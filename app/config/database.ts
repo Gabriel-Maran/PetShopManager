@@ -12,7 +12,14 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 
 export async function initDatabase(): Promise<void> {
   const db = await getDatabase();
-
+/*
+-- CUIDADO: Isso apaga tudo toda vez que o app inicia!
+-- Apenas deixando aqui, caso algo mude no db, ficar mais facil de resetar o banco durante o desenvolvimento. 
+-- Em produção, isso deve ser removido ou comentado.
+    DROP TABLE IF EXISTS appointments;
+    DROP TABLE IF EXISTS pets;
+    DROP TABLE IF EXISTS owners;
+*/
   await db.execAsync(`
     PRAGMA foreign_keys = ON;
 
