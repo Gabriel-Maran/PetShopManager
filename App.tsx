@@ -1,18 +1,28 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, StatusBar, StyleSheet, Text, View } from 'react-native';
-import { initDatabase } from './app/config/database';
-import Home from './app/view/pages/Home';
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { initDatabase } from "./app/config/database";
+import Home from "./app/view/pages/Home";
 
-const STATUS_BAR_HEIGHT = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight;
+export const STATUS_BAR_HEIGHT =
+  Platform.OS === "ios" ? 44 : (StatusBar.currentHeight ?? 24);
+
+export const SEARCH_BAR_HEIGHT = 70;
 
 export enum Screen {
-  Home = 'Home',
-  OwnersList = 'OwnersList',
-  OwnerForm = 'OwnerForm',
-  PetsList = 'PetsList',
-  PetForm = 'PetForm',
-  AppointmentsList = 'AppointmentsList',
-  AppointmentForm = 'AppointmentForm',
+  Home = "Home",
+  OwnersList = "OwnersList",
+  OwnerForm = "OwnerForm",
+  PetsList = "PetsList",
+  PetForm = "PetForm",
+  AppointmentsList = "AppointmentsList",
+  AppointmentForm = "AppointmentForm",
 }
 
 export default function App() {
@@ -47,14 +57,14 @@ export default function App() {
   useEffect(() => {
     initDatabase()
       .then(() => setReady(true))
-      .catch(e => setError(e.message));
+      .catch((e) => setError(e.message));
   }, []);
 
   // Se der erro ao iniciar o banco, mostrar mensagem de erro
   if (error) {
     return (
       <View style={styles.container}>
-        <Text style={{ color: 'red' }}>Erro ao iniciar banco: {error}</Text>
+        <Text style={{ color: "red" }}>Erro ao iniciar banco: {error}</Text>
       </View>
     );
   }
@@ -72,14 +82,14 @@ export default function App() {
     <View style={{ paddingTop: STATUS_BAR_HEIGHT, flex: 1 }}>
       {renderScreen()}
     </View>
-);
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
