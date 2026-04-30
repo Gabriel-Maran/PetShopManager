@@ -1,10 +1,10 @@
-import * as SQLite from 'expo-sqlite';
+import * as SQLite from "expo-sqlite";
 
 let db: SQLite.SQLiteDatabase | null = null;
 
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   if (!db) {
-    db = await SQLite.openDatabaseAsync('petshop.db');
+    db = await SQLite.openDatabaseAsync("petshop.db");
     await db.execAsync(`PRAGMA journal_mode = WAL;`);
   }
   return db;
@@ -12,10 +12,11 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 
 export async function initDatabase(): Promise<void> {
   const db = await getDatabase();
-/*
+  /*
 -- CUIDADO: Isso apaga tudo toda vez que o app inicia!
 -- Apenas deixando aqui, caso algo mude no db, ficar mais facil de resetar o banco durante o desenvolvimento. 
--- Em produção, isso deve ser removido ou comentado.
+-- Em produção, isso deve ser removido (cinza = comentado).
+-- Para funcionar, precisa estar dentro acima do primeiro CREATE TABLE
     DROP TABLE IF EXISTS appointments;
     DROP TABLE IF EXISTS pets;
     DROP TABLE IF EXISTS owners;

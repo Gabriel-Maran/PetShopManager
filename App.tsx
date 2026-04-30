@@ -1,20 +1,27 @@
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  FlatList,
   Platform,
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
-import { initDatabase } from "./app/config/database";
+import { getDatabase, initDatabase } from "./app/config/database";
 import Home from "./app/view/pages/Home";
 import { STATUS_BAR_HEIGHT } from "./app/config/consts";
 import { Screen } from "./app/config/consts";
 import { useScreen } from "./app/hooks/useScreen";
 import BarraDePesquisa from "./app/view/components/BarraDePesquisa";
+import { Owner } from "./app/model/Owner";
 
 export default function App() {
+  const [text, setText] = useState("");
+  const [pessoas, setPessoas] = useState<Owner[]>([]);
+
   // Estado para controlar se o banco de dados está pronto
   const [ready, setReady] = useState(false);
   // Estado para controlar erros na inicialização do banco
