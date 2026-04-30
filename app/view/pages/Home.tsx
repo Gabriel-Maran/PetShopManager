@@ -1,7 +1,6 @@
 import { View, Text, StyleSheet, Image } from "react-native";
 import Calendario from "../components/Calendario";
 import Agendamentos from "../components/Agendamentos";
-import BarraDePesquisa from "../components/BarraDePesquisa";
 
 export default function Home() {
   return (
@@ -15,7 +14,6 @@ export default function Home() {
       <View style={{ flex: 1, padding: 15, backgroundColor: "#F2F3F7" }}>
         <Calendario />
         <Agendamentos margemSuperior={10} />
-        <BarraDePesquisa />
       </View>
     </View>
   );

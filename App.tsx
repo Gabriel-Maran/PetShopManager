@@ -9,21 +9,10 @@ import {
 } from "react-native";
 import { initDatabase } from "./app/config/database";
 import Home from "./app/view/pages/Home";
-
-export const STATUS_BAR_HEIGHT =
-  Platform.OS === "ios" ? 44 : (StatusBar.currentHeight ?? 24);
-
-export const SEARCH_BAR_HEIGHT = 70;
-
-export enum Screen {
-  Home = "Home",
-  OwnersList = "OwnersList",
-  OwnerForm = "OwnerForm",
-  PetsList = "PetsList",
-  PetForm = "PetForm",
-  AppointmentsList = "AppointmentsList",
-  AppointmentForm = "AppointmentForm",
-}
+import { STATUS_BAR_HEIGHT } from "./app/config/consts";
+import { Screen } from "./app/config/consts";
+import { useScreen } from "./app/hooks/useScreen";
+import BarraDePesquisa from "./app/view/components/BarraDePesquisa";
 
 export default function App() {
   // Estado para controlar se o banco de dados está pronto
@@ -31,24 +20,35 @@ export default function App() {
   // Estado para controlar erros na inicialização do banco
   const [error, setError] = useState<string | null>(null);
   // Estado para controlar a tela atual
-  const [currentScreen, setCurrentScreen] = useState<Screen>(Screen.Home);
+  const { screen, navigate } = useScreen();
   // Função para renderizar a tela atual com base no estado currentScreen
   const renderScreen = () => {
-    switch (currentScreen) {
-      case Screen.Home:
-        return <Home />;
-      case Screen.OwnersList:
-        return <Text>Owners List</Text>;
-      case Screen.OwnerForm:
-        return <Text>Owner Form</Text>;
-      case Screen.PetsList:
-        return <Text>Pets List</Text>;
-      case Screen.PetForm:
-        return <Text>Pet Form</Text>;
-      case Screen.AppointmentsList:
-        return <Text>Appointments List</Text>;
-      case Screen.AppointmentForm:
-        return <Text>Appointment Form</Text>;
+    switch (screen) {
+      case Screen.Calendario:
+        return (
+          <>
+            <Home />
+            <BarraDePesquisa />
+          </>
+        );
+      case Screen.Cadastros:
+        return (
+          <>
+            <View>
+              <Text>Cadastros</Text>
+            </View>
+            <BarraDePesquisa />
+          </>
+        );
+      case Screen.Relatorios:
+        return (
+          <>
+            <View>
+              <Text>Relatórios</Text>
+            </View>
+            <BarraDePesquisa />
+          </>
+        );
       default:
         return <Home />;
     }

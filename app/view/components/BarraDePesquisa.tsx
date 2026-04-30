@@ -1,5 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
-import { SEARCH_BAR_HEIGHT } from "../../../App";
+import { Screen, SEARCH_BAR_HEIGHT } from "../../config/consts";
+import IconDePesquisa from "./IconDePesquisa";
+import { IMAGENS_NAMES } from "../../config/consts";
 
 export default function BarraDePesquisa() {
   return (
@@ -9,7 +11,21 @@ export default function BarraDePesquisa() {
         { position: "absolute", bottom: 0, left: 0, right: 0 },
       ]}
     >
-      <Text>Barra de Pesquisa</Text>
+      <IconDePesquisa
+        imgName={IMAGENS_NAMES.CALENDARIO}
+        titleText="Calendário"
+        screenName={Screen.Calendario}
+      />
+      <IconDePesquisa
+        imgName={IMAGENS_NAMES.PESSOA_ADD}
+        titleText="Cadastros"
+        screenName={Screen.Cadastros}
+      />
+      <IconDePesquisa
+        imgName={IMAGENS_NAMES.ARTIGO}
+        titleText="Relatórios"
+        screenName={Screen.Relatorios}
+      />
     </View>
   );
 }
@@ -17,6 +33,7 @@ export default function BarraDePesquisa() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: "row",
     backgroundColor: "#ffffff",
     height: SEARCH_BAR_HEIGHT,
     justifyContent: "center",

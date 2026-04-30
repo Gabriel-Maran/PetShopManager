@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SEARCH_BAR_HEIGHT } from "../../../App";
+import { SEARCH_BAR_HEIGHT } from "../../config/consts";
 
 export default function Agendamentos({
   margemSuperior,
@@ -41,8 +41,8 @@ export default function Agendamentos({
               paddingHorizontal: 10,
             }}
           >
-            <Text style={{ flex: 2 }}>{item.petName}</Text>
-            <Text style={{ flex: 2 }}>{item.ownerName}</Text>
+            <Text style={{ flex: 1 }}>{item.petName}</Text>
+            <Text style={{ flex: 1 }}>{item.ownerName}</Text>
             <Text style={{ flex: 1, textAlign: "right" }}>{item.time}</Text>
             <TouchableOpacity
               style={{
