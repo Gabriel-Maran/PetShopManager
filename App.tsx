@@ -1,33 +1,22 @@
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Platform,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { getDatabase, initDatabase } from "./app/config/database";
-import Home from "./app/view/pages/Home";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { initDatabase } from "./app/config/database";
 import { STATUS_BAR_HEIGHT } from "./app/config/consts";
 import { Screen } from "./app/config/consts";
 import { useScreen } from "./app/hooks/useScreen";
 import BarraDePesquisa from "./app/view/components/BarraDePesquisa";
-import { Owner } from "./app/model/Owner";
+import Home from "./app/view/pages/Home";
 
 export default function App() {
-  const [text, setText] = useState("");
-  const [pessoas, setPessoas] = useState<Owner[]>([]);
-
   // Estado para controlar se o banco de dados está pronto
   const [ready, setReady] = useState(false);
+
   // Estado para controlar erros na inicialização do banco
   const [error, setError] = useState<string | null>(null);
+
   // Estado para controlar a tela atual
   const { screen, navigate } = useScreen();
+
   // Função para renderizar a tela atual com base no estado currentScreen
   const renderScreen = () => {
     switch (screen) {
