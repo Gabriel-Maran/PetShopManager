@@ -15,7 +15,10 @@ export default function IconDePesquisa({
 
   return (
     <TouchableOpacity
-      style={styles.container}
+      style={[
+        styles.container,
+        screen === screenName && { borderColor: "#0E9599", borderTopWidth: 2 },
+      ]}
       onPress={() => navigate(screenName)}
     >
       <Image style={styles.image} source={IMAGENS_BY_NAME[imgName]} />
@@ -31,6 +34,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingBottom: 5,
+    height: "100%",
   },
   image: {
     width: 30,
