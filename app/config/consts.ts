@@ -6,9 +6,18 @@ export const STATUS_BAR_HEIGHT =
 export const APP_BAR_HEIGHT = 70;
 
 export const IMAGENS_BY_NAME = {
-  ARTIGO: require("../assets/artigo.png"),
-  PESSOA_ADD: require("../assets/pessoaAdd.png"),
-  CALENDARIO: require("../assets/calendario.png"),
+  ARTIGO: {
+    active: require("../assets/artigo.png"),
+    inactive: require("../assets/artigoDesativado.png"),
+  },
+  PESSOA_ADD: {
+    active: require("../assets/pessoaAdd.png"),
+    inactive: require("../assets/pessoaAddDesativado.png"),
+  },
+  CALENDARIO: {
+    active: require("../assets/calendario.png"),
+    inactive: require("../assets/calendarioDesativado.png"),
+  },
 };
 
 export enum IMAGENS_NAMES {

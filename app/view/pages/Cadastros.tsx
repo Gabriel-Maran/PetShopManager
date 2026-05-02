@@ -75,7 +75,7 @@ export default function Cadastros() {
 
   return (
     <>
-      <View>
+      <View style={styles.container}>
         <DefaultHeader />
         <View>
           <BarraDePesquisa
@@ -115,6 +115,10 @@ export default function Cadastros() {
   );
 }
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#F5F7F6",
+    height: "100%",
+  },
   escolhaItem: {
     flexDirection: "row",
     justifyContent: "space-evenly",

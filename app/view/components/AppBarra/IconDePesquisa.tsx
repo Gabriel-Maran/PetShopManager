@@ -12,7 +12,10 @@ export default function IconDePesquisa({
   screenName: Screen;
 }) {
   const { screen, navigate } = useScreen();
-
+  const imageSource =
+    screen === screenName
+      ? IMAGENS_BY_NAME[imgName].active
+      : IMAGENS_BY_NAME[imgName].inactive;
   return (
     <TouchableOpacity
       style={[
@@ -21,7 +24,7 @@ export default function IconDePesquisa({
       ]}
       onPress={() => navigate(screenName)}
     >
-      <Image style={styles.image} source={IMAGENS_BY_NAME[imgName]} />
+      <Image style={styles.image} source={imageSource} />
       <Text style={styles.title}>{titleText}</Text>
     </TouchableOpacity>
   );
