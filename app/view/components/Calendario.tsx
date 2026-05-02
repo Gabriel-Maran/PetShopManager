@@ -71,7 +71,7 @@ export default function Calendario({
         markedDates={{
           [dateSelected]: {
             selected: true,
-            selectedColor: "#378ADD",
+            selectedColor: "#0E9599",
           },
         }}
         theme={{
@@ -93,17 +93,17 @@ export default function Calendario({
           dayTextColor: "#2C2C2A",
 
           // Dia selecionado
-          selectedDayBackgroundColor: "#378ADD",
+          selectedDayBackgroundColor: "#0E9599",
           selectedDayTextColor: "#ffffff",
 
           // Hoje
-          todayTextColor: "#378ADD",
+          todayTextColor: "#0E9599",
 
           // Dias desabilitados
           textDisabledColor: "#d9d9d9",
 
           // Setas de navegação
-          arrowColor: "#378ADD",
+          arrowColor: "#0E9599",
         }}
       />
     </View>

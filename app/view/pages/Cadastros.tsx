@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import DefaultHeader from "../components/Header/DefaultHeader";
 import BarraDePesquisa from "../components/SearchBarra/BarraDePesquisa";
 import { useState } from "react";
@@ -7,6 +7,8 @@ import { Pet } from "../../model/Pet";
 import { Owner } from "../../model/Owner";
 import OwnerList from "../components/Cadastro/OwnerList";
 import PetList from "../components/Cadastro/PetList";
+import { useScreen } from "../../hooks/useScreen";
+import { APP_BAR_HEIGHT } from "../../config/consts";
 
 export default function Cadastros() {
   // 1. Exemplo completo (todos os campos preenchidos)
@@ -69,36 +71,47 @@ export default function Cadastros() {
 
   const [isOwnerSelected, setIsOwnerSelecte] = useState(true);
   const [search, setSearch] = useState("");
+  const { screen, navigate } = useScreen();
 
   return (
-    <View>
-      <DefaultHeader />
+    <>
       <View>
-        <BarraDePesquisa
-          placeHolderStr={`Pesquisar por ${isOwnerSelected ? "Dono(s)" : "Pet(s)"}`}
-          setSearch={setSearch}
-        />
-        <View style={styles.escolhaItem}>
-          <ItemSelect
-            title={"Donos"}
-            isThisSelected={isOwnerSelected}
-            setValorSelect={setIsOwnerSelecte}
-            valorSelect={true}
+        <DefaultHeader />
+        <View>
+          <BarraDePesquisa
+            placeHolderStr={`Pesquisar por ${isOwnerSelected ? "Dono(s)" : "Pet(s)"}`}
+            setSearch={setSearch}
           />
-          <ItemSelect
-            title={"Pets"}
-            isThisSelected={!isOwnerSelected}
-            setValorSelect={setIsOwnerSelecte}
-            valorSelect={false}
-          />
+          <View style={styles.escolhaItem}>
+            <ItemSelect
+              title={"Donos"}
+              isThisSelected={isOwnerSelected}
+              setValorSelect={setIsOwnerSelecte}
+              valorSelect={true}
+            />
+            <ItemSelect
+              title={"Pets"}
+              isThisSelected={!isOwnerSelected}
+              setValorSelect={setIsOwnerSelecte}
+              valorSelect={false}
+            />
+          </View>
+          {isOwnerSelected ? (
+            <OwnerList items={donos} />
+          ) : (
+            <PetList items={pets} />
+          )}
         </View>
-        {isOwnerSelected ? (
-          <OwnerList items={donos} />
-        ) : (
-          <PetList items={pets} />
-        )}
       </View>
-    </View>
+      <View style={styles.ctnBtnAdd}>
+        <TouchableOpacity style={styles.btnAdd}>
+          <Image
+            style={styles.imgAdd}
+            source={require("../../assets/addWhite.png")}
+          />
+        </TouchableOpacity>
+      </View>
+    </>
   );
 }
 const styles = StyleSheet.create({
@@ -116,5 +129,22 @@ const styles = StyleSheet.create({
   },
   escolhaText: {
     textAlign: "center",
+  },
+  ctnBtnAdd: {
+    position: "absolute",
+    bottom: APP_BAR_HEIGHT + 25,
+    right: 25,
+  },
+  btnAdd: {
+    backgroundColor: "#0e996d",
+    borderRadius: 32.5,
+    width: 65,
+    height: 65,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  imgAdd: {
+    width: 40,
+    height: 40,
   },
 });

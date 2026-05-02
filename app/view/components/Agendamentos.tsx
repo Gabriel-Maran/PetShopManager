@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Screen, SEARCH_BAR_HEIGHT } from "../../config/consts";
+import { Screen, APP_BAR_HEIGHT } from "../../config/consts";
 import { useScreen } from "../../hooks/useScreen";
 
 export default function Agendamentos({
@@ -31,7 +31,7 @@ export default function Agendamentos({
     <View
       style={{
         flex: 1,
-        marginBottom: SEARCH_BAR_HEIGHT,
+        marginBottom: APP_BAR_HEIGHT,
         marginTop: margemSuperior,
         width: "100%",
       }}
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   btnEditarAgendamento: {
-    backgroundColor: "#378ADD",
+    backgroundColor: "#0E9599",
     padding: 5,
     borderRadius: 5,
   },

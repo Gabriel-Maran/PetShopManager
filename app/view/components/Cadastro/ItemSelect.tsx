@@ -15,7 +15,7 @@ export default function ItemSelect({
     <TouchableOpacity
       style={[
         styles.escolhaBtn,
-        { backgroundColor: isThisSelected ? "#18BC9C" : "#F1F5F9" },
+        { backgroundColor: isThisSelected ? "#0E9599" : "#F1F5F9" },
       ]}
       onPress={() => setValorSelect(valorSelect)}
     >

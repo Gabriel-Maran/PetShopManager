@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import { Screen, SEARCH_BAR_HEIGHT } from "../../../config/consts";
+import { Screen, APP_BAR_HEIGHT } from "../../../config/consts";
 import IconDePesquisa from "./IconDePesquisa";
 import { IMAGENS_NAMES } from "../../../config/consts";
 
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     backgroundColor: "#ffffff",
-    height: SEARCH_BAR_HEIGHT,
+    height: APP_BAR_HEIGHT,
     justifyContent: "center",
     alignItems: "center",
   },
