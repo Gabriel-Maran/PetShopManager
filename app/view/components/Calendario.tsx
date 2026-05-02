@@ -48,13 +48,16 @@ LocaleConfig.locales["pt-br"] = {
 //Configura o calendário para usar o locale pt-br
 LocaleConfig.defaultLocale = "pt-br";
 
-export default function Calendario() {
+export default function Calendario({
+  setNewDate,
+  dateSelected,
+}: {
+  setNewDate: (date: string) => void;
+  dateSelected: string;
+}) {
   // new Date().toISOString() -> "2025-04-24T12:34:56.789Z"
   // .split('T')[0] -> "2025-04-24", o [0] pega só a parte da data(ano-mês-dia), sem a parte do horário
   // Isso é só para marcar o dia atual no calendário e inicializar o estado com a data de hoje
-  const [selected, setSelected] = useState(
-    new Date().toISOString().split("T")[0],
-  );
   return (
     <View style={styles.completeCalendar}>
       <Text style={{ fontSize: 20, fontWeight: "bold" }}>
@@ -63,10 +66,10 @@ export default function Calendario() {
       <Calendar
         style={styles.calendar}
         onDayPress={(day) => {
-          setSelected(day.dateString); // ex: "2025-04-24"
+          setNewDate(day.dateString);
         }}
         markedDates={{
-          [selected]: {
+          [dateSelected]: {
             selected: true,
             selectedColor: "#378ADD",
           },

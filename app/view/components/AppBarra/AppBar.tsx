@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
-import { Screen, SEARCH_BAR_HEIGHT } from "../../config/consts";
+import { Screen, SEARCH_BAR_HEIGHT } from "../../../config/consts";
 import IconDePesquisa from "./IconDePesquisa";
-import { IMAGENS_NAMES } from "../../config/consts";
+import { IMAGENS_NAMES } from "../../../config/consts";
 
-export default function BarraDePesquisa() {
+export default function AppBar() {
   return (
     <View
       style={[

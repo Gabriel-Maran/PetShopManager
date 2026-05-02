@@ -4,8 +4,10 @@ import { initDatabase } from "./app/config/database";
 import { STATUS_BAR_HEIGHT } from "./app/config/consts";
 import { Screen } from "./app/config/consts";
 import { useScreen } from "./app/hooks/useScreen";
-import BarraDePesquisa from "./app/view/components/BarraDePesquisa";
+import AppBar from "./app/view/components/AppBarra/AppBar";
 import Home from "./app/view/pages/Home";
+import Cadastros from "./app/view/pages/Cadastros";
+import Relatorios from "./app/view/pages/Relatorios";
 
 export default function App() {
   // Estado para controlar se o banco de dados está pronto
@@ -24,25 +26,21 @@ export default function App() {
         return (
           <>
             <Home />
-            <BarraDePesquisa />
+            <AppBar />
           </>
         );
       case Screen.Cadastros:
         return (
           <>
-            <View>
-              <Text>Cadastros</Text>
-            </View>
-            <BarraDePesquisa />
+            <Cadastros />
+            <AppBar />
           </>
         );
       case Screen.Relatorios:
         return (
           <>
-            <View>
-              <Text>Relatórios</Text>
-            </View>
-            <BarraDePesquisa />
+            <Relatorios />
+            <AppBar />
           </>
         );
       default:

@@ -2,23 +2,28 @@ import { View, Text, StyleSheet, Image } from "react-native";
 import Calendario from "../components/Calendario";
 import Agendamentos from "../components/Agendamentos";
 import { useState } from "react";
+import DefaultHeader from "../components/Header/DefaultHeader";
 
 export default function Home() {
   const [isAgenFullScreen, setIsAgenFullScreen] = useState(false);
+  const [dateSelected, setDateSelected] = useState(
+    new Date().toISOString().split("T")[0],
+  );
   return (
     <View style={styles.container}>
-      <View style={{ backgroundColor: "#fff", paddingBottom: 10 }}>
-        <Image
-          source={require("../../assets/logoPetShopFundoBranco.png")}
-          style={{ width: 180, height: 50, alignSelf: "center" }}
-        />
-      </View>
+      <DefaultHeader />
       <View style={{ flex: 1, padding: 15, backgroundColor: "#F2F3F7" }}>
-        {!isAgenFullScreen && <Calendario />}
+        {!isAgenFullScreen && (
+          <Calendario
+            setNewDate={setDateSelected}
+            dateSelected={dateSelected}
+          />
+        )}
         <Agendamentos
           margemSuperior={10}
           setFullScreen={setIsAgenFullScreen}
           isFullScreen={isAgenFullScreen}
+          dateSelected={dateSelected}
         />
       </View>
     </View>
