@@ -3,29 +3,53 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { Screen } from "../../../config/consts";
 import DefaultHeader from "../../components/Header/DefaultHeader";
-import ButtonBack from "../../components/Cadastro/ButtonBack";
+import TitleBar from "../../components/Cadastro/TitleBar";
+import { Owner } from "../../../model/Owner";
+import { useState } from "react";
+import InputInfo from "../../components/Cadastro/InputInfo";
 
-export default function NewOrEditOwner() {
+export default function NewOrEditOwner({
+  ownerToEdit,
+}: {
+  ownerToEdit?: Owner;
+}) {
+  const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
   return (
     <>
       <DefaultHeader />
-      <View style={styles.ctnNovoDOno}>
-        <ButtonBack backTo={Screen.Cadastros} />
-        <View>
-          <Text style={styles.txtNovoDono}>Novo Dono</Text>
-          <Text style={styles.txtPreencha}>
-            Preencha os dados do responsável
-          </Text>
-        </View>
-      </View>
+      <TitleBar
+        returnTo={Screen.Cadastros}
+        title="Novo Dono"
+        subtitle="Preencha os dados do resposável"
+      />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.ctnCadastro}>
-          <Text>Cadastro</Text>
+          <View style={styles.viewDataRequired}>
+            <Text>DADOS OBRIGÁTORIOS</Text>
+          </View>
+          <View style={styles.inputs}>
+            <InputInfo
+              image={require("../../../assets/personGreen.png")}
+              item={nome}
+              setItem={setNome}
+              placeHolder="Digite o nome..."
+              titleName="Nome Completo"
+            />
+            <InputInfo
+              image={require("../../../assets/phoneGreen.png")}
+              item={telefone}
+              setItem={setTelefone}
+              placeHolder="(46) 90000-0000"
+              titleName="Telefone"
+            />
+          </View>
         </View>
       </ScrollView>
     </>
@@ -33,23 +57,6 @@ export default function NewOrEditOwner() {
 }
 
 const styles = StyleSheet.create({
-  ctnNovoDOno: {
-    flexDirection: "row",
-    borderWidth: 1,
-    borderColor: "#EFEFEF",
-    padding: 20,
-    alignItems: "center",
-    gap: 15,
-  },
-  txtNovoDono: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  txtPreencha: {
-    fontSize: 14,
-    color: "#777777",
-  },
-
   scrollContent: {
     flexGrow: 1,
   },
@@ -57,5 +64,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     alignItems: "center",
+  },
+  viewDataRequired: {
+    width: "100%",
+  },
+  inputs: {
+    width: "100%",
+    alignContent: "center",
+    gap: 10,
   },
 });

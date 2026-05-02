@@ -1,6 +1,6 @@
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Screen } from "../../../config/consts";
-import { useScreen } from "../../../hooks/useScreen";
+import { Screen } from "../../../../config/consts";
+import { useScreen } from "../../../../hooks/useScreen";
 
 export default function ButtonEditar({ navegarPara }: { navegarPara: Screen }) {
   const { screen, navigate } = useScreen();
@@ -12,7 +12,7 @@ export default function ButtonEditar({ navegarPara }: { navegarPara: Screen }) {
       >
         <Image
           style={styles.iconEdit}
-          source={require("../../../assets/edit.png")}
+          source={require("../../../../assets/edit.png")}
         />
       </TouchableOpacity>
     </View>

@@ -1,6 +1,6 @@
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Screen } from "../../../config/consts";
-import { useScreen } from "../../../hooks/useScreen";
+import { Screen } from "../../../../config/consts";
+import { useScreen } from "../../../../hooks/useScreen";
 
 export default function ButtonExcluir() {
   const { screen, navigate } = useScreen();
@@ -9,7 +9,7 @@ export default function ButtonExcluir() {
       <TouchableOpacity style={styles.btnDelete}>
         <Image
           style={styles.iconDelete}
-          source={require("../../../assets/delete.png")}
+          source={require("../../../../assets/delete.png")}
         />
       </TouchableOpacity>
     </View>

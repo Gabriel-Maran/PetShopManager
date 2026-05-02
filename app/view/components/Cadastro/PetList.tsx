@@ -7,9 +7,9 @@ import {
   View,
 } from "react-native";
 import { Pet } from "../../../model/Pet";
-import ButtonEditar from "./ButtonEditar";
+import ButtonEditar from "./Botões/ButtonEditar";
 import { Screen } from "../../../config/consts";
-import ButtonExcluir from "./ButtonExcluir";
+import ButtonExcluir from "./Botões/ButtonExcluir";
 
 export default function OwnerList({ items }: { items: Pet[] }) {
   return (

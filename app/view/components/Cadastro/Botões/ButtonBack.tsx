@@ -1,6 +1,6 @@
 import { Image, StyleSheet, TouchableOpacity } from "react-native";
-import { Screen } from "../../../config/consts";
-import { useScreen } from "../../../hooks/useScreen";
+import { Screen } from "../../../../config/consts";
+import { useScreen } from "../../../../hooks/useScreen";
 
 export default function ButtonBack({ backTo }: { backTo: Screen }) {
   const { screen, navigate } = useScreen();
@@ -8,7 +8,7 @@ export default function ButtonBack({ backTo }: { backTo: Screen }) {
     <TouchableOpacity onPress={() => navigate(backTo)} style={styles.btnBack}>
       <Image
         style={styles.imgBack}
-        source={require("../../../assets/voltarBlack.png")}
+        source={require("../../../../assets/voltarBlack.png")}
       />
     </TouchableOpacity>
   );
