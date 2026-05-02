@@ -8,6 +8,8 @@ import AppBar from "./app/view/components/AppBarra/AppBar";
 import Home from "./app/view/pages/Home";
 import Cadastros from "./app/view/pages/Cadastros";
 import Relatorios from "./app/view/pages/Relatorios";
+import NewOrEditOwner from "./app/view/pages/Owner/NewOrEditOwner";
+import NewOrEditPet from "./app/view/pages/Pet/NewOrEditPet";
 
 export default function App() {
   // Estado para controlar se o banco de dados está pronto
@@ -29,6 +31,8 @@ export default function App() {
             <AppBar />
           </>
         );
+
+      //Cadastros ////////////////////////////////////////////
       case Screen.Cadastros:
         return (
           <>
@@ -36,6 +40,20 @@ export default function App() {
             <AppBar />
           </>
         );
+      case Screen.NewOrEditOwner:
+        return (
+          <>
+            <NewOrEditOwner />
+          </>
+        );
+      case Screen.NewOrEditPet:
+        return (
+          <>
+            <NewOrEditPet />
+          </>
+        );
+
+      ////////////////////////////////////////////////////////
       case Screen.Relatorios:
         return (
           <>

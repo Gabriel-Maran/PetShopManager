@@ -30,4 +30,6 @@ export enum Screen {
   Calendario = "Calendario",
   Cadastros = "Cadastros",
   Relatorios = "Relatorios",
+  NewOrEditOwner = "NewOrEditOwner",
+  NewOrEditPet = "NewOrEditPet",
 }

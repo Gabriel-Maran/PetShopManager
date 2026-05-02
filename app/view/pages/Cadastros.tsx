@@ -8,7 +8,7 @@ import { Owner } from "../../model/Owner";
 import OwnerList from "../components/Cadastro/OwnerList";
 import PetList from "../components/Cadastro/PetList";
 import { useScreen } from "../../hooks/useScreen";
-import { APP_BAR_HEIGHT } from "../../config/consts";
+import { APP_BAR_HEIGHT, Screen } from "../../config/consts";
 
 export default function Cadastros() {
   // 1. Exemplo completo (todos os campos preenchidos)
@@ -75,7 +75,7 @@ export default function Cadastros() {
 
   return (
     <>
-      <View style={styles.container}>
+      <View>
         <DefaultHeader />
         <View>
           <BarraDePesquisa
@@ -104,7 +104,16 @@ export default function Cadastros() {
         </View>
       </View>
       <View style={styles.ctnBtnAdd}>
-        <TouchableOpacity style={styles.btnAdd}>
+        <TouchableOpacity
+          onPress={() => {
+            {
+              isOwnerSelected
+                ? navigate(Screen.NewOrEditOwner)
+                : navigate(Screen.NewOrEditPet);
+            }
+          }}
+          style={styles.btnAdd}
+        >
           <Image
             style={styles.imgAdd}
             source={require("../../assets/addWhite.png")}
@@ -115,10 +124,6 @@ export default function Cadastros() {
   );
 }
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#F5F7F6",
-    height: "100%",
-  },
   escolhaItem: {
     flexDirection: "row",
     justifyContent: "space-evenly",
