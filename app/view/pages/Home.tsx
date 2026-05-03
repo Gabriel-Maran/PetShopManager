@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, StyleSheet } from "react-native";
 import Calendario from "../components/Calendario";
 import Agendamentos from "../components/Agendamentos";
 import { useState } from "react";
