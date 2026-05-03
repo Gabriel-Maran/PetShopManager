@@ -5,4 +5,5 @@ export interface Owner {
   email?: string;
   endereco?: string;
   criado_em?: string;
+  ultimo_banho_data?: string;
 }
