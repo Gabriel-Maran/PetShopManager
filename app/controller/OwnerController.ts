@@ -1,15 +1,19 @@
 import { ownerService } from "../service/OwnerService";
 
 class OwnerController {
+
   async getOwnerById(id: number) {
-    return await ownerService.getOwnerById(id);
+    return ownerService.getOwnerById(id);
   }
+
   async getAllOwners() {
-    return await ownerService.getAllOwners();
+    return ownerService.getAllOwners();
   }
+  
   async getAllOwnersPaged(page: number, limit: number) {
-    return await ownerService.getAllOwnersPaged(page, limit);
+    return ownerService.getAllOwnersPaged(page, limit);
   }
+
   async createOwner(
     nome: string,
     telefone: string,

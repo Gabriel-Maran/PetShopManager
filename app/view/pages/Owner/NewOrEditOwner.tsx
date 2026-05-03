@@ -14,6 +14,7 @@ import { Owner } from "../../../model/Owner";
 import { useState } from "react";
 import InputInfo from "../../components/Cadastro/InputInfo";
 import { useScreen } from "../../../hooks/useScreen";
+import { ownerController } from "../../../controller/OwnerController";
 
 const maskPhone = (v: string) => {
   const d = v.replace(/\D/g, "").slice(0, 11);
@@ -33,6 +34,14 @@ export default function NewOrEditOwner({
   const [email, setEmail] = useState(ownerToEdit?.email ?? "");
   const [endereco, setEndereco] = useState(ownerToEdit?.endereco ?? "");
   const { navigate } = useScreen();
+
+  const salvarDono = async () => {
+    try {
+      await ownerController.createOwner(nome, telefone, email, endereco);
+    } catch (erro) {
+      console.error(erro);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -95,6 +104,7 @@ export default function NewOrEditOwner({
               style={styles.btnSalvar}
               onPress={() => {
                 //Adicionar ou atualiza no banco de dados
+                salvarDono()
                 navigate(Screen.Cadastros);
               }}
             >

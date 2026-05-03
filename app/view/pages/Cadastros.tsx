@@ -1,18 +1,21 @@
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import DefaultHeader from "../components/Header/DefaultHeader";
-import BarraDePesquisa from "../components/SearchBarra/BarraDePesquisa";
-import { useState } from "react";
-import ItemSelect from "../components/Cadastro/ItemSelect";
+import { useState, useEffect } from "react";
+
 import { Pet } from "../../model/Pet";
 import { Owner } from "../../model/Owner";
-import OwnerList from "../components/Cadastro/OwnerList";
-import PetList from "../components/Cadastro/PetList";
 import { useScreen } from "../../hooks/useScreen";
 import { APP_BAR_HEIGHT, Screen } from "../../config/consts";
+import { ownerRepository } from "../../repository/OwnerRepository";
+
+import BarraDePesquisa from "../components/SearchBarra/BarraDePesquisa";
+import DefaultHeader from "../components/Header/DefaultHeader";
+import ItemSelect from "../components/Cadastro/ItemSelect";
+import OwnerList from "../components/Cadastro/OwnerList";
+import PetList from "../components/Cadastro/PetList";
 
 export default function Cadastros() {
   // 1. Exemplo completo (todos os campos preenchidos)
-  const pets: Pet[] = [
+/*   const pets: Pet[] = [
     {
       id: 1,
       nome: "Luna",
@@ -37,8 +40,8 @@ export default function Cadastros() {
       owner_id: 12,
       criado_em: new Date().toISOString(),
     },
-  ];
-  const donos: Owner[] = [
+  ]; */
+  /* const donos: Owner[] = [
     {
       id: 1,
       nome: "João Silva",
@@ -67,7 +70,24 @@ export default function Cadastros() {
       endereco: "Av. Central, 500 - PR",
       criado_em: new Date().toISOString(),
     },
-  ];
+  ]; */
+  const [donos, setDonos] = useState<Owner[]>([]);
+  const [pets, setPets] = useState<Pet[]>([])
+
+  useEffect(() => {
+    carregarDonosEPets();
+  }, []);
+
+  async function carregarDonosEPets() {
+    try {
+      const dadosDonos = await ownerRepository.getAllOwners();
+      setDonos(dadosDonos);
+      //const dadosPets = await petController.getAllPets();
+      console.log(dadosDonos);
+    } catch (erro) {
+      console.error(erro);
+    }
+  }
 
   const [isOwnerSelected, setIsOwnerSelecte] = useState(true);
   const [search, setSearch] = useState("");
@@ -97,9 +117,9 @@ export default function Cadastros() {
             />
           </View>
           {isOwnerSelected ? (
-            <OwnerList items={donos} />
+            <OwnerList cadastros={donos} />
           ) : (
-            <PetList items={pets} />
+            <PetList cadastros={pets} />
           )}
         </View>
       </View>

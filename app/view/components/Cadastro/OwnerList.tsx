@@ -1,32 +1,28 @@
-import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-} from "react-native";
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import { Owner } from "../../../model/Owner";
-import ButtonEditar from "./Botões/ButtonEditar";
 import { Screen } from "../../../config/consts";
 import ButtonExcluir from "./Botões/ButtonExcluir";
+import ButtonEditar from "./Botões/ButtonEditar";
 
-export default function OwnerList({ items }: { items: Owner[] }) {
+export default function OwnerList({ cadastros }: { cadastros: Owner[] }) {
   return (
     <View>
       <FlatList
-        data={items}
+        data={cadastros}
         renderItem={({ item }) => (
           <View style={styles.itemCard}>
             <Image
               style={styles.img}
               source={require("../../../assets/person.png")}
             />
+
             <View style={styles.mainContent}>
               <Text style={styles.textMain}>{item.nome}</Text>
               <Text style={styles.textSub}>{item.telefone}</Text>
             </View>
-            <ButtonEditar navegarPara={Screen.Calendario} />
+
+            <ButtonEditar navegarPara={Screen.NewOrEditOwner} />
+
             <ButtonExcluir />
           </View>
         )}

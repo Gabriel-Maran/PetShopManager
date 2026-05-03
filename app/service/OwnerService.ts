@@ -1,64 +1,39 @@
-import { getDatabase } from "../config/database";
-import { Owner } from "../model/Owner";
+import { ownerRepository } from "../repository/OwnerRepository";
 
 class OwnerService {
-  async getOwnerById(id: number): Promise<Owner | null> {
-    const db = await getDatabase();
-    const owner = await db.getFirstAsync<Owner>(
-      `SELECT * FROM owners WHERE id = ?`,
-      [id],
-    );
-    return owner;
+  getOwnerById(id: number) {
+    return ownerRepository.getOwnerById(id);
   }
 
-  async getAllOwners(): Promise<Owner[]> {
-    const db = await getDatabase();
-    return await db.getAllAsync<Owner>(
-      `SELECT * FROM owners ORDER BY criado_em DESC`,
-    );
-  }
-  async getAllOwnersPaged(
-    page: number = 0,
-    limit: number = 20,
-  ): Promise<Owner[]> {
-    const db = await getDatabase();
-    const offset = page * limit;
-    return await db.getAllAsync<Owner>(
-      `SELECT * FROM owners ORDER BY criado_em DESC LIMIT ? OFFSET ?`,
-      [limit, offset],
-    );
+  getAllOwners() {
+    return ownerRepository.getAllOwners();
   }
 
-  async createOwner(
+  getAllOwnersPaged(page: number, limit: number) {
+    return ownerRepository.getAllOwnersPaged(page, limit);
+  }
+
+  createOwner(
     nome: string,
     telefone: string,
     email?: string,
     endereco?: string,
-  ): Promise<void> {
-    const db = await getDatabase();
-    await db.runAsync(
-      `INSERT INTO owners (nome, telefone, email, endereco) VALUES (?, ?, ?, ?)`,
-      [nome, telefone, email ?? null, endereco ?? null],
-    );
+  ) {
+    return ownerRepository.createOwner(nome, telefone, email, endereco);
   }
 
-  async updateOwner(
+  updateOwner(
     id: number,
     nome: string,
     telefone: string,
     email?: string,
     endereco?: string,
-  ): Promise<void> {
-    const db = await getDatabase();
-    await db.runAsync(
-      `UPDATE owners SET nome = ?, telefone = ?, email = ?, endereco = ? WHERE id = ?`,
-      [nome, telefone, email ?? null, endereco ?? null, id],
-    );
+  ) {
+    return ownerRepository.updateOwner(id, nome, telefone, email, endereco);
   }
 
-  async deleteOwner(id: number): Promise<void> {
-    const db = await getDatabase();
-    await db.runAsync(`DELETE FROM owners WHERE id = ?`, [id]);
+  deleteOwner(id: number) {
+    return ownerRepository.deleteOwner(id);
   }
 }
 
