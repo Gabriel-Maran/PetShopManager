@@ -20,6 +20,12 @@ export const IMAGENS_BY_NAME = {
   },
 };
 
+export enum TipoServico {
+  Banho = "Banho",
+  Tosa = "Tosa",
+  BanhoETosa = "Banho e Tosa",
+}
+
 export enum IMAGENS_NAMES {
   ARTIGO = "ARTIGO",
   PESSOA_ADD = "PESSOA_ADD",

@@ -34,13 +34,14 @@ export async function initDatabase(): Promise<void> {
     );
 
     CREATE TABLE IF NOT EXISTS pets (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      nome        TEXT    NOT NULL,
-      especie     TEXT    NOT NULL,
-      raca        TEXT,
-      observacoes TEXT,
-      owner_id    INTEGER NOT NULL,
-      criado_em   TEXT    NOT NULL DEFAULT (datetime('now')),
+      id               INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome             TEXT    NOT NULL,
+      especie          TEXT    NOT NULL,
+      raca             TEXT,
+      observacoes      TEXT,
+      owner_id         INTEGER NOT NULL,
+      ultimo_banho_data TEXT,
+      criado_em        TEXT    NOT NULL DEFAULT (datetime('now')),
       FOREIGN KEY (owner_id) REFERENCES owners(id) ON DELETE CASCADE
     );
 
@@ -55,5 +56,17 @@ export async function initDatabase(): Promise<void> {
       criado_em    TEXT    NOT NULL DEFAULT (datetime('now')),
       FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
     );
+
+    -- Atualiza ultimo_banho_data do pet sempre que um agendamento de banho for inserido.
+    -- Serviços considerados: 'Banho' e 'Banho e Tosa'.
+    CREATE TRIGGER IF NOT EXISTS trg_ultimo_banho
+    AFTER INSERT ON appointments
+    FOR EACH ROW
+    WHEN NEW.servico IN ('Banho', 'Banho e Tosa')
+    BEGIN
+      UPDATE pets
+      SET ultimo_banho_data = NEW.data
+      WHERE id = NEW.pet_id;
+    END;
   `);
 }
