@@ -6,4 +6,5 @@ export interface Pet {
   observacoes?: string;
   owner_id: number;
   criado_em?: string;
+  ultimo_banho_data?: string;
 }
