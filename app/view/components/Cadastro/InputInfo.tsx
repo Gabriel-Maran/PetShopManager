@@ -13,20 +13,29 @@ export default function InputInfo({
   setItem,
   placeHolder,
   titleName,
+  hasBorderBottom = false,
 }: {
   image: ImageSourcePropType;
   item: string;
   setItem: (item: any) => void;
   placeHolder: string;
   titleName: string;
+  hasBorderBottom?: boolean;
 }) {
   return (
-    <View style={styles.ctnInput}>
+    <View
+      style={[
+        styles.ctnInput,
+        hasBorderBottom
+          ? { borderBottomWidth: 1, borderColor: "#EDEDED" }
+          : { borderWidth: 0 },
+      ]}
+    >
       <View style={styles.ctnImgInut}>
         <Image style={styles.imgInput} source={image} />
       </View>
-      <View style={{ width: "90%" }}>
-        <Text style={styles.txtInput}>{titleName}</Text>
+      <View style={{ width: "90%", gap: 5 }}>
+        <Text style={styles.txtInput}>{titleName.toUpperCase()}</Text>
         <TextInput
           style={styles.input}
           placeholder={placeHolder}
@@ -41,13 +50,15 @@ export default function InputInfo({
 
 const styles = StyleSheet.create({
   ctnInput: {
+    width: "100%",
+    padding: 15,
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
   imgInput: {
-    width: 30,
-    height: 30,
+    width: 28,
+    height: 28,
   },
   input: {
     width: "90%",
@@ -66,5 +77,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#1D9E75",
   },
-  txtInput: {},
+  txtInput: {
+    color: "#A7A7A7",
+    fontWeight: "bold",
+    fontSize: 12,
+  },
 });

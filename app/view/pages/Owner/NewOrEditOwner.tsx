@@ -1,9 +1,9 @@
 import {
-  Image,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -13,26 +13,45 @@ import TitleBar from "../../components/Cadastro/TitleBar";
 import { Owner } from "../../../model/Owner";
 import { useState } from "react";
 import InputInfo from "../../components/Cadastro/InputInfo";
+import { useScreen } from "../../../hooks/useScreen";
+
+const maskPhone = (v: string) => {
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+};
 
 export default function NewOrEditOwner({
   ownerToEdit,
 }: {
   ownerToEdit?: Owner;
 }) {
-  const [nome, setNome] = useState("");
-  const [telefone, setTelefone] = useState("");
+  const isEditing = Boolean(ownerToEdit);
+  const [nome, setNome] = useState(ownerToEdit?.nome ?? "");
+  const [telefone, setTelefone] = useState(ownerToEdit?.telefone ?? "");
+  const [email, setEmail] = useState(ownerToEdit?.email ?? "");
+  const [endereco, setEndereco] = useState(ownerToEdit?.endereco ?? "");
+  const { navigate } = useScreen();
+
   return (
-    <>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <DefaultHeader />
       <TitleBar
         returnTo={Screen.Cadastros}
-        title="Novo Dono"
-        subtitle="Preencha os dados do resposável"
+        title={isEditing ? "Editar Dono" : "Novo Dono"}
+        subtitle="Preencha os dados do responsável"
       />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.ctnCadastro}>
-          <View style={styles.viewDataRequired}>
-            <Text>DADOS OBRIGÁTORIOS</Text>
+          <View style={styles.viewDataReq}>
+            <Text style={styles.titleDataInfo}>DADOS OBRIGATÓRIOS</Text>
           </View>
           <View style={styles.inputs}>
             <InputInfo
@@ -41,23 +60,59 @@ export default function NewOrEditOwner({
               setItem={setNome}
               placeHolder="Digite o nome..."
               titleName="Nome Completo"
+              hasBorderBottom={true}
             />
             <InputInfo
               image={require("../../../assets/phoneGreen.png")}
               item={telefone}
-              setItem={setTelefone}
+              setItem={(v) => setTelefone(maskPhone(v))}
               placeHolder="(46) 90000-0000"
               titleName="Telefone"
             />
           </View>
+          <View style={styles.viewDataNotReq}>
+            <Text style={styles.titleDataInfo}>DADOS OPCIONAIS</Text>
+          </View>
+          <View style={styles.inputs}>
+            <InputInfo
+              image={require("../../../assets/mailGreen.png")}
+              item={email}
+              setItem={setEmail}
+              placeHolder="email@exemplo.email"
+              titleName="E-mail"
+              hasBorderBottom={true}
+            />
+            <InputInfo
+              image={require("../../../assets/locationGreen.png")}
+              item={endereco}
+              setItem={setEndereco}
+              placeHolder="Rua X, 456"
+              titleName="Endereço"
+            />
+          </View>
+          <View style={styles.ctnBtnSalvar}>
+            <TouchableOpacity
+              style={styles.btnSalvar}
+              onPress={() => {
+                //Adicionar ou atualiza no banco de dados
+                navigate(Screen.Cadastros);
+              }}
+            >
+              <Text style={styles.txtSalvar}>
+                {isEditing ? "Salvar alterações" : "Salvar"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
-    </>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   scrollContent: {
+    backgroundColor: "#F5F5F5",
     flexGrow: 1,
   },
   ctnCadastro: {
@@ -65,12 +120,33 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
   },
-  viewDataRequired: {
+  viewDataReq: { width: "100%" },
+  viewDataNotReq: {
     width: "100%",
+    marginTop: 20,
   },
   inputs: {
     width: "100%",
-    alignContent: "center",
-    gap: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#EDEDED",
+    backgroundColor: "#fff",
+    overflow: "hidden",
+  },
+  titleDataInfo: {
+    color: "#1D9D75",
+    fontWeight: "500",
+    marginBottom: 8,
+  },
+  ctnBtnSalvar: { marginTop: 25 },
+  btnSalvar: {
+    paddingVertical: 20,
+    paddingHorizontal: 75,
+    backgroundColor: "#1D9D75",
+    borderRadius: 15,
+  },
+  txtSalvar: {
+    color: "#fff",
+    textAlign: "center",
   },
 });

@@ -15,14 +15,14 @@ export default function ButtonBack({ backTo }: { backTo: Screen }) {
 }
 const styles = StyleSheet.create({
   imgBack: {
-    height: 32,
-    width: 32,
+    height: 28,
+    width: 28,
   },
   btnBack: {
     borderColor: "#DDDDDD",
-    borderWidth: 2,
+    borderWidth: 1,
     alignSelf: "center",
-    padding: 3,
+    padding: 8,
     borderRadius: 15,
   },
 });
