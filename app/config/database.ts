@@ -42,7 +42,7 @@ export async function initDatabase(): Promise<void> {
       dono_id         INTEGER NOT NULL,
       ultimo_banho_data TEXT,
       criado_em        TEXT    NOT NULL DEFAULT (datetime('now')),
-      FOREIGN KEY (owner_id) REFERENCES owners(id) ON DELETE CASCADE
+      FOREIGN KEY (dono_id) REFERENCES owners(id) ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS appointments (
