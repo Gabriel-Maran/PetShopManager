@@ -25,24 +25,30 @@ const maskPhone = (v: string) => {
   return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
 };
 
-export default function NewOrEditOwner({
-  ownerToEdit,
-}: {
-  ownerToEdit?: Owner;
-}) {
+export default function NewOrEditOwner() {
+  const { params, navigate } = useScreen<Owner>();
   const { showError } = useError();
-  const isEditing = Boolean(ownerToEdit);
-  const [isSucess, setIsSucess] = useState(true);
 
-  const [nome, setNome] = useState(ownerToEdit?.nome ?? "");
-  const [telefone, setTelefone] = useState(ownerToEdit?.telefone ?? "");
-  const [email, setEmail] = useState(ownerToEdit?.email ?? "");
-  const [endereco, setEndereco] = useState(ownerToEdit?.endereco ?? "");
-  const { navigate } = useScreen();
+  const isEditing = Boolean(params?.id);
+
+  const [nome, setNome] = useState(params?.nome ?? "");
+  const [telefone, setTelefone] = useState(params?.telefone ?? "");
+  const [email, setEmail] = useState(params?.email ?? "");
+  const [endereco, setEndereco] = useState(params?.endereco ?? "");
 
   const salvarDono = async () => {
     try {
-      await ownerController.createOwner(nome, telefone, email, endereco);
+      if (isEditing) {
+        await ownerController.updateOwner(
+          params!.id!,
+          nome,
+          telefone,
+          email,
+          endereco,
+        );
+      } else {
+        await ownerController.createOwner(nome, telefone, email, endereco);
+      }
       navigate(Screen.Cadastros);
     } catch (erro) {
       showError(erro instanceof Error ? erro.message : "Erro inesperado.");
@@ -106,12 +112,7 @@ export default function NewOrEditOwner({
             />
           </View>
           <View style={styles.ctnBtnSalvar}>
-            <TouchableOpacity
-              style={styles.btnSalvar}
-              onPress={() => {
-                salvarDono();
-              }}
-            >
+            <TouchableOpacity style={styles.btnSalvar} onPress={salvarDono}>
               <Text style={styles.txtSalvar}>
                 {isEditing ? "Salvar alterações" : "Salvar"}
               </Text>

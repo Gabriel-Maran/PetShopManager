@@ -10,9 +10,11 @@ import Relatorios from "./app/view/pages/Relatorios";
 import NewOrEditOwner from "./app/view/pages/Owner/NewOrEditOwner";
 import { ErrorProvider } from "./app/view/components/Error/ErrorProvider";
 import NewOrEditPet from "./app/view/pages/Pet/NewOrEditPet";
+import { Pet } from "./app/model/Pet";
+import { Owner } from "./app/model/Owner";
 
 function AppContent() {
-  const { screen } = useScreen();
+  const { screen, params } = useScreen();
 
   switch (screen) {
     case Screen.Calendario:

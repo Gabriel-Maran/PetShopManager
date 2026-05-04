@@ -1,13 +1,23 @@
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Screen } from "../../../../config/consts";
 import { useScreen } from "../../../../hooks/useScreen";
+import { Owner } from "../../../../model/Owner";
+import { Pet } from "../../../../model/Pet";
 
-export default function ButtonEditar({ navegarPara }: { navegarPara: Screen }) {
-  const { screen, navigate } = useScreen();
+export default function ButtonEditar({
+  navegarPara,
+  selectParam,
+}: {
+  navegarPara: Screen;
+  selectParam?: Pet | Owner;
+}) {
+  const { screen, navigate, params } = useScreen();
   return (
     <View style={styles.ctnEdit}>
       <TouchableOpacity
-        onPress={() => navigate(navegarPara)}
+        onPress={() => {
+          navigate(navegarPara, selectParam);
+        }}
         style={styles.btnEdit}
       >
         <Image

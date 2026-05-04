@@ -3,8 +3,10 @@ import { Owner } from "../../../model/Owner";
 import { Screen } from "../../../config/consts";
 import ButtonExcluir from "./Botões/ButtonExcluir";
 import ButtonEditar from "./Botões/ButtonEditar";
+import { useScreen } from "../../../hooks/useScreen";
 
 export default function OwnerList({ cadastros }: { cadastros: Owner[] }) {
+  const { params } = useScreen();
   return (
     <View>
       <FlatList
@@ -21,7 +23,10 @@ export default function OwnerList({ cadastros }: { cadastros: Owner[] }) {
               <Text style={styles.textSub}>{item.telefone}</Text>
             </View>
 
-            <ButtonEditar navegarPara={Screen.NewOrEditOwner} />
+            <ButtonEditar
+              selectParam={item}
+              navegarPara={Screen.NewOrEditOwner}
+            />
 
             <ButtonExcluir />
           </View>
