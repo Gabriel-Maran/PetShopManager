@@ -1,16 +1,15 @@
 import { ownerService } from "../service/OwnerService";
 
 class OwnerController {
-
-  async getOwnerById(id: number) {
+  getOwnerById(id: number) {
     return ownerService.getOwnerById(id);
   }
 
-  async getAllOwners() {
+  getAllOwners() {
     return ownerService.getAllOwners();
   }
   
-  async getAllOwnersPaged(page: number, limit: number) {
+  getAllOwnersPaged(page: number, limit: number) {
     return ownerService.getAllOwnersPaged(page, limit);
   }
 
@@ -21,7 +20,7 @@ class OwnerController {
     endereco?: string,
   ): Promise<void> {
     if (!nome || !telefone || nome.trim() === "" || telefone.trim() === "") {
-      throw new Error("Nome and telefone are required");
+      throw new Error("Nome e telefone são obrigatórios");
     }
     await ownerService.createOwner(nome, telefone, email, endereco);
   }
@@ -34,7 +33,7 @@ class OwnerController {
     endereco?: string,
   ): Promise<void> {
     if (!nome || !telefone || nome.trim() === "" || telefone.trim() === "") {
-      throw new Error("Nome and telefone are required");
+      throw new Error("Nome e telefone são obrigatórios");
     }
     await ownerService.updateOwner(id, nome, telefone, email, endereco);
   }
