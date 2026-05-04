@@ -1,7 +1,6 @@
 import { ownerService } from "../service/OwnerService";
 
 class OwnerController {
-
   async getOwnerById(id: number) {
     return ownerService.getOwnerById(id);
   }
@@ -9,7 +8,7 @@ class OwnerController {
   async getAllOwners() {
     return ownerService.getAllOwners();
   }
-  
+
   async getAllOwnersPaged(page: number, limit: number) {
     return ownerService.getAllOwnersPaged(page, limit);
   }
