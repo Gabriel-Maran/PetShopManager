@@ -13,13 +13,10 @@ import { Screen } from "../../../config/consts";
 import { Owner } from "../../../model/Owner";
 import { useScreen } from "../../../hooks/useScreen";
 import { ownerController } from "../../../controller/OwnerController";
-import { useError } from "../../../hooks/useError";
-
 import TitleBar from "../../components/Cadastro/TitleBar";
 import DefaultHeader from "../../components/Header/DefaultHeader";
 import InputInfo from "../../components/Cadastro/InputInfo";
 import { useError } from "../../../hooks/useError";
-
 
 const maskPhone = (v: string) => {
   const d = v.replace(/\D/g, "").slice(0, 11);
