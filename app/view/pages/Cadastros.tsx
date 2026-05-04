@@ -6,12 +6,15 @@ import { Owner } from "../../model/Owner";
 import { useScreen } from "../../hooks/useScreen";
 import { APP_BAR_HEIGHT, Screen } from "../../config/consts";
 import { ownerRepository } from "../../repository/OwnerRepository";
+import { petRepository } from "../../repository/PetRepository";
 
 import BarraDePesquisa from "../components/SearchBarra/BarraDePesquisa";
 import DefaultHeader from "../components/Header/DefaultHeader";
 import ItemSelect from "../components/Cadastro/ItemSelect";
 import OwnerList from "../components/Cadastro/OwnerList";
 import PetList from "../components/Cadastro/PetList";
+
+
 
 export default function Cadastros() {
   // 1. Exemplo completo (todos os campos preenchidos)
@@ -83,6 +86,9 @@ export default function Cadastros() {
       const dadosDonos = await ownerRepository.getAllOwners();
       setDonos(dadosDonos);
       //const dadosPets = await petController.getAllPets();
+      const dadosPets = await petRepository.getAllPets();
+      setPets(dadosPets);
+
       console.log(dadosDonos);
     } catch (erro) {
       console.error(erro);
