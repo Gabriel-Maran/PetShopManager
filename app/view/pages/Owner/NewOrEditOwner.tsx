@@ -11,8 +11,6 @@ import { useState } from "react";
 
 import { Screen } from "../../../config/consts";
 import { Owner } from "../../../model/Owner";
-import { useMemo, useState } from "react";
-import InputInfo from "../../components/Cadastro/InputInfo";
 import { useScreen } from "../../../hooks/useScreen";
 import { ownerController } from "../../../controller/OwnerController";
 
