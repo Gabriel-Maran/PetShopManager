@@ -4,7 +4,7 @@ export interface Pet {
   especie: string;
   raca?: string;
   observacoes?: string;
-  owner_id: number;
+  dono_id: number;
   criado_em?: string;
   ultimo_banho_data?: string;
 }

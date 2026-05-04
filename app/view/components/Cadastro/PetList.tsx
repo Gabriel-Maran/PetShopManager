@@ -3,7 +3,6 @@ import {
   Image,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { Pet } from "../../../model/Pet";
@@ -11,26 +10,32 @@ import ButtonEditar from "./Botões/ButtonEditar";
 import { Screen } from "../../../config/consts";
 import ButtonExcluir from "./Botões/ButtonExcluir";
 
-export default function OwnerList({ items }: { items: Pet[] }) {
+export default function PetList({ cadastros }: { cadastros: Pet[] }) {
   return (
     <View>
       <FlatList
-        data={items}
+        data={cadastros}
         renderItem={({ item }) => (
+
           <View style={styles.itemCard}>
+
             <Image
               style={styles.img}
               source={require("../../../assets/pet.png")}
             />
+
             <View style={styles.mainContent}>
               <Text style={styles.textMain}>{item.nome}</Text>
               <Text style={styles.textSub}>
                 {`${item.especie}${item.raca ? ` - ${item.raca}` : ""}`}
               </Text>
             </View>
-            <ButtonEditar navegarPara={Screen.Calendario} />
+
+            <ButtonEditar navegarPara={Screen.NewOrEditPet} />
+
             <ButtonExcluir />
           </View>
+
         )}
         keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
       />

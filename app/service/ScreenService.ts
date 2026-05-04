@@ -1,15 +1,20 @@
-// service/ScreenService.ts
 import { Screen } from "../config/consts";
 
 class ScreenService {
   private currentScreen: Screen = Screen.Calendario;
+  private currentParams: unknown = undefined;
 
-  get(): Screen {
+  getScreen(): Screen {
     return this.currentScreen;
   }
 
-  set(screen: Screen): void {
+  getParams(): unknown {
+    return this.currentParams;
+  }
+
+  set(screen: Screen, params?: unknown): void {
     this.currentScreen = screen;
+    this.currentParams = params;
   }
 }
 

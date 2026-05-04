@@ -1,15 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 import {
   Screen,
-  APP_BAR_HEIGHT,
-  IMAGENS_NAME_BAR,
+  APP_BAR_HEIGHT
 } from "../../../config/consts";
 import IconDePesquisa from "./IconDePesquisa";
 import { IMAGENS_NAMES } from "../../../config/consts";
-import { useScreen } from "../../../hooks/useScreen";
 
 export default function AppBar() {
-  const { screen, navigate } = useScreen();
   return (
     <View
       style={[
