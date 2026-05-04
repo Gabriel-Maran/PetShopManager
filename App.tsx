@@ -8,8 +8,8 @@ import Home from "./app/view/pages/Home";
 import Cadastros from "./app/view/pages/Cadastros";
 import Relatorios from "./app/view/pages/Relatorios";
 import NewOrEditOwner from "./app/view/pages/Owner/NewOrEditOwner";
-import NewOrEditPet from "./app/view/pages/Pet/NewOrEditPet";
 import { ErrorProvider } from "./app/view/components/Error/ErrorProvider";
+import NewOrEditPet from "./app/view/pages/Pet/NewOrEditPet";
 
 function AppContent() {
   const { screen } = useScreen();

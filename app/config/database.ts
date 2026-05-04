@@ -30,18 +30,18 @@ export async function initDatabase(): Promise<void> {
       telefone  TEXT    NOT NULL,
       email     TEXT,
       endereco  TEXT,
-      criado_em TEXT    NOT NULL DEFAULT (datetime('now'))
+      criado_em INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now'))
     );
 
     CREATE TABLE IF NOT EXISTS pets (
-      id               INTEGER PRIMARY KEY AUTOINCREMENT,
-      nome             TEXT    NOT NULL,
-      especie          TEXT    NOT NULL,
-      raca             TEXT,
-      observacoes      TEXT,
-      dono_id         INTEGER NOT NULL,
+      id                INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome              TEXT    NOT NULL,
+      especie           TEXT    NOT NULL,
+      raca              TEXT,
+      observacoes       TEXT,
+      dono_id           INTEGER NOT NULL,
       ultimo_banho_data TEXT,
-      criado_em        TEXT    NOT NULL DEFAULT (datetime('now')),
+      criado_em         INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now')),
       FOREIGN KEY (dono_id) REFERENCES owners(id) ON DELETE CASCADE
     );
 
@@ -49,11 +49,11 @@ export async function initDatabase(): Promise<void> {
       id           INTEGER PRIMARY KEY AUTOINCREMENT,
       pet_id       INTEGER NOT NULL,
       servico      TEXT    NOT NULL,
-      data         TEXT    NOT NULL,
+      data         INTEGER NOT NULL,
       hora         TEXT    NOT NULL,
       entregar_pet INTEGER NOT NULL DEFAULT 0, -- 0 = não, 1 = sim
       observacao   TEXT,
-      criado_em    TEXT    NOT NULL DEFAULT (datetime('now')),
+      criado_em    INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now')),
       FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
     );
 
