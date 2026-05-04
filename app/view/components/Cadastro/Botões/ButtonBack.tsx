@@ -1,4 +1,4 @@
-import { Image, StyleSheet, TouchableOpacity } from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Screen } from "../../../../config/consts";
 import { useScreen } from "../../../../hooks/useScreen";
 
@@ -15,14 +15,14 @@ export default function ButtonBack({ backTo }: { backTo: Screen }) {
 }
 const styles = StyleSheet.create({
   imgBack: {
-    height: 28,
-    width: 28,
+    height: 40,
+    width: 40,
   },
   btnBack: {
     borderColor: "#DDDDDD",
     borderWidth: 1,
-    alignSelf: "center",
-    padding: 8,
+    padding: 4,
     borderRadius: 15,
+    justifyContent: "center",
   },
 });

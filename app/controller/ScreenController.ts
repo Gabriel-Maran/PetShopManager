@@ -1,24 +1,31 @@
-// controller/ScreenController.ts
 import { Screen } from "../config/consts";
-import { screenService } from "../service/ScreenService";
 
-type Listener = (screen: Screen) => void;
+type Listener = (screen: Screen, params?: unknown) => void;
 
 class ScreenController {
-  private listeners: Set<Listener> = new Set();
+  private currentScreen: Screen = Screen.Calendario;
+  private currentParams: unknown = undefined;
+  private listeners: Listener[] = [];
 
-  getCurrentScreen(): Screen {
-    return screenService.get();
+  getCurrentScreen() {
+    return this.currentScreen;
   }
 
-  setCurrentScreen(screen: Screen): void {
-    screenService.set(screen);
-    this.listeners.forEach((listener) => listener(screen));
+  getCurrentParams() {
+    return this.currentParams;
   }
 
-  subscribe(listener: Listener): () => void {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
+  setCurrentScreen(screen: Screen, params?: unknown) {
+    this.currentScreen = screen;
+    this.currentParams = params;
+    this.listeners.forEach((l) => l(screen, params));
+  }
+
+  subscribe(listener: Listener) {
+    this.listeners.push(listener);
+    return () => {
+      this.listeners = this.listeners.filter((l) => l !== listener);
+    };
   }
 }
 
