@@ -14,6 +14,7 @@ export default function InputInfo({
   placeHolder,
   titleName,
   hasBorderBottom = false,
+  variasLinhas,
 }: {
   image: ImageSourcePropType;
   item: string;
@@ -21,6 +22,7 @@ export default function InputInfo({
   placeHolder: string;
   titleName: string;
   hasBorderBottom?: boolean;
+  variasLinhas: boolean;
 }) {
   return (
     <View
@@ -41,7 +43,7 @@ export default function InputInfo({
           placeholder={placeHolder}
           onChangeText={(item) => setItem(item)}
           value={item}
-          multiline={true}
+          multiline={variasLinhas}
         />
       </View>
     </View>
