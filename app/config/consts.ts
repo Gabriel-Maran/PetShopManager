@@ -46,14 +46,27 @@ export enum PacoteRemarcacao {
 }
 
 export enum EspeciesAtendidas {
+  CAO = "CAO",
+  GATO = "GATO",
+  OUTRO = "OUTRO",
+}
+
+export enum EspeciesAtendidasLabel {
   CAO = "Cão",
   GATO = "Gato",
   OUTRO = "Outro",
 }
 
 export enum PorteAnimal {
-  PEQUENO = "Pequeno",
-  MEDIO = "Medio",
-  GRANDE = "Grande",
-  GRANDAO = "Grandão",
+  PEQUENO = "PEQUENO",
+  MEDIO = "MEDIO",
+  GRANDE = "GRANDE",
+  GRANDAO = "GRANDAO",
 }
+
+export const PorteAnimalLabel = {
+  PEQUENO: "Pequeno",
+  MEDIO: "Médio",
+  GRANDE: "Grande",
+  GRANDAO: "Grandão",
+};

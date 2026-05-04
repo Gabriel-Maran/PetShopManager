@@ -1,6 +1,7 @@
 import { Button, Text } from "react-native";
 import { useState } from "react";
 import {
+  EspeciesAtendidas,
   PacoteRemarcacao,
   PorteAnimal,
   Screen,
@@ -16,7 +17,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
 
   const [form, setForm] = useState({
     nome: petToEdit?.nome ?? "",
-    especie: petToEdit?.especie ?? "",
+    especie: petToEdit?.especie ?? EspeciesAtendidas.CAO,
     dono_id: petToEdit?.dono_id ?? 0,
     raca: petToEdit?.raca ?? "",
     observacoes: petToEdit?.observacoes ?? "",
@@ -35,17 +36,32 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
 
   const salvarPet = async () => {
     try {
-      await petController.createPet(
-        form.nome,
-        form.especie,
-        form.porte,
-        form.dono_id,
-        form.raca,
-        form.observacoes,
-        form.servicoPadrao,
-        form.remarcAtiva ? 1 : 0,
-        form.remarcGapDias,
-      );
+      if (petToEdit?.id) {
+        await petController.updatePet(
+          petToEdit.id,
+          form.nome,
+          form.especie,
+          form.porte,
+          form.dono_id,
+          form.raca,
+          form.observacoes,
+          form.servicoPadrao,
+          form.remarcAtiva ? 1 : 0,
+          form.remarcGapDias,
+        );
+      } else {
+        await petController.createPet(
+          form.nome,
+          form.especie,
+          form.porte,
+          form.dono_id,
+          form.raca,
+          form.observacoes,
+          form.servicoPadrao,
+          form.remarcAtiva ? 1 : 0,
+          form.remarcGapDias,
+        );
+      }
     } catch (erro) {
       showError(erro instanceof Error ? erro.message : "Erro inesperado.");
     }

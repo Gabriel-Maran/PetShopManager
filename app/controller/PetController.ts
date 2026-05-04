@@ -1,5 +1,10 @@
 import { petService } from "../service/PetService";
-import { PacoteRemarcacao, PorteAnimal, TipoServico } from "../config/consts";
+import {
+  EspeciesAtendidas,
+  PacoteRemarcacao,
+  PorteAnimal,
+  TipoServico,
+} from "../config/consts";
 import { Pet } from "../model/Pet";
 import { ownerController } from "./OwnerController";
 
@@ -15,7 +20,7 @@ class PetController {
   }
   async createPet(
     nome: string,
-    especie: string,
+    especie: EspeciesAtendidas,
     porte: PorteAnimal,
     dono_id: number,
     raca?: string,
@@ -27,7 +32,7 @@ class PetController {
     if (!nome || !especie || nome.trim() === "" || !dono_id || !porte) {
       throw new Error("Nome, especie, dono e porte são obrigatórios");
     }
-    const owner = ownerController.getOwnerById(dono_id);
+    const owner = await ownerController.getOwnerById(dono_id);
     if (!owner) {
       throw new Error("Dono não encontrado com o id " + dono_id);
     }
@@ -50,7 +55,7 @@ class PetController {
   async updatePet(
     id: number,
     nome: string,
-    especie: string,
+    especie: EspeciesAtendidas,
     porte: PorteAnimal,
     dono_id: number,
     raca?: string,
@@ -62,9 +67,9 @@ class PetController {
     if (!nome || !especie || nome.trim() === "" || !dono_id || !porte) {
       throw new Error("Nome, especie, dono e porte são obrigatórios");
     }
-    const owner = ownerController.getOwnerById(dono_id);
+    const owner = await ownerController.getOwnerById(dono_id);
     if (!owner) {
-      throw new Error("Dono não encontrado");
+      throw new Error("Dono não encontrado com o id " + dono_id);
     }
 
     let meuPet: Pet = {

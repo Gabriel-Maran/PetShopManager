@@ -7,7 +7,7 @@ class PetService {
   }
 
   getAllPets() {
-    return petRepository.getAllPets;
+    return petRepository.getAllPets();
   }
 
   getAllPetsPaged(page: number, limit: number) {
