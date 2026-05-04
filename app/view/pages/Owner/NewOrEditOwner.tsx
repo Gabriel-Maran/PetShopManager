@@ -11,12 +11,15 @@ import { useState } from "react";
 
 import { Screen } from "../../../config/consts";
 import { Owner } from "../../../model/Owner";
+import { useMemo, useState } from "react";
+import InputInfo from "../../components/Cadastro/InputInfo";
 import { useScreen } from "../../../hooks/useScreen";
 import { ownerController } from "../../../controller/OwnerController";
 
 import TitleBar from "../../components/Cadastro/TitleBar";
 import DefaultHeader from "../../components/Header/DefaultHeader";
 import InputInfo from "../../components/Cadastro/InputInfo";
+import { useError } from "../../../hooks/useError";
 
 const maskPhone = (v: string) => {
   const d = v.replace(/\D/g, "").slice(0, 11);
@@ -30,7 +33,10 @@ export default function NewOrEditOwner({
 }: {
   ownerToEdit?: Owner;
 }) {
+  const { showError } = useError();
   const isEditing = Boolean(ownerToEdit);
+  const [isSucess, setIsSucess] = useState(true);
+
   const [nome, setNome] = useState(ownerToEdit?.nome ?? "");
   const [telefone, setTelefone] = useState(ownerToEdit?.telefone ?? "");
   const [email, setEmail] = useState(ownerToEdit?.email ?? "");
@@ -40,8 +46,9 @@ export default function NewOrEditOwner({
   const salvarDono = async () => {
     try {
       await ownerController.createOwner(nome, telefone, email, endereco);
+      navigate(Screen.Cadastros);
     } catch (erro) {
-      console.error(erro);
+      showError(erro instanceof Error ? erro.message : "Erro inesperado.");
     }
   };
 
@@ -105,9 +112,7 @@ export default function NewOrEditOwner({
             <TouchableOpacity
               style={styles.btnSalvar}
               onPress={() => {
-                //Adicionar ou atualiza no banco de dados
-                salvarDono()
-                navigate(Screen.Cadastros);
+                salvarDono();
               }}
             >
               <Text style={styles.txtSalvar}>
