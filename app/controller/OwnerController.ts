@@ -8,7 +8,7 @@ class OwnerController {
   getAllOwners() {
     return ownerService.getAllOwners();
   }
-  
+
   getAllOwnersPaged(page: number, limit: number) {
     return ownerService.getAllOwnersPaged(page, limit);
   }
