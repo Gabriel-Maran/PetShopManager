@@ -1,3 +1,4 @@
+import { Appointment } from "../model/Appointment";
 import { appointmentsRepository } from "../repository/AppointmentsRepository";
 
 class AppointmentService {
@@ -5,44 +6,16 @@ class AppointmentService {
     return appointmentsRepository.getAppointmentByID(id);
   }
 
-  getAppointmentByDate(date: string) {
+  getAppointmentByDate(date: number) {
     return appointmentsRepository.getAppointmentByDate(date);
   }
 
-  createAppointment(
-    pet_id: number,
-    servico: string,
-    data: number,
-    hora: string,
-    entregar_pet: number,
-    observacao?: string
-  ) {
-    return appointmentsRepository.createAppointment(
-      pet_id,
-      servico,
-      data,
-      hora,
-      entregar_pet,
-      observacao
-    );
+  createAppointment(appointment: Appointment) {
+    return appointmentsRepository.createAppointment(appointment);
   }
 
-  updateAppointment(
-    pet_id: number,
-    servico: string,
-    data: number,
-    hora: string,
-    entregar_pet: number,
-    observacao?: string
-  ) {
-    return appointmentsRepository.createAppointment(
-      pet_id,
-      servico,
-      data,
-      hora,
-      entregar_pet,
-      observacao
-    );
+  updateAppointment(id: number, appointment: Appointment) {
+    return appointmentsRepository.updateAppointment(id, appointment);
   }
 
   deleteAppointment(id: number) {
@@ -50,4 +23,4 @@ class AppointmentService {
   }
 }
 
-export const appointmentsService = new AppointmentService
+export const appointmentsService = new AppointmentService();

@@ -16,6 +16,7 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   return db;
 }
 
+// Todo -> Verificaçãode pacotes(quinzenal e mensal)
 export async function initDatabase(): Promise<void> {
   const db = await getDatabase();
 
@@ -55,6 +56,7 @@ export async function initDatabase(): Promise<void> {
       id                           INTEGER PRIMARY KEY AUTOINCREMENT,
       nome                         TEXT    NOT NULL,
       especie                      TEXT    NOT NULL,
+      porte                        TEXT    NOT NULL,
       raca                         TEXT,
       observacoes                  TEXT,
       dono_id                      INTEGER NOT NULL,

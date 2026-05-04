@@ -22,14 +22,23 @@ class PetRepository {
 
   async createPet(pet: Pet): Promise<void> {
     const db = await getDatabase();
+
     await db.runAsync(
       `INSERT INTO pets (
-        nome, especie, raca, observacoes, dono_id, 
-        servico_padrao, remarcacao_ativa, remarcacao_gap_dias
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      nome, 
+      especie, 
+      porte, 
+      raca, 
+      observacoes, 
+      dono_id, 
+      servico_padrao, 
+      remarcacao_ativa, 
+      remarcacao_gap_dias
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         pet.nome,
         pet.especie,
+        pet.porte,
         pet.raca ?? null,
         pet.observacoes ?? null,
         pet.dono_id,
@@ -46,6 +55,7 @@ class PetRepository {
       `UPDATE pets SET 
       nome = ?, 
       especie = ?, 
+      porte = ?, 
       raca = ?, 
       observacoes = ?, 
       dono_id = ?, 
@@ -54,11 +64,12 @@ class PetRepository {
       remarcacao_gap_dias = ? 
     WHERE id = ?`,
       [
-        pet.nome!,
-        pet.especie!,
+        pet.nome,
+        pet.especie,
+        pet.porte,
         pet.raca ?? null,
         pet.observacoes ?? null,
-        pet.dono_id!,
+        pet.dono_id,
         pet.servico_padrao ?? "Banho",
         pet.remarcacao_ativa ?? 0,
         pet.remarcacao_gap_dias ?? null,

@@ -1,9 +1,10 @@
-import { PacoteRemarcacao, TipoServico } from "../config/consts";
+import { PacoteRemarcacao, PorteAnimal, TipoServico } from "../config/consts";
 
 export interface Pet {
   id?: number;
   nome: string;
   especie: string;
+  porte: PorteAnimal;
   raca?: string;
   observacoes?: string;
   dono_id: number;

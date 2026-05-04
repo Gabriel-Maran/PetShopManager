@@ -44,3 +44,16 @@ export enum PacoteRemarcacao {
   Mensal = 4,
   Quinzenal = 2,
 }
+
+export enum EspeciesAtendidas {
+  CAO = "Cão",
+  GATO = "Gato",
+  OUTRO = "Outro",
+}
+
+export enum PorteAnimal {
+  PEQUENO = "Pequeno",
+  MEDIO = "Medio",
+  GRANDE = "Grande",
+  GRANDAO = "Grandão",
+}

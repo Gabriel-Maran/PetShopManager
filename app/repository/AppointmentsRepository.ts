@@ -1,5 +1,6 @@
 import { getDatabase } from "../config/database";
 import { Appointment } from "../model/Appointment";
+import { Pet } from "../model/Pet";
 
 class AppointmentRepository {
   async getAppointmentByID(id: number): Promise<Appointment | null> {
@@ -10,49 +11,54 @@ class AppointmentRepository {
     );
   }
 
-  async getAppointmentByDate(date: string): Promise<Appointment | null> {
+  async getAppointmentByDate(date: number): Promise<Appointment | null> {
     const db = await getDatabase();
     return db.getFirstAsync<Appointment>(
       `SELECT * FROM appointments where data = ?`,
-      [date]
+      [date],
     );
   }
 
-  async createAppointment(
-    pet_id: number,
-    servico: string,
-    data: number,
-    hora: string,
-    entregar_pet: number,
-    observacao?: string
-  ): Promise<void> {
+  async createAppointment(appointment: Appointment): Promise<void> {
     const db = await getDatabase();
+
     await db.runAsync(
-      `INSERT INTO appointments (pet_id, servico, data, hora, entregar_pet, observacao)
-        values (?,?,?,?,?,?)`,
+      `INSERT INTO appointments
+      (pet_id, servico, data, entregar_pet, concluido, observacao)
+     VALUES
+      (?, ?, ?, ?, ?, ?)`,
       [
-        pet_id,
-        servico,
-        data,
-        hora,
-        entregar_pet,
-        observacao ?? null,
+        appointment.pet_id,
+        appointment.servico,
+        appointment.data,
+        appointment.entregar_pet,
+        0,
+        appointment.observacao ?? null,
       ],
     );
   }
 
-  async updateAppointment(
-    pet_id: number,
-    servico: string,
-    data: number,
-    hora: string,
-    entregar_pet: number,
-    observacao?: string,
-  ): Promise<void> {
+  async updateAppointment(id: number, appointment: Appointment): Promise<void> {
     const db = await getDatabase();
+
     await db.runAsync(
-      `UPDATE appointments SET pet_id = ?, servico = ?, data = ?, hora = ?, entregar_pet = ?, observacao = ?`,
-      [pet_id, servico, data, hora, entregar_pet, observacao ?? null],
+      `UPDATE appointments SET
+      pet_id = ?,
+      servico = ?,
+      data = ?,
+      entregar_pet = ?,
+      concluido = ?,
+      observacao = ?
+     WHERE id = ?`,
+      [
+        appointment.pet_id,
+        appointment.servico,
+        appointment.data,
+        appointment.entregar_pet,
+        appointment.concluido,
+        appointment.observacao ?? null,
+        id,
+      ],
     );
   }
 
