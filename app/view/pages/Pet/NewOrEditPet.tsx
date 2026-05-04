@@ -1,5 +1,5 @@
 import { Button, StyleSheet, Text } from "react-native";
-import { Screen } from "../../../config/consts";
+import { PacoteRemarcacao, Screen, TipoServico } from "../../../config/consts";
 import DefaultHeader from "../../components/Header/DefaultHeader";
 import { useState } from "react";
 import { Pet } from "../../../model/Pet";
@@ -10,9 +10,34 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { showError } = useError();
   const [nome, setNome] = useState(petToEdit?.nome ?? "");
   const [especie, setEspecie] = useState(petToEdit?.especie ?? "");
+  const [dono_id, setDonoId] = useState(petToEdit?.dono_id ?? 0);
   const [raca, setRaca] = useState(petToEdit?.raca ?? "");
   const [observacoes, setObservacoes] = useState(petToEdit?.observacoes ?? "");
-  const [dono_id, setDonoId] = useState(petToEdit?.dono_id ?? 0);
+  const [servicoPadrao, setServicoPadrao] = useState<TipoServico>(
+    petToEdit?.servico_padrao ?? TipoServico.Banho,
+  );
+  const [remarcAtiva, setRemarcAtiva] = useState(
+    petToEdit?.remarcacao_ativa ?? false,
+  );
+  const [remarcGapDias, setRemarcGapDias] = useState<
+    PacoteRemarcacao | undefined
+  >(
+    petToEdit?.remarcacao_gap_dias &&
+      petToEdit.remarcacao_gap_dias in PacoteRemarcacao
+      ? (petToEdit.remarcacao_gap_dias as PacoteRemarcacao)
+      : undefined,
+  );
+
+  /*
+    nome: string,
+    especie: string,
+    dono_id: number,
+    raca?: string,
+    observacoes?: string,
+    servico_padrao: TipoServico = TipoServico.Banho, // Valor padrão caso não venha nada
+    remarcacao_ativa: number = 0, // 0 para desligado
+    remarcacao_gap_dias?: PacoteRemarcacao,
+    */
 
   const salvarPet = async () => {
     //Teste
@@ -22,7 +47,16 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
     setObservacoes("Nenhuma");
     setDonoId(1);
     try {
-      await petController.createPet(nome, especie, dono_id, raca, observacoes);
+      await petController.createPet(
+        nome,
+        especie,
+        dono_id,
+        raca,
+        observacoes,
+        servicoPadrao,
+        remarcAtiva ? 1 : 0,
+        remarcGapDias,
+      );
     } catch (erro) {
       showError(erro instanceof Error ? erro.message : "Erro inesperado.");
     }

@@ -1,3 +1,4 @@
+import { Pet } from "../model/Pet";
 import { petRepository } from "../repository/PetRepository";
 
 class PetService {
@@ -8,28 +9,19 @@ class PetService {
   getAllPets() {
     return petRepository.getAllPets;
   }
+
   getAllPetsPaged(page: number, limit: number) {
     return petRepository.getAllPetsPaged(page, limit);
   }
-  createPet(
-    nome: string,
-    especie: string,
-    dono_id: number,
-    raca?: string,
-    observacoes?: string,
-  ) {
-    return petRepository.createPet(nome, especie, dono_id, raca, observacoes);
+
+  createPet(pet: Pet) {
+    return petRepository.createPet(pet);
   }
 
-  updatePet(
-    nome: string,
-    especie: string,
-    dono_id: number,
-    raca?: string,
-    observacoes?: string,
-  ) {
-    return petRepository.createPet(nome, especie, dono_id, raca, observacoes);
+  updatePet(id: number, pet: Pet) {
+    return petRepository.updatePet(id, pet);
   }
+
   deletePet(id: number) {
     return petRepository.deletePet(id);
   }

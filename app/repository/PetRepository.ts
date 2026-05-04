@@ -20,37 +20,57 @@ class PetRepository {
     );
   }
 
-  async createPet(
-    nome: string,
-    especie: string,
-    dono_id: number,
-    raca?: string,
-    observacoes?: string,
-  ): Promise<void> {
+  async createPet(pet: Pet): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(
-      `INSERT INTO pets (nome, especie, dono_id, raca, observacoes) VALUES (?, ?, ?, ?, ?)`,
-      [nome, especie, dono_id, raca ?? null, observacoes ?? null],
+      `INSERT INTO pets (
+        nome, especie, raca, observacoes, dono_id, 
+        servico_padrao, remarcacao_ativa, remarcacao_gap_dias
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        pet.nome,
+        pet.especie,
+        pet.raca ?? null,
+        pet.observacoes ?? null,
+        pet.dono_id,
+        pet.servico_padrao ?? "Banho",
+        pet.remarcacao_ativa ?? 0,
+        pet.remarcacao_gap_dias ?? null,
+      ],
     );
   }
-  async updatePet(
-    id: number,
-    nome: string,
-    especie: string,
-    dono_id: number,
-    raca?: string,
-    observacoes?: string,
-  ): Promise<void> {
+
+  async updatePet(id: number, pet: Pet): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(
-      `INSERT INTO pets (nome, especie, dono_id raca, observacoes) VALUES (?, ?, ?, ?, ?)`,
-      [nome, especie, dono_id, raca ?? null, observacoes ?? null],
+      `UPDATE pets SET 
+      nome = ?, 
+      especie = ?, 
+      raca = ?, 
+      observacoes = ?, 
+      dono_id = ?, 
+      servico_padrao = ?, 
+      remarcacao_ativa = ?, 
+      remarcacao_gap_dias = ? 
+    WHERE id = ?`,
+      [
+        pet.nome!,
+        pet.especie!,
+        pet.raca ?? null,
+        pet.observacoes ?? null,
+        pet.dono_id!,
+        pet.servico_padrao ?? "Banho",
+        pet.remarcacao_ativa ?? 0,
+        pet.remarcacao_gap_dias ?? null,
+        id,
+      ],
     );
   }
+
   async deletePet(id: number): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(`DELETE FROM pets where id = ?`, [id]);
   }
 }
 
-export const petRepository = new PetRepository()
+export const petRepository = new PetRepository();

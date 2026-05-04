@@ -5,7 +5,7 @@ let db: SQLite.SQLiteDatabase | null = null;
 // ─── Período máximo de remarcação automática ──────────────────────────────────
 // Troque o valor conforme necessário:
 //   '+365 days' = 1 ano | '+180 days' = 6 meses | '+30 days' = 1 mês
-const PERIODO_REMARCACAO = "+365 days";
+const PERIODO_REMARCACAO = "+212 days";
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
@@ -40,7 +40,6 @@ export async function initDatabase(): Promise<void> {
 
   await db.execAsync(`
     PRAGMA foreign_keys = ON;
-
     -- ── Tabelas ──────────────────────────────────────────────────────────────
 
     CREATE TABLE IF NOT EXISTS owners (
