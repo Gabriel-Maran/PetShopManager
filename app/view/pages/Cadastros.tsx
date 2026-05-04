@@ -1,12 +1,16 @@
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useState, useEffect } from "react";
 
+import { useScreen } from "../../hooks/useScreen";
+
 import { Pet } from "../../model/Pet";
 import { Owner } from "../../model/Owner";
-import { useScreen } from "../../hooks/useScreen";
+
+import { ownerController } from "../../controller/OwnerController";
+import { petController } from "../../controller/PetController";
+
 import { APP_BAR_HEIGHT, Screen } from "../../config/consts";
-import { ownerRepository } from "../../repository/OwnerRepository";
-import { petRepository } from "../../repository/PetRepository";
+
 
 import BarraDePesquisa from "../components/SearchBarra/BarraDePesquisa";
 import DefaultHeader from "../components/Header/DefaultHeader";
@@ -44,36 +48,6 @@ export default function Cadastros() {
       criado_em: new Date().toISOString(),
     },
   ]; */
-  /* const donos: Owner[] = [
-    {
-      id: 1,
-      nome: "João Silva",
-      telefone: "(11) 98888-7777",
-      email: "joao.silva@email.com",
-      endereco: "Rua das Flores, 123 - SP",
-      criado_em: "2024-01-10T09:00:00Z",
-    },
-    {
-      id: 2,
-      nome: "Maria Oliveira",
-      telefone: "(21) 97777-6666",
-      email: "maria.oliver@provedor.com",
-      // Endereço omitido (opcional)
-    },
-    {
-      id: 3,
-      nome: "Carlos Souza",
-      telefone: "(31) 96666-5555",
-      // Email e Endereço omitidos (opcionais)
-    },
-    {
-      id: 4,
-      nome: "Ana Costa",
-      telefone: "(41) 95555-4444",
-      endereco: "Av. Central, 500 - PR",
-      criado_em: new Date().toISOString(),
-    },
-  ]; */
   const [donos, setDonos] = useState<Owner[]>([]);
   const [pets, setPets] = useState<Pet[]>([])
 
@@ -83,10 +57,9 @@ export default function Cadastros() {
 
   async function carregarDonosEPets() {
     try {
-      const dadosDonos = await ownerRepository.getAllOwners();
+      const dadosDonos = await ownerController.getAllOwners();
       setDonos(dadosDonos);
-      //const dadosPets = await petController.getAllPets();
-      const dadosPets = await petRepository.getAllPets();
+      const dadosPets = await petController.getAllPets();
       setPets(dadosPets);
 
       console.log(dadosDonos);

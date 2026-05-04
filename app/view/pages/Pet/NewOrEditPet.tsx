@@ -1,3 +1,4 @@
+
 import { Button, Text } from "react-native";
 import { useState } from "react";
 import {
@@ -7,10 +8,11 @@ import {
   Screen,
   TipoServico,
 } from "../../../config/consts";
-import DefaultHeader from "../../components/Header/DefaultHeader";
+import { useError } from "../../../hooks/useError";
 import { Pet } from "../../../model/Pet";
 import { petController } from "../../../controller/PetController";
-import { useError } from "../../../hooks/useError";
+
+import DefaultHeader from "../../components/Header/DefaultHeader";
 
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { showError } = useError();
