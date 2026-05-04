@@ -30,7 +30,7 @@ export async function initDatabase(): Promise<void> {
       telefone  TEXT    NOT NULL,
       email     TEXT,
       endereco  TEXT,
-      criado_em TEXT    NOT NULL DEFAULT (datetime('now'))
+      criado_em INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now'))
     );
 
     CREATE TABLE IF NOT EXISTS pets (
@@ -41,7 +41,7 @@ export async function initDatabase(): Promise<void> {
       observacoes       TEXT,
       dono_id           INTEGER NOT NULL,
       ultimo_banho_data TEXT,
-      criado_em         TEXT    NOT NULL DEFAULT (datetime('now')),
+      criado_em         INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now')),
       FOREIGN KEY (dono_id) REFERENCES owners(id) ON DELETE CASCADE
     );
 
@@ -53,7 +53,7 @@ export async function initDatabase(): Promise<void> {
       hora         TEXT    NOT NULL,
       entregar_pet INTEGER NOT NULL DEFAULT 0, -- 0 = não, 1 = sim
       observacao   TEXT,
-      data_int_dia INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now')),
+      criado_em    INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now')),
       FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
     );
 
