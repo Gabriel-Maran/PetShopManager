@@ -10,9 +10,14 @@ import { Pet } from "../model/Pet";
 import { ownerController } from "./OwnerController";
 
 class PetController {
-  async getPetById(id: number) {
-    return petService.getPetById(id);
+  async getPetById(id: number): Promise<Pet> {
+    const pet = await petService.getPetById(id);
+    if (!pet) {
+      throw new Error("Pet não encontrado");
+    }
+    return pet;
   }
+
   async getAllPets() {
     return petService.getAllPets();
   }
@@ -92,6 +97,10 @@ class PetController {
     };
 
     await petService.updatePet(id, meuPet);
+  }
+
+  async deletePet(id: number): Promise<void> {
+    await petService.deletePet(id);
   }
 }
 

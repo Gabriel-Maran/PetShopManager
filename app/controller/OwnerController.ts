@@ -1,20 +1,29 @@
 import { ORDER } from "../config/consts";
+import { Owner } from "../model/Owner";
 import { ownerService } from "../service/OwnerService";
 
 class OwnerController {
-  getOwnerById(id: number) {
-    return ownerService.getOwnerById(id);
+  async getOwnerById(id: number): Promise<Owner> {
+    const owner = await ownerService.getOwnerById(id);
+    if (!owner) {
+      throw new Error("Usuário não encontrado");
+    }
+    return owner;
   }
 
-  getAllOwners() {
+  getAllOwners(): Promise<Owner[]> {
     return ownerService.getAllOwners();
   }
 
-  getAllOwnersPaged(page: number, limit: number, order: ORDER = ORDER.DESC) {
+  getAllOwnersPaged(
+    page: number,
+    limit: number,
+    order: ORDER = ORDER.DESC,
+  ): Promise<Owner[]> {
     return ownerService.getAllOwnersPaged(page, limit, order);
   }
 
-  countOwners() {
+  countOwners(): Promise<number> {
     return ownerService.countOwners();
   }
 
@@ -24,9 +33,10 @@ class OwnerController {
     email?: string,
     endereco?: string,
   ): Promise<void> {
-    if (!nome || !telefone || nome.trim() === "" || telefone.trim() === "") {
+    if (!nome?.trim() || !telefone?.trim()) {
       throw new Error("Nome e telefone são obrigatórios");
     }
+
     await ownerService.createOwner(nome, telefone, email, endereco);
   }
 
@@ -37,9 +47,10 @@ class OwnerController {
     email?: string,
     endereco?: string,
   ): Promise<void> {
-    if (!nome || !telefone || nome.trim() === "" || telefone.trim() === "") {
+    if (!nome?.trim() || !telefone?.trim()) {
       throw new Error("Nome e telefone são obrigatórios");
     }
+
     await ownerService.updateOwner(id, nome, telefone, email, endereco);
   }
 

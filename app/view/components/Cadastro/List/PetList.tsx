@@ -4,7 +4,13 @@ import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
 import { Pet } from "../../../../model/Pet";
 import { Screen } from "../../../../config/consts";
 
-export default function PetList({ cadastros }: { cadastros: Pet[] }) {
+export default function PetList({
+  cadastros,
+  onDelete,
+}: {
+  cadastros: Pet[];
+  onDelete: (itemId: number) => void;
+}) {
   return (
     <View>
       <FlatList
@@ -25,7 +31,7 @@ export default function PetList({ cadastros }: { cadastros: Pet[] }) {
 
             <ButtonEditar navegarPara={Screen.NewOrEditPet} />
 
-            <ButtonExcluir />
+            <ButtonExcluir itemId={item.id ?? -1} onDelete={onDelete} />
           </View>
         )}
         keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}

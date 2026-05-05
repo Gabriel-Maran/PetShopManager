@@ -18,6 +18,7 @@ import ItemSelect from "../components/Cadastro/ItemSelect";
 import PetList from "../components/Cadastro/List/PetList";
 import Pagination from "../components/Cadastro/List/Pagination";
 import OwnerList from "../components/Cadastro/List/OwnerList";
+import ModalConfDelete from "../components/Cadastro/Botões/Delete/ModalConfDelete";
 
 //Limite de itens por pagina
 const LIMIT = 20;
@@ -32,11 +33,39 @@ export default function Cadastros() {
   const [owners, setOwners] = useState<Owner[]>([]); // Controla a Lista de Owners
   const [pets, setPets] = useState<Pet[]>([]); // Controla a lista de pets
   const [total, setTotal] = useState(0); // Controla o total de itens de Pet ou Owner
+  const [objSelectToDelete, setObjSelectToDelete] = useState<
+    Pet | Owner | undefined
+  >(undefined);
 
   const handleTabChange = (value: boolean) => {
     setIsOwnerSelected(value);
     setPage(0);
   };
+
+  function confirmDeletar(itemId: number) {
+    try {
+      if (isOwnerSelected) {
+        ownerController.deleteOwner(itemId);
+        setOwners((prev) => prev.filter((item) => item.id !== itemId));
+      } else {
+        petController.deletePet(itemId);
+        setPets((prev) => prev.filter((item) => item.id !== itemId));
+      }
+    } catch (e) {
+      showError(e instanceof Error ? e.message : "Erro inesperado.");
+    }
+    setObjSelectToDelete(undefined);
+  }
+
+  async function handleDeleteSelected(itemId: number) {
+    if (isOwnerSelected) {
+      const owner = await ownerController.getOwnerById(itemId);
+      setObjSelectToDelete(owner);
+      return;
+    }
+    const pet = await petController.getPetById(itemId);
+    setObjSelectToDelete(pet);
+  }
 
   useEffect(() => {
     const count = isOwnerSelected
@@ -66,6 +95,12 @@ export default function Cadastros() {
 
   return (
     <>
+      <ModalConfDelete
+        message={`Excluindo o ${isOwnerSelected ? "dono" : "pet"} ${objSelectToDelete?.nome}`}
+        onClose={() => setObjSelectToDelete(undefined)}
+        onConfirmDelete={() => confirmDeletar(objSelectToDelete?.id ?? 0)}
+        visible={objSelectToDelete != undefined}
+      />
       <View style={styles.container}>
         <DefaultHeader />
         <BarraDePesquisa
@@ -94,9 +129,9 @@ export default function Cadastros() {
         />
         <View style={{ flex: 1 }}>
           {isOwnerSelected ? (
-            <OwnerList cadastros={owners} />
+            <OwnerList cadastros={owners} onDelete={handleDeleteSelected} />
           ) : (
-            <PetList cadastros={pets} />
+            <PetList cadastros={pets} onDelete={handleDeleteSelected} />
           )}
         </View>
       </View>

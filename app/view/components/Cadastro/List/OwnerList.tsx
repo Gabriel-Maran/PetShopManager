@@ -5,7 +5,13 @@ import ButtonEditar from "../Botões/ButtonEditar";
 import { Screen } from "../../../../config/consts";
 import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
 
-export default function OwnerList({ cadastros }: { cadastros: Owner[] }) {
+export default function OwnerList({
+  cadastros,
+  onDelete,
+}: {
+  cadastros: Owner[];
+  onDelete: (itemId: number) => void;
+}) {
   const { params } = useScreen();
   return (
     <View>
@@ -28,7 +34,7 @@ export default function OwnerList({ cadastros }: { cadastros: Owner[] }) {
               navegarPara={Screen.NewOrEditOwner}
             />
 
-            <ButtonExcluir />
+            <ButtonExcluir itemId={item.id ?? -1} onDelete={onDelete} />
           </View>
         )}
         keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
