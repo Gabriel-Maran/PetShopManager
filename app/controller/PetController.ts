@@ -1,6 +1,7 @@
 import { petService } from "../service/PetService";
 import {
   EspeciesAtendidas,
+  ORDER,
   PacoteRemarcacao,
   PorteAnimal,
   TipoServico,
@@ -15,9 +16,15 @@ class PetController {
   async getAllPets() {
     return petService.getAllPets();
   }
-  async getAllPetsPaged(page: number, limit: number) {
-    return petService.getAllPetsPaged(page, limit);
+
+  getAllPetsPaged(page: number, limit: number, order: ORDER) {
+    return petService.getAllPetsPaged(page, limit, order);
   }
+
+  countPets() {
+    return petService.countPets();
+  }
+
   async createPet(
     nome: string,
     especie: EspeciesAtendidas,

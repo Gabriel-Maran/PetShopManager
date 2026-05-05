@@ -1,3 +1,4 @@
+import { ORDER } from "../config/consts";
 import { ownerService } from "../service/OwnerService";
 
 class OwnerController {
@@ -8,10 +9,13 @@ class OwnerController {
   getAllOwners() {
     return ownerService.getAllOwners();
   }
-  
 
-  getAllOwnersPaged(page: number, limit: number) {
-    return ownerService.getAllOwnersPaged(page, limit);
+  getAllOwnersPaged(page: number, limit: number, order: ORDER = ORDER.DESC) {
+    return ownerService.getAllOwnersPaged(page, limit, order);
+  }
+
+  countOwners() {
+    return ownerService.countOwners();
   }
 
   async createOwner(

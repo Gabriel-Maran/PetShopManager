@@ -1,3 +1,4 @@
+import { ORDER } from "../config/consts";
 import { getDatabase } from "../config/database";
 import { Owner } from "../model/Owner";
 
@@ -17,13 +18,23 @@ class OwnerRepository {
   async getAllOwnersPaged(
     page: number = 0,
     limit: number = 20,
+    order: ORDER,
   ): Promise<Owner[]> {
     const db = await getDatabase();
     const offset = page * limit;
+
     return db.getAllAsync<Owner>(
-      `SELECT * FROM owners ORDER BY criado_em DESC LIMIT ? OFFSET ?`,
+      `SELECT * FROM owners ORDER BY criado_em ${order} LIMIT ? OFFSET ?`,
       [limit, offset],
     );
+  }
+
+  async countOwners(): Promise<number> {
+    const db = await getDatabase();
+    const result = await db.getFirstAsync<{ total: number }>(
+      `SELECT COUNT(*) as total FROM owners`,
+    );
+    return result?.total ?? 0;
   }
 
   async createOwner(
@@ -59,4 +70,4 @@ class OwnerRepository {
   }
 }
 
-export const ownerRepository = new OwnerRepository()
+export const ownerRepository = new OwnerRepository();

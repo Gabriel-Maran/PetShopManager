@@ -1,3 +1,4 @@
+import { ORDER } from "../config/consts";
 import { ownerRepository } from "../repository/OwnerRepository";
 
 class OwnerService {
@@ -9,8 +10,12 @@ class OwnerService {
     return ownerRepository.getAllOwners();
   }
 
-  getAllOwnersPaged(page: number, limit: number) {
-    return ownerRepository.getAllOwnersPaged(page, limit);
+  getAllOwnersPaged(page: number, limit: number, order: ORDER) {
+    return ownerRepository.getAllOwnersPaged(page, limit, order);
+  }
+
+  countOwners() {
+    return ownerRepository.countOwners();
   }
 
   createOwner(

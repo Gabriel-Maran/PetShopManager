@@ -70,3 +70,8 @@ export const PorteAnimalLabel = {
   GRANDE: "Grande",
   GRANDAO: "Grandão",
 };
+
+export enum ORDER {
+  ASC = "ASC",
+  DESC = "DESC",
+}

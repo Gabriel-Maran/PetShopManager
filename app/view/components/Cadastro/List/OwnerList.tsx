@@ -1,9 +1,9 @@
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
-import { Owner } from "../../../model/Owner";
-import { Screen } from "../../../config/consts";
-import ButtonExcluir from "./Botões/ButtonExcluir";
-import ButtonEditar from "./Botões/ButtonEditar";
-import { useScreen } from "../../../hooks/useScreen";
+import { Owner } from "../../../../model/Owner";
+import { useScreen } from "../../../../hooks/useScreen";
+import ButtonEditar from "../Botões/ButtonEditar";
+import { Screen } from "../../../../config/consts";
+import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
 
 export default function OwnerList({ cadastros }: { cadastros: Owner[] }) {
   const { params } = useScreen();
@@ -15,7 +15,7 @@ export default function OwnerList({ cadastros }: { cadastros: Owner[] }) {
           <View style={styles.itemCard}>
             <Image
               style={styles.img}
-              source={require("../../../assets/person.png")}
+              source={require("../../../../assets/person.png")}
             />
 
             <View style={styles.mainContent}>

@@ -1,3 +1,4 @@
+import { ORDER } from "../config/consts";
 import { getDatabase } from "../config/database";
 import { Pet } from "../model/Pet";
 
@@ -11,13 +12,27 @@ class PetRepository {
     const db = await getDatabase();
     return db.getAllAsync<Pet>(`SELECT * FROM pets ORDER BY criado_em DESC`);
   }
-  async getAllPetsPaged(page: number = 0, limit: number = 20): Promise<Pet[]> {
+
+  async getAllPetsPaged(
+    page: number = 0,
+    limit: number = 20,
+    order: ORDER,
+  ): Promise<Pet[]> {
     const db = await getDatabase();
     const offset = page * limit;
+
     return db.getAllAsync<Pet>(
-      `SELECT * FROM pets ORDER BY criado_em DESC LIMIT ? OFFSET ?`,
+      `SELECT * FROM pets ORDER BY criado_em ${order} LIMIT ? OFFSET ?`,
       [limit, offset],
     );
+  }
+
+  async countPets(): Promise<number> {
+    const db = await getDatabase();
+    const result = await db.getFirstAsync<{ total: number }>(
+      `SELECT COUNT(*) as total FROM pets`,
+    );
+    return result?.total ?? 0;
   }
 
   async createPet(pet: Pet): Promise<void> {

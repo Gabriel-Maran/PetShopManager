@@ -1,3 +1,4 @@
+import { ORDER } from "../config/consts";
 import { Pet } from "../model/Pet";
 import { petRepository } from "../repository/PetRepository";
 
@@ -10,8 +11,12 @@ class PetService {
     return petRepository.getAllPets();
   }
 
-  getAllPetsPaged(page: number, limit: number) {
-    return petRepository.getAllPetsPaged(page, limit);
+  getAllPetsPaged(page: number, limit: number, order: ORDER) {
+    return petRepository.getAllPetsPaged(page, limit, order);
+  }
+
+  countPets() {
+    return petRepository.countPets();
   }
 
   createPet(pet: Pet) {

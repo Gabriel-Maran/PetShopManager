@@ -2,6 +2,7 @@ import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useState, useEffect } from "react";
 
 import { useScreen } from "../../hooks/useScreen";
+import { useError } from "../../hooks/useError";
 
 import { Pet } from "../../model/Pet";
 import { Owner } from "../../model/Owner";
@@ -9,109 +10,105 @@ import { Owner } from "../../model/Owner";
 import { ownerController } from "../../controller/OwnerController";
 import { petController } from "../../controller/PetController";
 
-import { APP_BAR_HEIGHT, Screen } from "../../config/consts";
-
+import { APP_BAR_HEIGHT, ORDER, Screen } from "../../config/consts";
 
 import BarraDePesquisa from "../components/SearchBarra/BarraDePesquisa";
 import DefaultHeader from "../components/Header/DefaultHeader";
 import ItemSelect from "../components/Cadastro/ItemSelect";
-import OwnerList from "../components/Cadastro/OwnerList";
-import PetList from "../components/Cadastro/PetList";
+import PetList from "../components/Cadastro/List/PetList";
+import Pagination from "../components/Cadastro/List/Pagination";
+import OwnerList from "../components/Cadastro/List/OwnerList";
 
-
+//Limite de itens por pagina
+const LIMIT = 20;
 
 export default function Cadastros() {
-  // 1. Exemplo completo (todos os campos preenchidos)
-/*   const pets: Pet[] = [
-    {
-      id: 1,
-      nome: "Luna",
-      especie: "Gato",
-      raca: "Persa",
-      observacoes: "Necessita de escovação diária.",
-      owner_id: 45,
-      criado_em: "2024-03-15T14:20:00Z",
-    },
-    {
-      id: 2,
-      nome: "Thor",
-      especie: "Cachorro",
-      owner_id: 82,
-    },
-    {
-      id: 3,
-      nome: "Pingo",
-      especie: "Pássaro",
-      raca: "Calopsita",
-      observacoes: "Canta o hino nacional.",
-      owner_id: 12,
-      criado_em: new Date().toISOString(),
-    },
-  ]; */
-  const [donos, setDonos] = useState<Owner[]>([]);
-  const [pets, setPets] = useState<Pet[]>([])
+  const { navigate } = useScreen();
+  const { showError } = useError();
+
+  const [isOwnerSelected, setIsOwnerSelected] = useState(true); // Controla qual tela está selecionada
+  const [search, setSearch] = useState(""); // Controla o que o usuário pesquisa (TODO)
+  const [page, setPage] = useState(0); // Controla a pagina atual
+  const [owners, setOwners] = useState<Owner[]>([]); // Controla a Lista de Owners
+  const [pets, setPets] = useState<Pet[]>([]); // Controla a lista de pets
+  const [total, setTotal] = useState(0); // Controla o total de itens de Pet ou Owner
+
+  const handleTabChange = (value: boolean) => {
+    setIsOwnerSelected(value);
+    setPage(0);
+  };
 
   useEffect(() => {
-    carregarDonosEPets();
-  }, []);
+    const count = isOwnerSelected
+      ? ownerController.countOwners()
+      : petController.countPets();
 
-  async function carregarDonosEPets() {
-    try {
-      const dadosDonos = await ownerController.getAllOwners();
-      setDonos(dadosDonos);
-      const dadosPets = await petController.getAllPets();
-      setPets(dadosPets);
+    count
+      .then(setTotal)
+      .catch((e) =>
+        showError(e instanceof Error ? e.message : "Erro inesperado."),
+      );
+  }, [isOwnerSelected]);
 
-      console.log(dadosDonos);
-    } catch (erro) {
-      console.error(erro);
-    }
-  }
+  useEffect(() => {
+    const getPagedData = isOwnerSelected
+      ? //Se for Owner, pega o paged do Owner
+        ownerController
+          .getAllOwnersPaged(page, LIMIT, ORDER.DESC)
+          .then(setOwners)
+      : //Se for Pet, pega o paged do Pet
+        petController.getAllPetsPaged(page, LIMIT, ORDER.DESC).then(setPets);
 
-  const [isOwnerSelected, setIsOwnerSelecte] = useState(true);
-  const [search, setSearch] = useState("");
-  const { screen, navigate } = useScreen();
+    getPagedData.catch((e) =>
+      showError(e instanceof Error ? e.message : "Erro inesperado."),
+    );
+  }, [page, isOwnerSelected]);
 
   return (
     <>
-      <View>
+      <View style={styles.container}>
         <DefaultHeader />
-        <View>
-          <BarraDePesquisa
-            placeHolderStr={`Pesquisar por ${isOwnerSelected ? "Dono(s)" : "Pet(s)"}`}
-            setSearch={setSearch}
+        <BarraDePesquisa
+          placeHolderStr={`Pesquisar por ${isOwnerSelected ? "Dono(s)" : "Pet(s)"}`}
+          setSearch={setSearch}
+        />
+        <View style={styles.escolhaItem}>
+          <ItemSelect
+            title="Donos"
+            isThisSelected={isOwnerSelected}
+            setValorSelect={handleTabChange}
+            valorSelect={true}
           />
-          <View style={styles.escolhaItem}>
-            <ItemSelect
-              title={"Donos"}
-              isThisSelected={isOwnerSelected}
-              setValorSelect={setIsOwnerSelecte}
-              valorSelect={true}
-            />
-            <ItemSelect
-              title={"Pets"}
-              isThisSelected={!isOwnerSelected}
-              setValorSelect={setIsOwnerSelecte}
-              valorSelect={false}
-            />
-          </View>
+          <ItemSelect
+            title="Pets"
+            isThisSelected={!isOwnerSelected}
+            setValorSelect={handleTabChange}
+            valorSelect={false}
+          />
+        </View>
+        <Pagination
+          currentPage={page}
+          totalItems={total}
+          itemsPerPage={LIMIT}
+          onPageChange={setPage}
+        />
+        <View style={{ flex: 1 }}>
           {isOwnerSelected ? (
-            <OwnerList cadastros={donos} />
+            <OwnerList cadastros={owners} />
           ) : (
             <PetList cadastros={pets} />
           )}
         </View>
       </View>
+
       <View style={styles.ctnBtnAdd}>
         <TouchableOpacity
-          onPress={() => {
-            {
-              isOwnerSelected
-                ? navigate(Screen.NewOrEditOwner)
-                : navigate(Screen.NewOrEditPet);
-            }
-          }}
           style={styles.btnAdd}
+          onPress={() =>
+            navigate(
+              isOwnerSelected ? Screen.NewOrEditOwner : Screen.NewOrEditPet,
+            )
+          }
         >
           <Image
             style={styles.imgAdd}
@@ -122,21 +119,16 @@ export default function Cadastros() {
     </>
   );
 }
+
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   escolhaItem: {
     flexDirection: "row",
     justifyContent: "space-evenly",
     width: "100%",
     marginTop: 15,
-  },
-  escolhaBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    width: "40%",
-    borderRadius: 20,
-  },
-  escolhaText: {
-    textAlign: "center",
   },
   ctnBtnAdd: {
     position: "absolute",

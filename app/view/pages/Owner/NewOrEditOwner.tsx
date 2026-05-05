@@ -105,6 +105,7 @@ export default function NewOrEditOwner() {
               setItem={setEmail}
               placeHolder="email@exemplo.email"
               titleName="E-mail"
+              variasLinhas={false}
               hasBorderBottom={true}
             />
             <InputInfo
@@ -112,6 +113,7 @@ export default function NewOrEditOwner() {
               item={endereco}
               setItem={setEndereco}
               placeHolder="Rua X, 456"
+              variasLinhas={true}
               titleName="Endereço"
             />
           </View>

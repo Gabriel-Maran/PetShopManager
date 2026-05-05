@@ -1,14 +1,8 @@
-import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { Pet } from "../../../model/Pet";
-import ButtonEditar from "./Botões/ButtonEditar";
-import { Screen } from "../../../config/consts";
-import ButtonExcluir from "./Botões/ButtonExcluir";
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import ButtonEditar from "../Botões/ButtonEditar";
+import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
+import { Pet } from "../../../../model/Pet";
+import { Screen } from "../../../../config/consts";
 
 export default function PetList({ cadastros }: { cadastros: Pet[] }) {
   return (
@@ -16,12 +10,10 @@ export default function PetList({ cadastros }: { cadastros: Pet[] }) {
       <FlatList
         data={cadastros}
         renderItem={({ item }) => (
-
           <View style={styles.itemCard}>
-
             <Image
               style={styles.img}
-              source={require("../../../assets/pet.png")}
+              source={require("../../../../assets/pet.png")}
             />
 
             <View style={styles.mainContent}>
@@ -35,7 +27,6 @@ export default function PetList({ cadastros }: { cadastros: Pet[] }) {
 
             <ButtonExcluir />
           </View>
-
         )}
         keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
       />
