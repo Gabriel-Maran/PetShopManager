@@ -22,7 +22,6 @@ class OwnerRepository {
   ): Promise<Owner[]> {
     const db = await getDatabase();
     const offset = page * limit;
-
     return db.getAllAsync<Owner>(
       `SELECT * FROM owners ORDER BY criado_em ${order} LIMIT ? OFFSET ?`,
       [limit, offset],
@@ -66,7 +65,13 @@ class OwnerRepository {
 
   async deleteOwner(id: number): Promise<void> {
     const db = await getDatabase();
-    await db.runAsync(`DELETE FROM owners WHERE id = ?`, [id]);
+    // Soft delete: marca como inativo sem remover do banco
+    await db.runAsync(`UPDATE owners SET is_ativo = 0 WHERE id = ?`, [id]);
+  }
+
+  async activeOwner(id: number): Promise<void> {
+    const db = await getDatabase();
+    await db.runAsync(`UPDATE owners SET is_ativo = 1 WHERE id = ?`, [id]);
   }
 }
 

@@ -49,6 +49,7 @@ export async function initDatabase(): Promise<void> {
       telefone  TEXT    NOT NULL,
       email     TEXT,
       endereco  TEXT,
+      is_ativo    INTEGER NOT NULL DEFAULT 1,
       criado_em INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now'))
     );
 
@@ -66,6 +67,7 @@ export async function initDatabase(): Promise<void> {
       current_ultimo_banho_data    INTEGER,
       ultimo_banho_data_automatico INTEGER,
       criado_em                    INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now')),
+      is_ativo    INTEGER NOT NULL DEFAULT 1,
       FOREIGN KEY (dono_id) REFERENCES owners(id) ON DELETE CASCADE
     );
 

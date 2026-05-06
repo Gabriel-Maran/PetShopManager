@@ -5,9 +5,7 @@ import { ownerService } from "../service/OwnerService";
 class OwnerController {
   async getOwnerById(id: number): Promise<Owner> {
     const owner = await ownerService.getOwnerById(id);
-    if (!owner) {
-      throw new Error("Usuário não encontrado");
-    }
+    if (!owner) throw new Error("Dono não encontrado");
     return owner;
   }
 
@@ -36,7 +34,6 @@ class OwnerController {
     if (!nome?.trim() || !telefone?.trim()) {
       throw new Error("Nome e telefone são obrigatórios");
     }
-
     await ownerService.createOwner(nome, telefone, email, endereco);
   }
 
@@ -50,12 +47,18 @@ class OwnerController {
     if (!nome?.trim() || !telefone?.trim()) {
       throw new Error("Nome e telefone são obrigatórios");
     }
-
+    await this.getOwnerById(id); // valida existência, já faz throw se não encontrar
     await ownerService.updateOwner(id, nome, telefone, email, endereco);
   }
 
   async deleteOwner(id: number): Promise<void> {
+    await this.getOwnerById(id); // valida existência
     await ownerService.deleteOwner(id);
+  }
+
+  async activeOwner(id: number): Promise<void> {
+    await this.getOwnerById(id); // valida existência
+    await ownerService.activeOwner(id);
   }
 }
 

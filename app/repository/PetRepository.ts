@@ -20,7 +20,6 @@ class PetRepository {
   ): Promise<Pet[]> {
     const db = await getDatabase();
     const offset = page * limit;
-
     return db.getAllAsync<Pet>(
       `SELECT * FROM pets ORDER BY criado_em ${order} LIMIT ? OFFSET ?`,
       [limit, offset],
@@ -37,19 +36,18 @@ class PetRepository {
 
   async createPet(pet: Pet): Promise<void> {
     const db = await getDatabase();
-
     await db.runAsync(
       `INSERT INTO pets (
-      nome, 
-      especie, 
-      porte, 
-      raca, 
-      observacoes, 
-      dono_id, 
-      servico_padrao, 
-      remarcacao_ativa, 
-      remarcacao_gap_dias
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        nome,
+        especie,
+        porte,
+        raca,
+        observacoes,
+        dono_id,
+        servico_padrao,
+        remarcacao_ativa,
+        remarcacao_gap_dias
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         pet.nome,
         pet.especie,
@@ -67,17 +65,17 @@ class PetRepository {
   async updatePet(id: number, pet: Pet): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(
-      `UPDATE pets SET 
-      nome = ?, 
-      especie = ?, 
-      porte = ?, 
-      raca = ?, 
-      observacoes = ?, 
-      dono_id = ?, 
-      servico_padrao = ?, 
-      remarcacao_ativa = ?, 
-      remarcacao_gap_dias = ? 
-    WHERE id = ?`,
+      `UPDATE pets SET
+        nome = ?,
+        especie = ?,
+        porte = ?,
+        raca = ?,
+        observacoes = ?,
+        dono_id = ?,
+        servico_padrao = ?,
+        remarcacao_ativa = ?,
+        remarcacao_gap_dias = ?
+      WHERE id = ?`,
       [
         pet.nome,
         pet.especie,
@@ -95,7 +93,13 @@ class PetRepository {
 
   async deletePet(id: number): Promise<void> {
     const db = await getDatabase();
-    await db.runAsync(`DELETE FROM pets where id = ?`, [id]);
+    // Soft delete: marca como inativo sem remover do banco
+    await db.runAsync(`UPDATE pets SET is_ativo = 0 WHERE id = ?`, [id]);
+  }
+
+  async activePet(id: number): Promise<void> {
+    const db = await getDatabase();
+    await db.runAsync(`UPDATE pets SET is_ativo = 1 WHERE id = ?`, [id]);
   }
 }
 

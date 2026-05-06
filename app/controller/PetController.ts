@@ -12,21 +12,19 @@ import { ownerController } from "./OwnerController";
 class PetController {
   async getPetById(id: number): Promise<Pet> {
     const pet = await petService.getPetById(id);
-    if (!pet) {
-      throw new Error("Pet não encontrado");
-    }
+    if (!pet) throw new Error("Pet não encontrado");
     return pet;
   }
 
-  async getAllPets() {
+  getAllPets(): Promise<Pet[]> {
     return petService.getAllPets();
   }
 
-  getAllPetsPaged(page: number, limit: number, order: ORDER) {
+  getAllPetsPaged(page: number, limit: number, order: ORDER): Promise<Pet[]> {
     return petService.getAllPetsPaged(page, limit, order);
   }
 
-  countPets() {
+  countPets(): Promise<number> {
     return petService.countPets();
   }
 
@@ -37,31 +35,28 @@ class PetController {
     dono_id: number,
     raca?: string,
     observacoes?: string,
-    servico_padrao: TipoServico = TipoServico.Banho, // Valor padrão caso não venha nada
-    remarcacao_ativa: number = 0, // 0 para desligado
+    servico_padrao: TipoServico = TipoServico.Banho,
+    remarcacao_ativa: number = 0,
     remarcacao_gap_dias?: PacoteRemarcacao,
   ): Promise<void> {
-    if (!nome || !especie || nome.trim() === "" || !dono_id || !porte) {
-      throw new Error("Nome, especie, dono e porte são obrigatórios");
+    if (!nome?.trim() || !especie || !dono_id || !porte) {
+      throw new Error("Nome, espécie, dono e porte são obrigatórios");
     }
-    const owner = await ownerController.getOwnerById(dono_id);
-    if (!owner) {
-      throw new Error("Dono não encontrado com o id " + dono_id);
-    }
+    await ownerController.getOwnerById(dono_id); // valida existência do dono, já faz throw
 
-    let meuPet: Pet = {
-      nome: nome,
-      especie: especie,
-      dono_id: dono_id,
-      porte: porte,
-      servico_padrao: servico_padrao,
-      remarcacao_ativa: remarcacao_ativa,
-      raca: raca,
-      observacoes: observacoes,
-      remarcacao_gap_dias: remarcacao_gap_dias,
+    const pet: Pet = {
+      nome,
+      especie,
+      porte,
+      dono_id,
+      servico_padrao,
+      remarcacao_ativa,
+      raca,
+      observacoes,
+      remarcacao_gap_dias,
     };
 
-    await petService.createPet(meuPet);
+    await petService.createPet(pet);
   }
 
   async updatePet(
@@ -72,35 +67,38 @@ class PetController {
     dono_id: number,
     raca?: string,
     observacoes?: string,
-    servico_padrao: TipoServico = TipoServico.Banho, // Valor padrão caso não venha nada
-    remarcacao_ativa: number = 0, // 0 para desligado
+    servico_padrao: TipoServico = TipoServico.Banho,
+    remarcacao_ativa: number = 0,
     remarcacao_gap_dias?: PacoteRemarcacao,
   ): Promise<void> {
-    if (!nome || !especie || nome.trim() === "" || !dono_id || !porte) {
-      throw new Error("Nome, especie, dono e porte são obrigatórios");
+    if (!nome?.trim() || !especie || !dono_id || !porte) {
+      throw new Error("Nome, espécie, dono e porte são obrigatórios");
     }
-    const owner = await ownerController.getOwnerById(dono_id);
-    if (!owner) {
-      throw new Error("Dono não encontrado com o id " + dono_id);
-    }
+    await this.getPetById(id); // valida existência do pet
 
-    let meuPet: Pet = {
-      nome: nome,
-      especie: especie,
-      dono_id: dono_id,
-      porte: porte,
-      servico_padrao: servico_padrao,
-      remarcacao_ativa: remarcacao_ativa,
-      raca: raca,
-      observacoes: observacoes,
-      remarcacao_gap_dias: remarcacao_gap_dias,
+    const pet: Pet = {
+      nome,
+      especie,
+      porte,
+      dono_id,
+      servico_padrao,
+      remarcacao_ativa,
+      raca,
+      observacoes,
+      remarcacao_gap_dias,
     };
 
-    await petService.updatePet(id, meuPet);
+    await petService.updatePet(id, pet);
   }
 
   async deletePet(id: number): Promise<void> {
+    await this.getPetById(id); // valida existência
     await petService.deletePet(id);
+  }
+
+  async activePet(id: number): Promise<void> {
+    await this.getPetById(id); // valida existência
+    await petService.activePet(id);
   }
 }
 

@@ -30,6 +30,10 @@ class PetService {
   deletePet(id: number) {
     return petRepository.deletePet(id);
   }
+
+  activePet(id: number) {
+    return petRepository.activePet(id);
+  }
 }
 
 export const petService = new PetService();

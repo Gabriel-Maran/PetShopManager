@@ -40,6 +40,10 @@ class OwnerService {
   deleteOwner(id: number) {
     return ownerRepository.deleteOwner(id);
   }
+
+  activeOwner(id: number) {
+    return ownerRepository.activeOwner(id);
+  }
 }
 
 export const ownerService = new OwnerService();
