@@ -11,7 +11,7 @@ class OwnerRepository {
   async getAllOwners(): Promise<Owner[]> {
     const db = await getDatabase();
     return db.getAllAsync<Owner>(
-      `SELECT * FROM owners ORDER BY criado_em DESC`,
+      `SELECT * FROM owners WHERE is_ativo = 1 ORDER BY criado_em DESC`,
     );
   }
 
@@ -23,15 +23,24 @@ class OwnerRepository {
     const db = await getDatabase();
     const offset = page * limit;
     return db.getAllAsync<Owner>(
-      `SELECT * FROM owners ORDER BY criado_em ${order} LIMIT ? OFFSET ?`,
+      `SELECT * FROM owners WHERE is_ativo = 1 ORDER BY criado_em ${order} LIMIT ? OFFSET ?`,
       [limit, offset],
+    );
+  }
+
+  // Busca por nome usando o idx_owners_nome (prefixo) ou substring
+  async searchOwnersByName(query: string): Promise<Owner[]> {
+    const db = await getDatabase();
+    return db.getAllAsync<Owner>(
+      `SELECT * FROM owners WHERE nome LIKE ? AND is_ativo = 1 ORDER BY nome ASC`,
+      [`%${query}%`],
     );
   }
 
   async countOwners(): Promise<number> {
     const db = await getDatabase();
     const result = await db.getFirstAsync<{ total: number }>(
-      `SELECT COUNT(*) as total FROM owners`,
+      `SELECT COUNT(*) as total FROM owners WHERE is_ativo = 1`,
     );
     return result?.total ?? 0;
   }
