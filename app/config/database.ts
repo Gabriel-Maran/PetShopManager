@@ -49,22 +49,7 @@ export async function initDatabase(): Promise<void> {
 
   await db.execAsync(`
     PRAGMA foreign_keys = ON;
-    DROP TRIGGER IF EXISTS trg_ultima_visita;
-    DROP TRIGGER IF EXISTS trg_remarcacao_automatica;
-    DROP TRIGGER IF EXISTS trg_pet_remarcacao_insert;
-    DROP TRIGGER IF EXISTS trg_pet_remarcacao_ativar;
-    DROP TRIGGER IF EXISTS trg_pet_remarcacao_desativar;
 
-    DROP INDEX IF EXISTS idx_pets_dono_id;
-    DROP INDEX IF EXISTS idx_appointments_pet_id;
-    DROP INDEX IF EXISTS idx_appointments_pet_data;
-    DROP INDEX IF EXISTS idx_appointments_data_concluido;
-    DROP INDEX IF EXISTS idx_owners_nome;
-    DROP INDEX IF EXISTS idx_pets_nome;
-
-    DROP TABLE IF EXISTS appointments;
-    DROP TABLE IF EXISTS pets;
-    DROP TABLE IF EXISTS owners;
     -- ── Tabelas ──────────────────────────────────────────────────────────────
 
     CREATE TABLE IF NOT EXISTS owners (
