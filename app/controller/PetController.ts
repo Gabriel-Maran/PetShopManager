@@ -24,6 +24,14 @@ class PetController {
     return petService.getAllPetsPaged(page, limit, order);
   }
 
+  searchPetsByName(query: string): Promise<Pet[]> {
+    return petService.searchPetsByName(query);
+  }
+
+  getPetsByOwnerId(ownerId: number): Promise<Pet[]> {
+    return petService.getPetsByOwnerId(ownerId);
+  }
+
   countPets(): Promise<number> {
     return petService.countPets();
   }
@@ -33,16 +41,17 @@ class PetController {
     especie: EspeciesAtendidas,
     porte: PorteAnimal,
     dono_id: number,
-    raca?: string,
-    observacoes?: string,
+    raca?: string | null,
+    observacoes?: string | null,
     servico_padrao: TipoServico = TipoServico.Banho,
     remarcacao_ativa: number = 0,
-    remarcacao_gap_dias?: PacoteRemarcacao,
+    pacote_remarcacao?: PacoteRemarcacao | null,
+    data_inicio_pacote?: number | null,
   ): Promise<void> {
     if (!nome?.trim() || !especie || !dono_id || !porte) {
       throw new Error("Nome, espécie, dono e porte são obrigatórios");
     }
-    await ownerController.getOwnerById(dono_id); // valida existência do dono, já faz throw
+    await ownerController.getOwnerById(dono_id); // valida existência do dono
 
     const pet: Pet = {
       nome,
@@ -51,9 +60,11 @@ class PetController {
       dono_id,
       servico_padrao,
       remarcacao_ativa,
-      raca,
-      observacoes,
-      remarcacao_gap_dias,
+      raca: raca ?? null,
+      observacoes: observacoes ?? null,
+      pacote_remarcacao: pacote_remarcacao ?? null,
+      data_inicio_pacote: data_inicio_pacote ?? null,
+      is_ativo: 1,
     };
 
     await petService.createPet(pet);
@@ -65,11 +76,12 @@ class PetController {
     especie: EspeciesAtendidas,
     porte: PorteAnimal,
     dono_id: number,
-    raca?: string,
-    observacoes?: string,
+    raca?: string | null,
+    observacoes?: string | null,
     servico_padrao: TipoServico = TipoServico.Banho,
     remarcacao_ativa: number = 0,
-    remarcacao_gap_dias?: PacoteRemarcacao,
+    pacote_remarcacao?: PacoteRemarcacao | null,
+    data_inicio_pacote?: number | null,
   ): Promise<void> {
     if (!nome?.trim() || !especie || !dono_id || !porte) {
       throw new Error("Nome, espécie, dono e porte são obrigatórios");
@@ -83,21 +95,23 @@ class PetController {
       dono_id,
       servico_padrao,
       remarcacao_ativa,
-      raca,
-      observacoes,
-      remarcacao_gap_dias,
+      raca: raca ?? null,
+      observacoes: observacoes ?? null,
+      pacote_remarcacao: pacote_remarcacao ?? null,
+      data_inicio_pacote: data_inicio_pacote ?? null,
+      is_ativo: 1,
     };
 
     await petService.updatePet(id, pet);
   }
 
   async deletePet(id: number): Promise<void> {
-    await this.getPetById(id); // valida existência
+    await this.getPetById(id);
     await petService.deletePet(id);
   }
 
   async activePet(id: number): Promise<void> {
-    await this.getPetById(id); // valida existência
+    await this.getPetById(id);
     await petService.activePet(id);
   }
 }

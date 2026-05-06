@@ -1,4 +1,3 @@
-
 import { Button, Text } from "react-native";
 import { useState } from "react";
 import {
@@ -13,6 +12,7 @@ import { Pet } from "../../../model/Pet";
 import { petController } from "../../../controller/PetController";
 
 import DefaultHeader from "../../components/Header/DefaultHeader";
+import InputSelect from "../../components/InputSelect";
 
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { showError } = useError();
@@ -29,11 +29,12 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
       petToEdit?.porte && petToEdit.porte in PorteAnimal
         ? (petToEdit.porte as PorteAnimal)
         : PorteAnimal.MEDIO,
-    remarcGapDias:
-      petToEdit?.remarcacao_gap_dias &&
-      petToEdit.remarcacao_gap_dias in PacoteRemarcacao
-        ? (petToEdit.remarcacao_gap_dias as PacoteRemarcacao)
+    pacoteRemarcacao:
+      petToEdit?.pacote_remarcacao &&
+      petToEdit.pacote_remarcacao in PacoteRemarcacao
+        ? (petToEdit.pacote_remarcacao as PacoteRemarcacao)
         : undefined,
+    dataInicioPacote: petToEdit?.data_inicio_pacote ?? undefined,
   });
 
   const salvarPet = async () => {
@@ -49,7 +50,8 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
           form.observacoes,
           form.servicoPadrao,
           form.remarcAtiva ? 1 : 0,
-          form.remarcGapDias,
+          form.pacoteRemarcacao,
+          form.dataInicioPacote,
         );
       } else {
         await petController.createPet(
@@ -61,7 +63,8 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
           form.observacoes,
           form.servicoPadrao,
           form.remarcAtiva ? 1 : 0,
-          form.remarcGapDias,
+          form.pacoteRemarcacao,
+          form.dataInicioPacote,
         );
       }
     } catch (erro) {
@@ -74,6 +77,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
       <DefaultHeader screenBack={Screen.Cadastros} />
       <Text>Create Or Edit Pet</Text>
       <Button onPress={salvarPet} title="Salvar" />
+      <InputSelect />
     </>
   );
 }
