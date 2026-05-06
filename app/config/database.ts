@@ -5,7 +5,12 @@ let db: SQLite.SQLiteDatabase | null = null;
 // ─── Período máximo de remarcação automática ──────────────────────────────────
 // Troque o valor conforme necessário:
 //   '+365 days' = 1 ano | '+180 days' = 6 meses | '+30 days' = 1 mês
-const PERIODO_REMARCACAO = "+212 days";
+const PERIODO_REMARCACAO = "+227 days";
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── Gap por pacote ───────────────────────────────────────────────────────────
+// Pacote 2 → a cada 14 dias (máx. 2 banhos/mês)
+// Pacote 4 → a cada  7 dias (máx. 4 banhos/mês)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
@@ -16,7 +21,6 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   return db;
 }
 
-// Todo -> Verificaçãode pacotes(quinzenal e mensal)
 export async function initDatabase(): Promise<void> {
   const db = await getDatabase();
 
@@ -29,7 +33,7 @@ export async function initDatabase(): Promise<void> {
     DROP TRIGGER IF EXISTS trg_pet_remarcacao_ativar;
     DROP TRIGGER IF EXISTS trg_pet_remarcacao_insert;
     DROP TRIGGER IF EXISTS trg_remarcacao_automatica;
-    DROP TRIGGER IF EXISTS trg_ultimo_banho;
+    DROP TRIGGER IF EXISTS trg_ultima_visita;
     DROP INDEX IF EXISTS idx_appointments_data_concluido;
     DROP INDEX IF EXISTS idx_appointments_pet_data;
     DROP INDEX IF EXISTS idx_appointments_pet_id;
@@ -41,6 +45,7 @@ export async function initDatabase(): Promise<void> {
 
   await db.execAsync(`
     PRAGMA foreign_keys = ON;
+
     -- ── Tabelas ──────────────────────────────────────────────────────────────
 
     CREATE TABLE IF NOT EXISTS owners (
@@ -49,25 +54,28 @@ export async function initDatabase(): Promise<void> {
       telefone  TEXT    NOT NULL,
       email     TEXT,
       endereco  TEXT,
-      is_ativo    INTEGER NOT NULL DEFAULT 1,
+      is_ativo  INTEGER NOT NULL DEFAULT 1,
       criado_em INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now'))
     );
 
     CREATE TABLE IF NOT EXISTS pets (
-      id                           INTEGER PRIMARY KEY AUTOINCREMENT,
-      nome                         TEXT    NOT NULL,
-      especie                      TEXT    NOT NULL,
-      porte                        TEXT    NOT NULL,
-      raca                         TEXT,
-      observacoes                  TEXT,
-      dono_id                      INTEGER NOT NULL,
-      servico_padrao               TEXT    NOT NULL DEFAULT 'Banho',
-      remarcacao_ativa             INTEGER NOT NULL DEFAULT 0,
-      remarcacao_gap_dias          INTEGER CHECK (remarcacao_gap_dias <= 60),
-      current_ultimo_banho_data    INTEGER,
-      ultimo_banho_data_automatico INTEGER,
-      criado_em                    INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now')),
-      is_ativo    INTEGER NOT NULL DEFAULT 1,
+      id                         INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome                       TEXT    NOT NULL,
+      especie                    TEXT    NOT NULL,
+      porte                      TEXT    NOT NULL,
+      raca                       TEXT,
+      observacoes                TEXT,
+      dono_id                    INTEGER NOT NULL,
+      servico_padrao             TEXT    NOT NULL DEFAULT 'Banho',
+      remarcacao_ativa           INTEGER NOT NULL DEFAULT 0,
+      -- 2 = quinzenal (14 dias, máx 2/mês) | 4 = semanal (7 dias, máx 4/mês)
+      pacote_remarcacao          INTEGER CHECK (pacote_remarcacao IN (2, 4)),
+      -- Data de início da série de agendamentos automáticos (formato YYYYMMDD)
+      data_inicio_pacote         INTEGER,
+      current_ultima_visita_data INTEGER,
+      ultimo_visita_data_auto    INTEGER,
+      is_ativo                   INTEGER NOT NULL DEFAULT 1,
+      criado_em                  INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now')),
       FOREIGN KEY (dono_id) REFERENCES owners(id) ON DELETE CASCADE
     );
 
@@ -79,118 +87,225 @@ export async function initDatabase(): Promise<void> {
       entregar_pet INTEGER NOT NULL DEFAULT 0,
       concluido    INTEGER NOT NULL DEFAULT 0,
       observacao   TEXT,
+      is_auto_agen INTEGER NOT NULL DEFAULT 0,
       criado_em    INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now')),
       FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
     );
 
     -- ── Indexes ──────────────────────────────────────────────────────────────
 
-    -- Busca de pets por dono (tela de cadastros, join owners → pets)
     CREATE INDEX IF NOT EXISTS idx_pets_dono_id
       ON pets (dono_id);
 
-    -- Busca de agendamentos por pet (perfil do pet, histórico)
     CREATE INDEX IF NOT EXISTS idx_appointments_pet_id
       ON appointments (pet_id);
 
-    -- Busca de agendamentos por pet + data (calendário filtrando por pet)
     CREATE INDEX IF NOT EXISTS idx_appointments_pet_data
       ON appointments (pet_id, data);
 
-    -- Busca de agendamentos por data + status (tela do calendário)
     CREATE INDEX IF NOT EXISTS idx_appointments_data_concluido
       ON appointments (data, concluido);
 
-    -- ── Trigger: atualiza current_ultimo_banho_data ao CONCLUIR agendamento ──
-    -- Só registra quando o banho realmente aconteceu.
+    -- Busca por nome (LIKE '%termo%') em owners e pets
+    CREATE INDEX IF NOT EXISTS idx_owners_nome
+      ON owners (nome);
 
-    CREATE TRIGGER IF NOT EXISTS trg_ultimo_banho
+    CREATE INDEX IF NOT EXISTS idx_pets_nome
+      ON pets (nome);
+
+    -- ── Trigger: atualiza current_ultima_visita_data ao CONCLUIR agendamento ─
+    -- Registra a data real em que o serviço aconteceu.
+
+    CREATE TRIGGER IF NOT EXISTS trg_ultima_visita
     AFTER UPDATE OF concluido ON appointments
     FOR EACH ROW
     WHEN NEW.concluido = 1
-      AND NEW.servico IN ('Banho', 'Banho e Tosa')
     BEGIN
       UPDATE pets
-      SET current_ultimo_banho_data = NEW.data
+      SET current_ultima_visita_data = NEW.data
       WHERE id = NEW.pet_id;
     END;
 
-    -- ── Trigger: cria próximo agendamento ao concluir (remarcação por gap) ───
-    -- Cria 1 novo agendamento = data concluída + remarcacao_gap_dias.
+    -- ── Trigger: cria próximo agendamento ao CONCLUIR (apenas is_auto_agen=1) ─
+    -- Gap calculado pelo pacote: 2 → 14 dias | 4 → 7 dias.
+    -- Só avança se o novo agendamento NÃO ultrapassar o limite mensal do pacote:
+    --   pacote 2 → máx 2 agendamentos auto no mesmo mês/ano
+    --   pacote 4 → máx 4 agendamentos auto no mesmo mês/ano
 
     CREATE TRIGGER IF NOT EXISTS trg_remarcacao_automatica
     AFTER UPDATE OF concluido ON appointments
     FOR EACH ROW
     WHEN NEW.concluido = 1
+      AND NEW.is_auto_agen = 1
     BEGIN
-      INSERT INTO appointments (pet_id, servico, data, entregar_pet, observacao)
+      INSERT INTO appointments (pet_id, servico, data, entregar_pet, observacao, is_auto_agen)
       SELECT
         NEW.pet_id,
         NEW.servico,
+        -- Próxima data = data concluída + gap do pacote
         CAST(strftime('%Y%m%d', date(
           substr(CAST(NEW.data AS TEXT), 1, 4) || '-' ||
           substr(CAST(NEW.data AS TEXT), 5, 2) || '-' ||
           substr(CAST(NEW.data AS TEXT), 7, 2),
-          '+' || p.remarcacao_gap_dias || ' days'
+          '+' || CASE p.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
         )) AS INTEGER),
         NEW.entregar_pet,
-        NEW.observacao
+        NEW.observacao,
+        1
       FROM pets p
       WHERE p.id = NEW.pet_id
         AND p.remarcacao_ativa = 1
-        AND p.remarcacao_gap_dias IS NOT NULL;
+        AND p.pacote_remarcacao IS NOT NULL
+        -- Guarda a próxima data em uma CTE inline para reutilizar nos filtros
+        AND (
+          SELECT COUNT(*)
+          FROM appointments a2
+          WHERE a2.pet_id = NEW.pet_id
+            AND a2.is_auto_agen = 1
+            AND a2.concluido = 0
+            -- mesmo mês/ano da próxima data
+            AND substr(CAST(a2.data AS TEXT), 1, 6) = strftime('%Y%m', date(
+              substr(CAST(NEW.data AS TEXT), 1, 4) || '-' ||
+              substr(CAST(NEW.data AS TEXT), 5, 2) || '-' ||
+              substr(CAST(NEW.data AS TEXT), 7, 2),
+              '+' || CASE p.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+            ))
+        ) < p.pacote_remarcacao;
     END;
 
-    -- ── Trigger: cria agendamentos em série ao INSERIR pet com remarcação ────
-    -- Cria N agendamentos espaçados por remarcacao_gap_dias dentro do período.
+    -- ── Trigger: gera série ao INSERIR pet com remarcação já ativa ───────────
+    -- Série começa em data_inicio_pacote (ou hoje se nulo).
+    -- Cada slot respeita o limite mensal do pacote antes de ser inserido.
 
     CREATE TRIGGER IF NOT EXISTS trg_pet_remarcacao_insert
     AFTER INSERT ON pets
     FOR EACH ROW
-    WHEN NEW.remarcacao_ativa = 1 AND NEW.remarcacao_gap_dias IS NOT NULL
+    WHEN NEW.remarcacao_ativa = 1 AND NEW.pacote_remarcacao IS NOT NULL
     BEGIN
-      INSERT INTO appointments (pet_id, servico, data, entregar_pet)
-      WITH RECURSIVE agenda(data_int) AS (
-        SELECT CAST(strftime('%Y%m%d', date('now', '+' || NEW.remarcacao_gap_dias || ' days')) AS INTEGER)
+      INSERT INTO appointments (pet_id, servico, data, entregar_pet, is_auto_agen)
+      WITH RECURSIVE agenda(data_int, mes_atual, contagem_mes) AS (
+        -- Primeiro slot: data_inicio_pacote ou hoje + gap
+        SELECT
+          CAST(strftime('%Y%m%d', date(
+            COALESCE(
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 1, 4) || '-' ||
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 5, 2) || '-' ||
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 7, 2),
+              'now'
+            ),
+            '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+          )) AS INTEGER),
+          strftime('%Y%m', date(
+            COALESCE(
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 1, 4) || '-' ||
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 5, 2) || '-' ||
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 7, 2),
+              'now'
+            ),
+            '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+          )),
+          1
         UNION ALL
-        SELECT CAST(strftime('%Y%m%d', date(
-          substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
-          substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
-          substr(CAST(data_int AS TEXT), 7, 2),
-          '+' || NEW.remarcacao_gap_dias || ' days'
-        )) AS INTEGER)
+        -- Próximos slots
+        SELECT
+          CAST(strftime('%Y%m%d', date(
+            substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
+            substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
+            substr(CAST(data_int AS TEXT), 7, 2),
+            '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+          )) AS INTEGER),
+          strftime('%Y%m', date(
+            substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
+            substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
+            substr(CAST(data_int AS TEXT), 7, 2),
+            '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+          )),
+          CASE
+            WHEN strftime('%Y%m', date(
+              substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
+              substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
+              substr(CAST(data_int AS TEXT), 7, 2),
+              '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+            )) = mes_atual
+            THEN contagem_mes + 1
+            ELSE 1
+          END
         FROM agenda
         WHERE data_int < CAST(strftime('%Y%m%d', date('now', '${PERIODO_REMARCACAO}')) AS INTEGER)
+          -- Respeita o limite mensal do pacote
+          AND contagem_mes < NEW.pacote_remarcacao
       )
-      SELECT NEW.id, NEW.servico_padrao, data_int, 0 FROM agenda;
+      SELECT NEW.id, NEW.servico_padrao, data_int, 0, 1
+      FROM agenda
+      WHERE contagem_mes <= NEW.pacote_remarcacao;
     END;
 
-    -- ── Trigger: cria agendamentos em série ao ATIVAR remarcação (0 → 1) ────
+    -- ── Trigger: gera série ao ATIVAR remarcação (0 → 1) ─────────────────────
 
     CREATE TRIGGER IF NOT EXISTS trg_pet_remarcacao_ativar
     AFTER UPDATE OF remarcacao_ativa ON pets
     FOR EACH ROW
     WHEN OLD.remarcacao_ativa = 0 AND NEW.remarcacao_ativa = 1
-      AND NEW.remarcacao_gap_dias IS NOT NULL
+      AND NEW.pacote_remarcacao IS NOT NULL
     BEGIN
-      INSERT INTO appointments (pet_id, servico, data, entregar_pet)
-      WITH RECURSIVE agenda(data_int) AS (
-        SELECT CAST(strftime('%Y%m%d', date('now', '+' || NEW.remarcacao_gap_dias || ' days')) AS INTEGER)
+      INSERT INTO appointments (pet_id, servico, data, entregar_pet, is_auto_agen)
+      WITH RECURSIVE agenda(data_int, mes_atual, contagem_mes) AS (
+        SELECT
+          CAST(strftime('%Y%m%d', date(
+            COALESCE(
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 1, 4) || '-' ||
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 5, 2) || '-' ||
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 7, 2),
+              'now'
+            ),
+            '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+          )) AS INTEGER),
+          strftime('%Y%m', date(
+            COALESCE(
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 1, 4) || '-' ||
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 5, 2) || '-' ||
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 7, 2),
+              'now'
+            ),
+            '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+          )),
+          1
         UNION ALL
-        SELECT CAST(strftime('%Y%m%d', date(
-          substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
-          substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
-          substr(CAST(data_int AS TEXT), 7, 2),
-          '+' || NEW.remarcacao_gap_dias || ' days'
-        )) AS INTEGER)
+        SELECT
+          CAST(strftime('%Y%m%d', date(
+            substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
+            substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
+            substr(CAST(data_int AS TEXT), 7, 2),
+            '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+          )) AS INTEGER),
+          strftime('%Y%m', date(
+            substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
+            substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
+            substr(CAST(data_int AS TEXT), 7, 2),
+            '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+          )),
+          CASE
+            WHEN strftime('%Y%m', date(
+              substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
+              substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
+              substr(CAST(data_int AS TEXT), 7, 2),
+              '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+            )) = mes_atual
+            THEN contagem_mes + 1
+            ELSE 1
+          END
         FROM agenda
         WHERE data_int < CAST(strftime('%Y%m%d', date('now', '${PERIODO_REMARCACAO}')) AS INTEGER)
+          AND contagem_mes < NEW.pacote_remarcacao
       )
-      SELECT NEW.id, NEW.servico_padrao, data_int, 0 FROM agenda;
+      SELECT NEW.id, NEW.servico_padrao, data_int, 0, 1
+      FROM agenda
+      WHERE contagem_mes <= NEW.pacote_remarcacao;
     END;
 
-    -- ── Trigger: remove agendamentos futuros ao DESATIVAR remarcação (1 → 0) ─
-    -- Remove apenas agendamentos não concluídos a partir de amanhã.
+    -- ── Trigger: remove agendamentos automáticos futuros ao DESATIVAR ─────────
+    -- Remove apenas agendamentos com is_auto_agen = 1, não concluídos, futuros.
+    -- Agendamentos manuais (is_auto_agen = 0) são preservados.
 
     CREATE TRIGGER IF NOT EXISTS trg_pet_remarcacao_desativar
     AFTER UPDATE OF remarcacao_ativa ON pets
@@ -199,6 +314,7 @@ export async function initDatabase(): Promise<void> {
     BEGIN
       DELETE FROM appointments
       WHERE pet_id = NEW.id
+        AND is_auto_agen = 1
         AND concluido = 0
         AND data > CAST(strftime('%Y%m%d', 'now') AS INTEGER);
     END;

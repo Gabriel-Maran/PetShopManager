@@ -3,8 +3,9 @@ export interface Appointment {
   pet_id: number;
   servico: string;
   data: number;
-  entregar_pet: number;
-  concluido: number;
+  entregar_pet: number; // 0 ou 1
+  concluido: number; // 0 ou 1
   observacao?: string | null;
+  is_auto_agen: number; // 0 ou 1
   criado_em?: number;
 }
