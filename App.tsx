@@ -10,6 +10,7 @@ import Relatorios from "./app/view/pages/Relatorios";
 import NewOrEditOwner from "./app/view/pages/Owner/NewOrEditOwner";
 import { ErrorProvider } from "./app/view/components/Error/ErrorProvider";
 import NewOrEditPet from "./app/view/pages/Pet/NewOrEditPet";
+import NewOrEditAppointment from "./app/view/pages/Appointments/NewOrEditAppointment";
 import { Pet } from "./app/model/Pet";
 import { Owner } from "./app/model/Owner";
 
@@ -35,6 +36,8 @@ function AppContent() {
       return <NewOrEditOwner />;
     case Screen.NewOrEditPet:
       return <NewOrEditPet />;
+    case Screen.NewOrEditAppointment:
+      return <NewOrEditAppointment />
     case Screen.Relatorios:
       return (
         <>

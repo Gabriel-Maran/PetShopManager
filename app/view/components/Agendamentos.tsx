@@ -30,7 +30,10 @@ export default function Agendamentos({
   return (
     <View style={[styles.container, { marginTop: margemSuperior }]}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.iconBtn}>
+        <TouchableOpacity
+          style={styles.iconBtn}
+          onPress={() => navigate(Screen.NewOrEditAppointment)}
+        >
           <Image source={require("../../assets/add.png")} style={styles.icon} />
         </TouchableOpacity>
 

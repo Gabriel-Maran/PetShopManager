@@ -38,6 +38,7 @@ export enum Screen {
   Relatorios = "Relatorios",
   NewOrEditOwner = "NewOrEditOwner",
   NewOrEditPet = "NewOrEditPet",
+  NewOrEditAppointment = "NewOrEditAppointment"
 }
 
 export enum PacoteRemarcacao {
