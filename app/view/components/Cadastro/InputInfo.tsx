@@ -33,7 +33,7 @@ export default function InputInfo({
           : { borderWidth: 0 },
       ]}
     >
-s      <View style={styles.ctnImgInput}>
+      <View style={styles.ctnImgInput}>
         <Image style={styles.imgInput} source={image} />
       </View>
       <View style={{ width: "90%", gap: 5 }}>

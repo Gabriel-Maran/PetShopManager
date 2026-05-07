@@ -45,30 +45,25 @@ class OwnerRepository {
     return result?.total ?? 0;
   }
 
-  async createOwner(
-    nome: string,
-    telefone: string,
-    email?: string,
-    endereco?: string,
-  ): Promise<void> {
+  async createOwner(owner: Owner): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(
       `INSERT INTO owners (nome, telefone, email, endereco) VALUES (?, ?, ?, ?)`,
-      [nome, telefone, email ?? null, endereco ?? null],
+      [owner.nome, owner.telefone, owner.email ?? null, owner.endereco ?? null],
     );
   }
 
-  async updateOwner(
-    id: number,
-    nome: string,
-    telefone: string,
-    email?: string,
-    endereco?: string,
-  ): Promise<void> {
+  async updateOwner(id: number, owner: Owner): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(
       `UPDATE owners SET nome = ?, telefone = ?, email = ?, endereco = ? WHERE id = ?`,
-      [nome, telefone, email ?? null, endereco ?? null, id],
+      [
+        owner.nome,
+        owner.telefone,
+        owner.email ?? null,
+        owner.endereco ?? null,
+        id,
+      ],
     );
   }
 

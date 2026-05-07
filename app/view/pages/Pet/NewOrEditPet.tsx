@@ -1,6 +1,4 @@
 import {
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,7 +14,7 @@ import {
   TipoServico,
 } from "../../../config/consts";
 import { useError } from "../../../hooks/useError";
-import { Pet } from "../../../model/Pet";
+import { Pet, PetBuilder } from "../../../model/Pet";
 import { petController } from "../../../controller/PetController";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import DefaultHeader from "../../components/Header/DefaultHeader";
@@ -46,34 +44,25 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   });
 
   const salvarPet = async () => {
+    const petSalvar = new PetBuilder()
+      .withNome(form.nome)
+      .withEspecie(form.especie)
+      .withPorte(form.porte)
+      .forDono(form.dono_id)
+      .withRaca(form.raca)
+      .withObservacoes(form.observacoes)
+      .withServicoPadrao(form.servicoPadrao)
+      .isRemarcacaoAtiva(form.remarcAtiva ? 1 : 0)
+      .withPacote(form.pacoteRemarcacao)
+      .withInicioPacote(form.dataInicioPacote)
+      .build();
+    3;
+
     try {
       if (petToEdit?.id) {
-        await petController.updatePet(
-          petToEdit.id,
-          form.nome,
-          form.especie,
-          form.porte,
-          form.dono_id,
-          form.raca,
-          form.observacoes,
-          form.servicoPadrao,
-          form.remarcAtiva ? 1 : 0,
-          form.pacoteRemarcacao,
-          form.dataInicioPacote,
-        );
+        await petController.updatePet(petToEdit.id, petSalvar);
       } else {
-        await petController.createPet(
-          form.nome,
-          form.especie,
-          form.porte,
-          form.dono_id,
-          form.raca,
-          form.observacoes,
-          form.servicoPadrao,
-          form.remarcAtiva ? 1 : 0,
-          form.pacoteRemarcacao,
-          form.dataInicioPacote,
-        );
+        await petController.createPet(petSalvar);
       }
     } catch (erro) {
       showError(erro instanceof Error ? erro.message : "Erro inesperado.");
@@ -113,7 +102,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               titleName="Nome Completo"
               variasLinhas={false}
               hasBorderBottom={true}
-            /> 
+            />
             <InputInfo
               image={require("../../../assets/iconPata.png")}
               item={form.especie}
@@ -122,8 +111,8 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               titleName="Espécie"
               variasLinhas={false}
               hasBorderBottom={true}
-            /> 
-          <InputInfo
+            />
+            <InputInfo
               image={require("../../../assets/personGreen.png")}
               item={form.raca}
               setItem={(v) => atualizarValores("raca", v)}
@@ -131,16 +120,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               titleName="Raça"
               variasLinhas={false}
               hasBorderBottom={true}
-            /> 
-
-
-
-
-
-
-
-
-
+            />
           </View>
           <View style={styles.ctnBtnSalvar}>
             <TouchableOpacity style={styles.btnSalvar} onPress={salvarPet}>

@@ -1,11 +1,5 @@
 import { petService } from "../service/PetService";
-import {
-  EspeciesAtendidas,
-  ORDER,
-  PacoteRemarcacao,
-  PorteAnimal,
-  TipoServico,
-} from "../config/consts";
+import { ORDER } from "../config/consts";
 import { Pet } from "../model/Pet";
 import { ownerController } from "./OwnerController";
 
@@ -36,73 +30,31 @@ class PetController {
     return petService.countPets();
   }
 
-  async createPet(
-    nome: string,
-    especie: EspeciesAtendidas,
-    porte: PorteAnimal,
-    dono_id: number,
-    raca?: string | null,
-    observacoes?: string | null,
-    servico_padrao: TipoServico = TipoServico.Banho,
-    remarcacao_ativa: number = 0,
-    pacote_remarcacao?: PacoteRemarcacao | null,
-    data_inicio_pacote?: number | null,
-  ): Promise<void> {
-    if (!nome?.trim() || !especie || !dono_id || !porte) {
+  async createPet(petSalvar: Pet): Promise<void> {
+    if (
+      !petSalvar.nome?.trim() ||
+      !petSalvar.especie ||
+      !petSalvar.dono_id ||
+      !petSalvar.porte
+    ) {
       throw new Error("Nome, espécie, dono e porte são obrigatórios");
     }
-    await ownerController.getOwnerById(dono_id); // valida existência do dono
-
-    const pet: Pet = {
-      nome,
-      especie,
-      porte,
-      dono_id,
-      servico_padrao,
-      remarcacao_ativa,
-      raca: raca ?? null,
-      observacoes: observacoes ?? null,
-      pacote_remarcacao: pacote_remarcacao ?? null,
-      data_inicio_pacote: data_inicio_pacote ?? null,
-      is_ativo: 1,
-    };
-
-    await petService.createPet(pet);
+    await ownerController.getOwnerById(petSalvar.dono_id); // valida existência do dono
+    await petService.createPet(petSalvar);
   }
 
-  async updatePet(
-    id: number,
-    nome: string,
-    especie: EspeciesAtendidas,
-    porte: PorteAnimal,
-    dono_id: number,
-    raca?: string | null,
-    observacoes?: string | null,
-    servico_padrao: TipoServico = TipoServico.Banho,
-    remarcacao_ativa: number = 0,
-    pacote_remarcacao?: PacoteRemarcacao | null,
-    data_inicio_pacote?: number | null,
-  ): Promise<void> {
-    if (!nome?.trim() || !especie || !dono_id || !porte) {
+  async updatePet(id: number, petSalvar: Pet): Promise<void> {
+    if (
+      !petSalvar.nome?.trim() ||
+      !petSalvar.especie ||
+      !petSalvar.dono_id ||
+      !petSalvar.porte
+    ) {
       throw new Error("Nome, espécie, dono e porte são obrigatórios");
     }
-    await this.getPetById(id); // valida existência do pet
-
-    const pet: Pet = {
-      nome,
-      especie,
-      porte,
-      dono_id,
-      servico_padrao,
-      remarcacao_ativa,
-      raca: raca ?? null,
-      observacoes: observacoes ?? null,
-      pacote_remarcacao: pacote_remarcacao ?? null,
-      data_inicio_pacote: data_inicio_pacote ?? null,
-      is_ativo: 1,
-    };
-
-    await petService.updatePet(id, pet);
+    await this.getPetById(id);
+    await ownerController.getOwnerById(petSalvar.dono_id); // valida existência do dono
+    await petService.updatePet(id, petSalvar);
   }
 
   async deletePet(id: number): Promise<void> {

@@ -6,21 +6,27 @@ import {
   StyleSheet,
   Text,
   Image,
+  ImageSourcePropType,
 } from "react-native";
 
 export default function Toggle({
   hasBorderBottom = false,
   image,
+  title,
+  onChange,
+  value,
 }: {
   hasBorderBottom?: boolean;
   image: ImageSourcePropType;
+  title?: string;
+  onChange: (value: number) => void;
+  value: number;
 }) {
-  const [isEnabled, setIsEnabled] = useState(false);
-  const animatedValue = useRef(new Animated.Value(isEnabled ? 1 : 0)).current;
+  const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
 
   const toggleSwitch = () => {
-    const newValue = !isEnabled;
-    setIsEnabled(newValue);
+    const newValue = !value;
+    onChange(newValue ? 1 : 0);
 
     // Animação da "bolinha"
     Animated.timing(animatedValue, {
@@ -39,7 +45,7 @@ export default function Toggle({
   // Interpolação para mudar a cor de fundo
   const backgroundColor = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ["#ccc", "#4cd964"], // Cinza para Verde
+    outputRange: ["#ccc", "#0e996d"], // Cinza para Verde
   });
 
   return (
@@ -55,7 +61,9 @@ export default function Toggle({
         <Image style={styles.imgInput} source={image} />
       </View>
       <View style={styles.container}>
-        <Text style={styles.label}>Entregar?</Text>
+        {title && (
+          <Text style={styles.txtInput}>{title.trim().toUpperCase()}</Text>
+        )}
 
         <TouchableOpacity activeOpacity={0.8} onPress={toggleSwitch}>
           <Animated.View style={[styles.switchContainer, { backgroundColor }]}>
@@ -82,16 +90,14 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: "#1D9E75",
+    borderColor: "#0e996d",
   },
   imgInput: {
     width: 28,
     height: 28,
   },
   container: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
+    gap: 5,
   },
   label: {
     fontSize: 18,
@@ -114,5 +120,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
-  }
+  },
+  txtInput: {
+    color: "#A7A7A7",
+    fontWeight: "bold",
+    fontSize: 12,
+  },
 });

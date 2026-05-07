@@ -13,7 +13,7 @@ import { useError } from "../../../hooks/useError";
 import { useScreen } from "../../../hooks/useScreen";
 
 import { Screen } from "../../../config/consts";
-import { Owner } from "../../../model/Owner";
+import { Owner, OwnerBuilder } from "../../../model/Owner";
 import { ownerController } from "../../../controller/OwnerController";
 
 import TitleBar from "../../components/Cadastro/TitleBar";
@@ -21,10 +21,14 @@ import DefaultHeader from "../../components/Header/DefaultHeader";
 import InputInfo from "../../components/Cadastro/InputInfo";
 
 const maskPhone = (v: string) => {
-  const d = v.replace(/\D/g, "").slice(0, 11);
+  const d = v.replace(/\D/g, "");
+  if (!d) return "";
   if (d.length <= 2) return `(${d}`;
-  if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
-  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) {
+    return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6, 10)}`;
+  }
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7, 11)}`;
 };
 
 export default function NewOrEditOwner() {
@@ -39,17 +43,17 @@ export default function NewOrEditOwner() {
   const [endereco, setEndereco] = useState(params?.endereco ?? "");
 
   const salvarDono = async () => {
+    const ownerSalvar: Owner = new OwnerBuilder()
+      .withNome(nome)
+      .withTelefone(telefone)
+      .withEmail(email)
+      .withEndereco(endereco)
+      .build();
     try {
       if (isEditing) {
-        await ownerController.updateOwner(
-          params!.id!,
-          nome,
-          telefone,
-          email,
-          endereco,
-        );
+        await ownerController.updateOwner(params!.id!, ownerSalvar);
       } else {
-        await ownerController.createOwner(nome, telefone, email, endereco);
+        await ownerController.createOwner(ownerSalvar);
       }
       navigate(Screen.Cadastros);
     } catch (erro) {

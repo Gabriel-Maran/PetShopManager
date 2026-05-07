@@ -1,5 +1,5 @@
 import { ORDER } from "../config/consts";
-import { Owner } from "../model/Owner";
+import { Owner, OwnerBuilder } from "../model/Owner";
 import { ownerService } from "../service/OwnerService";
 
 class OwnerController {
@@ -25,30 +25,27 @@ class OwnerController {
     return ownerService.countOwners();
   }
 
-  async createOwner(
-    nome: string,
-    telefone: string,
-    email?: string,
-    endereco?: string,
-  ): Promise<void> {
-    if (!nome?.trim() || !telefone?.trim()) {
+  async createOwner(owner: Owner): Promise<void> {
+    if (
+      !owner.nome.trim() ||
+      !owner.telefone.trim() ||
+      !this.isValidPhone(owner.telefone.trim())
+    ) {
       throw new Error("Nome e telefone são obrigatórios");
     }
-    await ownerService.createOwner(nome, telefone, email, endereco);
+    await ownerService.createOwner(owner);
   }
 
-  async updateOwner(
-    id: number,
-    nome: string,
-    telefone: string,
-    email?: string,
-    endereco?: string,
-  ): Promise<void> {
-    if (!nome?.trim() || !telefone?.trim()) {
+  async updateOwner(id: number, owner: Owner): Promise<void> {
+    if (
+      !owner.nome.trim() ||
+      !owner.telefone.trim() ||
+      !this.isValidPhone(owner.telefone.trim())
+    ) {
       throw new Error("Nome e telefone são obrigatórios");
     }
     await this.getOwnerById(id); // valida existência, já faz throw se não encontrar
-    await ownerService.updateOwner(id, nome, telefone, email, endereco);
+    await ownerService.updateOwner(id, owner);
   }
 
   async deleteOwner(id: number): Promise<void> {
@@ -59,6 +56,14 @@ class OwnerController {
   async activeOwner(id: number): Promise<void> {
     await this.getOwnerById(id); // valida existência
     await ownerService.activeOwner(id);
+  }
+
+  isValidPhone(v: string): boolean {
+    const d = v.replace(/\D/g, "");
+    if (d.length < 10 || d.length > 11) return false;
+    if (/^(\d)\1+$/.test(d)) return false;
+    if (d.length === 11 && d[2] !== "9") return false;
+    return true;
   }
 }
 

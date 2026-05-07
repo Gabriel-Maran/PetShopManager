@@ -1,4 +1,5 @@
 import { ORDER } from "../config/consts";
+import { Owner } from "../model/Owner";
 import { ownerRepository } from "../repository/OwnerRepository";
 
 class OwnerService {
@@ -18,23 +19,12 @@ class OwnerService {
     return ownerRepository.countOwners();
   }
 
-  createOwner(
-    nome: string,
-    telefone: string,
-    email?: string,
-    endereco?: string,
-  ) {
-    return ownerRepository.createOwner(nome, telefone, email, endereco);
+  createOwner(owner: Owner) {
+    return ownerRepository.createOwner(owner);
   }
 
-  updateOwner(
-    id: number,
-    nome: string,
-    telefone: string,
-    email?: string,
-    endereco?: string,
-  ) {
-    return ownerRepository.updateOwner(id, nome, telefone, email, endereco);
+  updateOwner(id: number, owner: Owner) {
+    return ownerRepository.updateOwner(id, owner);
   }
 
   deleteOwner(id: number) {

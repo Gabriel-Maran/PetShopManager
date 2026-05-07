@@ -24,60 +24,28 @@ class AppointmentsController {
     return appointmentsService.getPendingAppointmentsByPetId(petId);
   }
 
-  async createAppointment(
-    pet_id: number,
-    servico: string,
-    data: number,
-    entregar_pet: number,
-    observacao?: string | null,
-    horaParam?: string | null,
-  ): Promise<void> {
-    if (!pet_id || !servico || !data || servico.trim() === "") {
+  async createAppointment(appointment: Appointment): Promise<void> {
+    if (
+      !appointment.pet_id ||
+      !appointment.servico ||
+      !appointment.data ||
+      appointment.servico.trim() === ""
+    ) {
       throw new Error("Dados faltando.");
     }
-
-    const hora = horaParam ?? "00:00";
-
-    const appointment: Appointment = {
-      pet_id,
-      servico,
-      data,
-      hora,
-      entregar_pet,
-      observacao: observacao ?? null,
-      concluido: 0,
-      is_auto_agen: 0,
-    };
-
     await appointmentsService.createAppointment(appointment);
   }
 
-  async updateAppointment(
-    id: number,
-    pet_id: number,
-    servico: string,
-    concluido: number,
-    data: number,
-    entregar_pet: number,
-    observacao?: string | null,
-    horaParam?: string | null,
-  ): Promise<void> {
-    if (!id || !pet_id || !servico || !data || servico.trim() === "") {
+  async updateAppointment(id: number, appointment: Appointment): Promise<void> {
+    if (
+      !id ||
+      !appointment.pet_id ||
+      !appointment.servico ||
+      !appointment.data ||
+      appointment.servico.trim() === ""
+    ) {
       throw new Error("Dados faltando.");
     }
-
-    const hora = horaParam ?? "00:00";
-
-    const appointment: Appointment = {
-      pet_id,
-      servico,
-      data,
-      hora,
-      entregar_pet,
-      observacao: observacao ?? null,
-      concluido,
-      is_auto_agen: 0,
-    };
 
     await appointmentsService.updateAppointment(id, appointment);
   }

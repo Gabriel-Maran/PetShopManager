@@ -6,31 +6,67 @@ import {
   Text,
 } from "react-native";
 import { useState } from "react";
-import { Screen } from "../../../config/consts";
+import { Screen, TipoServico } from "../../../config/consts";
 import { useScreen } from "../../../hooks/useScreen";
 
-import { Appointment } from "../../../model/Appointment";
+import { Appointment, AppointmentBuilder } from "../../../model/Appointment";
 
 import DefaultHeader from "../../components/Header/DefaultHeader";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import InputInfo from "../../components/Cadastro/InputInfo";
 import Toggle from "../../components/Cadastro/Botões/Toggle";
+import { appointmentController } from "../../../controller/AppointmentsController";
+import { useError } from "../../../hooks/useError";
 
 export default function NewOrEditAppointment() {
   const { params, navigate } = useScreen<Appointment>();
 
   const isEditing = Boolean(params?.id);
+  const { showError } = useError();
 
   const [nomePet, setNomePet] = useState("");
-  const [idPet, setIdPet] = useState("")
+  const [idPet, setIdPet] = useState<number>(0);
 
-  const [servico, setServico] = useState(params?.servico ?? "");
-  const [data, setData] = useState(params?.data ?? "");
-  const [hora, setHora] = useState(params?.hora ?? "");
-  const [entregarPet, setEntregarPet] = useState(params?.entregar_pet ?? "");
-  const [concluido, setConcluido] = useState(params?.concluido ?? "");
+  const [servico, setServico] = useState(params?.servico ?? TipoServico.Banho);
+  const [data, setData] = useState(params?.data ?? 0);
+  const [hora, setHora] = useState(params?.hora ?? undefined);
+  const [entregarPet, setEntregarPet] = useState<number>(
+    params?.entregar_pet ?? 0,
+  );
+  const [concluido, setConcluido] = useState(params?.concluido ?? 0);
   const [observacao, setObservacao] = useState(params?.observacao ?? "");
+
+  //Quando não auto gerado, o db já criar isso como false(ou seja, 0), so fica true isso aqui quando é criado na trigger
+  //Minha ideia é não alterar isso, por conta de que, foi criado automatico e se o dono do petshop mudar
+  //deve continuar como auto gerado
+  //Mas é interessante fazer algo visual para mostrar se foi auto gerado ou não
   const [autoGen, setAutoGen] = useState(params?.is_auto_agen ?? "");
+
+  const salvarDono = async () => {
+    const appointmentSalvar = new AppointmentBuilder()
+      .withPetId(idPet)
+      .withServico(servico)
+      .withHora(hora ?? "00:00")
+      .withData(data)
+      .withEntregarPet(entregarPet != 1 ? 0 : 1)
+      .withObservacao(observacao)
+      .isConcluido(concluido != 1 ? 0 : 1)
+      .build();
+
+    try {
+      if (isEditing) {
+        await appointmentController.updateAppointment(
+          params!.id!,
+          appointmentSalvar,
+        );
+      } else {
+        await appointmentController.createAppointment(appointmentSalvar);
+      }
+      navigate(Screen.Cadastros);
+    } catch (erro) {
+      showError(erro instanceof Error ? erro.message : "Erro inesperado.");
+    }
+  };
 
   return (
     <KeyboardAvoidingView style={styles.flex}>
@@ -67,7 +103,13 @@ export default function NewOrEditAppointment() {
               variasLinhas={false}
               hasBorderBottom={true}
             />
-            <Toggle hasBorderBottom={true} image={require("../../../assets/entrega.png")}/>
+            <Toggle
+              onChange={setEntregarPet}
+              value={entregarPet}
+              hasBorderBottom={true}
+              image={require("../../../assets/entrega.png")}
+              title="Entregar Pet?"
+            />
             <InputInfo
               image={require("../../../assets/pet.png")}
               item={observacao}
