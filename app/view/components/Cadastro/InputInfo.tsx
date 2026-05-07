@@ -33,7 +33,7 @@ export default function InputInfo({
           : { borderWidth: 0 },
       ]}
     >
-      <View style={styles.ctnImgInut}>
+s      <View style={styles.ctnImgInput}>
         <Image style={styles.imgInput} source={image} />
       </View>
       <View style={{ width: "90%", gap: 5 }}>
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 5,
   },
-  ctnImgInut: {
+  ctnImgInput: {
     backgroundColor: "#E1F5EE",
     padding: 8,
     borderRadius: 15,
