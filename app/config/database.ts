@@ -88,6 +88,7 @@ export async function initDatabase(): Promise<void> {
       pet_id       INTEGER NOT NULL,
       servico      TEXT    NOT NULL,
       data         INTEGER NOT NULL,
+      hora         TEXT NOT NULL DEFAULT '00:00',
       entregar_pet INTEGER NOT NULL DEFAULT 0,
       concluido    INTEGER NOT NULL DEFAULT 0,
       observacao   TEXT,
