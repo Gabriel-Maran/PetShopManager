@@ -30,19 +30,23 @@ class AppointmentsController {
     data: number,
     entregar_pet: number,
     observacao?: string | null,
+    horaParam?: string | null,
   ): Promise<void> {
     if (!pet_id || !servico || !data || servico.trim() === "") {
       throw new Error("Dados faltando.");
     }
 
+    const hora = horaParam ?? "00:00";
+
     const appointment: Appointment = {
       pet_id,
       servico,
       data,
+      hora,
       entregar_pet,
       observacao: observacao ?? null,
       concluido: 0,
-      is_auto_agen: 0, // criado via controller é sempre manual
+      is_auto_agen: 0,
     };
 
     await appointmentsService.createAppointment(appointment);
@@ -56,15 +60,19 @@ class AppointmentsController {
     data: number,
     entregar_pet: number,
     observacao?: string | null,
+    horaParam?: string | null,
   ): Promise<void> {
     if (!id || !pet_id || !servico || !data || servico.trim() === "") {
       throw new Error("Dados faltando.");
     }
 
+    const hora = horaParam ?? "00:00";
+
     const appointment: Appointment = {
       pet_id,
       servico,
       data,
+      hora,
       entregar_pet,
       observacao: observacao ?? null,
       concluido,

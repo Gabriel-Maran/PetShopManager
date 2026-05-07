@@ -58,13 +58,14 @@ class AppointmentRepository {
     const db = await getDatabase();
     await db.runAsync(
       `INSERT INTO appointments
-        (pet_id, servico, data, entregar_pet, concluido, observacao, is_auto_agen)
+        (pet_id, servico, data, hora, entregar_pet, concluido, observacao, is_auto_agen)
        VALUES
-        (?, ?, ?, ?, ?, ?, ?)`,
+        (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         appointment.pet_id,
         appointment.servico,
         appointment.data,
+        appointment.hora,
         appointment.entregar_pet,
         0,
         appointment.observacao ?? null,
@@ -80,6 +81,7 @@ class AppointmentRepository {
         pet_id = ?,
         servico = ?,
         data = ?,
+        hora = ?,
         entregar_pet = ?,
         concluido = ?,
         observacao = ?
@@ -88,6 +90,7 @@ class AppointmentRepository {
         appointment.pet_id,
         appointment.servico,
         appointment.data,
+        appointment.hora,
         appointment.entregar_pet,
         appointment.concluido,
         appointment.observacao ?? null,

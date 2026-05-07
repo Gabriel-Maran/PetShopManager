@@ -6,7 +6,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Screen, APP_BAR_HEIGHT } from "../../config/consts";
+import {
+  Screen,
+  APP_BAR_HEIGHT,
+  EspeciesAtendidasLabel,
+  EspeciesAtendidas,
+  TipoServico,
+} from "../../config/consts";
 import { useScreen } from "../../hooks/useScreen";
 
 export default function Agendamentos({
@@ -21,9 +27,30 @@ export default function Agendamentos({
   dateSelected: string;
 }) {
   const appointments = [
-    { id: 1, petName: "Rex", ownerName: "João", time: "10:00" },
-    { id: 2, petName: "Mia", ownerName: "Maria", time: "11:30" },
-    { id: 3, petName: "Toby", ownerName: "Carlos", time: "14:00" },
+    {
+      id: 1,
+      petName: "Rex",
+      ownerName: "João",
+      time: "10:00",
+      foto: EspeciesAtendidas.CAO,
+      servico: TipoServico.Banho,
+    },
+    {
+      id: 2,
+      petName: "Mia",
+      ownerName: "Maria",
+      time: "11:30",
+      foto: EspeciesAtendidas.GATO,
+      servico: TipoServico.BanhoETosa,
+    },
+    {
+      id: 3,
+      petName: "Toby",
+      ownerName: "Carlos",
+      time: "14:00",
+      foto: EspeciesAtendidas.OUTRO,
+      servico: TipoServico.BanhoETosa,
+    },
   ];
   const { navigate } = useScreen();
 
@@ -40,7 +67,7 @@ export default function Agendamentos({
 
         <TouchableOpacity
           style={styles.iconBtn}
-          onPress={() => setFullScreen(!isFullScreen)}
+          onPress={() => navigate(Screen.NewOrEditAppointment)}
         >
           <Image
             source={
@@ -69,7 +96,13 @@ export default function Agendamentos({
           >
             <View style={styles.avatar}>
               <Image
-                source={require("../../assets/petHome.png")}
+                source={
+                  item.foto == EspeciesAtendidas.CAO
+                    ? require("../../assets/caoGreen.png")
+                    : item.foto == EspeciesAtendidas.GATO
+                      ? require("../../assets/gatoGreen.png")
+                      : require("../../assets/interrogacaoGreen.png")
+                }
                 style={styles.imgPetImg}
               />
             </View>
@@ -77,6 +110,7 @@ export default function Agendamentos({
               <Text style={styles.petName}>{item.petName}</Text>
               <Text style={styles.ownerName}>{item.ownerName}</Text>
             </View>
+            <Text style={styles.time}>{item.servico} - </Text>
             <Text style={styles.time}>{item.time}</Text>
           </TouchableOpacity>
         )}
