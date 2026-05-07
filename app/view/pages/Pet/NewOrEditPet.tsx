@@ -1,4 +1,12 @@
-import { Button, Text } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useState } from "react";
 import {
   EspeciesAtendidas,
@@ -10,9 +18,9 @@ import {
 import { useError } from "../../../hooks/useError";
 import { Pet } from "../../../model/Pet";
 import { petController } from "../../../controller/PetController";
-
+import TitleBar from "../../components/Cadastro/TitleBar";
 import DefaultHeader from "../../components/Header/DefaultHeader";
-import InputSelect from "../../components/InputSelect";
+import InputInfo from "../../components/Cadastro/InputInfo";
 
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { showError } = useError();
@@ -72,12 +80,118 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
     }
   };
 
+  const atualizarValores = (campo: keyof typeof form, valor: any) => {
+    setForm((prev) => ({
+      ...prev,
+      [campo]: valor,
+    }));
+  };
+
   return (
     <>
-      <DefaultHeader screenBack={Screen.Cadastros} />
-      <Text>Create Or Edit Pet</Text>
-      <Button onPress={salvarPet} title="Salvar" />
-      <InputSelect />
+      <DefaultHeader />
+      <TitleBar
+        returnTo={Screen.Cadastros}
+        title={petToEdit ? "Editar Pet" : "Novo Pet"}
+        subtitle="Preencha os dados do pet"
+      />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.ctnCadastro}>
+          <View style={styles.viewDataReq}>
+            <Text style={styles.titleDataInfo}>DADOS OBRIGATÓRIOS</Text>
+          </View>
+
+          <View style={styles.inputs}>
+            <InputInfo
+              image={require("../../../assets/personGreen.png")}
+              item={form.nome}
+              setItem={(v) => atualizarValores("nome", v)}
+              placeHolder="Digite o nome..."
+              titleName="Nome Completo"
+              variasLinhas={false}
+              hasBorderBottom={true}
+            /> 
+            <InputInfo
+              image={require("../../../assets/iconPata.png")}
+              item={form.especie}
+              setItem={(v) => atualizarValores("especie", v)}
+              placeHolder="Digite a espécie..."
+              titleName="Espécie"
+              variasLinhas={false}
+              hasBorderBottom={true}
+            /> 
+          <InputInfo
+              image={require("../../../assets/personGreen.png")}
+              item={form.raca}
+              setItem={(v) => atualizarValores("raca", v)}
+              placeHolder="Digite a raça..."
+              titleName="Raça"
+              variasLinhas={false}
+              hasBorderBottom={true}
+            /> 
+
+
+
+
+
+
+
+
+
+          </View>
+          <View style={styles.ctnBtnSalvar}>
+            <TouchableOpacity style={styles.btnSalvar} onPress={salvarPet}>
+              <Text style={styles.txtSalvar}>
+                {petToEdit ? "Salvar alterações" : "Salvar"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
     </>
   );
 }
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  scrollContent: {
+    backgroundColor: "#F5F5F5",
+    flexGrow: 1,
+  },
+  ctnCadastro: {
+    flex: 1,
+    padding: 20,
+    alignItems: "center",
+  },
+  viewDataReq: { width: "100%" },
+  viewDataNotReq: {
+    width: "100%",
+    marginTop: 20,
+  },
+  inputs: {
+    width: "100%",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#EDEDED",
+    backgroundColor: "#fff",
+    overflow: "hidden",
+  },
+  titleDataInfo: {
+    color: "#1D9D75",
+    fontWeight: "500",
+    marginBottom: 8,
+  },
+  ctnBtnSalvar: { marginTop: 25 },
+  btnSalvar: {
+    paddingVertical: 20,
+    paddingHorizontal: 75,
+    backgroundColor: "#1D9D75",
+    borderRadius: 15,
+  },
+  txtSalvar: {
+    color: "#fff",
+    textAlign: "center",
+  },
+});
