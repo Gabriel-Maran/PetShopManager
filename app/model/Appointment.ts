@@ -18,8 +18,8 @@ export class AppointmentBuilder {
     this.props = {
       pet_id: 0,
       servico: "",
-      hora: "",
-      data: Date.now(),
+      hora: "00:00",
+      data: 0,
       entregar_pet: 0,
       concluido: 0,
       is_auto_agen: 0,
