@@ -62,7 +62,7 @@ export default function NewOrEditAppointment() {
       } else {
         await appointmentController.createAppointment(appointmentSalvar);
       }
-      navigate(Screen.Cadastros);
+      navigate(Screen.Calendario);
     } catch (erro) {
       showError(erro instanceof Error ? erro.message : "Erro inesperado.");
     }
@@ -72,7 +72,7 @@ export default function NewOrEditAppointment() {
     <KeyboardAvoidingView style={styles.flex}>
       <DefaultHeader />
       <TitleBar
-        returnTo={Screen.Cadastros}
+        returnTo={Screen.Calendario}
         title={isEditing ? "Editar Agendamento" : "Novo Agendamento"}
         subtitle="Preencha as informações"
       />

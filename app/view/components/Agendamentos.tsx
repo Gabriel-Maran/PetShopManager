@@ -49,7 +49,7 @@ export default function Agendamentos({
       ownerName: "Carlos",
       time: "14:00",
       foto: EspeciesAtendidas.OUTRO,
-      servico: TipoServico.BanhoETosa,
+      servico: TipoServico.Tosa,
     },
   ];
   const { navigate } = useScreen();
@@ -64,9 +64,12 @@ export default function Agendamentos({
           <Image source={require("../../assets/add.png")} style={styles.icon} />
         </TouchableOpacity>
 
-        <Text style={styles.title}>
-          {dateSelected.split("-").reverse().join("/")}
-        </Text>
+        <View style={styles.titleBlock}>
+          <Text style={styles.titleLabel}>Agendamentos</Text>
+          <Text style={styles.titleDate}>
+            {dateSelected.split("-").reverse().join("/")}
+          </Text>
+        </View>
 
         <TouchableOpacity
           style={styles.iconBtn}
@@ -87,6 +90,7 @@ export default function Agendamentos({
         data={appointments}
         style={styles.list}
         keyExtractor={(item) => item.id.toString()}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyTxt}>Nenhum agendamento neste dia.</Text>
@@ -95,32 +99,42 @@ export default function Agendamentos({
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.row}
+            activeOpacity={0.6}
             onPress={() => navigate(Screen.Cadastros)}
           >
             <View style={styles.avatar}>
               <Image
                 source={
-                  item.foto == EspeciesAtendidas.CAO
+                  item.foto === EspeciesAtendidas.CAO
                     ? require("../../assets/caoGreen.png")
-                    : item.foto == EspeciesAtendidas.GATO
+                    : item.foto === EspeciesAtendidas.GATO
                       ? require("../../assets/gatoGreen.png")
                       : require("../../assets/interrogacaoGreen.png")
                 }
                 style={styles.imgPetImg}
               />
             </View>
+
             <View style={styles.info}>
               <Text style={styles.petName}>{item.petName}</Text>
               <Text style={styles.ownerName}>{item.ownerName}</Text>
             </View>
-            <Text style={styles.time}>{item.servico} - </Text>
-            <Text style={styles.time}>{item.time}</Text>
+
+            <View style={styles.right}>
+              <View style={styles.servicoBadge}>
+                <Text style={styles.servicoTxt}>{item.servico}</Text>
+              </View>
+              <Text style={styles.time}>{item.time}</Text>
+            </View>
           </TouchableOpacity>
         )}
       />
     </View>
   );
 }
+
+const TEAL = "#0E9599";
+const TEAL_LIGHT = "#E6F7F7";
 
 const styles = StyleSheet.create({
   container: {
@@ -130,7 +144,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
 
-  // Header
+  // ── Header ──────────────────────────────────────────────
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -140,80 +154,112 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#EFEFEF",
   },
-  title: {
+  titleBlock: {
     flex: 1,
-    textAlign: "center",
-    fontSize: 16,
+    alignItems: "center",
+  },
+  titleLabel: {
+    fontSize: 10,
     fontWeight: "600",
+    color: TEAL,
+    letterSpacing: 1.1,
+    textTransform: "uppercase",
+  },
+  titleDate: {
+    fontSize: 15,
+    fontWeight: "700",
     color: "#111",
+    marginTop: 1,
   },
   iconBtn: {
     width: 38,
     height: 38,
     borderRadius: 10,
-    backgroundColor: "#F0FAF6",
+    backgroundColor: TEAL_LIGHT,
     justifyContent: "center",
     alignItems: "center",
   },
   icon: {
-    width: 28,
-    height: 28,
-    tintColor: "#0E9599",
+    width: 22,
+    height: 22,
+    tintColor: TEAL,
   },
 
-  // Lista
+  // ── Lista ────────────────────────────────────────────────
   list: {
     flex: 1,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: "#F0F0F0",
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 11,
     gap: 10,
-    borderBottomWidth: 1,
-    borderColor: "#F0F0F0",
+    backgroundColor: "#fff",
   },
+
+  // Avatar
   avatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "#E1F5EE",
+    width: 44,
+    height: 44,
+    borderRadius: 20,
+    backgroundColor: TEAL_LIGHT,
     justifyContent: "center",
     alignItems: "center",
   },
   imgPetImg: {
-    width: 28,
-    height: 28,
+    width: 30,
+    height: 30,
   },
+
+  // Infos
   info: {
     flex: 1,
   },
   petName: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 16,
+    fontWeight: "700",
     color: "#111",
   },
   ownerName: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#888",
-    marginTop: 1,
-  },
-  time: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#444",
-    minWidth: 42,
-    textAlign: "right",
+    marginTop: 2,
   },
 
-  // Empty
+  // Lado direito: badge + horário
+  right: {
+    alignItems: "flex-end",
+    gap: 4,
+  },
+  servicoBadge: {
+    backgroundColor: TEAL_LIGHT,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  servicoTxt: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: TEAL,
+  },
+  time: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#444",
+  },
+
+  // ── Empty ────────────────────────────────────────────────
   empty: {
     paddingVertical: 40,
     alignItems: "center",
   },
   emptyTxt: {
     color: "#aaa",
-    fontSize: 14,
+    fontSize: 18,
   },
 });

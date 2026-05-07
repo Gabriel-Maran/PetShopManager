@@ -56,7 +56,6 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
       .withPacote(form.pacoteRemarcacao)
       .withInicioPacote(form.dataInicioPacote)
       .build();
-    3;
 
     try {
       if (petToEdit?.id) {
