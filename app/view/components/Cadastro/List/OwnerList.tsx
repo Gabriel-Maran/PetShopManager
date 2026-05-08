@@ -2,7 +2,7 @@ import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import { Owner } from "../../../../model/Owner";
 import { useScreen } from "../../../../hooks/useScreen";
 import ButtonEditar from "../Botões/ButtonEditar";
-import { Screen } from "../../../../config/consts";
+import { COLORS, Screen } from "../../../../config/consts";
 import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
 
 export default function OwnerList({
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     width: "95%",
     gap: 10,
     borderBottomWidth: 1,
-    borderColor: "#b5b5b5",
+    borderColor: COLORS.BORDER_MID,
   },
   mainContent: {
     flex: 1,
@@ -65,28 +65,21 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     alignSelf: "center",
+    tintColor: COLORS.TEXT_PRIMARY,
   },
   textMain: {
     fontSize: 16,
     fontWeight: "bold",
+    color: COLORS.TEXT_PRIMARY,
   },
   textSub: {
     fontSize: 12,
-    color: "#646462",
+    color: COLORS.TEXT_MUTED,
   },
 
   ctnDelete: {
     alignSelf: "center",
     justifyContent: "flex-end",
-  },
-
-  btnDelete: {
-    marginLeft: 10,
-    backgroundColor: "#FCEBEB",
-    padding: 8,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: "#F09595",
   },
 
   iconDelete: {

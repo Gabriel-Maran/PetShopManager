@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import ButtonBack from "./Botões/ButtonBack";
-import { Screen } from "../../../config/consts";
+import { COLORS, Screen } from "../../../config/consts";
 
 export default function TitleBar({
   title,
@@ -23,9 +23,10 @@ export default function TitleBar({
 }
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: COLORS.THIRD_BACKGROUND,
     flexDirection: "row",
     borderWidth: 1,
-    borderColor: "#EFEFEF",
+    borderColor: COLORS.BORDER_MID,
     padding: 20,
     alignItems: "center",
     gap: 15,
@@ -33,9 +34,10 @@ const styles = StyleSheet.create({
   txtTitle: {
     fontSize: 20,
     fontWeight: "bold",
+    color: COLORS.TEXT_PRIMARY,
   },
   txtSubTitle: {
     fontSize: 14,
-    color: "#777777",
+    color: COLORS.TEXT_MUTED,
   },
 });

@@ -1,5 +1,6 @@
 // components/Pagination.tsx
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { COLORS } from "../../../../config/consts";
 
 interface Props {
   currentPage: number;
@@ -82,17 +83,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#E0E0E0",
-    backgroundColor: "#fff",
+    borderColor: COLORS.BORDER_STRONG,
+    backgroundColor: COLORS.BACKGROUND,
   },
   btnActive: {
-    backgroundColor: "#1D9E75",
-    borderColor: "#1D9E75",
+    backgroundColor: COLORS.PRIMARY_VARIANT,
+    borderColor: COLORS.PRIMARY_VARIANT,
   },
   btnDisabled: {
     opacity: 0.3,
   },
-  txt: { fontSize: 14, color: "#444" },
-  txtActive: { color: "#fff", fontWeight: "600" },
-  arrow: { fontSize: 20, color: "#444", lineHeight: 22 },
+  txt: {
+    color: COLORS.TEXT_MUTED,
+    fontSize: 14,
+  },
+  txtActive: {
+    color: COLORS.TEXT_PRIMARY,
+    fontWeight: "600",
+  },
+  arrow: {
+    fontSize: 20,
+    color: COLORS.BORDER_STRONG,
+    lineHeight: 22,
+  },
 });

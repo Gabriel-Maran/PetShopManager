@@ -6,6 +6,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { COLORS } from "../../../config/consts";
 
 export default function InputInfo({
   image,
@@ -29,7 +30,7 @@ export default function InputInfo({
       style={[
         styles.ctnInput,
         hasBorderBottom
-          ? { borderBottomWidth: 1, borderColor: "#EDEDED" }
+          ? { borderBottomWidth: 1, borderColor: COLORS.BORDER_LIGHT }
           : { borderWidth: 0 },
       ]}
     >
@@ -44,6 +45,7 @@ export default function InputInfo({
           onChangeText={(item) => setItem(item)}
           value={item}
           multiline={variasLinhas}
+          placeholderTextColor={COLORS.TEXT_PRIMARY}
         />
       </View>
     </View>
@@ -61,8 +63,10 @@ const styles = StyleSheet.create({
   imgInput: {
     width: 28,
     height: 28,
+    tintColor: COLORS.PRIMARY,
   },
   input: {
+    color: COLORS.TEXT_PRIMARY,
     width: "90%",
     minHeight: 45,
     maxHeight: 90,
@@ -73,14 +77,14 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   ctnImgInput: {
-    backgroundColor: "#E1F5EE",
+    backgroundColor: COLORS.PRIMARY_SOFT,
     padding: 8,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: "#1D9E75",
+    borderColor: COLORS.PRIMARY_VARIANT,
   },
   txtInput: {
-    color: "#A7A7A7",
+    color: COLORS.TEXT_MUTED,
     fontWeight: "bold",
     fontSize: 12,
   },

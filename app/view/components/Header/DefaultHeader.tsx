@@ -1,6 +1,6 @@
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useScreen } from "../../../hooks/useScreen";
-import { Screen } from "../../../config/consts";
+import { COLORS, Screen } from "../../../config/consts";
 const LOGO = require("../../../assets/logo/logoPetShopFundoBranco.png");
 const BACK_ICON = require("../../../assets/setas/back.png");
 
@@ -32,7 +32,7 @@ export default function DefaultHeader({ screenBack }: { screenBack?: Screen }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.BACKGROUND,
     paddingBottom: 10,
   },
   btnImg: {
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 10,
     borderWidth: 1,
-    borderColor: "#0e996d",
+    borderColor: COLORS.PRIMARY,
   },
   imgVoltar: {
     width: 28,

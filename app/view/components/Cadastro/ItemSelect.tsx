@@ -1,4 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import { COLORS } from "../../../config/consts";
 
 export default function ItemSelect({
   isThisSelected,
@@ -15,14 +16,18 @@ export default function ItemSelect({
     <TouchableOpacity
       style={[
         styles.escolhaBtn,
-        { backgroundColor: isThisSelected ? "#0E9599" : "#F1F5F9" },
+        {
+          backgroundColor: isThisSelected ? COLORS.PRIMARY : COLORS.SURFACE,
+        },
       ]}
       onPress={() => setValorSelect(valorSelect)}
     >
       <Text
         style={[
           styles.escolhaText,
-          { color: isThisSelected ? "#ffffff" : "#000000" },
+          {
+            color: isThisSelected ? COLORS.BACKGROUND : COLORS.TEXT_PRIMARY,
+          },
         ]}
       >
         {title}

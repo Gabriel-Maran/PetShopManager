@@ -8,6 +8,7 @@ import {
   Image,
   ImageSourcePropType,
 } from "react-native";
+import { COLORS } from "../../../../config/consts";
 
 export default function Toggle({
   hasBorderBottom = false,
@@ -45,7 +46,7 @@ export default function Toggle({
   // Interpolação para mudar a cor de fundo
   const backgroundColor = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ["#ccc", "#0e996d"], // Cinza para Verde
+    outputRange: ["#ccc", COLORS.PRIMARY], // Cinza para Verde
   });
 
   return (
@@ -86,15 +87,16 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   ctnImgInput: {
-    backgroundColor: "#E1F5EE",
+    backgroundColor: COLORS.PRIMARY_SOFT,
     padding: 8,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: "#0e996d",
+    borderColor: COLORS.BORDER_LIGHT,
   },
   imgInput: {
     width: 28,
     height: 28,
+    tintColor: COLORS.PRIMARY,
   },
   container: {
     gap: 5,

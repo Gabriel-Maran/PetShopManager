@@ -1,6 +1,7 @@
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { StyleSheet, Text, View } from "react-native";
 import { useState } from "react";
+import { COLORS } from "../../config/consts";
 
 // Configuração do calendário para português do Brasil
 LocaleConfig.locales["pt-br"] = {
@@ -60,7 +61,13 @@ export default function Calendario({
   // Isso é só para marcar o dia atual no calendário e inicializar o estado com a data de hoje
   return (
     <View style={styles.completeCalendar}>
-      <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+      <Text
+        style={{
+          fontSize: 20,
+          fontWeight: "bold",
+          color: COLORS.TEXT_PRIMARY,
+        }}
+      >
         Calendário de Agendamentos
       </Text>
       <Calendar
@@ -76,34 +83,34 @@ export default function Calendario({
         }}
         theme={{
           // Cores gerais
-          backgroundColor: "#ffffff",
-          calendarBackground: "#ffffff",
+          backgroundColor: COLORS.BACKGROUND,
+          calendarBackground: COLORS.BACKGROUND,
 
           // Texto do mês/ano no topo
           textMonthFontSize: 18,
           textMonthFontWeight: "600",
-          monthTextColor: "#2C2C2A",
+          monthTextColor: COLORS.TEXT_SECONDARY,
 
           // Cabeçalho (Dom, Seg, Ter...)
           textDayHeaderFontSize: 13,
-          textSectionTitleColor: "#000000",
+          textSectionTitleColor: COLORS.TEXT_PRIMARY,
 
           // Números dos dias
           textDayFontSize: 18,
-          dayTextColor: "#2C2C2A",
+          dayTextColor: COLORS.TEXT_SECONDARY,
 
           // Dia selecionado
-          selectedDayBackgroundColor: "#0E9599",
-          selectedDayTextColor: "#ffffff",
+          selectedDayBackgroundColor: COLORS.PRIMARY_CONTRAST,
+          selectedDayTextColor: COLORS.BACKGROUND,
 
           // Hoje
-          todayTextColor: "#0E9599",
+          todayTextColor: COLORS.PRIMARY_CONTRAST,
 
           // Dias desabilitados
-          textDisabledColor: "#d9d9d9",
+          textDisabledColor: COLORS.THIRD_BACKGROUND,
 
           // Setas de navegação
-          arrowColor: "#0E9599",
+          arrowColor: COLORS.PRIMARY_CONTRAST,
         }}
       />
     </View>
@@ -115,12 +122,12 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   completeCalendar: {
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.BACKGROUND,
     width: "100%",
     justifyContent: "center",
     alignSelf: "center",
     padding: 10,
-    borderColor: "#ccc",
+    borderColor: COLORS.BORDER_STRONG,
     borderWidth: 1,
     borderRadius: 15,
   },

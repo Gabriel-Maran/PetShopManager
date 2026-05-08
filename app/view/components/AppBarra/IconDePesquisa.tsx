@@ -1,5 +1,10 @@
 import { Image, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { IMAGENS_BY_NAME, IMAGENS_NAMES, Screen } from "../../../config/consts";
+import {
+  COLORS,
+  IMAGENS_BY_NAME,
+  IMAGENS_NAMES,
+  Screen,
+} from "../../../config/consts";
 import { useScreen } from "../../../hooks/useScreen";
 
 export default function IconDePesquisa({
@@ -12,20 +17,39 @@ export default function IconDePesquisa({
   screenName: Screen;
 }) {
   const { screen, navigate } = useScreen();
-  const imageSource =
-    screen === screenName
-      ? IMAGENS_BY_NAME[imgName].active
-      : IMAGENS_BY_NAME[imgName].inactive;
+  const imageSource = IMAGENS_BY_NAME[imgName];
   return (
     <TouchableOpacity
       style={[
         styles.container,
-        screen === screenName && { borderColor: "#0E9599", borderTopWidth: 2 },
+        screen === screenName && {
+          borderColor: COLORS.PRIMARY,
+          borderTopWidth: 2,
+        },
       ]}
       onPress={() => navigate(screenName)}
     >
-      <Image style={styles.image} source={imageSource} />
-      <Text style={styles.title}>{titleText}</Text>
+      <Image
+        style={[
+          styles.image,
+          screen != screenName && {
+            borderColor: COLORS.PRIMARY,
+            borderTopWidth: 2,
+            tintColor: COLORS.DESATIVADO,
+          },
+        ]}
+        source={imageSource}
+      />
+      <Text
+        style={[
+          styles.title,
+          screen != screenName && {
+            color: COLORS.DESATIVADO,
+          },
+        ]}
+      >
+        {titleText}
+      </Text>
     </TouchableOpacity>
   );
 }
@@ -33,7 +57,7 @@ export default function IconDePesquisa({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: COLORS.BACKGROUND,
     justifyContent: "center",
     alignItems: "center",
     paddingBottom: 5,
@@ -42,12 +66,12 @@ const styles = StyleSheet.create({
   image: {
     width: 30,
     height: 30,
+    tintColor: COLORS.PRIMARY,
   },
   title: {
     fontSize: 13,
     fontWeight: "bold",
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
+    backgroundColor: COLORS.BACKGROUND,
+    color: COLORS.PRIMARY,
   },
 });

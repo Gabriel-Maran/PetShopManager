@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { initDatabase } from "./app/config/database";
-import { STATUS_BAR_HEIGHT, Screen } from "./app/config/consts";
+import { COLORS, STATUS_BAR_HEIGHT, Screen } from "./app/config/consts";
 import { useScreen } from "./app/hooks/useScreen";
 import AppBar from "./app/view/components/AppBarra/AppBar";
 import Home from "./app/view/pages/Home";
@@ -37,7 +37,7 @@ function AppContent() {
     case Screen.NewOrEditPet:
       return <NewOrEditPet />;
     case Screen.NewOrEditAppointment:
-      return <NewOrEditAppointment />
+      return <NewOrEditAppointment />;
     case Screen.Relatorios:
       return (
         <>
@@ -71,7 +71,7 @@ export default function App() {
   if (!ready) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#1D9E75" />
+        <ActivityIndicator size="large" color={COLORS.PRIMARY_VARIANT} />
       </View>
     );
   }
@@ -88,7 +88,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.BACKGROUND,
     alignItems: "center",
     justifyContent: "center",
   },

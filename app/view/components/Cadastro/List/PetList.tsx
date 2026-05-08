@@ -2,7 +2,7 @@ import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import ButtonEditar from "../Botões/ButtonEditar";
 import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
 import { Pet } from "../../../../model/Pet";
-import { Screen } from "../../../../config/consts";
+import { COLORS, Screen } from "../../../../config/consts";
 
 export default function PetList({
   cadastros,
@@ -66,9 +66,10 @@ const styles = StyleSheet.create({
   textMain: {
     fontSize: 16,
     fontWeight: "bold",
+    color: COLORS.TEXT_PRIMARY,
   },
   textSub: {
     fontSize: 12,
-    color: "#646462",
+    color: COLORS.TEXT_MUTED,
   },
 });

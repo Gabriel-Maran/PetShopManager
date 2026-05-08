@@ -12,6 +12,7 @@ import {
   EspeciesAtendidasLabel,
   EspeciesAtendidas,
   TipoServico,
+  COLORS,
 } from "../../config/consts";
 import { useScreen } from "../../hooks/useScreen";
 
@@ -136,15 +137,12 @@ export default function Agendamentos({
   );
 }
 
-const TEAL = "#0E9599";
-const TEAL_LIGHT = "#E6F7F7";
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginBottom: APP_BAR_HEIGHT,
     width: "100%",
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.BACKGROUND,
   },
 
   // ── Header ──────────────────────────────────────────────
@@ -153,9 +151,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 10,
     paddingHorizontal: 12,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.BACKGROUND,
     borderBottomWidth: 1,
-    borderColor: "#EFEFEF",
+    borderColor: COLORS.SURFACE_VARIANT,
   },
   titleBlock: {
     flex: 1,
@@ -164,28 +162,28 @@ const styles = StyleSheet.create({
   titleLabel: {
     fontSize: 10,
     fontWeight: "600",
-    color: TEAL,
+    color: COLORS.PRIMARY,
     letterSpacing: 1.1,
     textTransform: "uppercase",
   },
   titleDate: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#111",
+    color: COLORS.TEXT_PRIMARY,
     marginTop: 1,
   },
   iconBtn: {
     width: 38,
     height: 38,
     borderRadius: 10,
-    backgroundColor: TEAL_LIGHT,
+    backgroundColor: COLORS.BACKGROUND,
     justifyContent: "center",
     alignItems: "center",
   },
   icon: {
     width: 22,
     height: 22,
-    tintColor: TEAL,
+    tintColor: COLORS.PRIMARY,
   },
 
   // ── Lista ────────────────────────────────────────────────
@@ -194,7 +192,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: COLORS.BORDER,
   },
   row: {
     flexDirection: "row",
@@ -202,7 +200,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 11,
     gap: 10,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.BACKGROUND,
   },
 
   // Avatar
@@ -210,7 +208,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 20,
-    backgroundColor: TEAL_LIGHT,
+    backgroundColor: COLORS.PRIMARY_SOFT,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -226,11 +224,11 @@ const styles = StyleSheet.create({
   petName: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#111",
+    color: COLORS.TEXT_PRIMARY,
   },
   ownerName: {
     fontSize: 14,
-    color: "#888",
+    color: COLORS.BORDER_STRONG,
     marginTop: 2,
   },
 
@@ -240,7 +238,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   servicoBadge: {
-    backgroundColor: TEAL_LIGHT,
+    backgroundColor: COLORS.BACKGROUND,
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -248,12 +246,12 @@ const styles = StyleSheet.create({
   servicoTxt: {
     fontSize: 13,
     fontWeight: "600",
-    color: TEAL,
+    color: COLORS.PRIMARY,
   },
   time: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#444",
+    color: COLORS.BORDER_STRONG,
   },
 
   // ── Empty ────────────────────────────────────────────────
@@ -262,7 +260,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyTxt: {
-    color: "#aaa",
+    color: COLORS.BORDER_STRONG,
     fontSize: 18,
   },
 });

@@ -1,5 +1,5 @@
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Screen } from "../../../../config/consts";
+import { COLORS, Screen } from "../../../../config/consts";
 import { useScreen } from "../../../../hooks/useScreen";
 import { Owner } from "../../../../model/Owner";
 import { Pet } from "../../../../model/Pet";
@@ -34,11 +34,11 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   btnEdit: {
-    backgroundColor: "#E1F5EE",
+    backgroundColor: COLORS.EDITAR_BACKGROUND_COLOR,
     padding: 8,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: "#1D9E75",
+    borderColor: COLORS.EDITAR_BORDER_COLOR,
   },
   iconEdit: {
     height: 28,

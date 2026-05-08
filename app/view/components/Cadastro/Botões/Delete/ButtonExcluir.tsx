@@ -1,5 +1,6 @@
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useScreen } from "../../../../../hooks/useScreen";
+import { COLORS } from "../../../../../config/consts";
 
 export default function ButtonExcluir({
   onDelete,
@@ -31,11 +32,11 @@ const styles = StyleSheet.create({
   },
   btnDelete: {
     marginLeft: 10,
-    backgroundColor: "#FCEBEB",
+    backgroundColor: COLORS.EXCLUIR_BACKGROUND_COLOR,
     padding: 8,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: "#F09595",
+    borderColor: COLORS.EXCLUIR_BORDER_COLOR,
   },
   iconDelete: {
     height: 28,

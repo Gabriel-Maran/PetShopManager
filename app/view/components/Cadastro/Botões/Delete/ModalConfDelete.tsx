@@ -1,4 +1,5 @@
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { COLORS } from "../../../../../config/consts";
 
 interface Props {
   message: string | null;
@@ -26,7 +27,7 @@ export default function ModalConfDelete({
 
           <View style={styles.btns}>
             <TouchableOpacity
-              style={[styles.btn, { backgroundColor: "#808080" }]}
+              style={[styles.btn, { backgroundColor: COLORS.TEXT_SECONDARY }]}
               onPress={onClose}
             >
               <Text style={styles.btnTxt}>Cancelar</Text>
@@ -48,14 +49,14 @@ export default function ModalConfDelete({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: COLORS.MODAL_BACKGROUND,
     justifyContent: "center",
     alignItems: "center",
     padding: 16,
   },
   box: {
     width: "100%",
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.BACKGROUND,
     borderRadius: 16,
     padding: 24,
     alignItems: "center",
@@ -66,15 +67,16 @@ const styles = StyleSheet.create({
   },
   messageTop: {
     gap: 5,
+    color: COLORS.TEXT_PRIMARY,
   },
   title: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#111",
+    color: COLORS.TEXT_PRIMARY,
   },
   message: {
     fontSize: 14,
-    color: "rgb(203, 31, 31)",
+    color: COLORS.EXCLUIR_MAIN_COLOR,
     fontWeight: "500",
     textAlign: "center",
   },
@@ -90,7 +92,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   btnTxt: {
-    color: "#fff",
+    color: COLORS.BACKGROUND,
     fontWeight: "600",
     fontSize: 14,
   },

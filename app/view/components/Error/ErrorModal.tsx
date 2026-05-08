@@ -1,5 +1,6 @@
 // view/components/ErrorModal.tsx
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { COLORS } from "../../../config/consts";
 
 interface Props {
   message: string | null;
@@ -33,21 +34,31 @@ const styles = StyleSheet.create({
   },
   box: {
     width: "100%",
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.BACKGROUND,
     borderRadius: 16,
     padding: 24,
     alignItems: "center",
     gap: 8,
   },
-  emoji: { fontSize: 40 },
-  title: { fontSize: 16, fontWeight: "600", color: "#111" },
-  message: { fontSize: 14, color: "#888", textAlign: "center" },
+  emoji: {
+    fontSize: 40,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.TEXT_PRIMARY,
+  },
+  message: {
+    fontSize: 14,
+    color: COLORS.BORDER_STRONG,
+    textAlign: "center",
+  },
   btn: {
     marginTop: 8,
-    backgroundColor: "#1D9E75",
+    backgroundColor: COLORS.PRIMARY_VARIANT,
     paddingVertical: 12,
     paddingHorizontal: 40,
     borderRadius: 12,
   },
-  btnTxt: { color: "#fff", fontWeight: "600", fontSize: 14 },
+  btnTxt: { color: COLORS.BACKGROUND, fontWeight: "600", fontSize: 14 },
 });

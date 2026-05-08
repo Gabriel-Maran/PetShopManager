@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import { COLORS } from "../../../config/consts";
 
 export default function BarraDePesquisa({
   placeHolderStr,
@@ -33,6 +34,7 @@ export default function BarraDePesquisa({
           placeholder={placeHolderStr}
           multiline={true}
           style={styles.input}
+          placeholderTextColor={COLORS.TEXT_PRIMARY}
         />
       </View>
     </View>
@@ -49,15 +51,18 @@ const styles = StyleSheet.create({
     width: "90%",
     alignSelf: "center",
     alignItems: "center",
-    backgroundColor: "#F1F5F9",
+    backgroundColor: COLORS.THIRD_BACKGROUND,
     padding: 5,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER_STRONG,
   },
   input: {
     width: "80%",
     minHeight: 30,
     maxHeight: 100,
     fontSize: 16,
+    color: COLORS.TEXT_PRIMARY,
   },
   btnImg: {
     paddingHorizontal: 10,
@@ -65,5 +70,6 @@ const styles = StyleSheet.create({
   img: {
     width: 30,
     height: 30,
+    tintColor: COLORS.TEXT_MUTED,
   },
 });

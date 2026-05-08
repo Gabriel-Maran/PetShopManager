@@ -3,6 +3,7 @@ import Calendario from "../components/Calendario";
 import Agendamentos from "../components/Agendamentos";
 import { useState } from "react";
 import DefaultHeader from "../components/Header/DefaultHeader";
+import { COLORS } from "../../config/consts";
 
 export default function Home() {
   const [isAgenFullScreen, setIsAgenFullScreen] = useState(false);
@@ -12,7 +13,13 @@ export default function Home() {
   return (
     <View style={styles.container}>
       <DefaultHeader />
-      <View style={{ flex: 1, padding: 15, backgroundColor: "#F2F3F7" }}>
+      <View
+        style={{
+          flex: 1,
+          padding: 15,
+          backgroundColor: COLORS.THIRD_BACKGROUND,
+        }}
+      >
         {!isAgenFullScreen && (
           <Calendario
             setNewDate={setDateSelected}
@@ -33,6 +40,6 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.THIRD_BACKGROUND,
   },
 });

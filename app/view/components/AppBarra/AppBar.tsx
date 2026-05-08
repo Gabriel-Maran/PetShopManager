@@ -1,8 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import {
-  Screen,
-  APP_BAR_HEIGHT
-} from "../../../config/consts";
+import { Screen, APP_BAR_HEIGHT, COLORS } from "../../../config/consts";
 import IconDePesquisa from "./IconDePesquisa";
 import { IMAGENS_NAMES } from "../../../config/consts";
 
@@ -37,7 +34,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "#ffffff",
+    backgroundColor: COLORS.BACKGROUND,
     height: APP_BAR_HEIGHT,
     justifyContent: "center",
     alignItems: "center",

@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import { useState } from "react";
 import {
+  COLORS,
   EspeciesAtendidas,
   PacoteRemarcacao,
   PorteAnimal,
@@ -112,7 +113,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               hasBorderBottom={true}
             />
             <InputInfo
-              image={require("../../../assets/nav_bar/ativados/personAddGreen.png")}
+              image={require("../../../assets/nav_bar/personAdd.png")}
               item={form.raca}
               setItem={(v) => atualizarValores("raca", v)}
               placeHolder="Digite a raça..."
@@ -136,7 +137,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   scrollContent: {
-    backgroundColor: "#F5F5F5",
+    backgroundColor: COLORS.THIRD_BACKGROUND,
     flexGrow: 1,
   },
   ctnCadastro: {
@@ -153,12 +154,12 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#EDEDED",
-    backgroundColor: "#fff",
+    borderColor: COLORS.BORDER_LIGHT,
+    backgroundColor: COLORS.BACKGROUND,
     overflow: "hidden",
   },
   titleDataInfo: {
-    color: "#1D9D75",
+    color: COLORS.PRIMARY_VARIANT,
     fontWeight: "500",
     marginBottom: 8,
   },
@@ -166,11 +167,11 @@ const styles = StyleSheet.create({
   btnSalvar: {
     paddingVertical: 20,
     paddingHorizontal: 75,
-    backgroundColor: "#1D9D75",
+    backgroundColor: COLORS.PRIMARY_VARIANT,
     borderRadius: 15,
   },
   txtSalvar: {
-    color: "#fff",
+    color: COLORS.BACKGROUND,
     textAlign: "center",
   },
 });

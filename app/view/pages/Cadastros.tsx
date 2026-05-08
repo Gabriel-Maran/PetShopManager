@@ -10,7 +10,7 @@ import { Owner } from "../../model/Owner";
 import { ownerController } from "../../controller/OwnerController";
 import { petController } from "../../controller/PetController";
 
-import { APP_BAR_HEIGHT, ORDER, Screen } from "../../config/consts";
+import { APP_BAR_HEIGHT, COLORS, ORDER, Screen } from "../../config/consts";
 
 import BarraDePesquisa from "../components/SearchBarra/BarraDePesquisa";
 import DefaultHeader from "../components/Header/DefaultHeader";
@@ -21,7 +21,7 @@ import OwnerList from "../components/Cadastro/List/OwnerList";
 import ModalConfDelete from "../components/Cadastro/Botões/Delete/ModalConfDelete";
 
 //Limite de itens por pagina
-const LIMIT = 20;
+const LIMIT = 1;
 
 export default function Cadastros() {
   const { navigate } = useScreen();
@@ -158,6 +158,7 @@ export default function Cadastros() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.THIRD_BACKGROUND,
   },
   escolhaItem: {
     flexDirection: "row",
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
     right: 25,
   },
   btnAdd: {
-    backgroundColor: "#0e996d",
+    backgroundColor: COLORS.PRIMARY,
     borderRadius: 32.5,
     width: 65,
     height: 65,
