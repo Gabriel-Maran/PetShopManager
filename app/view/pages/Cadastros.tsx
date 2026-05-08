@@ -10,7 +10,13 @@ import { Owner } from "../../model/Owner";
 import { ownerController } from "../../controller/OwnerController";
 import { petController } from "../../controller/PetController";
 
-import { APP_BAR_HEIGHT, COLORS, ORDER, Screen } from "../../config/consts";
+import {
+  APP_BAR_HEIGHT,
+  COLORS,
+  LIMIT_ITEM_PAGE,
+  ORDER,
+  Screen,
+} from "../../config/consts";
 
 import BarraDePesquisa from "../components/SearchBarra/BarraDePesquisa";
 import DefaultHeader from "../components/Header/DefaultHeader";
@@ -21,7 +27,6 @@ import OwnerList from "../components/Cadastro/List/OwnerList";
 import ModalConfDelete from "../components/Cadastro/Botões/Delete/ModalConfDelete";
 
 //Limite de itens por pagina
-const LIMIT = 1;
 
 export default function Cadastros() {
   const { navigate } = useScreen();
@@ -83,10 +88,12 @@ export default function Cadastros() {
     const getPagedData = isOwnerSelected
       ? //Se for Owner, pega o paged do Owner
         ownerController
-          .getAllOwnersPaged(page, LIMIT, ORDER.DESC)
+          .getAllOwnersPaged(page, LIMIT_ITEM_PAGE, ORDER.DESC)
           .then(setOwners)
       : //Se for Pet, pega o paged do Pet
-        petController.getAllPetsPaged(page, LIMIT, ORDER.DESC).then(setPets);
+        petController
+          .getAllPetsPaged(page, LIMIT_ITEM_PAGE, ORDER.DESC)
+          .then(setPets);
 
     getPagedData.catch((e) =>
       showError(e instanceof Error ? e.message : "Erro inesperado."),
@@ -124,7 +131,7 @@ export default function Cadastros() {
         <Pagination
           currentPage={page}
           totalItems={total}
-          itemsPerPage={LIMIT}
+          itemsPerPage={LIMIT_ITEM_PAGE}
           onPageChange={setPage}
         />
         <View style={{ flex: 1 }}>

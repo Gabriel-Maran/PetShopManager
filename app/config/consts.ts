@@ -83,6 +83,7 @@ export const COLORS = {
 
 
 */
+export const LIMIT_ITEM_PAGE = 20;
 
 export const IMAGENS_BY_NAME = {
   ARTIGO: require("../assets/nav_bar/artigo.png"),
