@@ -118,5 +118,5 @@ const styles = StyleSheet.create({
         color: COLORS.BACKGROUND,
         textAlign: "center",
         fontSize: 15,
-    },
+    }
 })
