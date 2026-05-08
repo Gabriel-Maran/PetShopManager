@@ -4,19 +4,35 @@ import {
   ScrollView,
   View,
   Text,
+  TouchableOpacity,
+  Image
 } from "react-native";
 import { useState } from "react";
 import { COLORS, Screen, TipoServico } from "../../../config/consts";
 import { useScreen } from "../../../hooks/useScreen";
+import { useError } from "../../../hooks/useError";
 
 import { Appointment, AppointmentBuilder } from "../../../model/Appointment";
+import { appointmentController } from "../../../controller/AppointmentsController";
 
 import DefaultHeader from "../../components/Header/DefaultHeader";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import InputInfo from "../../components/Cadastro/InputInfo";
 import Toggle from "../../components/Cadastro/Botões/Toggle";
-import { appointmentController } from "../../../controller/AppointmentsController";
-import { useError } from "../../../hooks/useError";
+import ButtonEditar from "../../components/Cadastro/Botões/ButtonEditar";
+
+
+const maskData = (v: string) => {
+  const d = v.replace(/\D/g, "");
+  if (!d) return "";
+  if (d.length <= 2) {
+    return d;
+  }
+  if (d.length <= 4) {
+    return `${d.slice(0, 2)}/${d.slice(2)}`;
+  }
+  return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4, 8)}`;
+};
 
 export default function NewOrEditAppointment() {
   const { params, navigate } = useScreen<Appointment>();
@@ -27,8 +43,12 @@ export default function NewOrEditAppointment() {
   const [nomePet, setNomePet] = useState("");
   const [idPet, setIdPet] = useState<number>(0);
 
-  const [servico, setServico] = useState(params?.servico ?? TipoServico.Banho);
-  const [data, setData] = useState(params?.data ?? 0);
+  const [servico, setServico] = useState(params?.servico ?? "");
+  const [data, setData] = useState(
+    params?.data ?
+      new Date(params.data).toLocaleDateString("pt-BR") :
+      ""
+  );
   const [hora, setHora] = useState(params?.hora ?? undefined);
   const [entregarPet, setEntregarPet] = useState<number>(
     params?.entregar_pet ?? 0,
@@ -42,12 +62,20 @@ export default function NewOrEditAppointment() {
   //Mas é interessante fazer algo visual para mostrar se foi auto gerado ou não
   const [autoGen, setAutoGen] = useState(params?.is_auto_agen ?? "");
 
-  const salvarDono = async () => {
+  const [petSelecionado, setPetSelecionado] = useState(false)
+
+  function converterPraNumber(dataTexto: string): number {
+    const [dia, mes, ano] = dataTexto.split("/").map(Number);
+
+    return new Date(ano, mes - 1, dia).getTime();
+  }
+
+  const salvarAgendamento = async () => {
     const appointmentSalvar = new AppointmentBuilder()
       .withPetId(idPet)
       .withServico(servico)
       .withHora(hora ?? "00:00")
-      .withData(data)
+      .withData(converterPraNumber(data))
       .withEntregarPet(entregarPet != 1 ? 0 : 1)
       .withObservacao(observacao)
       .isConcluido(concluido != 1 ? 0 : 1)
@@ -85,22 +113,50 @@ export default function NewOrEditAppointment() {
             <Text style={styles.titleDataInfo}>DADOS</Text>
           </View>
           <View style={styles.inputs}>
+            <View style={[
+              styles.ctnInput,
+              { borderBottomWidth: 1, borderColor: COLORS.BORDER_LIGHT }
+            ]}>
+              <View style={styles.ctnImgInput}>
+                <Image
+                  style={styles.imgInput}
+                  source={require("../../../assets/animais/petHome.png")}
+                />
+              </View>
+              <View style={{ width: "90%", gap: 5 }}>
+                <Text style={styles.txtInput}>PET</Text>
+                {petSelecionado ? (
+                  <View style={styles.petSelecionado}>
+                    <View style={styles.txtNomePet}>
+                      <Text>Max</Text>
+                    </View>
+                    <ButtonEditar navegarPara={Screen.Cadastros} editCampo={true} />
+                  </View>
+                ) : (
+                  <TouchableOpacity style={styles.btnSalvar} onPress={() => setPetSelecionado(true)}>
+                    <Text style={styles.txtSalvar}>Selecionar Pet</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
             <InputInfo
-              image={require("../../../assets/animais/petHome.png")}
-              item={nomePet}
-              setItem={setServico}
-              placeHolder="Digite o nome do Pet..."
-              titleName="Nome do Pet"
-              variasLinhas={false}
-              hasBorderBottom={true}
-            />
-            <InputInfo
-              image={require("../../../assets/outros/search.png")}
+              image={require("../../../assets/outros/servicos.png")}
               item={servico}
-              setItem={setNomePet}
+              setItem={setServico}
               placeHolder="Selecione o serviço..."
               titleName="Serviço"
               variasLinhas={false}
+              digitavel={true}
+              hasBorderBottom={true}
+            />
+            <InputInfo
+              image={require("../../../assets/outros/data.png")}
+              item={data}
+              setItem={(v) => setData(maskData(v))}
+              placeHolder="Informe a data..."
+              titleName="Data"
+              variasLinhas={true}
+              digitavel={true}
               hasBorderBottom={true}
             />
             <Toggle
@@ -117,6 +173,7 @@ export default function NewOrEditAppointment() {
               placeHolder="Uma observação adicional..."
               titleName="Observações"
               variasLinhas={true}
+              digitavel={true}
               hasBorderBottom={true}
             />
           </View>
@@ -157,13 +214,67 @@ const styles = StyleSheet.create({
   },
   ctnBtnSalvar: { marginTop: 25 },
   btnSalvar: {
-    paddingVertical: 20,
-    paddingHorizontal: 75,
+    width: "90%",
+    height: 50,
     backgroundColor: COLORS.PRIMARY_VARIANT,
     borderRadius: 15,
+    display: 'flex',
+    justifyContent: 'center'
   },
   txtSalvar: {
     color: COLORS.BACKGROUND,
     textAlign: "center",
+    fontSize: 15,
+
   },
+  ctnInput: {
+    width: "100%",
+    padding: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  ctnImgInput: {
+    backgroundColor: COLORS.PRIMARY_SOFT,
+    padding: 8,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: COLORS.PRIMARY_VARIANT,
+  },
+  imgInput: {
+    width: 28,
+    height: 28,
+    tintColor: COLORS.PRIMARY,
+  },
+  input: {
+    color: COLORS.TEXT_PRIMARY,
+    width: "90%",
+    minHeight: 45,
+    maxHeight: 90,
+    fontSize: 16,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 40,
+    paddingVertical: 5,
+  },
+  txtInput: {
+    color: COLORS.TEXT_MUTED,
+    fontWeight: "bold",
+    fontSize: 12,
+  },
+  petSelecionado: {
+    width: '90%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  editarCampo: {
+    alignSelf: 'flex-end'
+  },
+  txtNomePet: {
+    borderWidth: 1.3,
+    width: '80%',
+    padding:10,
+    borderRadius: 10
+  }
 });
