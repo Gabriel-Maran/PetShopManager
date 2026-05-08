@@ -61,7 +61,10 @@ export default function Agendamentos({
           style={styles.iconBtn}
           onPress={() => navigate(Screen.NewOrEditAppointment)}
         >
-          <Image source={require("../../assets/add.png")} style={styles.icon} />
+          <Image
+            source={require("../../assets/crud/add.png")}
+            style={styles.icon}
+          />
         </TouchableOpacity>
 
         <View style={styles.titleBlock}>
@@ -78,8 +81,8 @@ export default function Agendamentos({
           <Image
             source={
               isFullScreen
-                ? require("../../assets/diminuir.png")
-                : require("../../assets/expandir.png")
+                ? require("../../assets/setas/diminuir.png")
+                : require("../../assets/setas/expandir.png")
             }
             style={styles.icon}
           />
@@ -106,10 +109,10 @@ export default function Agendamentos({
               <Image
                 source={
                   item.foto === EspeciesAtendidas.CAO
-                    ? require("../../assets/caoGreen.png")
+                    ? require("../../assets/animais/caoGreen.png")
                     : item.foto === EspeciesAtendidas.GATO
-                      ? require("../../assets/gatoGreen.png")
-                      : require("../../assets/interrogacaoGreen.png")
+                      ? require("../../assets/animais/gatoGreen.png")
+                      : require("../../assets/animais/interrogacaoGreen.png")
                 }
                 style={styles.imgPetImg}
               />

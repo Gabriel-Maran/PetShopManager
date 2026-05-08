@@ -21,7 +21,7 @@ export default function OwnerList({
           <View style={styles.itemCard}>
             <Image
               style={styles.img}
-              source={require("../../../../assets/person.png")}
+              source={require("../../../../assets/crud/person.png")}
             />
 
             <View style={styles.mainContent}>

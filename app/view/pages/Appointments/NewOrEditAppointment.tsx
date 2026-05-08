@@ -86,7 +86,7 @@ export default function NewOrEditAppointment() {
           </View>
           <View style={styles.inputs}>
             <InputInfo
-              image={require("../../../assets/petHome.png")}
+              image={require("../../../assets/animais/petHome.png")}
               item={nomePet}
               setItem={setServico}
               placeHolder="Digite o nome do Pet..."
@@ -95,7 +95,7 @@ export default function NewOrEditAppointment() {
               hasBorderBottom={true}
             />
             <InputInfo
-              image={require("../../../assets/search.png")}
+              image={require("../../../assets/outros/search.png")}
               item={servico}
               setItem={setNomePet}
               placeHolder="Selecione o serviço..."
@@ -107,11 +107,11 @@ export default function NewOrEditAppointment() {
               onChange={setEntregarPet}
               value={entregarPet}
               hasBorderBottom={true}
-              image={require("../../../assets/entrega.png")}
+              image={require("../../../assets/outros/entrega.png")}
               title="Entregar Pet?"
             />
             <InputInfo
-              image={require("../../../assets/pet.png")}
+              image={require("../../../assets/animais/pet.png")}
               item={observacao}
               setItem={setObservacao}
               placeHolder="Uma observação adicional..."

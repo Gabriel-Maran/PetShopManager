@@ -24,7 +24,7 @@ export default function BarraDePesquisa({
         <TouchableOpacity style={styles.btnImg}>
           <Image
             style={styles.img}
-            source={require("../../../assets/search.png")}
+            source={require("../../../assets/outros/search.png")}
           />
         </TouchableOpacity>
         <TextInput

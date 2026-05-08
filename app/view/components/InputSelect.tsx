@@ -51,8 +51,8 @@ export default function InputSelect<T>({
         <Image
           source={
             isOpen
-              ? require("../../assets/closeGreen.png")
-              : require("../../assets/openGreen.png")
+              ? require("../../assets/setas/closeGreen.png")
+              : require("../../assets/setas/openGreen.png")
           }
         />
       </TouchableOpacity>

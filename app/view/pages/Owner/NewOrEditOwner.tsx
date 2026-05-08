@@ -82,7 +82,7 @@ export default function NewOrEditOwner() {
           </View>
           <View style={styles.inputs}>
             <InputInfo
-              image={require("../../../assets/personGreen.png")}
+              image={require("../../../assets/nav_bar/ativados/personAddGreen.png")}
               item={nome}
               setItem={setNome}
               placeHolder="Digite o nome..."
@@ -91,7 +91,7 @@ export default function NewOrEditOwner() {
               hasBorderBottom={true}
             />
             <InputInfo
-              image={require("../../../assets/phoneGreen.png")}
+              image={require("../../../assets/outros/phoneGreen.png")}
               item={telefone}
               setItem={(v) => setTelefone(maskPhone(v))}
               placeHolder="(46) 90000-0000"
@@ -104,7 +104,7 @@ export default function NewOrEditOwner() {
           </View>
           <View style={styles.inputs}>
             <InputInfo
-              image={require("../../../assets/mailGreen.png")}
+              image={require("../../../assets/outros/mailGreen.png")}
               item={email}
               setItem={setEmail}
               placeHolder="email@exemplo.email"
@@ -113,7 +113,7 @@ export default function NewOrEditOwner() {
               hasBorderBottom={true}
             />
             <InputInfo
-              image={require("../../../assets/locationGreen.png")}
+              image={require("../../../assets/outros/locationGreen.png")}
               item={endereco}
               setItem={setEndereco}
               placeHolder="Rua X, 456"

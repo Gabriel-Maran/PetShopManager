@@ -17,7 +17,7 @@ export default function ButtonExcluir({
       >
         <Image
           style={styles.iconDelete}
-          source={require("../../../../../assets/delete.png")}
+          source={require("../../../../../assets/crud/delete.png")}
         />
       </TouchableOpacity>
     </View>

@@ -147,7 +147,7 @@ export default function Cadastros() {
         >
           <Image
             style={styles.imgAdd}
-            source={require("../../assets/addWhite.png")}
+            source={require("../../assets/crud/addWhite.png")}
           />
         </TouchableOpacity>
       </View>

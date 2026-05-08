@@ -22,7 +22,7 @@ export default function ButtonEditar({
       >
         <Image
           style={styles.iconEdit}
-          source={require("../../../../assets/edit.png")}
+          source={require("../../../../assets/crud/edit.png")}
         />
       </TouchableOpacity>
     </View>

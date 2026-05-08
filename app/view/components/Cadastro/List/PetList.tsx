@@ -19,7 +19,7 @@ export default function PetList({
           <View style={styles.itemCard}>
             <Image
               style={styles.img}
-              source={require("../../../../assets/pet.png")}
+              source={require("../../../../assets/animais/pet.png")}
             />
 
             <View style={styles.mainContent}>

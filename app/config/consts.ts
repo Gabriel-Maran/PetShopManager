@@ -7,16 +7,16 @@ export const APP_BAR_HEIGHT = 70;
 
 export const IMAGENS_BY_NAME = {
   ARTIGO: {
-    active: require("../assets/artigo.png"),
-    inactive: require("../assets/artigoDesativado.png"),
+    active: require("../assets/nav_bar/ativados/artigo.png"),
+    inactive: require("../assets/desativados/artigoDesativado.png"),
   },
   PESSOA_ADD: {
-    active: require("../assets/pessoaAdd.png"),
-    inactive: require("../assets/pessoaAddDesativado.png"),
+    active: require("../assets/nav_bar/ativados/personAddGreen.png"),
+    inactive: require("../assets/nav_bar/desativados/pessoaAddDesativado.png"),
   },
   CALENDARIO: {
-    active: require("../assets/calendario.png"),
-    inactive: require("../assets/calendarioDesativado.png"),
+    active: require("../assets/nav_bar/ativados/calendario.png"),
+    inactive: require("../assets/nav_bar/desativados/calendarioDesativado.png"),
   },
 };
 
@@ -38,7 +38,7 @@ export enum Screen {
   Relatorios = "Relatorios",
   NewOrEditOwner = "NewOrEditOwner",
   NewOrEditPet = "NewOrEditPet",
-  NewOrEditAppointment = "NewOrEditAppointment"
+  NewOrEditAppointment = "NewOrEditAppointment",
 }
 
 export enum PacoteRemarcacao {

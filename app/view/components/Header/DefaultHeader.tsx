@@ -1,8 +1,8 @@
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useScreen } from "../../../hooks/useScreen";
 import { Screen } from "../../../config/consts";
-const LOGO = require("../../../assets/logoPetShopFundoBranco.png");
-const BACK_ICON = require("../../../assets/back.png");
+const LOGO = require("../../../assets/logo/logoPetShopFundoBranco.png");
+const BACK_ICON = require("../../../assets/setas/back.png");
 
 export default function DefaultHeader({ screenBack }: { screenBack?: Screen }) {
   const { navigate } = useScreen();

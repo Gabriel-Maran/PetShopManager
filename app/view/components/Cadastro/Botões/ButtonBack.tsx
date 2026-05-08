@@ -8,7 +8,7 @@ export default function ButtonBack({ backTo }: { backTo: Screen }) {
     <TouchableOpacity onPress={() => navigate(backTo)} style={styles.btnBack}>
       <Image
         style={styles.imgBack}
-        source={require("../../../../assets/voltarBlack.png")}
+        source={require("../../../../assets/setas/voltarBlack.png")}
       />
     </TouchableOpacity>
   );

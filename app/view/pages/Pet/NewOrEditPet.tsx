@@ -94,7 +94,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
 
           <View style={styles.inputs}>
             <InputInfo
-              image={require("../../../assets/personGreen.png")}
+              image={require("../../../assets/animais/iconPata.png")}
               item={form.nome}
               setItem={(v) => atualizarValores("nome", v)}
               placeHolder="Digite o nome..."
@@ -103,7 +103,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               hasBorderBottom={true}
             />
             <InputInfo
-              image={require("../../../assets/iconPata.png")}
+              image={require("../../../assets/animais/iconPata.png")}
               item={form.especie}
               setItem={(v) => atualizarValores("especie", v)}
               placeHolder="Digite a espécie..."
@@ -112,7 +112,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               hasBorderBottom={true}
             />
             <InputInfo
-              image={require("../../../assets/personGreen.png")}
+              image={require("../../../assets/nav_bar/ativados/personAddGreen.png")}
               item={form.raca}
               setItem={(v) => atualizarValores("raca", v)}
               placeHolder="Digite a raça..."
