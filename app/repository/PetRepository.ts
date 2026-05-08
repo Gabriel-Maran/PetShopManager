@@ -29,11 +29,21 @@ class PetRepository {
   }
 
   // Busca por nome usando o idx_pets_nome (prefixo) ou substring
-  async searchPetsByName(query: string): Promise<Pet[]> {
+  async searchPetsByNamePaged(
+    query: string,
+    page: number = 0,
+    limit: number = 20,
+    order: ORDER = ORDER.ASC,
+  ): Promise<Pet[]> {
     const db = await getDatabase();
+    const offset = page * limit;
+
     return db.getAllAsync<Pet>(
-      `SELECT * FROM pets WHERE nome LIKE ? AND is_ativo = 1 ORDER BY nome ASC`,
-      [`%${query}%`],
+      `SELECT * FROM pets 
+       WHERE nome LIKE ? AND is_ativo = 1 
+       ORDER BY nome ${order} 
+       LIMIT ? OFFSET ?`,
+      [`%${query}%`, limit, offset],
     );
   }
 

@@ -29,7 +29,7 @@ export default function OwnerListModal({
 
       <Image
         source={require("../../../../assets/setas/setaDireita.png")}
-        style={styles.btnDireita}
+        style={styles.chevron}
       />
     </TouchableOpacity>
   );
@@ -71,9 +71,10 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT_MUTED,
     marginTop: 2,
   },
-  btnDireita: {
-    width: 38,
-    height: 38,
+
+  chevron: {
+    width: 14,
+    height: 14,
     tintColor: COLORS.TEXT_MUTED,
     opacity: 0.5,
   },

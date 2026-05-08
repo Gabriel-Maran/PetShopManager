@@ -26,26 +26,49 @@ import Pagination from "../components/Cadastro/List/Pagination";
 import OwnerList from "../components/Cadastro/List/OwnerList";
 import ModalConfDelete from "../components/Cadastro/Botões/Delete/ModalConfDelete";
 
-//Limite de itens por pagina
-
 export default function Cadastros() {
   const { navigate } = useScreen();
   const { showError } = useError();
 
-  const [isOwnerSelected, setIsOwnerSelected] = useState(true); // Controla qual tela está selecionada
-  const [search, setSearch] = useState(""); // Controla o que o usuário pesquisa (TODO)
-  const [page, setPage] = useState(0); // Controla a pagina atual
-  const [owners, setOwners] = useState<Owner[]>([]); // Controla a Lista de Owners
-  const [pets, setPets] = useState<Pet[]>([]); // Controla a lista de pets
-  const [total, setTotal] = useState(0); // Controla o total de itens de Pet ou Owner
+  const [isOwnerSelected, setIsOwnerSelected] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [owners, setOwners] = useState<Owner[]>([]);
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [total, setTotal] = useState(0);
   const [objSelectToDelete, setObjSelectToDelete] = useState<
     Pet | Owner | undefined
-  >(undefined);
+  >();
+
+  const handleError = (e: unknown) =>
+    showError(e instanceof Error ? e.message : "Erro inesperado.");
 
   const handleTabChange = (value: boolean) => {
     setIsOwnerSelected(value);
+    setSearch("");
     setPage(0);
   };
+
+  // Contagem total — recalcula ao trocar de aba
+  useEffect(() => {
+    const count = isOwnerSelected
+      ? ownerController.countOwners()
+      : petController.countPets();
+    count.then(setTotal).catch(handleError);
+  }, [isOwnerSelected]);
+
+  // Busca — só dispara quando search muda (botão) ou ao trocar página/aba
+  useEffect(() => {
+    const fetch = isOwnerSelected
+      ? ownerController
+          .searchOwnersByNamePaged(search, page, LIMIT_ITEM_PAGE, ORDER.DESC)
+          .then(setOwners)
+      : petController
+          .searchPetsByNamePaged(search, page, LIMIT_ITEM_PAGE, ORDER.DESC)
+          .then(setPets);
+
+    fetch.catch(handleError);
+  }, [search, page, isOwnerSelected]);
 
   function confirmDeletar(itemId: number) {
     try {
@@ -57,7 +80,7 @@ export default function Cadastros() {
         setPets((prev) => prev.filter((item) => item.id !== itemId));
       }
     } catch (e) {
-      showError(e instanceof Error ? e.message : "Erro inesperado.");
+      handleError(e);
     }
     setObjSelectToDelete(undefined);
   }
@@ -72,34 +95,6 @@ export default function Cadastros() {
     setObjSelectToDelete(pet);
   }
 
-  useEffect(() => {
-    const count = isOwnerSelected
-      ? ownerController.countOwners()
-      : petController.countPets();
-
-    count
-      .then(setTotal)
-      .catch((e) =>
-        showError(e instanceof Error ? e.message : "Erro inesperado."),
-      );
-  }, [isOwnerSelected]);
-
-  useEffect(() => {
-    const getPagedData = isOwnerSelected
-      ? //Se for Owner, pega o paged do Owner
-        ownerController
-          .getAllOwnersPaged(page, LIMIT_ITEM_PAGE, ORDER.DESC)
-          .then(setOwners)
-      : //Se for Pet, pega o paged do Pet
-        petController
-          .getAllPetsPaged(page, LIMIT_ITEM_PAGE, ORDER.DESC)
-          .then(setPets);
-
-    getPagedData.catch((e) =>
-      showError(e instanceof Error ? e.message : "Erro inesperado."),
-    );
-  }, [page, isOwnerSelected]);
-
   return (
     <>
       <ModalConfDelete
@@ -108,12 +103,18 @@ export default function Cadastros() {
         onConfirmDelete={() => confirmDeletar(objSelectToDelete?.id ?? 0)}
         visible={objSelectToDelete != undefined}
       />
+
       <View style={styles.container}>
         <DefaultHeader />
+
         <BarraDePesquisa
           placeHolderStr={`Pesquisar por ${isOwnerSelected ? "Dono(s)" : "Pet(s)"}`}
-          setSearch={setSearch}
+          setSearch={(txt) => {
+            setPage(0); // Volta pra página 1 a cada nova busca
+            setSearch(txt);
+          }}
         />
+
         <View style={styles.escolhaItem}>
           <ItemSelect
             title="Donos"
@@ -128,12 +129,14 @@ export default function Cadastros() {
             valorSelect={false}
           />
         </View>
+
         <Pagination
           currentPage={page}
           totalItems={total}
           itemsPerPage={LIMIT_ITEM_PAGE}
           onPageChange={setPage}
         />
+
         <View style={{ flex: 1 }}>
           {isOwnerSelected ? (
             <OwnerList cadastros={owners} onDelete={handleDeleteSelected} />

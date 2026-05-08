@@ -16,6 +16,7 @@ export default function InputInfo({
   titleName,
   hasBorderBottom = false,
   variasLinhas,
+  digitavel,
 }: {
   image: ImageSourcePropType;
   item: string;
@@ -24,6 +25,7 @@ export default function InputInfo({
   titleName: string;
   hasBorderBottom?: boolean;
   variasLinhas: boolean;
+  digitavel: boolean
 }) {
   return (
     <View
@@ -45,6 +47,7 @@ export default function InputInfo({
           onChangeText={(item) => setItem(item)}
           value={item}
           multiline={variasLinhas}
+          editable={digitavel}
           placeholderTextColor={COLORS.TEXT_PRIMARY}
         />
       </View>

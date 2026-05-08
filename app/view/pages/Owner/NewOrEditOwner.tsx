@@ -88,6 +88,7 @@ export default function NewOrEditOwner() {
               placeHolder="Digite o nome..."
               titleName="Nome Completo"
               variasLinhas={false}
+              digitavel={true}
               hasBorderBottom={true}
             />
             <InputInfo
@@ -96,6 +97,7 @@ export default function NewOrEditOwner() {
               setItem={(v) => setTelefone(maskPhone(v))}
               placeHolder="(46) 90000-0000"
               titleName="Telefone"
+              digitavel={true}
               variasLinhas={false}
             />
           </View>
@@ -110,6 +112,7 @@ export default function NewOrEditOwner() {
               placeHolder="email@exemplo.email"
               titleName="E-mail"
               variasLinhas={false}
+              digitavel={true}
               hasBorderBottom={true}
             />
             <InputInfo
@@ -118,6 +121,7 @@ export default function NewOrEditOwner() {
               setItem={setEndereco}
               placeHolder="Rua X, 456"
               variasLinhas={true}
+              digitavel={true}
               titleName="Endereço"
             />
           </View>

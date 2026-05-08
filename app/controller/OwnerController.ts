@@ -13,6 +13,18 @@ class OwnerController {
     return ownerService.getAllOwners();
   }
 
+  searchOwnersByNamePaged(
+    query: string,
+    page: number,
+    limit: number,
+    order: ORDER = ORDER.DESC,
+  ): Promise<Owner[]> {
+    if (!query.trim()) {
+      return this.getAllOwnersPaged(page, limit, order);
+    }
+    return ownerService.searchOwnersByNamePaged(query, page, limit, order);
+  }
+
   getAllOwnersPaged(
     page: number,
     limit: number,

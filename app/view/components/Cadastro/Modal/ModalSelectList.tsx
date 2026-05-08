@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   View,
   Pressable,
-  Image,
 } from "react-native";
 import { COLORS, LIMIT_ITEM_PAGE } from "../../../../config/consts";
 import OwnerListModal from "./OwnerListModal";
@@ -48,30 +47,29 @@ export default function ModalSelectList({
     >
       <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable style={styles.modalContent} onPress={() => {}}>
+          {/* Cabeçalho */}
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
               Selecionar {isOwner ? "Tutor" : "Pet"}
             </Text>
-            <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-              <Text style={styles.closeIcon}>X</Text>
+            <TouchableOpacity
+              style={styles.closeBtn}
+              onPress={onClose}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.closeIcon}>✕</Text>
             </TouchableOpacity>
           </View>
 
+          {/* Pesquisa */}
           <View style={styles.searchWrap}>
             <BarraDePesquisa
               placeHolderStr={`Pesquisar ${isOwner ? "tutor" : "pet"}...`}
               setSearch={setSearch}
             />
           </View>
-          <View style={styles.paginationWrap}>
-            <Pagination
-              currentPage={page}
-              totalItems={total}
-              itemsPerPage={LIMIT_ITEM_PAGE}
-              onPageChange={setPage}
-            />
-          </View>
 
+          {/* Lista */}
           <FlatList
             data={items}
             contentContainerStyle={styles.listContent}
@@ -93,6 +91,16 @@ export default function ModalSelectList({
               item.id?.toString() ?? index.toString()
             }
           />
+
+          {/* Paginação — abaixo da lista */}
+          <View style={styles.paginationWrap}>
+            <Pagination
+              currentPage={page}
+              totalItems={total}
+              itemsPerPage={LIMIT_ITEM_PAGE}
+              onPageChange={setPage}
+            />
+          </View>
         </Pressable>
       </Pressable>
     </Modal>
@@ -108,8 +116,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: "88%",
-    maxHeight: "72%",
-    backgroundColor: COLORS.BACKGROUND ?? "#FFF",
+    height: "80%",
+    backgroundColor: COLORS.BACKGROUND,
     borderRadius: 16,
     overflow: "hidden",
     elevation: 6,
@@ -138,14 +146,16 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: COLORS.PRIMARY_SOFT ?? "#E6F7F7",
+    backgroundColor: COLORS.PRIMARY_SOFT,
     justifyContent: "center",
     alignItems: "center",
   },
+
   closeIcon: {
-    width: 14,
-    height: 14,
-    tintColor: COLORS.PRIMARY ?? "#0E9599",
+    fontSize: 13,
+    lineHeight: 15,
+    color: COLORS.PRIMARY,
+    fontWeight: "600",
   },
 
   // Pesquisa
@@ -169,7 +179,7 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT_MUTED,
   },
 
-  // Paginação
+  // Paginação — ✅ movida para baixo da lista
   paginationWrap: {
     borderTopWidth: 1,
     borderColor: COLORS.BORDER_MID,

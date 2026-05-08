@@ -16,13 +16,11 @@ export default function BarraDePesquisa({
   setSearch: (txt: string) => void;
 }) {
   const [text, setText] = useState("");
-  useEffect(() => {
-    setSearch(text);
-  }, [text]);
+
   return (
     <View style={styles.container}>
       <View style={styles.pesquisa}>
-        <TouchableOpacity style={styles.btnImg}>
+        <TouchableOpacity onPress={() => setSearch(text)} style={styles.btnImg}>
           <Image
             style={styles.img}
             source={require("../../../assets/outros/search.png")}

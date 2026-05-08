@@ -15,6 +15,14 @@ class OwnerService {
     return ownerRepository.getAllOwnersPaged(page, limit, order);
   }
 
+  searchOwnersByNamePaged(
+    query: string,
+    page: number,
+    limit: number,
+    order: ORDER,
+  ) {
+    return ownerRepository.searchOwnersByNamePaged(query, page, limit, order);
+  }
   countOwners() {
     return ownerRepository.countOwners();
   }

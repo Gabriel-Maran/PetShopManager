@@ -15,8 +15,13 @@ class PetService {
     return petRepository.getAllPetsPaged(page, limit, order);
   }
 
-  searchPetsByName(query: string) {
-    return petRepository.searchPetsByName(query);
+  searchPetsByNamePaged(
+    query: string,
+    page: number,
+    limit: number,
+    order: ORDER,
+  ) {
+    return petRepository.searchPetsByNamePaged(query, page, limit, order);
   }
 
   getPetsByOwnerId(ownerId: number) {

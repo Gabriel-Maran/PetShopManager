@@ -18,8 +18,16 @@ class PetController {
     return petService.getAllPetsPaged(page, limit, order);
   }
 
-  searchPetsByName(query: string): Promise<Pet[]> {
-    return petService.searchPetsByName(query);
+  searchPetsByNamePaged(
+    query: string,
+    page: number,
+    limit: number,
+    order: ORDER = ORDER.DESC,
+  ): Promise<Pet[]> {
+    if (!query.trim()) {
+      return this.getAllPetsPaged(page, limit, order);
+    }
+    return petService.searchPetsByNamePaged(query, page, limit, order);
   }
 
   getPetsByOwnerId(ownerId: number): Promise<Pet[]> {

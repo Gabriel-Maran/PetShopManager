@@ -1,69 +1,82 @@
-import { Text, View, Button } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Button, Text, StyleSheet } from "react-native";
 import DefaultHeader from "../components/Header/DefaultHeader";
 import ModalSelectList from "../components/Cadastro/Modal/ModalSelectList";
-import { useEffect, useState } from "react";
-import Pagination from "../components/Cadastro/List/Pagination";
 import { ownerController } from "../../controller/OwnerController";
-import { petController } from "../../controller/PetController";
 import { useError } from "../../hooks/useError";
 import { Owner } from "../../model/Owner";
 import { Pet } from "../../model/Pet";
-import { LIMIT_ITEM_PAGE, ORDER } from "../../config/consts";
+import { COLORS, LIMIT_ITEM_PAGE, ORDER } from "../../config/consts";
 
 export default function Relatorios() {
-  const [page, setPage] = useState(0); // Controla a pagina atual
-  const [total, setTotal] = useState(0); // Controla o total de itens de Pet ou Owner
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [searchTxt, setSearchTxt] = useState("");
-  const [isOwner, setIsOwner] = useState(true);
   const [owners, setOwners] = useState<Owner[] | undefined | null>();
-  const [pets, setPets] = useState<Pet[] | undefined | null>();
+  const [itemSelected, setItemSelected] = useState<Owner | Pet | undefined>();
   const { showError } = useError();
 
+  const handleError = (e: unknown) =>
+    showError(e instanceof Error ? e.message : "Erro inesperado.");
+
+  // Contagem total
   useEffect(() => {
-    const count = isOwner
-      ? ownerController.countOwners()
-      : petController.countPets();
+    ownerController.countOwners().then(setTotal).catch(handleError);
+  }, []);
 
-    count
-      .then(setTotal)
-      .catch((e) =>
-        showError(e instanceof Error ? e.message : "Erro inesperado."),
-      );
-  }, [isOwner]);
-
+  // Busca com debounce — espera 400ms após o usuário parar de digitar
   useEffect(() => {
-    const getPagedData = isOwner
-      ? //Se for Owner, pega o paged do Owner
-        ownerController
-          .getAllOwnersPaged(page, LIMIT_ITEM_PAGE, ORDER.DESC)
-          .then(setOwners)
-      : //Se for Pet, pega o paged do Pet
-        petController
-          .getAllPetsPaged(page, LIMIT_ITEM_PAGE, ORDER.DESC)
-          .then(setPets);
-
-    getPagedData.catch((e) =>
-      showError(e instanceof Error ? e.message : "Erro inesperado."),
-    );
-  }, [page, isOwner]);
+    try {
+      ownerController
+        .searchOwnersByNamePaged(searchTxt, page, LIMIT_ITEM_PAGE, ORDER.DESC)
+        .then(setOwners)
+        .catch(handleError);
+    } catch (e) {
+      showError(e instanceof Error ? e.message : "Erro inesperado.");
+    }
+  }, [searchTxt, page]);
 
   return (
-    <View>
+    <View style={styles.container}>
       <DefaultHeader />
+
       <Button title="ABRIR MODAL" onPress={() => setIsOpen(true)} />
+
+      <Text style={styles.selected}>
+        {itemSelected?.nome ?? "Nenhum selecionado"}
+      </Text>
+
       <ModalSelectList
-        setSearch={(searchTxt: string) => setSearchTxt(searchTxt)}
         isOpen={isOpen}
-        isOwner={isOwner}
-        onClose={() => setIsOpen(false)}
-        onSelect={(item) => console.log("Item selecionado " + item.nome)}
-        items={isOwner ? owners : pets}
+        isOwner={true}
+        items={owners}
         page={page}
         total={total}
+        onClose={() => setIsOpen(false)}
+        onSelect={(item) => {
+          setItemSelected(item);
+          setIsOpen(false);
+        }}
         setPage={setPage}
+        setSearch={(txt) => {
+          setPage(0);
+          setSearchTxt(txt);
+        }}
       />
-      <View></View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.BACKGROUND ?? "#FFF",
+  },
+  selected: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    fontSize: 13,
+    color: COLORS.TEXT_MUTED,
+  },
+});

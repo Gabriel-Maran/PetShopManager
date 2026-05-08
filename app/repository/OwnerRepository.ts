@@ -28,12 +28,21 @@ class OwnerRepository {
     );
   }
 
-  // Busca por nome usando o idx_owners_nome (prefixo) ou substring
-  async searchOwnersByName(query: string): Promise<Owner[]> {
+  async searchOwnersByNamePaged(
+    query: string,
+    page: number = 0,
+    limit: number = 20,
+    order: ORDER = ORDER.ASC,
+  ): Promise<Owner[]> {
     const db = await getDatabase();
+    const offset = page * limit;
+
     return db.getAllAsync<Owner>(
-      `SELECT * FROM owners WHERE nome LIKE ? AND is_ativo = 1 ORDER BY nome ASC`,
-      [`%${query}%`],
+      `SELECT * FROM owners 
+     WHERE nome LIKE ? AND is_ativo = 1 
+     ORDER BY nome ${order} 
+     LIMIT ? OFFSET ?`,
+      [`%${query}%`, limit, offset],
     );
   }
 
