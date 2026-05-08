@@ -6,41 +6,40 @@ export const STATUS_BAR_HEIGHT =
 export const APP_BAR_HEIGHT = 70;
 
 export const COLORS = {
-  // Brand/Action (Verdes ajustados para contraste no escuro)
-  PRIMARY: "#10b981",
-  PRIMARY_VARIANT: "#059669",
-  PRIMARY_SOFT: "#064e3b",
-  PRIMARY_CONTRAST: "#34d399",
+  // Brand/Action (Verdes)
+  PRIMARY: "#0e996d",
+  PRIMARY_VARIANT: "#1D9E75",
+  PRIMARY_SOFT: "#E1F5EE",
+  PRIMARY_CONTRAST: "#0E9599",
 
-  // Backgrounds/Surfaces (Pretos e Cinzas Escuros)
-  BACKGROUND: "#121212",
-  SECOND_BACKGROUND: "#1e1e1e",
-  THIRD_BACKGROUND: "#242424",
-  SURFACE: "#2c2c2c",
-  SURFACE_VARIANT: "#3d3d3d",
+  // Backgrounds/Surfaces (Brancos)
+  BACKGROUND: "#ffffff",
+  SECOND_BACKGROUND: "#b5b5b5",
+  THIRD_BACKGROUND: "#F8F9FA",
+  SURFACE: "#F2F3F7",
+  SURFACE_VARIANT: "#EFEFEF",
 
-  // Typography/Icons (Brancos e Cinzas Claros)
-  TEXT_PRIMARY: "#ffffff",
-  TEXT_SECONDARY: "#e5e7eb",
-  TEXT_MUTED: "#9ca3af",
+  // Typography/Icons (Pretos e Cinzas)
+  TEXT_PRIMARY: "#000000",
+  TEXT_SECONDARY: "#2C2C2A",
+  TEXT_MUTED: "#646462",
 
   // Elements (Bordas e Divisores)
-  BORDER: "#2d2d2d",
-  BORDER_STRONG: "#525252",
-  BORDER_MID: "#404040",
-  BORDER_LIGHT: "#b4b2b2",
+  BORDER: "#F0F0F0",
+  BORDER_STRONG: "#888",
+  BORDER_MID: "#b5b5b5",
+  BORDER_LIGHT: "#cccdcf",
 
-  MODAL_BACKGROUND: "rgba(0,0,0,0.75)",
-  DESATIVADO: "#4b4b4b",
+  MODAL_BACKGROUND: "rgba(0,0,0,0.45)",
+  DESATIVADO: "#CECCC3",
 
-  // Feedback de Ações
-  EXCLUIR_MAIN_COLOR: "#f87171",
-  EXCLUIR_BORDER_COLOR: "#991b1b",
-  EXCLUIR_BACKGROUND_COLOR: "#450a0a",
+  EXCLUIR_MAIN_COLOR: "rgb(203, 31, 31)",
+  EXCLUIR_BORDER_COLOR: "#F09595",
+  EXCLUIR_BACKGROUND_COLOR: "#FCEBEB",
 
-  EDITAR_MAIN_COLOR: "#10b981",
-  EDITAR_BORDER_COLOR: "#065f46",
-  EDITAR_BACKGROUND_COLOR: "#064e3b",
+  EDITAR_MAIN_COLOR: "#0e996d",
+  EDITAR_BORDER_COLOR: "#1D9E75",
+  EDITAR_BACKGROUND_COLOR: "#E1F5EE",
 };
 
 /*
