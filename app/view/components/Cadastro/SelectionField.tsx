@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Image, ImageSourcePropType } from "react-native";
 import { useState } from "react";
 import { COLORS, Screen } from "../../../config/consts";
 import ButtonEditar from "./Botões/ButtonEditar";
