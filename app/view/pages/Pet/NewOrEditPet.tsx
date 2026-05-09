@@ -5,10 +5,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   COLORS,
   EspeciesAtendidas,
+  LIMIT_ITEM_PAGE,
+  ORDER,
   PacoteRemarcacao,
   PorteAnimal,
   Screen,
@@ -17,9 +19,14 @@ import {
 import { useError } from "../../../hooks/useError";
 import { Pet, PetBuilder } from "../../../model/Pet";
 import { petController } from "../../../controller/PetController";
+import { Owner } from "../../../model/Owner";
+
 import TitleBar from "../../components/Cadastro/TitleBar";
 import DefaultHeader from "../../components/Header/DefaultHeader";
 import InputInfo from "../../components/Cadastro/InputInfo";
+import SelectionField from "../../components/Cadastro/SelectionField";
+import { ownerController } from "../../../controller/OwnerController";
+import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
 
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { showError } = useError();
@@ -28,6 +35,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
     nome: petToEdit?.nome ?? "",
     especie: petToEdit?.especie ?? EspeciesAtendidas.CAO,
     dono_id: petToEdit?.dono_id ?? 0,
+    dono_nome: "",
     raca: petToEdit?.raca ?? "",
     observacoes: petToEdit?.observacoes ?? "",
     servicoPadrao: petToEdit?.servico_padrao ?? TipoServico.Banho,
@@ -69,12 +77,37 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
     }
   };
 
+  const handleError = (e: unknown) =>
+    showError(e instanceof Error ? e.message : "Erro inesperado.");
+
   const atualizarValores = (campo: keyof typeof form, valor: any) => {
     setForm((prev) => ({
       ...prev,
       [campo]: valor,
     }));
   };
+
+  const limparDono = () => {
+    atualizarValores("dono_id", 0);
+    atualizarValores("dono_nome", "");
+  };
+
+  const [modalDonoVisivel, setModalDonoVisivel] = useState(false);
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [searchTxt, setSearchTxt] = useState("");
+  const [owners, setOwners] = useState<Owner[] | undefined | null>();
+
+  useEffect(() => {
+    try {
+      ownerController
+        .searchOwnersByNamePaged(searchTxt, page, LIMIT_ITEM_PAGE, ORDER.DESC)
+        .then(setOwners)
+        .catch(handleError);
+    } catch (e) {
+      showError(e instanceof Error ? e.message : "Erro inesperado.");
+    }
+  }, [searchTxt, page]);
 
   return (
     <>
@@ -95,14 +128,25 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
 
           <View style={styles.inputs}>
             <InputInfo
-              image={require("../../../assets/animais/iconPata.png")}
+              image={require("../../../assets/animais/iconNome.png")}
               item={form.nome}
               setItem={(v) => atualizarValores("nome", v)}
               placeHolder="Digite o nome..."
               titleName="Nome Completo"
               variasLinhas={false}
               hasBorderBottom={true}
+              digitavel={true}
             />
+            <SelectionField
+              image={require("../../../assets/animais/iconDono.png")}
+              titleName="dono"
+              selectedReg={form.dono_nome}
+              buttonText={form.dono_nome ? "Trocar dono" : "Selecionar dono"}
+              hasBorderBottom={true}
+              onPress={() => setModalDonoVisivel(true)}
+              onClear={form.dono_nome ? limparDono : undefined}
+            />
+
             <InputInfo
               image={require("../../../assets/animais/iconPata.png")}
               item={form.especie}
@@ -111,15 +155,18 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               titleName="Espécie"
               variasLinhas={false}
               hasBorderBottom={true}
+              digitavel={true}
             />
+
             <InputInfo
-              image={require("../../../assets/nav_bar/personAdd.png")}
+              image={require("../../../assets/animais/iconRaca.png")}
               item={form.raca}
               setItem={(v) => atualizarValores("raca", v)}
               placeHolder="Digite a raça..."
               titleName="Raça"
               variasLinhas={false}
               hasBorderBottom={true}
+              digitavel={true}
             />
           </View>
           <View style={styles.ctnBtnSalvar}>
@@ -131,6 +178,25 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
           </View>
         </View>
       </ScrollView>
+
+      <ModalSelectList
+        isOpen={modalDonoVisivel}
+        isOwner={true}
+        items={owners}
+        page={page}
+        total={total}
+        onClose={() => setModalDonoVisivel(false)}
+        onSelect={(item) => {
+          atualizarValores("dono_id", item.id);
+          atualizarValores("dono_nome", item.nome);
+          setModalDonoVisivel(false);
+        }}
+        setPage={setPage}
+        setSearch={(txt) => {
+          setPage(0);
+          setSearchTxt(txt);
+        }}
+      />
     </>
   );
 }
