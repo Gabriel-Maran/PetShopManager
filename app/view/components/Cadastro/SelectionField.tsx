@@ -9,14 +9,17 @@ export default function SelectionField({
   selectedReg,
   buttonText,
   hasBorderBottom,
+  onPress,
+  onClear,
 }: {
   image: ImageSourcePropType;
   titleName: string;
   selectedReg?: string;
   buttonText: string;
   hasBorderBottom: boolean;
+  onPress: () => void;
+  onClear?: () => void;
 }) {
-  const [petSelecionado, setPetSelecionado] = useState(false);
   return (
     <View
       style={[
@@ -33,7 +36,7 @@ export default function SelectionField({
       <View style={{ width: "90%", gap: 5 }}>
         <Text style={styles.txtInput}>{titleName.toUpperCase()}</Text>
 
-        {petSelecionado ? (
+        {selectedReg ? (
           <View style={styles.regSelecionado}>
             <View style={styles.caixaReg}>
               <Text style={styles.txtReg}>{selectedReg}</Text>
@@ -44,7 +47,7 @@ export default function SelectionField({
         ) : (
           <TouchableOpacity
             style={styles.btnSalvar}
-            onPress={() => setPetSelecionado(true)}
+            onPress={onPress}
           >
             <Text style={styles.txtSalvar}>{buttonText}</Text>
           </TouchableOpacity>
