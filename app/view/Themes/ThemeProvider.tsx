@@ -15,7 +15,7 @@ const colors = {
 
     BACKGROUND: "#ffffff",
     SECOND_BACKGROUND: "#b5b5b5",
-    THIRD_BACKGROUND: "#F8F9FA",
+    THIRD_BACKGROUND: "#f3f3f4",
     SURFACE: "#F2F3F7",
     SURFACE_VARIANT: "#EFEFEF",
 
