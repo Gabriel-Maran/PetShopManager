@@ -34,9 +34,9 @@ export default function SelectionField({
         <Text style={styles.txtInput}>{titleName.toUpperCase()}</Text>
 
         {petSelecionado ? (
-          <View style={styles.petSelecionado}>
-            <View style={styles.txtNomePet}>
-              <Text>{selectedReg}</Text>
+          <View style={styles.regSelecionado}>
+            <View style={styles.caixaReg}>
+              <Text style={styles.txtReg}>{selectedReg}</Text>
             </View>
 
             <ButtonEditar navegarPara={Screen.Cadastros} editCampo={true} />
@@ -79,17 +79,22 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 12,
   },
-  petSelecionado: {
+  regSelecionado: {
     width: "90%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  txtNomePet: {
+  caixaReg: {
     borderWidth: 1.3,
     width: "80%",
     padding: 10,
+    paddingLeft: 15,
     borderRadius: 10,
+    fontSize: 20,
+  },
+  txtReg:{
+    fontSize: 15
   },
   btnSalvar: {
     width: "90%",
