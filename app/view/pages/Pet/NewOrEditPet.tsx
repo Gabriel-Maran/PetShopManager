@@ -7,8 +7,6 @@ import {
 } from "react-native";
 import { useEffect, useState } from "react";
 import {
-  COLORS,
-  EspeciesAtendidas,
   LIMIT_ITEM_PAGE,
   ORDER,
   PacoteRemarcacao,
@@ -27,6 +25,9 @@ import InputInfo from "../../components/Cadastro/InputInfo";
 import SelectionField from "../../components/Cadastro/SelectionField";
 import { ownerController } from "../../../controller/OwnerController";
 import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
+import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
+import { speciesController } from "../../../controller/SpeciesController";
+import InputSelect from "../../components/InputSelect";
 
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { showError } = useError();
@@ -168,17 +169,16 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               setModal={() => setModalDonoVisivel(true)}
               goEdit={true}
               onClear={form.dono_nome ? limparDono : undefined}
-            />
-
-        {/*     <InputInfo
-              image={require("../../../assets/animais/iconPata.png")}
-              item={form.especie}
-              setItem={(v) => atualizarValores("especie", v)}
-              placeHolder="Digite a espécie..."
-              titleName="Espécie"
-              variasLinhas={false}
-              hasBorderBottom={true}
-              digitavel={true}
+            /> 
+            <InputSelect
+              placeholder="Selecione a espécie..."
+              itens={especiesList}
+              itemSelected={especiesList.find((e) => e.id === form.especie)}
+              labelExtractor={(item) => item.nome}
+              onChange={(item) => atualizarValores("especie", item.id)}
+              renderItem={(item) => (
+                <Text style={{ padding: 15 }}>{item.nome}</Text>
+              )}
             />
 
             <InputSelect
