@@ -10,6 +10,10 @@ class AppointmentsService {
     return appointmentsRepository.getAppointmentsByDate(date);
   }
 
+  getAppointmentsByDateWithOwnerAndPet(date: number) {
+    return appointmentsRepository.getAppointmentsByDateWithOwnerAndPet(date);
+  }
+
   getAppointmentsByDateRange(from: number, to: number) {
     return appointmentsRepository.getAppointmentsByDateRange(from, to);
   }

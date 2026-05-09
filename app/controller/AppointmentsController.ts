@@ -1,4 +1,5 @@
 import { Appointment } from "../model/Appointment";
+import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
 import { appointmentsService } from "../service/AppointmentsService";
 
 class AppointmentsController {
@@ -10,6 +11,10 @@ class AppointmentsController {
 
   getAppointmentsByDate(date: number): Promise<Appointment[]> {
     return appointmentsService.getAppointmentsByDate(date);
+  }
+
+  getAppointmentsByDateWithOwnerAndPet(date: number): Promise<AppointmentsWithOwnerAndPet[]> {
+    return appointmentsService.getAppointmentsByDateWithOwnerAndPet(date);
   }
 
   getAppointmentsByDateRange(from: number, to: number): Promise<Appointment[]> {

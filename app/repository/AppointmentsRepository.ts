@@ -1,5 +1,6 @@
 import { getDatabase } from "../config/database";
 import { Appointment } from "../model/Appointment";
+import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
 
 class AppointmentRepository {
   async getAppointmentById(id: number): Promise<Appointment | null> {
@@ -15,6 +16,27 @@ class AppointmentRepository {
     const db = await getDatabase();
     return db.getAllAsync<Appointment>(
       `SELECT * FROM appointments WHERE data = ? ORDER BY id ASC`,
+      [date],
+    );
+  }
+
+  async getAppointmentsByDateWithOwnerAndPet(
+    date: number,
+  ): Promise<AppointmentsWithOwnerAndPet[]> {
+    const db = await getDatabase();
+    return db.getAllAsync<AppointmentsWithOwnerAndPet>(
+      `
+    SELECT 
+      AP.*,
+      PT.nome AS nome_pet,
+      PT.raca AS raca_pet,
+      OW.nome AS nome_dono
+    FROM appointments AS AP
+    JOIN pets AS PT ON AP.pet_id = PT.id
+    JOIN owners AS OW ON PT.dono_id = OW.id
+    WHERE AP.data = ?
+    ORDER BY AP.id ASC
+    `,
       [date],
     );
   }
