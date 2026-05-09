@@ -11,6 +11,12 @@ export interface Appointment {
   criado_em?: number;
 }
 
+export type AppointmentsWithOwnerAndPet = Appointment & {
+  nome_pet: string;
+  nome_dono: string;
+  raca_pet: string;
+};
+
 export class AppointmentBuilder {
   private props: Partial<Appointment>;
 
