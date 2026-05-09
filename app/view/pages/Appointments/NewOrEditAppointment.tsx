@@ -18,7 +18,7 @@ import { useScreen } from "../../../hooks/useScreen";
 import { useError } from "../../../hooks/useError";
 
 import { Pet } from "../../../model/Pet";
-import { Appointment, AppointmentBuilder } from "../../../model/Appointment";
+import { AppointmentBuilder, NewOrEditAppointmentParams } from "../../../model/Appointment";
 
 import { petController } from "../../../controller/PetController";
 import { appointmentController } from "../../../controller/AppointmentsController";
@@ -30,49 +30,39 @@ import Toggle from "../../components/Cadastro/Botões/Toggle";
 import SelectionField from "../../components/Cadastro/SelectionField";
 import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
 
-const maskData = (v: string) => {
-  const d = v.replace(/\D/g, "");
-  if (!d) return "";
-  if (d.length <= 2) {
-    return d;
-  }
-  if (d.length <= 4) {
-    return `${d.slice(0, 2)}/${d.slice(2)}`;
-  }
-  return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4, 8)}`;
-};
-
-const maskHora = (v: string) => {
-  const d = v.replace(/\D/g, "");
-  if (!d) return "";
-  if (d.length <= 2) {
-    return d;
-  }
-  if (d.length <= 4) {
-    return `${d.slice(0, 2)}:${d.slice(2, 4)}`;
-  }
-  return `${d.slice(0, 2)}:${d.slice(2, 4)}`;
-};
+import { DataHifenPraBarra, DataNumberPraString, DataStringPraNumber } from "../../../utils/converterData";
+import Mascarar from "../../../utils/mascarar";
 
 export default function NewOrEditAppointment() {
-  const { params, navigate } = useScreen<Appointment>();
-
-  const isEditing = Boolean(params?.id);
+  const { params, navigate } = useScreen<NewOrEditAppointmentParams>();
   const { showError } = useError();
 
-  const [nomePet, setNomePet] = useState("");
-  const [idPet, setIdPet] = useState<number>(0);
+  const mascarar = Mascarar
 
-  const [servico, setServico] = useState(params?.servico ?? "");
-  const [data, setData] = useState(
-    params?.data ? new Date(params.data).toLocaleDateString("pt-BR") : "",
+  const isEditing = Boolean(params?.appointment?.id);
+  console.log(isEditing)
+
+  const [nomePet, setNomePet] = useState(params?.appointment?.nome_pet);
+  const [idPet, setIdPet] = useState(params?.appointment?.pet_id ?? 0);
+
+  const [servico, setServico] = useState(params?.appointment?.servico ?? "");
+  const [data, setData] = useState<string>(
+    params?.appointment?.data
+      ? DataNumberPraString(params?.appointment?.data)
+      : params?.dateSelected
+        ? DataHifenPraBarra(params?.dateSelected)
+        : "",
   );
-  const [hora, setHora] = useState(params?.hora ?? "");
+  const [hora, setHora] = useState(params?.appointment?.hora ?? "");
   const [entregarPet, setEntregarPet] = useState<number>(
-    params?.entregar_pet ?? 0,
+    params?.appointment?.entregar_pet ?? 0,
   );
-  const [concluido, setConcluido] = useState(params?.concluido ?? 0);
-  const [observacao, setObservacao] = useState(params?.observacao ?? "");
+  const [concluido, setConcluido] = useState(
+    params?.appointment?.concluido ?? 0,
+  );
+  const [observacao, setObservacao] = useState(
+    params?.appointment?.observacao ?? "",
+  );
 
   const [taEditando, setTaEditando] = useState(false);
 
@@ -80,7 +70,9 @@ export default function NewOrEditAppointment() {
   //Minha ideia é não alterar isso, por conta de que, foi criado automatico e se o dono do petshop mudar
   //deve continuar como auto gerado
   //Mas é interessante fazer algo visual para mostrar se foi auto gerado ou não
-  const [autoGen, setAutoGen] = useState(params?.is_auto_agen ?? 0);
+  const [autoGen, setAutoGen] = useState(
+    params?.appointment?.is_auto_agen ?? 0,
+  );
 
   const [modalPets, setModalPets] = useState(false);
   const [page, setPage] = useState(0);
@@ -97,24 +89,17 @@ export default function NewOrEditAppointment() {
     } catch (e) {
       showError(e instanceof Error ? e.message : "Erro inesperado.");
     }
-    ;
   }, [searchTxt, page]);
 
   const handleError = (e: unknown) =>
     showError(e instanceof Error ? e.message : "Erro inesperado.");
-
-  function converterPraNumber(dataTexto: string): number {
-    const [dia, mes, ano] = dataTexto.split("/");
-
-    return Number(`${ano}${mes}${dia}`);
-  }
 
   const salvarAgendamento = async () => {
     const appointmentSalvar = new AppointmentBuilder()
       .withPetId(idPet)
       .withServico(servico)
       .withHora(hora ?? "00:00")
-      .withData(converterPraNumber(data))
+      .withData(DataStringPraNumber(data,"/"))
       .withEntregarPet(entregarPet)
       .withObservacao(observacao)
       .isConcluido(concluido)
@@ -123,7 +108,7 @@ export default function NewOrEditAppointment() {
     try {
       if (isEditing) {
         await appointmentController.updateAppointment(
-          params!.id!,
+          params!.appointment?.id!,
           appointmentSalvar,
         );
       } else {
@@ -175,7 +160,7 @@ export default function NewOrEditAppointment() {
             <InputInfo
               image={require("../../../assets/outros/data.png")}
               item={data}
-              setItem={(v) => setData(maskData(v))}
+              setItem={(v) => setData(mascarar(v,1))}
               placeHolder="Informe a data..."
               titleName="Data"
               variasLinhas={true}
@@ -185,7 +170,7 @@ export default function NewOrEditAppointment() {
             <InputInfo
               image={require("../../../assets/outros/hora.png")}
               item={hora}
-              setItem={(v) => setHora(maskHora(v))}
+              setItem={(v) => setHora(mascarar(v,2))}
               placeHolder="Informe o horário..."
               titleName="Horário"
               variasLinhas={true}
