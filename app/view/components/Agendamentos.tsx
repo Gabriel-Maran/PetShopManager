@@ -6,6 +6,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useState, useEffect } from "react";
+
+import { useScreen } from "../../hooks/useScreen";
+import { useError } from "../../hooks/useError";
+
 import {
   Screen,
   APP_BAR_HEIGHT,
@@ -14,7 +19,10 @@ import {
   TipoServico,
   COLORS,
 } from "../../config/consts";
-import { useScreen } from "../../hooks/useScreen";
+
+import { AppointmentWithOwner } from "../../model/Appointment";
+
+import { appointmentController } from "../../controller/AppointmentsController";
 
 export default function Agendamentos({
   isFullScreen,
@@ -27,7 +35,7 @@ export default function Agendamentos({
   setFullScreen: (isFullScreen: boolean) => void;
   dateSelected: string;
 }) {
-  const appointments = [
+  /*  const appointments = [
     {
       id: 1,
       petName: "Rex",
@@ -52,8 +60,27 @@ export default function Agendamentos({
       foto: EspeciesAtendidas.OUTRO,
       servico: TipoServico.Tosa,
     },
-  ];
+  ]; */
   const { navigate } = useScreen();
+  const { showError } = useError();
+
+  const handleError = (e: unknown) =>
+    showError(e instanceof Error ? e.message : "Erro inesperado.");
+
+  const [appointments, setAppointments] = useState<AppointmentWithOwner[]>();
+
+  useEffect(() => {
+    const fetch = appointmentController
+      .getAppointmentsByDateWithOwnerAndPet(converterPraNumber(dateSelected))
+      .then(setAppointments);
+    fetch.catch(handleError);
+  }, [dateSelected]);
+
+  function converterPraNumber(dataTexto: string): number {
+    const [ano, mes, dia] = dataTexto.split("-");
+
+    return Number(`${ano}${mes}${dia}`);
+  }
 
   return (
     <View style={[styles.container, { marginTop: margemSuperior }]}>
@@ -109,9 +136,9 @@ export default function Agendamentos({
             <View style={styles.avatar}>
               <Image
                 source={
-                  item.foto === EspeciesAtendidas.CAO
+                  item.raca_pet === EspeciesAtendidas.CAO
                     ? require("../../assets/animais/caoGreen.png")
-                    : item.foto === EspeciesAtendidas.GATO
+                    : item.raca_pet === EspeciesAtendidas.GATO
                       ? require("../../assets/animais/gatoGreen.png")
                       : require("../../assets/animais/interrogacaoGreen.png")
                 }
@@ -120,15 +147,15 @@ export default function Agendamentos({
             </View>
 
             <View style={styles.info}>
-              <Text style={styles.petName}>{item.petName}</Text>
-              <Text style={styles.ownerName}>{item.ownerName}</Text>
+              <Text style={styles.petName}>{item.nome_pet}</Text>
+              <Text style={styles.ownerName}>{item.nome_dono}</Text>
             </View>
 
             <View style={styles.right}>
               <View style={styles.servicoBadge}>
                 <Text style={styles.servicoTxt}>{item.servico}</Text>
               </View>
-              <Text style={styles.time}>{item.time}</Text>
+              <Text style={styles.time}>{item.hora}</Text>
             </View>
           </TouchableOpacity>
         )}
