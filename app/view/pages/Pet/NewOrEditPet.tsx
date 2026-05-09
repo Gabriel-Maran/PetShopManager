@@ -8,7 +8,6 @@ import {
 import { useEffect, useState } from "react";
 import {
   COLORS,
-  EspeciesAtendidas,
   LIMIT_ITEM_PAGE,
   ORDER,
   PacoteRemarcacao,
@@ -27,16 +26,18 @@ import InputInfo from "../../components/Cadastro/InputInfo";
 import SelectionField from "../../components/Cadastro/SelectionField";
 import { ownerController } from "../../../controller/OwnerController";
 import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
+import { speciesController } from "../../../controller/SpeciesController";
+import InputSelect from "../../components/InputSelect";
 
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { showError } = useError();
 
   const [form, setForm] = useState({
     nome: petToEdit?.nome ?? "",
-    especie: petToEdit?.especie ?? EspeciesAtendidas.CAO,
+    especie: petToEdit?.especie ?? 0,
     dono_id: petToEdit?.dono_id ?? 0,
     dono_nome: "",
-    raca: petToEdit?.raca ?? "",
+    raca: petToEdit?.raca ?? 0,
     observacoes: petToEdit?.observacoes ?? "",
     servicoPadrao: petToEdit?.servico_padrao ?? TipoServico.Banho,
     remarcAtiva: petToEdit?.remarcacao_ativa ?? false,
@@ -97,6 +98,12 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const [total, setTotal] = useState(0);
   const [searchTxt, setSearchTxt] = useState("");
   const [owners, setOwners] = useState<Owner[] | undefined | null>();
+  const [especiesList, setEspeciesList] = useState<
+    { id: number; nome: string }[]
+  >([]);
+  const [racasList, setRacasList] = useState<{ id: number; nome: string }[]>(
+    [],
+  );
 
   useEffect(() => {
     try {
@@ -108,6 +115,19 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
       showError(e instanceof Error ? e.message : "Erro inesperado.");
     }
   }, [searchTxt, page]);
+
+  useEffect(() => {
+    speciesController.searchSpecies().then(setEspeciesList).catch(handleError);
+  }, []);
+
+  useEffect(() => {
+    if (form.especie) {
+      speciesController
+        .searchBreedsBySpecies(form.especie)
+        .then(setRacasList)
+        .catch(handleError);
+    }
+  }, [form.especie]);
 
   return (
     <>
@@ -144,31 +164,32 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               buttonText={form.dono_nome ? "Trocar dono" : "Selecionar dono"}
               hasBorderBottom={true}
               onPress={() => setModalDonoVisivel(true)}
+              setModal={() => setModalDonoVisivel(true)}
+              goEdit={true}
               onClear={form.dono_nome ? limparDono : undefined}
             />
 
-        {/*     <InputInfo
-              image={require("../../../assets/animais/iconPata.png")}
-              item={form.especie}
-              setItem={(v) => atualizarValores("especie", v)}
-              placeHolder="Digite a espécie..."
-              titleName="Espécie"
-              variasLinhas={false}
-              hasBorderBottom={true}
-              digitavel={true}
+            <InputSelect
+              placeholder="Selecione a espécie..."
+              itens={especiesList}
+              itemSelected={especiesList.find((e) => e.id === form.especie)}
+              labelExtractor={(item) => item.nome}
+              onChange={(item) => atualizarValores("especie", item.id)}
+              renderItem={(item) => (
+                <Text style={{ padding: 15 }}>{item.nome}</Text>
+              )}
             />
 
-            <InputInfo
-              image={require("../../../assets/animais/iconRaca.png")}
-              item={form.raca}
-              setItem={(v) => atualizarValores("raca", v)}
-              placeHolder="Digite a raça..."
-              titleName="Raça"
-              variasLinhas={false}
-              hasBorderBottom={true}
-              digitavel={true}
+            <InputSelect
+              placeholder="Selecione a raça..."
+              itens={racasList}
+              itemSelected={racasList.find((e) => e.id === form.raca)}
+              labelExtractor={(item) => item.nome}
+              onChange={(item) => atualizarValores("raca", item.id)}
+              renderItem={(item) => (
+                <Text style={{ padding: 15 }}>{item.nome}</Text>
+              )}
             />
-             */}
           </View>
           <View style={styles.ctnBtnSalvar}>
             <TouchableOpacity style={styles.btnSalvar} onPress={salvarPet}>

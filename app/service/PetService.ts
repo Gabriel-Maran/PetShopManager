@@ -47,6 +47,7 @@ class PetService {
   activePet(id: number) {
     return petRepository.activePet(id);
   }
+  
 }
 
 export const petService = new PetService();
