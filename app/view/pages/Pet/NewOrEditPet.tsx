@@ -147,7 +147,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               onClear={form.dono_nome ? limparDono : undefined}
             />
 
-            <InputInfo
+        {/*     <InputInfo
               image={require("../../../assets/animais/iconPata.png")}
               item={form.especie}
               setItem={(v) => atualizarValores("especie", v)}
@@ -168,6 +168,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               hasBorderBottom={true}
               digitavel={true}
             />
+             */}
           </View>
           <View style={styles.ctnBtnSalvar}>
             <TouchableOpacity style={styles.btnSalvar} onPress={salvarPet}>
