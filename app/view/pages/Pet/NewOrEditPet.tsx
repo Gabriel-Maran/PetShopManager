@@ -146,6 +146,8 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               buttonText={form.dono_nome ? "Trocar dono" : "Selecionar dono"}
               hasBorderBottom={true}
               onPress={() => setModalDonoVisivel(true)}
+              setModal={() => setModalDonoVisivel(true)}
+              goEdit={true}
               onClear={form.dono_nome ? limparDono : undefined}
             />
 
