@@ -1,6 +1,6 @@
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useScreen } from "../../../../../hooks/useScreen";
-import { COLORS } from "../../../../../config/consts";
+import { ThemeColors, useThemedStyles } from "../../../../Themes/ThemeProvider";
 
 export default function ButtonExcluir({
   onDelete,
@@ -9,15 +9,12 @@ export default function ButtonExcluir({
   onDelete: (itemId: number) => void;
   itemId: number;
 }) {
-  const { screen, navigate } = useScreen();
+  const s = useThemedStyles(styles);
   return (
-    <View style={styles.ctnDelete}>
-      <TouchableOpacity
-        onPress={() => onDelete(itemId)}
-        style={styles.btnDelete}
-      >
+    <View style={s.ctnDelete}>
+      <TouchableOpacity onPress={() => onDelete(itemId)} style={s.btnDelete}>
         <Image
-          style={styles.iconDelete}
+          style={s.iconDelete}
           source={require("../../../../../assets/crud/delete.png")}
         />
       </TouchableOpacity>
@@ -25,21 +22,22 @@ export default function ButtonExcluir({
   );
 }
 
-const styles = StyleSheet.create({
-  ctnDelete: {
-    alignSelf: "center",
-    justifyContent: "flex-end",
-  },
-  btnDelete: {
-    marginLeft: 10,
-    backgroundColor: COLORS.EXCLUIR_BACKGROUND_COLOR,
-    padding: 8,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: COLORS.EXCLUIR_BORDER_COLOR,
-  },
-  iconDelete: {
-    height: 28,
-    width: 28,
-  },
-});
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    ctnDelete: {
+      alignSelf: "center",
+      justifyContent: "flex-end",
+    },
+    btnDelete: {
+      marginLeft: 10,
+      backgroundColor: colors.EXCLUIR_BACKGROUND_COLOR,
+      padding: 8,
+      borderRadius: 15,
+      borderWidth: 1,
+      borderColor: colors.EXCLUIR_BORDER_COLOR,
+    },
+    iconDelete: {
+      height: 28,
+      width: 28,
+    },
+  });

@@ -1,29 +1,33 @@
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import { COLORS, Screen } from "../../../../config/consts";
+import { Screen } from "../../../../config/consts";
 import { useScreen } from "../../../../hooks/useScreen";
+import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 
 export default function ButtonBack({ backTo }: { backTo: Screen }) {
   const { screen, navigate } = useScreen();
+  const s = useThemedStyles(styles);
+
   return (
-    <TouchableOpacity onPress={() => navigate(backTo)} style={styles.btnBack}>
+    <TouchableOpacity onPress={() => navigate(backTo)} style={s.btnBack}>
       <Image
-        style={styles.imgBack}
+        style={s.imgBack}
         source={require("../../../../assets/setas/voltarBlack.png")}
       />
     </TouchableOpacity>
   );
 }
-const styles = StyleSheet.create({
-  imgBack: {
-    height: 40,
-    width: 40,
-    tintColor: COLORS.TEXT_PRIMARY,
-  },
-  btnBack: {
-    borderColor: COLORS.BORDER_MID,
-    borderWidth: 1,
-    padding: 4,
-    borderRadius: 15,
-    justifyContent: "center",
-  },
-});
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    imgBack: {
+      height: 40,
+      width: 40,
+      tintColor: colors.TEXT_PRIMARY,
+    },
+    btnBack: {
+      borderColor: colors.BORDER_MID,
+      borderWidth: 1,
+      padding: 4,
+      borderRadius: 15,
+      justifyContent: "center",
+    },
+  });
