@@ -58,7 +58,7 @@ export default function NewOrEditOwner() {
       } else {
         await ownerController.createOwner(ownerSalvar);
       }
-      navigate(Screen.Cadastros);
+      navigate(Screen.Cadastros, "OWNERS");
     } catch (erro) {
       showError(erro instanceof Error ? erro.message : "Erro inesperado.");
     }
