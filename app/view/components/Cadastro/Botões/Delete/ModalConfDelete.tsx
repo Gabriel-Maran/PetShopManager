@@ -1,5 +1,9 @@
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { COLORS } from "../../../../../config/consts";
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../../../../Themes/ThemeProvider";
 
 interface Props {
   message: string | null;
@@ -14,30 +18,33 @@ export default function ModalConfDelete({
   onConfirmDelete,
   visible,
 }: Props) {
+  const { colors } = useTheme();
+  const s = useThemedStyles(styles);
+
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.overlay}>
-        <View style={styles.box}>
-          <Text style={styles.emoji}>⚠️</Text>
+      <View style={s.overlay}>
+        <View style={s.box}>
+          <Text style={s.emoji}>⚠️</Text>
 
-          <View style={styles.messageTop}>
-            <Text style={styles.title}>Deseja mesmo excluir?</Text>
-            <Text style={styles.message}>{message}</Text>
+          <View style={s.messageTop}>
+            <Text style={s.title}>Deseja mesmo excluir?</Text>
+            <Text style={s.message}>{message}</Text>
           </View>
 
-          <View style={styles.btns}>
+          <View style={s.btns}>
             <TouchableOpacity
-              style={[styles.btn, { backgroundColor: COLORS.TEXT_SECONDARY }]}
+              style={[s.btn, { backgroundColor: colors.TEXT_SECONDARY }]}
               onPress={onClose}
             >
-              <Text style={styles.btnTxt}>Cancelar</Text>
+              <Text style={s.btnTxt}>Cancelar</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.btn, { backgroundColor: "#FF3B30" }]}
+              style={[s.btn, { backgroundColor: colors.EXCLUIR_MAIN_COLOR }]}
               onPress={onConfirmDelete}
             >
-              <Text style={styles.btnTxt}>Excluir</Text>
+              <Text style={s.btnTxt}>Excluir</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -46,54 +53,55 @@ export default function ModalConfDelete({
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: COLORS.MODAL_BACKGROUND,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
-  box: {
-    width: "100%",
-    backgroundColor: COLORS.BACKGROUND,
-    borderRadius: 16,
-    padding: 24,
-    alignItems: "center",
-    gap: 25,
-  },
-  emoji: {
-    fontSize: 40,
-  },
-  messageTop: {
-    gap: 5,
-    color: COLORS.TEXT_PRIMARY,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.TEXT_PRIMARY,
-  },
-  message: {
-    fontSize: 14,
-    color: COLORS.EXCLUIR_MAIN_COLOR,
-    fontWeight: "500",
-    textAlign: "center",
-  },
-  btns: {
-    flexDirection: "row",
-  },
-  btn: {
-    marginTop: 8,
-    paddingVertical: 12,
-    marginHorizontal: 10,
-    borderRadius: 12,
-    flex: 1,
-    alignItems: "center",
-  },
-  btnTxt: {
-    color: COLORS.BACKGROUND,
-    fontWeight: "600",
-    fontSize: 14,
-  },
-});
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: colors.MODAL_BACKGROUND,
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 16,
+    },
+    box: {
+      width: "100%",
+      backgroundColor: colors.BACKGROUND,
+      borderRadius: 16,
+      padding: 24,
+      alignItems: "center",
+      gap: 25,
+    },
+    emoji: {
+      fontSize: 40,
+    },
+    messageTop: {
+      gap: 5,
+      color: colors.TEXT_PRIMARY,
+    },
+    title: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: colors.TEXT_PRIMARY,
+    },
+    message: {
+      fontSize: 14,
+      color: colors.EXCLUIR_MAIN_COLOR,
+      fontWeight: "500",
+      textAlign: "center",
+    },
+    btns: {
+      flexDirection: "row",
+    },
+    btn: {
+      marginTop: 8,
+      paddingVertical: 12,
+      marginHorizontal: 10,
+      borderRadius: 12,
+      flex: 1,
+      alignItems: "center",
+    },
+    btnTxt: {
+      color: colors.BACKGROUND,
+      fontWeight: "600",
+      fontSize: 14,
+    },
+  });

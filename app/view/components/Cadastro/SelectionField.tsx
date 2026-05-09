@@ -1,7 +1,19 @@
-import { StyleSheet, View, Text, TouchableOpacity, Image, ImageSourcePropType } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  ImageSourcePropType,
+} from "react-native";
 import { useState } from "react";
-import { COLORS, Screen } from "../../../config/consts";
+import { Screen } from "../../../config/consts";
 import ButtonEditar from "./Botões/ButtonEditar";
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../../Themes/ThemeProvider";
 
 export default function SelectionField({
   image,
@@ -12,7 +24,7 @@ export default function SelectionField({
   onPress,
   onClear,
   goEdit,
-  setModal
+  setModal,
 }: {
   image: ImageSourcePropType;
   titleName: string;
@@ -24,36 +36,40 @@ export default function SelectionField({
   goEdit: boolean;
   setModal: () => void;
 }) {
+  const s = useThemedStyles(styles);
+  const { colors } = useTheme();
   return (
     <View
       style={[
-        styles.ctnInput,
+        s.ctnInput,
         hasBorderBottom
-          ? { borderBottomWidth: 1, borderColor: COLORS.BORDER_LIGHT }
+          ? { borderBottomWidth: 1, borderColor: colors.BORDER_LIGHT }
           : { borderWidth: 0 },
       ]}
     >
-      <View style={styles.ctnImgInput}>
-        <Image style={styles.imgInput} source={image} />
+      <View style={s.ctnImgInput}>
+        <Image style={s.imgInput} source={image} />
       </View>
 
       <View style={{ width: "90%", gap: 5 }}>
-        <Text style={styles.txtInput}>{titleName.toUpperCase()}</Text>
+        <Text style={s.txtInput}>{titleName.toUpperCase()}</Text>
 
         {selectedReg ? (
-          <View style={styles.regSelecionado}>
-            <View style={styles.caixaReg}>
-              <Text style={styles.txtReg}>{selectedReg}</Text>
+          <View style={s.regSelecionado}>
+            <View style={s.caixaReg}>
+              <Text style={s.txtReg}>{selectedReg}</Text>
             </View>
 
-            <ButtonEditar navegarPara={Screen.Cadastros} goEdit={goEdit} setModal={setModal} editCampo={true} />
+            <ButtonEditar
+              navegarPara={Screen.Cadastros}
+              goEdit={goEdit}
+              setModal={setModal}
+              editCampo={true}
+            />
           </View>
         ) : (
-          <TouchableOpacity
-            style={styles.btnSalvar}
-            onPress={onPress}
-          >
-            <Text style={styles.txtSalvar}>{buttonText}</Text>
+          <TouchableOpacity style={s.btnSalvar} onPress={onPress}>
+            <Text style={s.txtSalvar}>{buttonText}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -61,59 +77,60 @@ export default function SelectionField({
   );
 }
 
-const styles = StyleSheet.create({
-  ctnInput: {
-    width: "100%",
-    padding: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  ctnImgInput: {
-    backgroundColor: COLORS.PRIMARY_SOFT,
-    padding: 8,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: COLORS.PRIMARY_VARIANT,
-  },
-  imgInput: {
-    width: 28,
-    height: 28,
-    tintColor: COLORS.PRIMARY,
-  },
-  txtInput: {
-    color: COLORS.TEXT_MUTED,
-    fontWeight: "bold",
-    fontSize: 12,
-  },
-  regSelecionado: {
-    width: "90%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  caixaReg: {
-    borderWidth: 1.3,
-    width: "80%",
-    padding: 10,
-    paddingLeft: 15,
-    borderRadius: 10,
-    fontSize: 20,
-  },
-  txtReg:{
-    fontSize: 15
-  },
-  btnSalvar: {
-    width: "90%",
-    height: 50,
-    backgroundColor: COLORS.PRIMARY_VARIANT,
-    borderRadius: 15,
-    display: "flex",
-    justifyContent: "center",
-  },
-  txtSalvar: {
-    color: COLORS.BACKGROUND,
-    textAlign: "center",
-    fontSize: 15,
-  },
-});
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    ctnInput: {
+      width: "100%",
+      padding: 15,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    ctnImgInput: {
+      backgroundColor: colors.PRIMARY_SOFT,
+      padding: 8,
+      borderRadius: 15,
+      borderWidth: 1,
+      borderColor: colors.PRIMARY_VARIANT,
+    },
+    imgInput: {
+      width: 28,
+      height: 28,
+      tintColor: colors.PRIMARY,
+    },
+    txtInput: {
+      color: colors.TEXT_MUTED,
+      fontWeight: "bold",
+      fontSize: 12,
+    },
+    regSelecionado: {
+      width: "90%",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    caixaReg: {
+      borderWidth: 1.3,
+      width: "80%",
+      padding: 10,
+      paddingLeft: 15,
+      borderRadius: 10,
+      fontSize: 20,
+    },
+    txtReg: {
+      fontSize: 15,
+    },
+    btnSalvar: {
+      width: "90%",
+      height: 50,
+      backgroundColor: colors.PRIMARY_VARIANT,
+      borderRadius: 15,
+      display: "flex",
+      justifyContent: "center",
+    },
+    txtSalvar: {
+      color: colors.BACKGROUND,
+      textAlign: "center",
+      fontSize: 15,
+    },
+  });

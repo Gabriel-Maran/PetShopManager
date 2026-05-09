@@ -1,16 +1,14 @@
-import { StyleSheet, Text, View } from "react-native";
-import { Screen, APP_BAR_HEIGHT, COLORS } from "../../../config/consts";
-import IconDePesquisa from "./IconDePesquisa";
+import { StyleSheet, View } from "react-native";
+import { Screen, APP_BAR_HEIGHT } from "../../../config/consts";
 import { IMAGENS_NAMES } from "../../../config/consts";
+import IconDePesquisa from "./IconDePesquisa";
+import { useTheme } from "../../Themes/ThemeProvider";
 
 export default function AppBar() {
+  const { colors } = useTheme();
+
   return (
-    <View
-      style={[
-        styles.container,
-        { position: "absolute", bottom: 0, left: 0, right: 0 },
-      ]}
-    >
+    <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <IconDePesquisa
         imgName={IMAGENS_NAMES.CALENDARIO}
         titleText="Calendário"
@@ -26,15 +24,22 @@ export default function AppBar() {
         titleText="Relatórios"
         screenName={Screen.Relatorios}
       />
+      <IconDePesquisa
+        imgName={IMAGENS_NAMES.CONFIGURACOES}
+        titleText="Configurações"
+        screenName={Screen.Configuracoes}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: "row",
-    backgroundColor: COLORS.BACKGROUND,
     height: APP_BAR_HEIGHT,
     justifyContent: "center",
     alignItems: "center",

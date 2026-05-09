@@ -1,5 +1,9 @@
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
-import { COLORS } from "../../../config/consts";
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../../Themes/ThemeProvider";
 
 export default function ItemSelect({
   isThisSelected,
@@ -12,21 +16,23 @@ export default function ItemSelect({
   setValorSelect: (date: boolean) => void;
   title: string;
 }) {
+  const s = useThemedStyles(styles);
+  const { colors } = useTheme();
   return (
     <TouchableOpacity
       style={[
-        styles.escolhaBtn,
+        s.escolhaBtn,
         {
-          backgroundColor: isThisSelected ? COLORS.PRIMARY : COLORS.SURFACE,
+          backgroundColor: isThisSelected ? colors.PRIMARY : colors.SURFACE,
         },
       ]}
       onPress={() => setValorSelect(valorSelect)}
     >
       <Text
         style={[
-          styles.escolhaText,
+          s.escolhaText,
           {
-            color: isThisSelected ? COLORS.BACKGROUND : COLORS.TEXT_PRIMARY,
+            color: isThisSelected ? colors.BACKGROUND : colors.TEXT_PRIMARY,
           },
         ]}
       >
@@ -36,14 +42,15 @@ export default function ItemSelect({
   );
 }
 
-const styles = StyleSheet.create({
-  escolhaBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    width: "40%",
-    borderRadius: 20,
-  },
-  escolhaText: {
-    textAlign: "center",
-  },
-});
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    escolhaBtn: {
+      paddingVertical: 10,
+      paddingHorizontal: 30,
+      width: "40%",
+      borderRadius: 20,
+    },
+    escolhaText: {
+      textAlign: "center",
+    },
+  });

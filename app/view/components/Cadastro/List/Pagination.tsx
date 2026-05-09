@@ -1,6 +1,6 @@
 // components/Pagination.tsx
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { COLORS } from "../../../../config/consts";
+import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 
 interface Props {
   currentPage: number;
@@ -15,6 +15,7 @@ export default function Pagination({
   itemsPerPage,
   onPageChange,
 }: Props) {
+  const s = useThemedStyles(styles);
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   if (totalPages <= 1) return null;
 
@@ -30,24 +31,24 @@ export default function Pagination({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       {/* Anterior */}
       <TouchableOpacity
-        style={[styles.btn, currentPage === 0 && styles.btnDisabled]}
+        style={[s.btn, currentPage === 0 && s.btnDisabled]}
         onPress={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 0}
       >
-        <Text style={styles.arrow}>‹</Text>
+        <Text style={s.arrow}>‹</Text>
       </TouchableOpacity>
 
       {/* Números */}
       {getPages().map((page) => (
         <TouchableOpacity
           key={page}
-          style={[styles.btn, page === currentPage && styles.btnActive]}
+          style={[s.btn, page === currentPage && s.btnActive]}
           onPress={() => onPageChange(page)}
         >
-          <Text style={[styles.txt, page === currentPage && styles.txtActive]}>
+          <Text style={[s.txt, page === currentPage && s.txtActive]}>
             {page + 1}
           </Text>
         </TouchableOpacity>
@@ -55,55 +56,53 @@ export default function Pagination({
 
       {/* Próximo */}
       <TouchableOpacity
-        style={[
-          styles.btn,
-          currentPage === totalPages - 1 && styles.btnDisabled,
-        ]}
+        style={[s.btn, currentPage === totalPages - 1 && s.btnDisabled]}
         onPress={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages - 1}
       >
-        <Text style={styles.arrow}>›</Text>
+        <Text style={s.arrow}>›</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 12,
-  },
-  btn: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: COLORS.BORDER_STRONG,
-    backgroundColor: COLORS.BACKGROUND,
-  },
-  btnActive: {
-    backgroundColor: COLORS.PRIMARY_VARIANT,
-    borderColor: COLORS.PRIMARY_VARIANT,
-  },
-  btnDisabled: {
-    opacity: 0.3,
-  },
-  txt: {
-    color: COLORS.TEXT_MUTED,
-    fontSize: 14,
-  },
-  txtActive: {
-    color: COLORS.TEXT_PRIMARY,
-    fontWeight: "600",
-  },
-  arrow: {
-    fontSize: 20,
-    color: COLORS.BORDER_STRONG,
-    lineHeight: 22,
-  },
-});
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 6,
+      paddingVertical: 12,
+    },
+    btn: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: colors.BORDER_STRONG,
+      backgroundColor: colors.BACKGROUND,
+    },
+    btnActive: {
+      backgroundColor: colors.PRIMARY_VARIANT,
+      borderColor: colors.PRIMARY_VARIANT,
+    },
+    btnDisabled: {
+      opacity: 0.3,
+    },
+    txt: {
+      color: colors.TEXT_MUTED,
+      fontSize: 14,
+    },
+    txtActive: {
+      color: colors.TEXT_PRIMARY,
+      fontWeight: "600",
+    },
+    arrow: {
+      fontSize: 20,
+      color: colors.BORDER_STRONG,
+      lineHeight: 22,
+    },
+  });

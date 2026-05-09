@@ -7,13 +7,14 @@ import {
   View,
   Pressable,
 } from "react-native";
-import { COLORS, LIMIT_ITEM_PAGE } from "../../../../config/consts";
+import { LIMIT_ITEM_PAGE } from "../../../../config/consts";
 import OwnerListModal from "./OwnerListModal";
 import PetListModal from "./PetListModal";
 import { Pet } from "../../../../model/Pet";
 import { Owner } from "../../../../model/Owner";
 import Pagination from "../List/Pagination";
 import BarraDePesquisa from "../../SearchBarra/BarraDePesquisa";
+import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 
 interface ModalSelectListProps {
   items: any[] | null | undefined;
@@ -38,6 +39,8 @@ export default function ModalSelectList({
   setPage,
   setSearch,
 }: ModalSelectListProps) {
+  const s = useThemedStyles(styles);
+
   return (
     <Modal
       visible={isOpen}
@@ -45,24 +48,24 @@ export default function ModalSelectList({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.modalContent} onPress={() => {}}>
+      <Pressable style={s.overlay} onPress={onClose}>
+        <Pressable style={s.modalContent} onPress={() => {}}>
           {/* Cabeçalho */}
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>
+          <View style={s.modalHeader}>
+            <Text style={s.modalTitle}>
               Selecionar {isOwner ? "Tutor" : "Pet"}
             </Text>
             <TouchableOpacity
-              style={styles.closeBtn}
+              style={s.closeBtn}
               onPress={onClose}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Text style={styles.closeIcon}>✕</Text>
+              <Text style={s.closeIcon}>✕</Text>
             </TouchableOpacity>
           </View>
 
           {/* Pesquisa */}
-          <View style={styles.searchWrap}>
+          <View style={s.searchWrap}>
             <BarraDePesquisa
               placeHolderStr={`Pesquisar ${isOwner ? "tutor" : "pet"}...`}
               setSearch={setSearch}
@@ -72,10 +75,10 @@ export default function ModalSelectList({
           {/* Lista */}
           <FlatList
             data={items}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={s.listContent}
             ListEmptyComponent={
-              <View style={styles.empty}>
-                <Text style={styles.emptyTxt}>
+              <View style={s.empty}>
+                <Text style={s.emptyTxt}>
                   Nenhum {isOwner ? "tutor" : "pet"} encontrado.
                 </Text>
               </View>
@@ -93,7 +96,7 @@ export default function ModalSelectList({
           />
 
           {/* Paginação — abaixo da lista */}
-          <View style={styles.paginationWrap}>
+          <View style={s.paginationWrap}>
             <Pagination
               currentPage={page}
               totalItems={total}
@@ -107,82 +110,82 @@ export default function ModalSelectList({
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: COLORS.MODAL_BACKGROUND,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    width: "88%",
-    height: "80%",
-    backgroundColor: COLORS.BACKGROUND,
-    borderRadius: 16,
-    overflow: "hidden",
-    elevation: 6,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-  },
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: colors.MODAL_BACKGROUND,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalContent: {
+      width: "88%",
+      height: "80%",
+      backgroundColor: colors.BACKGROUND,
+      borderRadius: 16,
+      overflow: "hidden",
+      elevation: 6,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 6,
+    },
 
-  // Cabeçalho
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderColor: COLORS.BORDER_MID,
-  },
-  modalTitle: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
-  },
-  closeBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: COLORS.PRIMARY_SOFT,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+    // Cabeçalho
+    modalHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      borderBottomWidth: 1,
+      borderColor: colors.BORDER_MID,
+    },
+    modalTitle: {
+      flex: 1,
+      fontSize: 15,
+      fontWeight: "700",
+      color: colors.TEXT_PRIMARY,
+    },
+    closeBtn: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      backgroundColor: colors.PRIMARY_SOFT,
+      justifyContent: "center",
+      alignItems: "center",
+    },
 
-  closeIcon: {
-    fontSize: 13,
-    lineHeight: 15,
-    color: COLORS.PRIMARY,
-    fontWeight: "600",
-  },
+    closeIcon: {
+      fontSize: 13,
+      lineHeight: 15,
+      color: colors.PRIMARY,
+      fontWeight: "600",
+    },
 
-  // Pesquisa
-  searchWrap: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderColor: COLORS.BORDER_MID,
-  },
+    // Pesquisa
+    searchWrap: {
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderColor: colors.BORDER_MID,
+    },
 
-  // Lista
-  listContent: {
-    flexGrow: 1,
-  },
-  empty: {
-    paddingVertical: 36,
-    alignItems: "center",
-  },
-  emptyTxt: {
-    fontSize: 13,
-    color: COLORS.TEXT_MUTED,
-  },
+    // Lista
+    listContent: {
+      flexGrow: 1,
+    },
+    empty: {
+      paddingVertical: 36,
+      alignItems: "center",
+    },
+    emptyTxt: {
+      fontSize: 13,
+      color: colors.TEXT_MUTED,
+    },
 
-  // Paginação — ✅ movida para baixo da lista
-  paginationWrap: {
-    borderTopWidth: 1,
-    borderColor: COLORS.BORDER_MID,
-    paddingVertical: 4,
-  },
-});
+    paginationWrap: {
+      borderTopWidth: 1,
+      borderColor: colors.BORDER_MID,
+      paddingVertical: 4,
+    },
+  });

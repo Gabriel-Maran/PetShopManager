@@ -8,6 +8,7 @@ import {
 import { useEffect, useState } from "react";
 import {
   COLORS,
+  EspeciesAtendidas,
   LIMIT_ITEM_PAGE,
   ORDER,
   PacoteRemarcacao,
@@ -26,11 +27,11 @@ import InputInfo from "../../components/Cadastro/InputInfo";
 import SelectionField from "../../components/Cadastro/SelectionField";
 import { ownerController } from "../../../controller/OwnerController";
 import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
-import { speciesController } from "../../../controller/SpeciesController";
-import InputSelect from "../../components/InputSelect";
 
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { showError } = useError();
+
+  const s = useThemedStyles(styles);
 
   const [form, setForm] = useState({
     nome: petToEdit?.nome ?? "",
@@ -138,15 +139,15 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
         subtitle="Preencha os dados do pet"
       />
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={s.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.ctnCadastro}>
-          <View style={styles.viewDataReq}>
-            <Text style={styles.titleDataInfo}>DADOS OBRIGATÓRIOS</Text>
+        <View style={s.ctnCadastro}>
+          <View style={s.viewDataReq}>
+            <Text style={s.titleDataInfo}>DADOS OBRIGATÓRIOS</Text>
           </View>
 
-          <View style={styles.inputs}>
+          <View style={s.inputs}>
             <InputInfo
               image={require("../../../assets/animais/iconNome.png")}
               item={form.nome}
@@ -169,15 +170,15 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               onClear={form.dono_nome ? limparDono : undefined}
             />
 
-            <InputSelect
-              placeholder="Selecione a espécie..."
-              itens={especiesList}
-              itemSelected={especiesList.find((e) => e.id === form.especie)}
-              labelExtractor={(item) => item.nome}
-              onChange={(item) => atualizarValores("especie", item.id)}
-              renderItem={(item) => (
-                <Text style={{ padding: 15 }}>{item.nome}</Text>
-              )}
+        {/*     <InputInfo
+              image={require("../../../assets/animais/iconPata.png")}
+              item={form.especie}
+              setItem={(v) => atualizarValores("especie", v)}
+              placeHolder="Digite a espécie..."
+              titleName="Espécie"
+              variasLinhas={false}
+              hasBorderBottom={true}
+              digitavel={true}
             />
 
             <InputSelect
@@ -191,9 +192,9 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               )}
             />
           </View>
-          <View style={styles.ctnBtnSalvar}>
-            <TouchableOpacity style={styles.btnSalvar} onPress={salvarPet}>
-              <Text style={styles.txtSalvar}>
+          <View style={s.ctnBtnSalvar}>
+            <TouchableOpacity style={s.btnSalvar} onPress={salvarPet}>
+              <Text style={s.txtSalvar}>
                 {petToEdit ? "Salvar alterações" : "Salvar"}
               </Text>
             </TouchableOpacity>
@@ -222,44 +223,45 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
     </>
   );
 }
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  scrollContent: {
-    backgroundColor: COLORS.THIRD_BACKGROUND,
-    flexGrow: 1,
-  },
-  ctnCadastro: {
-    flex: 1,
-    padding: 20,
-    alignItems: "center",
-  },
-  viewDataReq: { width: "100%" },
-  viewDataNotReq: {
-    width: "100%",
-    marginTop: 20,
-  },
-  inputs: {
-    width: "100%",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: COLORS.BORDER_LIGHT,
-    backgroundColor: COLORS.BACKGROUND,
-    overflow: "hidden",
-  },
-  titleDataInfo: {
-    color: COLORS.PRIMARY_VARIANT,
-    fontWeight: "500",
-    marginBottom: 8,
-  },
-  ctnBtnSalvar: { marginTop: 25 },
-  btnSalvar: {
-    paddingVertical: 20,
-    paddingHorizontal: 75,
-    backgroundColor: COLORS.PRIMARY_VARIANT,
-    borderRadius: 15,
-  },
-  txtSalvar: {
-    color: COLORS.BACKGROUND,
-    textAlign: "center",
-  },
-});
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    flex: { flex: 1 },
+    scrollContent: {
+      backgroundColor: colors.THIRD_BACKGROUND,
+      flexGrow: 1,
+    },
+    ctnCadastro: {
+      flex: 1,
+      padding: 20,
+      alignItems: "center",
+    },
+    viewDataReq: { width: "100%" },
+    viewDataNotReq: {
+      width: "100%",
+      marginTop: 20,
+    },
+    inputs: {
+      width: "100%",
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.BORDER_LIGHT,
+      backgroundColor: colors.BACKGROUND,
+      overflow: "hidden",
+    },
+    titleDataInfo: {
+      color: colors.PRIMARY_VARIANT,
+      fontWeight: "500",
+      marginBottom: 8,
+    },
+    ctnBtnSalvar: { marginTop: 25 },
+    btnSalvar: {
+      paddingVertical: 20,
+      paddingHorizontal: 75,
+      backgroundColor: colors.PRIMARY_VARIANT,
+      borderRadius: 15,
+    },
+    txtSalvar: {
+      color: colors.BACKGROUND,
+      textAlign: "center",
+    },
+  });

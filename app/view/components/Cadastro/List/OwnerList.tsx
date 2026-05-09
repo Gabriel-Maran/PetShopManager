@@ -2,8 +2,9 @@ import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import { Owner } from "../../../../model/Owner";
 import { useScreen } from "../../../../hooks/useScreen";
 import ButtonEditar from "../Botões/ButtonEditar";
-import { COLORS, Screen } from "../../../../config/consts";
+import { Screen } from "../../../../config/consts";
 import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
+import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 
 export default function OwnerList({
   cadastros,
@@ -12,21 +13,21 @@ export default function OwnerList({
   cadastros: Owner[];
   onDelete: (itemId: number) => void;
 }) {
-  const { params } = useScreen();
+  const s = useThemedStyles(styles);
   return (
     <View>
       <FlatList
         data={cadastros}
         renderItem={({ item }) => (
-          <View style={styles.itemCard}>
+          <View style={s.itemCard}>
             <Image
-              style={styles.img}
+              style={s.img}
               source={require("../../../../assets/crud/person.png")}
             />
 
-            <View style={styles.mainContent}>
-              <Text style={styles.textMain}>{item.nome}</Text>
-              <Text style={styles.textSub}>{item.telefone}</Text>
+            <View style={s.mainContent}>
+              <Text style={s.textMain}>{item.nome}</Text>
+              <Text style={s.textSub}>{item.telefone}</Text>
             </View>
 
             <ButtonEditar
@@ -43,47 +44,48 @@ export default function OwnerList({
   );
 }
 
-const styles = StyleSheet.create({
-  itemCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "center",
-    padding: 10,
-    height: 90,
-    width: "95%",
-    gap: 10,
-    borderBottomWidth: 1,
-    borderColor: COLORS.BORDER_MID,
-  },
-  mainContent: {
-    flex: 1,
-    marginLeft: 10,
-    alignSelf: "center",
-    gap: 5,
-  },
-  img: {
-    width: 30,
-    height: 30,
-    alignSelf: "center",
-    tintColor: COLORS.TEXT_PRIMARY,
-  },
-  textMain: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: COLORS.TEXT_PRIMARY,
-  },
-  textSub: {
-    fontSize: 12,
-    color: COLORS.TEXT_MUTED,
-  },
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    itemCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      alignSelf: "center",
+      padding: 10,
+      height: 90,
+      width: "95%",
+      gap: 10,
+      borderBottomWidth: 1,
+      borderColor: colors.BORDER_MID,
+    },
+    mainContent: {
+      flex: 1,
+      marginLeft: 10,
+      alignSelf: "center",
+      gap: 5,
+    },
+    img: {
+      width: 30,
+      height: 30,
+      alignSelf: "center",
+      tintColor: colors.TEXT_PRIMARY,
+    },
+    textMain: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: colors.TEXT_PRIMARY,
+    },
+    textSub: {
+      fontSize: 12,
+      color: colors.TEXT_MUTED,
+    },
 
-  ctnDelete: {
-    alignSelf: "center",
-    justifyContent: "flex-end",
-  },
+    ctnDelete: {
+      alignSelf: "center",
+      justifyContent: "flex-end",
+    },
 
-  iconDelete: {
-    height: 28,
-    width: 28,
-  },
-});
+    iconDelete: {
+      height: 28,
+      width: 28,
+    },
+  });
