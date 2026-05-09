@@ -28,8 +28,10 @@ import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
 import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
 import { speciesController } from "../../../controller/SpeciesController";
 import InputSelect from "../../components/InputSelect";
+import { useScreen } from "../../../hooks/useScreen";
 
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
+  const { params, navigate } = useScreen<Pet>();
   const { showError } = useError();
 
   const s = useThemedStyles(styles);
@@ -75,6 +77,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
       } else {
         await petController.createPet(petSalvar);
       }
+      navigate(Screen.Cadastros);
     } catch (erro) {
       showError(erro instanceof Error ? erro.message : "Erro inesperado.");
     }
@@ -169,7 +172,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               setModal={() => setModalDonoVisivel(true)}
               goEdit={true}
               onClear={form.dono_nome ? limparDono : undefined}
-            /> 
+            />
             <InputSelect
               placeholder="Selecione a espécie..."
               itens={especiesList}
