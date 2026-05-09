@@ -1,6 +1,5 @@
 import {
   EspeciesAtendidas,
-  EspeciesAtendidasLabel,
   PacoteRemarcacao,
   PorteAnimal,
   TipoServico,
@@ -9,9 +8,9 @@ import {
 export interface Pet {
   id?: number;
   nome: string;
-  especie: EspeciesAtendidas;
+  especie: number;
   porte: PorteAnimal;
-  raca?: string | null;
+  raca?: number;
   observacoes?: string | null;
   dono_id: number;
   servico_padrao: TipoServico;
@@ -30,7 +29,7 @@ export class PetBuilder {
   constructor() {
     this.props = {
       nome: "",
-      especie: EspeciesAtendidas.CAO,
+      especie: 0 ,
       porte: PorteAnimal.MEDIO,
       dono_id: 0,
       servico_padrao: TipoServico.BanhoETosa,
@@ -49,7 +48,7 @@ export class PetBuilder {
     return this;
   }
 
-  public withEspecie(especie: EspeciesAtendidas): this {
+  public withEspecie(especie: number): this {
     this.props.especie = especie;
     return this;
   }
@@ -59,7 +58,7 @@ export class PetBuilder {
     return this;
   }
 
-  public withRaca(raca: string | null): this {
+  public withRaca(raca: number): this {
     this.props.raca = raca;
     return this;
   }

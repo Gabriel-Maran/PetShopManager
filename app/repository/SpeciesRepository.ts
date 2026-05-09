@@ -1,0 +1,21 @@
+import { getDatabase } from "../config/database";
+
+class SpeciesRepository {
+  async searchSpecies(): Promise<{ id: number; nome: string }[]> {
+    const db = await getDatabase();
+    return db.getAllAsync<{ id: number; nome: string }>(
+      `SELECT id, nome FROM SPECIES ORDER BY nome ASC`,
+    );
+  }
+  async searchBreedsBySpecies(
+    speciesId: number,
+  ): Promise<{ id: number; nome: string }[]> {
+    const db = await getDatabase();
+    return db.getAllAsync<{ id: number; nome: string }>(
+      `SELECT id, nome_raca as nome FROM race WHERE especie_id = ? ORDER BY nome_raca asc `,
+      [speciesId],
+    );
+  }
+}
+
+export const speciesRepository = new SpeciesRepository();

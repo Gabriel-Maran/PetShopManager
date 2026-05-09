@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { initDatabase } from "./app/config/database";
-import { COLORS, STATUS_BAR_HEIGHT, Screen } from "./app/config/consts";
+import { STATUS_BAR_HEIGHT, Screen } from "./app/config/consts";
 import { useScreen } from "./app/hooks/useScreen";
 import AppBar from "./app/view/components/AppBarra/AppBar";
 import Home from "./app/view/pages/Home";
@@ -11,11 +11,16 @@ import NewOrEditOwner from "./app/view/pages/Owner/NewOrEditOwner";
 import { ErrorProvider } from "./app/view/components/Error/ErrorProvider";
 import NewOrEditPet from "./app/view/pages/Pet/NewOrEditPet";
 import NewOrEditAppointment from "./app/view/pages/Appointments/NewOrEditAppointment";
-import { Pet } from "./app/model/Pet";
-import { Owner } from "./app/model/Owner";
+import {
+  ThemeColors,
+  ThemeProvider,
+  useTheme,
+  useThemedStyles,
+} from "./app/view/Themes/ThemeProvider";
+import Configuracoes from "./app/view/pages/Configuracoes";
 
 function AppContent() {
-  const { screen, params } = useScreen();
+  const { screen } = useScreen();
 
   switch (screen) {
     case Screen.Calendario:
@@ -45,12 +50,26 @@ function AppContent() {
           <AppBar />
         </>
       );
+    case Screen.Configuracoes:
+      return (
+        <>
+          <Configuracoes />
+          <AppBar />
+        </>
+      );
     default:
-      return <Home />;
+      return (
+        <>
+          <Home />
+          <AppBar />
+        </>
+      );
   }
 }
 
-export default function App() {
+function AppInner() {
+  const s = useThemedStyles(styles);
+  const { colors } = useTheme();
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,37 +81,47 @@ export default function App() {
 
   if (error) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorTxt}>Erro ao iniciar banco: {error}</Text>
+      <View style={s.container}>
+        <Text style={s.errorTxt}>Erro ao iniciar banco: {error}</Text>
       </View>
     );
   }
 
   if (!ready) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color={COLORS.PRIMARY_VARIANT} />
+      <View style={s.container}>
+        <ActivityIndicator size="large" color={colors.PRIMARY_VARIANT} />
       </View>
     );
   }
 
   return (
-    <ErrorProvider>
-      <View style={{ paddingTop: STATUS_BAR_HEIGHT, flex: 1 }}>
-        <AppContent />
-      </View>
-    </ErrorProvider>
+    <View style={{ paddingTop: STATUS_BAR_HEIGHT, flex: 1 }}>
+      <AppContent />
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  errorTxt: {
-    color: "red",
-  },
-});
+// ✅ App só monta os providers — sem hooks de tema aqui
+export default function App() {
+  return (
+    <ThemeProvider>
+      <ErrorProvider>
+        <AppInner />
+      </ErrorProvider>
+    </ThemeProvider>
+  );
+}
+
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.BACKGROUND,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    errorTxt: {
+      color: "red",
+    },
+  });

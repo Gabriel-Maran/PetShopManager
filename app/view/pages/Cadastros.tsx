@@ -12,7 +12,6 @@ import { petController } from "../../controller/PetController";
 
 import {
   APP_BAR_HEIGHT,
-  COLORS,
   LIMIT_ITEM_PAGE,
   ORDER,
   Screen,
@@ -25,10 +24,13 @@ import PetList from "../components/Cadastro/List/PetList";
 import Pagination from "../components/Cadastro/List/Pagination";
 import OwnerList from "../components/Cadastro/List/OwnerList";
 import ModalConfDelete from "../components/Cadastro/Botões/Delete/ModalConfDelete";
+import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
 
 export default function Cadastros() {
   const { navigate } = useScreen();
   const { showError } = useError();
+
+  const s = useThemedStyles(styles);
 
   const [isOwnerSelected, setIsOwnerSelected] = useState(true);
   const [search, setSearch] = useState("");
@@ -104,7 +106,7 @@ export default function Cadastros() {
         visible={objSelectToDelete != undefined}
       />
 
-      <View style={styles.container}>
+      <View style={s.container}>
         <DefaultHeader />
 
         <BarraDePesquisa
@@ -115,7 +117,7 @@ export default function Cadastros() {
           }}
         />
 
-        <View style={styles.escolhaItem}>
+        <View style={s.escolhaItem}>
           <ItemSelect
             title="Donos"
             isThisSelected={isOwnerSelected}
@@ -146,9 +148,9 @@ export default function Cadastros() {
         </View>
       </View>
 
-      <View style={styles.ctnBtnAdd}>
+      <View style={s.ctnBtnAdd}>
         <TouchableOpacity
-          style={styles.btnAdd}
+          style={s.btnAdd}
           onPress={() =>
             navigate(
               isOwnerSelected ? Screen.NewOrEditOwner : Screen.NewOrEditPet,
@@ -156,7 +158,7 @@ export default function Cadastros() {
           }
         >
           <Image
-            style={styles.imgAdd}
+            style={s.imgAdd}
             source={require("../../assets/crud/addWhite.png")}
           />
         </TouchableOpacity>
@@ -165,32 +167,33 @@ export default function Cadastros() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.THIRD_BACKGROUND,
-  },
-  escolhaItem: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    width: "100%",
-    marginTop: 15,
-  },
-  ctnBtnAdd: {
-    position: "absolute",
-    bottom: APP_BAR_HEIGHT + 25,
-    right: 25,
-  },
-  btnAdd: {
-    backgroundColor: COLORS.PRIMARY,
-    borderRadius: 32.5,
-    width: 65,
-    height: 65,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  imgAdd: {
-    width: 40,
-    height: 40,
-  },
-});
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.THIRD_BACKGROUND,
+    },
+    escolhaItem: {
+      flexDirection: "row",
+      justifyContent: "space-evenly",
+      width: "100%",
+      marginTop: 15,
+    },
+    ctnBtnAdd: {
+      position: "absolute",
+      bottom: APP_BAR_HEIGHT + 25,
+      right: 25,
+    },
+    btnAdd: {
+      backgroundColor: colors.PRIMARY,
+      borderRadius: 32.5,
+      width: 65,
+      height: 65,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    imgAdd: {
+      width: 40,
+      height: 40,
+    },
+  });

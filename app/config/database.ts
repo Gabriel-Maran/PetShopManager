@@ -1,30 +1,30 @@
-  import * as SQLite from "expo-sqlite";
+import * as SQLite from "expo-sqlite";
 
-  let db: SQLite.SQLiteDatabase | null = null;
+let db: SQLite.SQLiteDatabase | null = null;
 
-  // ─── Período máximo de remarcação automática ──────────────────────────────────
-  // Troque o valor conforme necessário:
-  //   '+365 days' = 1 ano | '+180 days' = 6 meses | '+30 days' = 1 mês
-  const PERIODO_REMARCACAO = "+227 days";
-  // ─────────────────────────────────────────────────────────────────────────────
+// ─── Período máximo de remarcação automática ──────────────────────────────────
+// Troque o valor conforme necessário:
+//   '+365 days' = 1 ano | '+180 days' = 6 meses | '+30 days' = 1 mês
+const PERIODO_REMARCACAO = "+227 days";
+// ─────────────────────────────────────────────────────────────────────────────
 
-  // ─── Gap por pacote ───────────────────────────────────────────────────────────
-  // Pacote 2 → a cada 14 dias (máx. 2 banhos/mês)
-  // Pacote 4 → a cada  7 dias (máx. 4 banhos/mês)
-  // ─────────────────────────────────────────────────────────────────────────────
+// ─── Gap por pacote ───────────────────────────────────────────────────────────
+// Pacote 2 → a cada 14 dias (máx. 2 banhos/mês)
+// Pacote 4 → a cada  7 dias (máx. 4 banhos/mês)
+// ─────────────────────────────────────────────────────────────────────────────
 
-  export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
-    if (!db) {
-      db = await SQLite.openDatabaseAsync("petshop.db");
-      await db.execAsync(`PRAGMA journal_mode = WAL;`);
-    }
-    return db;
+export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
+  if (!db) {
+    db = await SQLite.openDatabaseAsync("petshop.db");
+    await db.execAsync(`PRAGMA journal_mode = WAL;`);
   }
+  return db;
+}
 
-  export async function initDatabase(): Promise<void> {
-    const db = await getDatabase();
+export async function initDatabase(): Promise<void> {
+  const db = await getDatabase();
 
-    /*
+  /*
     -- ── RESET DE DESENVOLVIMENTO ─────────────────────────────────────────────
     -- Descomente para recriar o banco do zero.
     -- IMPORTANTE: mover para ANTES do primeiro CREATE TABLE ao usar.
@@ -45,25 +45,27 @@
       DROP TABLE IF EXISTS appointments;
       DROP TABLE IF EXISTS pets;
       DROP TABLE IF EXISTS owners;
+      DROP TABLE IF EXISTS race;
+      DROP TABLE IF EXISTS species;
     */
 
-    await db.execAsync(`
+  await db.execAsync(`
       PRAGMA foreign_keys = ON;
 
       -- ── Tabelas ──────────────────────────────────────────────────────────────
-      
+
       CREATE TABLE IF NOT EXISTS species (
       id   INTEGER PRIMARY KEY AUTOINCREMENT,
       nome TEXT    NOT NULL UNIQUE  
       );
 
 
-      CREATE TABLE IF NOT EXISTS race (
-      id         INTEGER PRIMARY KEY AUTOINCREMENT,
-      especie_id INTEGER NOT NULL,
-      nome_raca  TEXT UNIQUE NOT NULL,
-      FOREIGN KEY (especie_id) REFERENCES species(id) ON DELETE CASCADE
-      UNIQUE(especie_id, nome_raca)
+     CREATE TABLE IF NOT EXISTS race (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        especie_id INTEGER NOT NULL,
+        nome_raca  TEXT NOT NULL,
+        FOREIGN KEY (especie_id) REFERENCES species(id) ON DELETE CASCADE,
+        UNIQUE (especie_id, nome_raca)
       );
 
 
@@ -375,4 +377,4 @@
           AND data > CAST(strftime('%Y%m%d', 'now') AS INTEGER);
       END;
     `);
-  }
+}

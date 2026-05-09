@@ -1,11 +1,11 @@
 import { Image, StyleSheet, Text, TouchableOpacity } from "react-native";
-import {
-  COLORS,
-  IMAGENS_BY_NAME,
-  IMAGENS_NAMES,
-  Screen,
-} from "../../../config/consts";
+import { IMAGENS_BY_NAME, IMAGENS_NAMES, Screen } from "../../../config/consts";
 import { useScreen } from "../../../hooks/useScreen";
+import {
+  useTheme,
+  useThemedStyles,
+  ThemeColors,
+} from "../../Themes/ThemeProvider";
 
 export default function IconDePesquisa({
   imgName,
@@ -16,62 +16,54 @@ export default function IconDePesquisa({
   titleText: string;
   screenName: Screen;
 }) {
+  const s = useThemedStyles(styles);
   const { screen, navigate } = useScreen();
   const imageSource = IMAGENS_BY_NAME[imgName];
+  const isActive = screen === screenName;
+
   return (
     <TouchableOpacity
-      style={[
-        styles.container,
-        screen === screenName && {
-          borderColor: COLORS.PRIMARY,
-          borderTopWidth: 2,
-        },
-      ]}
+      style={[s.container, isActive && s.containerActive]}
       onPress={() => navigate(screenName)}
     >
       <Image
-        style={[
-          styles.image,
-          screen != screenName && {
-            borderColor: COLORS.PRIMARY,
-            borderTopWidth: 2,
-            tintColor: COLORS.DESATIVADO,
-          },
-        ]}
+        style={[s.image, !isActive && s.imageInactive]}
         source={imageSource}
       />
-      <Text
-        style={[
-          styles.title,
-          screen != screenName && {
-            color: COLORS.DESATIVADO,
-          },
-        ]}
-      >
-        {titleText}
-      </Text>
+      <Text style={[s.title, !isActive && s.titleInactive]}>{titleText}</Text>
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingBottom: 5,
-    height: "100%",
-  },
-  image: {
-    width: 30,
-    height: 30,
-    tintColor: COLORS.PRIMARY,
-  },
-  title: {
-    fontSize: 13,
-    fontWeight: "bold",
-    backgroundColor: COLORS.BACKGROUND,
-    color: COLORS.PRIMARY,
-  },
-});
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.BACKGROUND,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingBottom: 5,
+      height: "100%",
+    },
+    containerActive: {
+      borderTopWidth: 2,
+      borderColor: colors.PRIMARY,
+    },
+    image: {
+      width: 30,
+      height: 30,
+      tintColor: colors.PRIMARY,
+    },
+    imageInactive: {
+      tintColor: colors.DESATIVADO,
+    },
+    title: {
+      fontSize: 13,
+      fontWeight: "bold",
+      color: colors.PRIMARY,
+      backgroundColor: colors.BACKGROUND,
+    },
+    titleInactive: {
+      color: colors.DESATIVADO,
+    },
+  });

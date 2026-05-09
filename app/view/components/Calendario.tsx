@@ -1,7 +1,11 @@
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { StyleSheet, Text, View } from "react-native";
 import { useState } from "react";
-import { COLORS } from "../../config/consts";
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../Themes/ThemeProvider";
 
 // Configuração do calendário para português do Brasil
 LocaleConfig.locales["pt-br"] = {
@@ -59,19 +63,22 @@ export default function Calendario({
   // new Date().toISOString() -> "2025-04-24T12:34:56.789Z"
   // .split('T')[0] -> "2025-04-24", o [0] pega só a parte da data(ano-mês-dia), sem a parte do horário
   // Isso é só para marcar o dia atual no calendário e inicializar o estado com a data de hoje
+
+  const s = useThemedStyles(styles);
+  const { colors } = useTheme();
   return (
-    <View style={styles.completeCalendar}>
+    <View style={s.completeCalendar}>
       <Text
         style={{
           fontSize: 20,
           fontWeight: "bold",
-          color: COLORS.TEXT_PRIMARY,
+          color: colors.TEXT_PRIMARY,
         }}
       >
         Calendário de Agendamentos
       </Text>
       <Calendar
-        style={styles.calendar}
+        style={s.calendar}
         onDayPress={(day) => {
           setNewDate(day.dateString);
         }}
@@ -83,52 +90,53 @@ export default function Calendario({
         }}
         theme={{
           // Cores gerais
-          backgroundColor: COLORS.BACKGROUND,
-          calendarBackground: COLORS.BACKGROUND,
+          backgroundColor: colors.BACKGROUND,
+          calendarBackground: colors.BACKGROUND,
 
           // Texto do mês/ano no topo
           textMonthFontSize: 18,
           textMonthFontWeight: "600",
-          monthTextColor: COLORS.TEXT_SECONDARY,
+          monthTextColor: colors.TEXT_SECONDARY,
 
           // Cabeçalho (Dom, Seg, Ter...)
           textDayHeaderFontSize: 13,
-          textSectionTitleColor: COLORS.TEXT_PRIMARY,
+          textSectionTitleColor: colors.TEXT_PRIMARY,
 
           // Números dos dias
           textDayFontSize: 18,
-          dayTextColor: COLORS.TEXT_SECONDARY,
+          dayTextColor: colors.TEXT_SECONDARY,
 
           // Dia selecionado
-          selectedDayBackgroundColor: COLORS.PRIMARY_CONTRAST,
-          selectedDayTextColor: COLORS.BACKGROUND,
+          selectedDayBackgroundColor: colors.PRIMARY_CONTRAST,
+          selectedDayTextColor: colors.BACKGROUND,
 
           // Hoje
-          todayTextColor: COLORS.PRIMARY_CONTRAST,
+          todayTextColor: colors.PRIMARY_CONTRAST,
 
           // Dias desabilitados
-          textDisabledColor: COLORS.THIRD_BACKGROUND,
+          textDisabledColor: colors.THIRD_BACKGROUND,
 
           // Setas de navegação
-          arrowColor: COLORS.PRIMARY_CONTRAST,
+          arrowColor: colors.PRIMARY_CONTRAST,
         }}
       />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  calendar: {
-    width: "100%",
-  },
-  completeCalendar: {
-    backgroundColor: COLORS.BACKGROUND,
-    width: "100%",
-    justifyContent: "center",
-    alignSelf: "center",
-    padding: 10,
-    borderColor: COLORS.BORDER_STRONG,
-    borderWidth: 1,
-    borderRadius: 15,
-  },
-});
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    calendar: {
+      width: "100%",
+    },
+    completeCalendar: {
+      backgroundColor: colors.BACKGROUND,
+      width: "100%",
+      justifyContent: "center",
+      alignSelf: "center",
+      padding: 10,
+      borderColor: colors.BORDER_STRONG,
+      borderWidth: 1,
+      borderRadius: 15,
+    },
+  });

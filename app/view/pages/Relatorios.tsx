@@ -6,9 +6,16 @@ import { ownerController } from "../../controller/OwnerController";
 import { useError } from "../../hooks/useError";
 import { Owner } from "../../model/Owner";
 import { Pet } from "../../model/Pet";
-import { COLORS, LIMIT_ITEM_PAGE, ORDER } from "../../config/consts";
+import { LIMIT_ITEM_PAGE, ORDER } from "../../config/consts";
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../Themes/ThemeProvider";
 
 export default function Relatorios() {
+  const s = useThemedStyles(styles);
+
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -38,12 +45,12 @@ export default function Relatorios() {
   }, [searchTxt, page]);
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <DefaultHeader />
 
       <Button title="ABRIR MODAL" onPress={() => setIsOpen(true)} />
 
-      <Text style={styles.selected}>
+      <Text style={s.selected}>
         {itemSelected?.nome ?? "Nenhum selecionado"}
       </Text>
 
@@ -68,15 +75,16 @@ export default function Relatorios() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BACKGROUND ?? "#FFF",
-  },
-  selected: {
-    marginHorizontal: 16,
-    marginTop: 12,
-    fontSize: 13,
-    color: COLORS.TEXT_MUTED,
-  },
-});
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.BACKGROUND,
+    },
+    selected: {
+      marginHorizontal: 16,
+      marginTop: 12,
+      fontSize: 13,
+      color: colors.TEXT_MUTED,
+    },
+  });

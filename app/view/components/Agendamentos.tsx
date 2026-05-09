@@ -17,7 +17,6 @@ import {
   EspeciesAtendidasLabel,
   EspeciesAtendidas,
   TipoServico,
-  COLORS,
 } from "../../config/consts";
 
 import { AppointmentsWithOwnerAndPet } from "../../model/Appointment";
@@ -25,6 +24,11 @@ import { AppointmentsWithOwnerAndPet } from "../../model/Appointment";
 import { appointmentController } from "../../controller/AppointmentsController";
 
 import { DataStringPraNumber } from "../../utils/converterData";
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../Themes/ThemeProvider";
 
 export default function Agendamentos({
   isFullScreen,
@@ -40,6 +44,9 @@ export default function Agendamentos({
   const { navigate } = useScreen();
   const { showError } = useError();
 
+  const s = useThemedStyles(styles);
+  const { colors } = useTheme();
+
   const handleError = (e: unknown) =>
     showError(e instanceof Error ? e.message : "Erro inesperado.");
 
@@ -53,27 +60,24 @@ export default function Agendamentos({
   }, [dateSelected]);
 
   return (
-    <View style={[styles.container, { marginTop: margemSuperior }]}>
-      <View style={styles.header}>
+    <View style={[s.container, { marginTop: margemSuperior }]}>
+      <View style={s.header}>
         <TouchableOpacity
-          style={styles.iconBtn}
+          style={s.iconBtn}
           onPress={() => navigate(Screen.NewOrEditAppointment, {dateSelected})}
         >
-          <Image
-            source={require("../../assets/crud/add.png")}
-            style={styles.icon}
-          />
+          <Image source={require("../../assets/crud/add.png")} style={s.icon} />
         </TouchableOpacity>
 
-        <View style={styles.titleBlock}>
-          <Text style={styles.titleLabel}>Agendamentos</Text>
-          <Text style={styles.titleDate}>
+        <View style={s.titleBlock}>
+          <Text style={s.titleLabel}>Agendamentos</Text>
+          <Text style={s.titleDate}>
             {dateSelected.split("-").reverse().join("/")}
           </Text>
         </View>
 
         <TouchableOpacity
-          style={styles.iconBtn}
+          style={s.iconBtn}
           onPress={() => setFullScreen(!isFullScreen)}
         >
           <Image
@@ -82,28 +86,28 @@ export default function Agendamentos({
                 ? require("../../assets/setas/diminuir.png")
                 : require("../../assets/setas/expandir.png")
             }
-            style={styles.icon}
+            style={s.icon}
           />
         </TouchableOpacity>
       </View>
 
       <FlatList
         data={appointments}
-        style={styles.list}
+        style={s.list}
         keyExtractor={(item) => item.id.toString()}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ItemSeparatorComponent={() => <View style={s.separator} />}
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <Text style={styles.emptyTxt}>Nenhum agendamento neste dia.</Text>
+          <View style={s.empty}>
+            <Text style={s.emptyTxt}>Nenhum agendamento neste dia.</Text>
           </View>
         }
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={styles.row}
+            style={s.row}
             activeOpacity={0.6}
             onPress={() => navigate(Screen.NewOrEditAppointment, {appointment: item})}
           >
-            <View style={styles.avatar}>
+            <View style={s.avatar}>
               <Image
                 source={
                   item.raca_pet === EspeciesAtendidas.CAO
@@ -112,20 +116,20 @@ export default function Agendamentos({
                       ? require("../../assets/animais/gatoGreen.png")
                       : require("../../assets/animais/interrogacaoGreen.png")
                 }
-                style={styles.imgPetImg}
+                style={s.imgPetImg}
               />
             </View>
 
-            <View style={styles.info}>
-              <Text style={styles.petName}>{item.nome_pet}</Text>
-              <Text style={styles.ownerName}>{item.nome_dono}</Text>
+            <View style={s.info}>
+              <Text style={s.petName}>{item.nome_pet}</Text>
+              <Text style={s.ownerName}>{item.nome_dono}</Text>
             </View>
 
-            <View style={styles.right}>
-              <View style={styles.servicoBadge}>
-                <Text style={styles.servicoTxt}>{item.servico}</Text>
+            <View style={s.right}>
+              <View style={s.servicoBadge}>
+                <Text style={s.servicoTxt}>{item.servico}</Text>
               </View>
-              <Text style={styles.time}>{item.hora}</Text>
+              <Text style={s.time}>{item.hora}</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -134,130 +138,131 @@ export default function Agendamentos({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginBottom: APP_BAR_HEIGHT,
-    width: "100%",
-    backgroundColor: COLORS.BACKGROUND,
-  },
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      marginBottom: APP_BAR_HEIGHT,
+      width: "100%",
+      backgroundColor: colors.BACKGROUND,
+    },
 
-  // ── Header ──────────────────────────────────────────────
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: COLORS.BACKGROUND,
-    borderBottomWidth: 1,
-    borderColor: COLORS.SURFACE_VARIANT,
-  },
-  titleBlock: {
-    flex: 1,
-    alignItems: "center",
-  },
-  titleLabel: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: COLORS.PRIMARY,
-    letterSpacing: 1.1,
-    textTransform: "uppercase",
-  },
-  titleDate: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
-    marginTop: 1,
-  },
-  iconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    backgroundColor: COLORS.BACKGROUND,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  icon: {
-    width: 22,
-    height: 22,
-    tintColor: COLORS.PRIMARY,
-  },
+    // ── Header ──────────────────────────────────────────────
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      backgroundColor: colors.BACKGROUND,
+      borderBottomWidth: 1,
+      borderColor: colors.SURFACE_VARIANT,
+    },
+    titleBlock: {
+      flex: 1,
+      alignItems: "center",
+    },
+    titleLabel: {
+      fontSize: 10,
+      fontWeight: "600",
+      color: colors.PRIMARY,
+      letterSpacing: 1.1,
+      textTransform: "uppercase",
+    },
+    titleDate: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: colors.TEXT_PRIMARY,
+      marginTop: 1,
+    },
+    iconBtn: {
+      width: 38,
+      height: 38,
+      borderRadius: 10,
+      backgroundColor: colors.BACKGROUND,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    icon: {
+      width: 22,
+      height: 22,
+      tintColor: colors.PRIMARY,
+    },
 
-  // ── Lista ────────────────────────────────────────────────
-  list: {
-    flex: 1,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: COLORS.BORDER,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    gap: 10,
-    backgroundColor: COLORS.BACKGROUND,
-  },
+    // ── Lista ────────────────────────────────────────────────
+    list: {
+      flex: 1,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: colors.BORDER,
+    },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 14,
+      paddingVertical: 11,
+      gap: 10,
+      backgroundColor: colors.BACKGROUND,
+    },
 
-  // Avatar
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 20,
-    backgroundColor: COLORS.PRIMARY_SOFT,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  imgPetImg: {
-    width: 30,
-    height: 30,
-  },
+    // Avatar
+    avatar: {
+      width: 44,
+      height: 44,
+      borderRadius: 20,
+      backgroundColor: colors.PRIMARY_SOFT,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    imgPetImg: {
+      width: 30,
+      height: 30,
+    },
 
-  // Infos
-  info: {
-    flex: 1,
-  },
-  petName: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
-  },
-  ownerName: {
-    fontSize: 14,
-    color: COLORS.BORDER_STRONG,
-    marginTop: 2,
-  },
+    // Infos
+    info: {
+      flex: 1,
+    },
+    petName: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: colors.TEXT_PRIMARY,
+    },
+    ownerName: {
+      fontSize: 14,
+      color: colors.BORDER_STRONG,
+      marginTop: 2,
+    },
 
-  // Lado direito: badge + horário
-  right: {
-    alignItems: "flex-end",
-    gap: 4,
-  },
-  servicoBadge: {
-    backgroundColor: COLORS.BACKGROUND,
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  servicoTxt: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: COLORS.PRIMARY,
-  },
-  time: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: COLORS.BORDER_STRONG,
-  },
+    // Lado direito: badge + horário
+    right: {
+      alignItems: "flex-end",
+      gap: 4,
+    },
+    servicoBadge: {
+      backgroundColor: colors.BACKGROUND,
+      borderRadius: 6,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+    },
+    servicoTxt: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: colors.PRIMARY,
+    },
+    time: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: colors.BORDER_STRONG,
+    },
 
-  // ── Empty ────────────────────────────────────────────────
-  empty: {
-    paddingVertical: 40,
-    alignItems: "center",
-  },
-  emptyTxt: {
-    color: COLORS.BORDER_STRONG,
-    fontSize: 18,
-  },
-});
+    // ── Empty ────────────────────────────────────────────────
+    empty: {
+      paddingVertical: 40,
+      alignItems: "center",
+    },
+    emptyTxt: {
+      color: colors.BORDER_STRONG,
+      fontSize: 18,
+    },
+  });
