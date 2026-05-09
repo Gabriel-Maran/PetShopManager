@@ -20,9 +20,11 @@ import {
   COLORS,
 } from "../../config/consts";
 
-import { AppointmentWithOwner } from "../../model/Appointment";
+import { AppointmentsWithOwnerAndPet } from "../../model/Appointment";
 
 import { appointmentController } from "../../controller/AppointmentsController";
+
+import { DataStringPraNumber } from "../../utils/converterData";
 
 export default function Agendamentos({
   isFullScreen,
@@ -35,59 +37,27 @@ export default function Agendamentos({
   setFullScreen: (isFullScreen: boolean) => void;
   dateSelected: string;
 }) {
-  /*  const appointments = [
-    {
-      id: 1,
-      petName: "Rex",
-      ownerName: "João",
-      time: "10:00",
-      foto: EspeciesAtendidas.CAO,
-      servico: TipoServico.Banho,
-    },
-    {
-      id: 2,
-      petName: "Mia",
-      ownerName: "Maria",
-      time: "11:30",
-      foto: EspeciesAtendidas.GATO,
-      servico: TipoServico.BanhoETosa,
-    },
-    {
-      id: 3,
-      petName: "Toby",
-      ownerName: "Carlos",
-      time: "14:00",
-      foto: EspeciesAtendidas.OUTRO,
-      servico: TipoServico.Tosa,
-    },
-  ]; */
   const { navigate } = useScreen();
   const { showError } = useError();
 
   const handleError = (e: unknown) =>
     showError(e instanceof Error ? e.message : "Erro inesperado.");
 
-  const [appointments, setAppointments] = useState<AppointmentWithOwner[]>();
+  const [appointments, setAppointments] = useState<AppointmentsWithOwnerAndPet[]>();
 
   useEffect(() => {
     const fetch = appointmentController
-      .getAppointmentsByDateWithOwnerAndPet(converterPraNumber(dateSelected))
+      .getAppointmentsByDateWithOwnerAndPet(DataStringPraNumber(dateSelected,"-"))
       .then(setAppointments);
     fetch.catch(handleError);
   }, [dateSelected]);
-
-  function converterPraNumber(dataTexto: string): number {
-    const [ano, mes, dia] = dataTexto.split("-");
-
-    return Number(`${ano}${mes}${dia}`);
-  }
 
   return (
     <View style={[styles.container, { marginTop: margemSuperior }]}>
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.iconBtn}
-          onPress={() => navigate(Screen.NewOrEditAppointment)}
+          onPress={() => navigate(Screen.NewOrEditAppointment, {dateSelected})}
         >
           <Image
             source={require("../../assets/crud/add.png")}
@@ -131,7 +101,7 @@ export default function Agendamentos({
           <TouchableOpacity
             style={styles.row}
             activeOpacity={0.6}
-            onPress={() => navigate(Screen.Cadastros)}
+            onPress={() => navigate(Screen.NewOrEditAppointment, {appointment: item})}
           >
             <View style={styles.avatar}>
               <Image
