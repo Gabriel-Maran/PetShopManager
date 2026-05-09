@@ -14,14 +14,18 @@ export default function Toggle({
   hasBorderBottom = false,
   image,
   title,
+  subtitle,
   onChange,
   value,
+  noEdit = false,
 }: {
   hasBorderBottom?: boolean;
   image: ImageSourcePropType;
-  title?: string;
-  onChange: (value: number) => void;
+  title: string;
+  subtitle: string;
+  onChange?: (value: number) => void;
   value: number;
+  noEdit?: boolean;
 }) {
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
 
@@ -65,14 +69,25 @@ export default function Toggle({
         {title && (
           <Text style={styles.txtInput}>{title.trim().toUpperCase()}</Text>
         )}
-
-        <TouchableOpacity activeOpacity={0.8} onPress={toggleSwitch}>
-          <Animated.View style={[styles.switchContainer, { backgroundColor }]}>
+        <View
+          style={
+            !noEdit ? styles.toggleESubtitle : styles.toggleESubtitleNoEdit
+          }
+        >
+          <Text style={styles.subtitle}>{subtitle}</Text>
+          <TouchableOpacity activeOpacity={0.8} onPress={toggleSwitch}>
             <Animated.View
-              style={[styles.thumb, { transform: [{ translateX: moveThumb }] }]}
-            />
-          </Animated.View>
-        </TouchableOpacity>
+              style={[styles.switchContainer, { backgroundColor }]}
+            >
+              <Animated.View
+                style={[
+                  styles.thumb,
+                  { transform: [{ translateX: moveThumb }] },
+                ]}
+              />
+            </Animated.View>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -91,7 +106,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: COLORS.BORDER_LIGHT,
+    borderColor: COLORS.PRIMARY_VARIANT,
   },
   imgInput: {
     width: 28,
@@ -105,6 +120,27 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     minWidth: 50,
+  },
+  toggleESubtitle: {
+    width: "90%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: 1.3,
+    padding: 10,
+    paddingLeft: 15,
+    borderRadius: 10,
+  },
+  toggleESubtitleNoEdit: {
+    width: "90%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 10,
+    paddingLeft: 15,
+  },
+  subtitle: {
+    fontSize: 15,
   },
   switchContainer: {
     width: 50,
@@ -124,7 +160,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   txtInput: {
-    color: "#A7A7A7",
+    color: COLORS.TEXT_MUTED,
     fontWeight: "bold",
     fontSize: 12,
   },
