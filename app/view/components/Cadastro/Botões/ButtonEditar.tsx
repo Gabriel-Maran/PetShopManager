@@ -8,7 +8,7 @@ import { Appointment } from "../../../../model/Appointment";
 export default function ButtonEditar({
   navegarPara,
   selectParam,
-  editCampo,
+  editCampo = false,
   goEdit,
   setModal,
 }: {
