@@ -17,6 +17,12 @@ export type AppointmentsWithOwnerAndPet = Appointment & {
   raca_pet: string;
 };
 
+export type NewOrEditAppointmentParams = {
+  appointment?: AppointmentsWithOwnerAndPet;
+  dateSelected?: string;
+};
+
+
 export class AppointmentBuilder {
   private props: Partial<Appointment>;
 

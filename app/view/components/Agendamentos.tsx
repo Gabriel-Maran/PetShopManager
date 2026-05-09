@@ -19,9 +19,11 @@ import {
   TipoServico,
 } from "../../config/consts";
 
-import { AppointmentWithOwner } from "../../model/Appointment";
+import { AppointmentsWithOwnerAndPet } from "../../model/Appointment";
 
 import { appointmentController } from "../../controller/AppointmentsController";
+
+import { DataStringPraNumber } from "../../utils/converterData";
 import {
   ThemeColors,
   useTheme,
@@ -48,27 +50,21 @@ export default function Agendamentos({
   const handleError = (e: unknown) =>
     showError(e instanceof Error ? e.message : "Erro inesperado.");
 
-  const [appointments, setAppointments] = useState<AppointmentWithOwner[]>();
+  const [appointments, setAppointments] = useState<AppointmentsWithOwnerAndPet[]>();
 
   useEffect(() => {
     const fetch = appointmentController
-      .getAppointmentsByDateWithOwnerAndPet(converterPraNumber(dateSelected))
+      .getAppointmentsByDateWithOwnerAndPet(DataStringPraNumber(dateSelected,"-"))
       .then(setAppointments);
     fetch.catch(handleError);
   }, [dateSelected]);
-
-  function converterPraNumber(dataTexto: string): number {
-    const [ano, mes, dia] = dataTexto.split("-");
-
-    return Number(`${ano}${mes}${dia}`);
-  }
 
   return (
     <View style={[s.container, { marginTop: margemSuperior }]}>
       <View style={s.header}>
         <TouchableOpacity
           style={s.iconBtn}
-          onPress={() => navigate(Screen.NewOrEditAppointment)}
+          onPress={() => navigate(Screen.NewOrEditAppointment, {dateSelected})}
         >
           <Image source={require("../../assets/crud/add.png")} style={s.icon} />
         </TouchableOpacity>
@@ -109,7 +105,7 @@ export default function Agendamentos({
           <TouchableOpacity
             style={s.row}
             activeOpacity={0.6}
-            onPress={() => navigate(Screen.Cadastros)}
+            onPress={() => navigate(Screen.NewOrEditAppointment, {appointment: item})}
           >
             <View style={s.avatar}>
               <Image
