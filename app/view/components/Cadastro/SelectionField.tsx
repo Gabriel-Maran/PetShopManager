@@ -11,6 +11,8 @@ export default function SelectionField({
   hasBorderBottom,
   onPress,
   onClear,
+  goEdit,
+  setModal
 }: {
   image: ImageSourcePropType;
   titleName: string;
@@ -19,6 +21,8 @@ export default function SelectionField({
   hasBorderBottom: boolean;
   onPress: () => void;
   onClear?: () => void;
+  goEdit: boolean;
+  setModal: () => void;
 }) {
   return (
     <View
@@ -42,7 +46,7 @@ export default function SelectionField({
               <Text style={styles.txtReg}>{selectedReg}</Text>
             </View>
 
-            <ButtonEditar navegarPara={Screen.Cadastros} editCampo={true} />
+            <ButtonEditar navegarPara={Screen.Cadastros} goEdit={goEdit} setModal={setModal} editCampo={true} />
           </View>
         ) : (
           <TouchableOpacity

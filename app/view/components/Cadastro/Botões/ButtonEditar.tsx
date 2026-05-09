@@ -9,18 +9,26 @@ export default function ButtonEditar({
   navegarPara,
   selectParam,
   editCampo,
+  goEdit,
+  setModal,
 }: {
   navegarPara: Screen;
   selectParam?: Pet | Owner | Appointment;
   editCampo?: boolean;
+  goEdit?: boolean;
+  setModal?: () => void;
 }) {
   const { screen, navigate, params } = useScreen();
   return (
     <View style={styles.ctnEdit}>
       <TouchableOpacity
-        onPress={() => {
-          navigate(navegarPara, selectParam);
-        }}
+        onPress={
+          goEdit
+            ? setModal
+            : () => {
+                navigate(navegarPara, selectParam);
+              }
+        }
         style={editCampo == false ? styles.btnEdit : styles.btnEditCampo}
       >
         <Image
