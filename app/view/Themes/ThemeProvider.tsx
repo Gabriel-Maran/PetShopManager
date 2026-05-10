@@ -98,7 +98,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     configsController
       .getConfigById(1)
-      .then((item) => setIsDark(item!.is_ativo == 1 ? true : false));
+      .then((item) => {
+        if (item != null) {
+          setIsDark(item.is_ativo === 1);
+        }
+      })
+      .catch((err) => {
+        console.warn("Erro ao carregar tema:", err);
+      });
   }, []);
 
   return (

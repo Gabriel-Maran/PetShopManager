@@ -22,7 +22,7 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 }
 
 /* - Drops de triggers, index e tables
-
+  //Cole lá em baixo, vai ter a indicação
   await db.execAsync(`
   DROP TRIGGER IF EXISTS trg_ultima_visita;
   DROP TRIGGER IF EXISTS trg_remarcacao_automatica;
@@ -46,6 +46,14 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   DROP TABLE IF EXISTS configs;`);
 
 */
+
+export async function closeDatabase(): Promise<void> {
+  if (db) {
+    await db.closeAsync();
+    db = null; // ← essencial para forçar reabertura
+  }
+}
+
 export async function initDatabase(): Promise<void> {
   const db = await getDatabase();
 
@@ -390,6 +398,7 @@ export async function initDatabase(): Promise<void> {
   // ── Execução ──────────────────────────────────────────────────────────────
 
   await db.execAsync(SQL_PRAGMA);
+  //Cole aqui se deseja dar drop em algo
   await db.execAsync(SQL_CREATE_TABLES);
   await db.execAsync(SQL_CREATE_INDEXES);
   await db.execAsync(SQL_INSERTS);
