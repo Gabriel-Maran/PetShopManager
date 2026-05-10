@@ -5,7 +5,6 @@ import {
   Animated,
   StyleSheet,
   Text,
-  Image,
   ImageSourcePropType,
 } from "react-native";
 import {
@@ -60,7 +59,7 @@ export default function Toggle({
   });
 
   return (
-    <InputWrapper 
+    <InputWrapper
       image={image}
       titleName={title}
       hasBorderBottom={hasBorderBottom}

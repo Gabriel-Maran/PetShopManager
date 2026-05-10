@@ -1,8 +1,19 @@
-
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { PacoteRemarcacao, PorteAnimal, Screen, TipoServico } from "../../../config/consts";
+import {
+  EspeciesAtendidas,
+  PacoteRemarcacao,
+  PorteAnimal,
+  Screen,
+  TipoServico,
+} from "../../../config/consts";
 import { Pet, PetBuilder } from "../../../model/Pet";
 import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
 
@@ -19,11 +30,14 @@ import InputSelect from "../../components/InputSelect";
 
 import { usePetFormSetup } from "../../../hooks/usePetFormSetup";
 
+import {
+  EspeciesAtendidasLabel,
+} from "../../../config/consts";
 
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { params, navigate } = useScreen<Pet>();
   const { showError } = useError();
-  const s = useThemedStyles(styles);;
+  const s = useThemedStyles(styles);
 
   const [form, setForm] = useState({
     nome: petToEdit?.nome ?? "",
@@ -45,21 +59,20 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
         : undefined,
     dataInicioPacote: petToEdit?.data_inicio_pacote ?? undefined,
   });
-  
-    const { 
-    especiesList, 
-    racasList, 
-    owners, 
-    page, 
-    total, 
-    setPage, 
-    setSearchTxt 
+
+  const {
+    especiesList,
+    racasList,
+    owners,
+    page,
+    total,
+    setPage,
+    setSearchTxt,
   } = usePetFormSetup(form.especie);
 
-const [modalDonoVisivel, setModalDonoVisivel] = useState(false);
+  const [modalDonoVisivel, setModalDonoVisivel] = useState(false);
 
-
-const salvarPet = async () => {
+  const salvarPet = async () => {
     const petSalvar = new PetBuilder()
       .withNome(form.nome)
       .withEspecie(form.especie)
@@ -72,7 +85,7 @@ const salvarPet = async () => {
       .withPacote(form.pacoteRemarcacao)
       .withInicioPacote(form.dataInicioPacote)
       .build();
-      try {
+    try {
       if (petToEdit?.id) {
         await petController.updatePet(petToEdit.id, petSalvar);
       } else {
@@ -135,24 +148,29 @@ const salvarPet = async () => {
               goEdit={true}
               onClear={form.dono_nome ? limparDono : undefined}
             />
-         <InputSelect
+            <InputSelect
               titleName="Espécie"
               image={require("../../../assets/animais/iconPata.png")}
               placeholder="Selecione a espécie..."
               itens={especiesList}
               itemSelected={especiesList.find((e) => e.id === form.especie)}
-              labelExtractor={(item) => item.nome}
+              labelExtractor={(item) => EspeciesAtendidasLabel[item.nome]}
               onChange={(item) => atualizarValores("especie", item.id)}
               renderItem={(item) => (
-                <Text style={{ padding: 15 }}>{item.nome}</Text>
+                <Text style={{ padding: 15 }}>
+                  {EspeciesAtendidasLabel[item.nome]}
+                </Text>
               )}
               hasBorderBottom={true}
             />
-
             <InputSelect
               titleName="Raça"
               image={require("../../../assets/animais/iconRaca.png")}
-              placeholder={form.especie ? "Selecione a raça..." : "Escolha a espécie primeiro"}
+              placeholder={
+                form.especie
+                  ? "Selecione a raça..."
+                  : "Escolha a espécie primeiro"
+              }
               itens={racasList}
               itemSelected={racasList.find((e) => e.id === form.raca)}
               labelExtractor={(item) => item.nome}
