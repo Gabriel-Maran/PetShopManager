@@ -26,7 +26,6 @@ export enum Screen {
 
 export enum TipoServico {
   Banho = "Banho",
-  Tosa = "Tosa",
   BanhoETosa = "Banho e Tosa",
 }
 
