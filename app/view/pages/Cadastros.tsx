@@ -27,12 +27,13 @@ import ModalConfDelete from "../components/Cadastro/Botões/Delete/ModalConfDele
 import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
 
 export default function Cadastros() {
-  const { navigate } = useScreen();
+  const { navigate, params} = useScreen();
   const { showError } = useError();
 
   const s = useThemedStyles(styles);
 
-  const [isOwnerSelected, setIsOwnerSelected] = useState(true);
+  const [isOwnerSelected, setIsOwnerSelected] = useState(params !== "PETS");
+
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [owners, setOwners] = useState<Owner[]>([]);

@@ -1,40 +1,29 @@
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useEffect, useState } from "react";
-import {
-  LIMIT_ITEM_PAGE,
-  ORDER,
-  PacoteRemarcacao,
-  PorteAnimal,
-  Screen,
-  TipoServico,
-} from "../../../config/consts";
-import { useError } from "../../../hooks/useError";
+
+import { useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+import { PacoteRemarcacao, PorteAnimal, Screen, TipoServico } from "../../../config/consts";
 import { Pet, PetBuilder } from "../../../model/Pet";
+import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
+
+import { useError } from "../../../hooks/useError";
+import { useScreen } from "../../../hooks/useScreen";
 import { petController } from "../../../controller/PetController";
-import { Owner } from "../../../model/Owner";
 
 import TitleBar from "../../components/Cadastro/TitleBar";
 import DefaultHeader from "../../components/Header/DefaultHeader";
 import InputInfo from "../../components/Cadastro/InputInfo";
 import SelectionField from "../../components/Cadastro/SelectionField";
-import { ownerController } from "../../../controller/OwnerController";
 import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
-import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
-import { speciesController } from "../../../controller/SpeciesController";
 import InputSelect from "../../components/InputSelect";
-import { useScreen } from "../../../hooks/useScreen";
+
+import { usePetFormSetup } from "../../../hooks/usePetFormSetup";
+
 
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { params, navigate } = useScreen<Pet>();
   const { showError } = useError();
-
-  const s = useThemedStyles(styles);
+  const s = useThemedStyles(styles);;
 
   const [form, setForm] = useState({
     nome: petToEdit?.nome ?? "",
@@ -56,8 +45,21 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
         : undefined,
     dataInicioPacote: petToEdit?.data_inicio_pacote ?? undefined,
   });
+  
+    const { 
+    especiesList, 
+    racasList, 
+    owners, 
+    page, 
+    total, 
+    setPage, 
+    setSearchTxt 
+  } = usePetFormSetup(form.especie);
 
-  const salvarPet = async () => {
+const [modalDonoVisivel, setModalDonoVisivel] = useState(false);
+
+
+const salvarPet = async () => {
     const petSalvar = new PetBuilder()
       .withNome(form.nome)
       .withEspecie(form.especie)
@@ -70,21 +72,17 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
       .withPacote(form.pacoteRemarcacao)
       .withInicioPacote(form.dataInicioPacote)
       .build();
-
-    try {
+      try {
       if (petToEdit?.id) {
         await petController.updatePet(petToEdit.id, petSalvar);
       } else {
         await petController.createPet(petSalvar);
       }
-      navigate(Screen.Cadastros);
+      navigate(Screen.Cadastros, "PETS");
     } catch (erro) {
       showError(erro instanceof Error ? erro.message : "Erro inesperado.");
     }
   };
-
-  const handleError = (e: unknown) =>
-    showError(e instanceof Error ? e.message : "Erro inesperado.");
 
   const atualizarValores = (campo: keyof typeof form, valor: any) => {
     setForm((prev) => ({
@@ -97,42 +95,6 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
     atualizarValores("dono_id", 0);
     atualizarValores("dono_nome", "");
   };
-
-  const [modalDonoVisivel, setModalDonoVisivel] = useState(false);
-  const [page, setPage] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [searchTxt, setSearchTxt] = useState("");
-  const [owners, setOwners] = useState<Owner[] | undefined | null>();
-  const [especiesList, setEspeciesList] = useState<
-    { id: number; nome: string }[]
-  >([]);
-  const [racasList, setRacasList] = useState<{ id: number; nome: string }[]>(
-    [],
-  );
-
-  useEffect(() => {
-    try {
-      ownerController
-        .searchOwnersByNamePaged(searchTxt, page, LIMIT_ITEM_PAGE, ORDER.DESC)
-        .then(setOwners)
-        .catch(handleError);
-    } catch (e) {
-      showError(e instanceof Error ? e.message : "Erro inesperado.");
-    }
-  }, [searchTxt, page]);
-
-  useEffect(() => {
-    speciesController.searchSpecies().then(setEspeciesList).catch(handleError);
-  }, []);
-
-  useEffect(() => {
-    if (form.especie) {
-      speciesController
-        .searchBreedsBySpecies(form.especie)
-        .then(setRacasList)
-        .catch(handleError);
-    }
-  }, [form.especie]);
 
   return (
     <>
@@ -173,7 +135,9 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               goEdit={true}
               onClear={form.dono_nome ? limparDono : undefined}
             />
-            <InputSelect
+         <InputSelect
+              titleName="Espécie"
+              image={require("../../../assets/animais/iconPata.png")}
               placeholder="Selecione a espécie..."
               itens={especiesList}
               itemSelected={especiesList.find((e) => e.id === form.especie)}
@@ -182,10 +146,13 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               renderItem={(item) => (
                 <Text style={{ padding: 15 }}>{item.nome}</Text>
               )}
+              hasBorderBottom={true}
             />
 
             <InputSelect
-              placeholder="Selecione a raça..."
+              titleName="Raça"
+              image={require("../../../assets/animais/iconRaca.png")}
+              placeholder={form.especie ? "Selecione a raça..." : "Escolha a espécie primeiro"}
               itens={racasList}
               itemSelected={racasList.find((e) => e.id === form.raca)}
               labelExtractor={(item) => item.nome}
@@ -193,6 +160,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               renderItem={(item) => (
                 <Text style={{ padding: 15 }}>{item.nome}</Text>
               )}
+              hasBorderBottom={false} // O último item da caixa não precisa de borda embaixo
             />
           </View>
           <View style={s.ctnBtnSalvar}>
