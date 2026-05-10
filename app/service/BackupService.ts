@@ -1,15 +1,29 @@
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
-import { closeDatabase, initDatabase } from "../config/database";
+import { getDatabase } from "../config/database";
 
 const DB_NAME = "petshop.db";
 const DB_PATH = `${FileSystem.documentDirectory}SQLite/${DB_NAME}`;
 const BACKUP_PATH = `${FileSystem.cacheDirectory}${DB_NAME}`;
 
+const TABELAS = [
+  "configs",
+  "service_type",
+  "species",
+  "race",
+  "owners",
+  "pets",
+  "appointments",
+];
+
 // ─── EXPORTAR ────────────────────────────────────────────────────────────────
 
 export async function exportDatabase(): Promise<void> {
+  // Força o WAL a ser consolidado antes de copiar
+  const db = await getDatabase();
+  await db.execAsync(`PRAGMA wal_checkpoint(TRUNCATE);`);
+
   const dbInfo = await FileSystem.getInfoAsync(DB_PATH);
   if (!dbInfo.exists) {
     throw new Error("Banco de dados não encontrado.");
@@ -20,7 +34,6 @@ export async function exportDatabase(): Promise<void> {
     throw new Error("Compartilhamento não disponível neste dispositivo.");
   }
 
-  // Garante que o backup anterior não interfere
   const backupInfo = await FileSystem.getInfoAsync(BACKUP_PATH);
   if (backupInfo.exists) {
     await FileSystem.deleteAsync(BACKUP_PATH, { idempotent: true });
@@ -51,37 +64,44 @@ export async function importDatabase(): Promise<void> {
     throw new Error("Arquivo inválido. Selecione um arquivo .db válido.");
   }
 
-  // Normaliza o URI removendo o prefixo file:// se presente
-  const sourceUri = file.uri.startsWith("file://")
-    ? file.uri.slice(7)
-    : file.uri;
-
-  // Verifica se o arquivo fonte existe e é acessível
   const sourceInfo = await FileSystem.getInfoAsync(file.uri);
   if (!sourceInfo.exists) {
     throw new Error("Arquivo selecionado não encontrado ou inacessível.");
   }
 
-  // Fecha e reseta o singleton antes de substituir o arquivo
-  await closeDatabase();
-
-  // Garante que o diretório SQLite existe
-  const sqliteDir = `${FileSystem.documentDirectory}SQLite`;
-  const dirInfo = await FileSystem.getInfoAsync(sqliteDir);
-  if (!dirInfo.exists) {
-    await FileSystem.makeDirectoryAsync(sqliteDir, { intermediates: true });
+  // Copia o .db importado para um caminho acessível pelo SQLite
+  const IMPORT_PATH = `${FileSystem.documentDirectory}SQLite/import_temp.db`;
+  const importInfo = await FileSystem.getInfoAsync(IMPORT_PATH);
+  if (importInfo.exists) {
+    await FileSystem.deleteAsync(IMPORT_PATH, { idempotent: true });
   }
+  await FileSystem.copyAsync({ from: file.uri, to: IMPORT_PATH });
 
-  // Remove o banco atual antes de copiar
-  await FileSystem.deleteAsync(DB_PATH, { idempotent: true });
+  const db = await getDatabase();
 
-  await FileSystem.copyAsync({ from: file.uri, to: DB_PATH });
+  // ATTACH abre o banco importado como "src" dentro da conexão ativa
+  await db.execAsync(
+    `ATTACH DATABASE '${IMPORT_PATH.replace("file://", "")}' AS src;`,
+  );
 
-  // Verifica se a cópia foi bem-sucedida antes de reinicializar
-  const newDbInfo = await FileSystem.getInfoAsync(DB_PATH);
-  if (!newDbInfo.exists) {
-    throw new Error("Falha ao copiar o arquivo. Tente novamente.");
+  try {
+    await db.execAsync(`PRAGMA foreign_keys = OFF;`);
+    await db.execAsync(`BEGIN TRANSACTION;`);
+
+    for (const tabela of TABELAS) {
+      await db.execAsync(`DELETE FROM main.${tabela};`);
+      await db.execAsync(
+        `INSERT INTO main.${tabela} SELECT * FROM src.${tabela};`,
+      );
+    }
+
+    await db.execAsync(`COMMIT;`);
+  } catch (e) {
+    await db.execAsync(`ROLLBACK;`);
+    throw e;
+  } finally {
+    await db.execAsync(`PRAGMA foreign_keys = ON;`);
+    await db.execAsync(`DETACH DATABASE src;`);
+    await FileSystem.deleteAsync(IMPORT_PATH, { idempotent: true });
   }
-
-  await initDatabase();
 }
