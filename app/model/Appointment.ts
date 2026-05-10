@@ -15,7 +15,7 @@ export type AppointmentsWithOwnerAndPet = Appointment & {
   id: number;
   nome_pet: string;
   nome_dono: string;
-  raca_pet: string;
+  especie: string;
 };
 
 export type NewOrEditAppointmentParams = {

@@ -109,9 +109,9 @@ export default function Agendamentos({
             <View style={s.avatar}>
               <Image
                 source={
-                  item.raca_pet === EspeciesAtendidas.CAO
+                  item.especie === EspeciesAtendidas.CAO
                     ? require("../../assets/animais/caoGreen.png")
-                    : item.raca_pet === EspeciesAtendidas.GATO
+                    : item.especie === EspeciesAtendidas.GATO
                       ? require("../../assets/animais/gatoGreen.png")
                       : require("../../assets/animais/interrogacaoGreen.png")
                 }

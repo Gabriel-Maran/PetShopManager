@@ -28,12 +28,13 @@ class AppointmentRepository {
       `
     SELECT 
       AP.*,
-      PT.nome AS nome_pet,
-      PT.raca AS raca_pet,
-      OW.nome AS nome_dono
+      PT.nome    AS nome_pet,
+      SP.nome    AS especie,
+      OW.nome    AS nome_dono
     FROM appointments AS AP
-    JOIN pets AS PT ON AP.pet_id = PT.id
-    JOIN owners AS OW ON PT.dono_id = OW.id
+    JOIN pets    AS PT ON AP.pet_id = PT.id
+    JOIN owners  AS OW ON PT.dono_id = OW.id
+    JOIN species AS SP ON PT.especie = SP.id
     WHERE AP.data = ?
     ORDER BY AP.id ASC
     `,
