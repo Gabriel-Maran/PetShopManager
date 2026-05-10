@@ -23,6 +23,7 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 
 /* - Drops de triggers, index e tables
 
+  await db.execAsync(`
   DROP TRIGGER IF EXISTS trg_ultima_visita;
   DROP TRIGGER IF EXISTS trg_remarcacao_automatica;
   DROP TRIGGER IF EXISTS trg_pet_remarcacao_insert;
@@ -42,7 +43,7 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   DROP TABLE IF EXISTS race;
   DROP TABLE IF EXISTS species;
   DROP TABLE IF EXISTS service_type;
-  DROP TABLE IF EXISTS configs;
+  DROP TABLE IF EXISTS configs;`);
 
 */
 export async function initDatabase(): Promise<void> {
