@@ -15,6 +15,10 @@ class PetService {
     return petRepository.getAllPetsPaged(page, limit, order);
   }
 
+  getAllPetsPagedWithSpecie(page: number, limit: number, order: ORDER) {
+    return petRepository.getAllPetsPagedWithSpecie(page, limit, order);
+  }
+
   searchPetsByNamePaged(
     query: string,
     page: number,
@@ -22,6 +26,20 @@ class PetService {
     order: ORDER,
   ) {
     return petRepository.searchPetsByNamePaged(query, page, limit, order);
+  }
+
+  searchPetsByNamePagedWithSpecie(
+    query: string,
+    page: number,
+    limit: number,
+    order: ORDER,
+  ) {
+    return petRepository.searchPetsByNamePagedWithSpecie(
+      query,
+      page,
+      limit,
+      order,
+    );
   }
 
   getPetsByOwnerId(ownerId: number) {
@@ -47,7 +65,6 @@ class PetService {
   activePet(id: number) {
     return petRepository.activePet(id);
   }
-  
 }
 
 export const petService = new PetService();

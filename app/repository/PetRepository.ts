@@ -1,6 +1,6 @@
 import { ORDER } from "../config/consts";
 import { getDatabase } from "../config/database";
-import { Pet } from "../model/Pet";
+import { Pet, PetWithSpecie } from "../model/Pet";
 
 class PetRepository {
   async getPetById(id: number): Promise<Pet | null> {
@@ -28,6 +28,29 @@ class PetRepository {
     );
   }
 
+  async getAllPetsPagedWithSpecie(
+    page: number = 0,
+    limit: number = 20,
+    order: ORDER,
+  ): Promise<PetWithSpecie[]> {
+    const db = await getDatabase();
+    const offset = page * limit;
+    return db.getAllAsync<PetWithSpecie>(
+      `
+      SELECT 
+      PT.*,
+      SP.nome      as nome_especie
+      FROM pets    as PT
+      JOIN species as SP ON PT.especie = SP.id
+      WHERE is_ativo = 1 
+      ORDER BY criado_em ${order} 
+      LIMIT ? 
+      OFFSET ?
+      `,
+      [limit, offset],
+    );
+  }
+
   // Busca por nome usando o idx_pets_nome (prefixo) ou substring
   async searchPetsByNamePaged(
     query: string,
@@ -41,6 +64,30 @@ class PetRepository {
     return db.getAllAsync<Pet>(
       `SELECT * FROM pets 
        WHERE nome LIKE ? AND is_ativo = 1 
+       ORDER BY nome ${order} 
+       LIMIT ? OFFSET ?`,
+      [`%${query}%`, limit, offset],
+    );
+  }
+
+  async searchPetsByNamePagedWithSpecie(
+    query: string,
+    page: number = 0,
+    limit: number = 20,
+    order: ORDER = ORDER.ASC,
+  ): Promise<PetWithSpecie[]> {
+    const db = await getDatabase();
+    const offset = page * limit;
+
+    return db.getAllAsync<PetWithSpecie>(
+      `
+       SELECT 
+        PT.*,
+        SP.nome      as nome_especie
+       FROM  pets    as PT
+       JOIN  species as SP ON PT.especie = SP.id
+       WHERE nome LIKE ? 
+       AND is_ativo = 1 
        ORDER BY nome ${order} 
        LIMIT ? OFFSET ?`,
       [`%${query}%`, limit, offset],

@@ -1,6 +1,6 @@
 import { petService } from "../service/PetService";
 import { ORDER } from "../config/consts";
-import { Pet } from "../model/Pet";
+import { Pet, PetWithSpecie } from "../model/Pet";
 import { ownerController } from "./OwnerController";
 
 class PetController {
@@ -18,6 +18,10 @@ class PetController {
     return petService.getAllPetsPaged(page, limit, order);
   }
 
+  getAllPetsPagedWithSpecie(page: number, limit: number, order: ORDER): Promise<PetWithSpecie[]> {
+    return petService.getAllPetsPagedWithSpecie(page, limit, order);
+  }
+
   searchPetsByNamePaged(
     query: string,
     page: number,
@@ -28,6 +32,18 @@ class PetController {
       return this.getAllPetsPaged(page, limit, order);
     }
     return petService.searchPetsByNamePaged(query, page, limit, order);
+  }
+
+  searchPetsByNamePagedWithSpecie(
+    query: string,
+    page: number,
+    limit: number,
+    order: ORDER = ORDER.DESC,
+  ): Promise<PetWithSpecie[]> {
+    if (!query.trim()) {
+      return this.getAllPetsPagedWithSpecie(page, limit, order);
+    }
+    return petService.searchPetsByNamePagedWithSpecie(query, page, limit, order);
   }
 
   getPetsByOwnerId(ownerId: number): Promise<Pet[]> {
@@ -75,7 +91,5 @@ class PetController {
     await petService.activePet(id);
   }
 }
-
-
 
 export const petController = new PetController();
