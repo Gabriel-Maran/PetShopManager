@@ -28,7 +28,11 @@ import Toggle from "../../components/Cadastro/Botões/Toggle";
 import SelectionField from "../../components/Cadastro/SelectionField";
 import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
 import InputSelect from "../../components/InputSelect";
-import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../../Themes/ThemeProvider";
 
 import {
   DataHifenPraBarra,
@@ -41,6 +45,8 @@ import { serviceTypeRepository } from "../../../repository/ServiceTypeRepository
 export default function NewOrEditAppointment() {
   const { params, navigate } = useScreen<NewOrEditAppointmentParams>();
   const { showError } = useError();
+
+  const { colors } = useTheme();
 
   const mascarar = Mascarar;
 
@@ -87,7 +93,12 @@ export default function NewOrEditAppointment() {
   useEffect(() => {
     try {
       petController
-        .searchPetsByNamePagedWithSpecie(searchTxt, page, LIMIT_ITEM_PAGE, ORDER.DESC)
+        .searchPetsByNamePagedWithSpecie(
+          searchTxt,
+          page,
+          LIMIT_ITEM_PAGE,
+          ORDER.DESC,
+        )
         .then(setPets)
         .catch(handleError);
     } catch (e) {
@@ -169,7 +180,9 @@ export default function NewOrEditAppointment() {
               labelExtractor={(item) => item.servico}
               onChange={(item) => setServico(item.servico)}
               renderItem={(item) => (
-                <Text style={{ padding: 15 }}>{item.servico}</Text>
+                <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+                  {item.servico}
+                </Text>
               )}
               hasBorderBottom={true}
             />

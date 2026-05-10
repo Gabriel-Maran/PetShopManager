@@ -15,7 +15,11 @@ import {
   TipoServico,
 } from "../../../config/consts";
 import { Pet, PetBuilder } from "../../../model/Pet";
-import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../../Themes/ThemeProvider";
 
 import { useError } from "../../../hooks/useError";
 import { useScreen } from "../../../hooks/useScreen";
@@ -36,6 +40,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { params, navigate } = useScreen<Pet>();
   const { showError } = useError();
   const s = useThemedStyles(styles);
+  const { colors } = useTheme();
 
   const [form, setForm] = useState({
     nome: petToEdit?.nome ?? "",
@@ -155,7 +160,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               labelExtractor={(item) => EspeciesAtendidasLabel[item.nome]}
               onChange={(item) => atualizarValores("especie", item.id)}
               renderItem={(item) => (
-                <Text style={{ padding: 15 }}>
+                <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
                   {EspeciesAtendidasLabel[item.nome]}
                 </Text>
               )}
@@ -174,7 +179,9 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               labelExtractor={(item) => item.nome}
               onChange={(item) => atualizarValores("raca", item.id)}
               renderItem={(item) => (
-                <Text style={{ padding: 15 }}>{item.nome}</Text>
+                <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+                  {item.nome}
+                </Text>
               )}
               hasBorderBottom={false} // O último item da caixa não precisa de borda embaixo
             />

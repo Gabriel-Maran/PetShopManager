@@ -22,6 +22,7 @@ const colors = {
     TEXT_PRIMARY: "#000000",
     TEXT_SECONDARY: "#2C2C2A",
     TEXT_MUTED: "#646462",
+    TEXT_PLACEHOLDER: "#9a9a98",
 
     BORDER: "#F0F0F0",
     BORDER_STRONG: "#888888",
@@ -58,6 +59,7 @@ const colors = {
     TEXT_PRIMARY: "#FFFFFF",
     TEXT_SECONDARY: "#E2E8F0",
     TEXT_MUTED: "#94A3B8",
+    TEXT_PLACEHOLDER: "#64748B",
 
     BORDER: "#2D3139",
     BORDER_STRONG: "#4A5568",
