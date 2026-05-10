@@ -100,7 +100,7 @@ export default function NewOrEditAppointment() {
       .getAllServiceTypes()
       .then(setServicos)
       .catch(handleError);
-    console.log(servicos)
+    console.log(servicos);
   }, []);
 
   const handleError = (e: unknown) =>
@@ -162,6 +162,8 @@ export default function NewOrEditAppointment() {
               goEdit={true}
             />
             <InputSelect
+              image={require("../../../assets/outros/servicos.png")}
+              titleName="Serviço"
               placeholder="Selecione o serviço..."
               itens={servicos}
               itemSelected={servicos.find((e) => e.servico === servico)}
@@ -170,15 +172,6 @@ export default function NewOrEditAppointment() {
               renderItem={(item) => (
                 <Text style={{ padding: 15 }}>{item.servico}</Text>
               )}
-            />
-            <InputInfo
-              image={require("../../../assets/outros/servicos.png")}
-              item={servico}
-              setItem={setServico}
-              placeHolder="Selecione o serviço..."
-              titleName="Serviço"
-              variasLinhas={false}
-              digitavel={true}
               hasBorderBottom={true}
             />
             <InputInfo
