@@ -1,11 +1,18 @@
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { StyleSheet, Text, View } from "react-native";
-import { useState } from "react";
 import {
   ThemeColors,
   useTheme,
   useThemedStyles,
 } from "../Themes/ThemeProvider";
+import { useEffect, useState } from "react";
+import { useError } from "../../hooks/useError";
+
+import { Appointment } from "../../model/Appointment";
+
+import { appointmentController } from "../../controller/AppointmentsController";
+
+import { DataNumberPraStringHifen } from "../../utils/converterData";
 
 // Configuração do calendário para português do Brasil
 LocaleConfig.locales["pt-br"] = {
@@ -63,9 +70,67 @@ export default function Calendario({
   // new Date().toISOString() -> "2025-04-24T12:34:56.789Z"
   // .split('T')[0] -> "2025-04-24", o [0] pega só a parte da data(ano-mês-dia), sem a parte do horário
   // Isso é só para marcar o dia atual no calendário e inicializar o estado com a data de hoje
+  const { colors } = useTheme();
+  const { showError } = useError();
+  const handleError = (e: unknown) =>
+    showError(e instanceof Error ? e.message : "Erro inesperado.");
+
+  const [datasComAgendamento, setDatasComAgendamento] = useState<Appointment[]>(
+    [],
+  );
+
+  const pegarMesEAno = () => {
+    const [ano, mes] = dateSelected.split("-");
+    return {
+      ano: Number(ano),
+      mes: Number(mes),
+    };
+  };
+
+  function pegarIntervaloMes(ano: number, mes: number) {
+    const mesAtual = String(mes).padStart(2, "0");
+
+    const ultimoDia = new Date(ano, mes, 0).getDate();
+    const diaFinal = String(ultimoDia).padStart(2, "0");
+
+    return {
+      inicio: Number(`${ano}${mesAtual}01`),
+      fim: Number(`${ano}${mesAtual}${diaFinal}`),
+    };
+  }
+
+  useEffect(() => {
+    const { mes, ano } = pegarMesEAno();
+    const { inicio, fim } = pegarIntervaloMes(ano, mes);
+    appointmentController
+      .getAppointmentsByDateRange(inicio, fim)
+      .then(setDatasComAgendamento)
+      .catch(handleError);
+  }, []);
+
+  const markedDates = datasComAgendamento.reduce(
+    (acc, appointment) => {
+      const dataFormatada = DataNumberPraStringHifen(appointment.data);
+
+      acc[dataFormatada] = {
+        marked: true,
+        dotColor: colors.PRIMARY_CONTRAST,
+      };
+
+      return acc;
+    },
+    {} as Record<string, any>,
+  );
+
+  markedDates[dateSelected] = {
+    ...(markedDates[dateSelected] ?? {}),
+    selected: true,
+    selectedColor: colors.PRIMARY_CONTRAST,
+    selectedTextColor: colors.BACKGROUND,
+  };
 
   const s = useThemedStyles(styles);
-  const { colors } = useTheme();
+
   return (
     <View style={s.completeCalendar}>
       <Text
@@ -82,12 +147,7 @@ export default function Calendario({
         onDayPress={(day) => {
           setNewDate(day.dateString);
         }}
-        markedDates={{
-          [dateSelected]: {
-            selected: true,
-            selectedColor: "#0E9599",
-          },
-        }}
+        markedDates={markedDates}
         theme={{
           // Cores gerais
           backgroundColor: colors.BACKGROUND,

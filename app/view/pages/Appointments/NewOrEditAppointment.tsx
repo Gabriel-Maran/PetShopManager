@@ -12,7 +12,11 @@ import { useScreen } from "../../../hooks/useScreen";
 import { useError } from "../../../hooks/useError";
 
 import { Pet } from "../../../model/Pet";
-import { AppointmentBuilder, NewOrEditAppointmentParams } from "../../../model/Appointment";
+import {
+  AppointmentBuilder,
+  NewOrEditAppointmentParams,
+} from "../../../model/Appointment";
+import { ServiceType } from "../../../model/ServiceType";
 
 import { petController } from "../../../controller/PetController";
 import { appointmentController } from "../../../controller/AppointmentsController";
@@ -23,21 +27,26 @@ import InputInfo from "../../components/Cadastro/InputInfo";
 import Toggle from "../../components/Cadastro/Botões/Toggle";
 import SelectionField from "../../components/Cadastro/SelectionField";
 import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
+import InputSelect from "../../components/InputSelect";
 import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
 
-import { DataHifenPraBarra, DataNumberPraString, DataStringPraNumber } from "../../../utils/converterData";
+import {
+  DataHifenPraBarra,
+  DataNumberPraString,
+  DataStringPraNumber,
+} from "../../../utils/converterData";
 import Mascarar from "../../../utils/mascarar";
+import { serviceTypeRepository } from "../../../repository/ServiceTypeRepository";
 
 export default function NewOrEditAppointment() {
   const { params, navigate } = useScreen<NewOrEditAppointmentParams>();
   const { showError } = useError();
 
-  const mascarar = Mascarar
+  const mascarar = Mascarar;
 
   const isEditing = Boolean(params?.appointment?.id);
-  console.log(isEditing)
 
-  const [nomePet, setNomePet] = useState(params?.appointment?.nome_pet);
+  const [nomePet, setNomePet] = useState(params?.appointment?.nome_pet ?? "");
   const [idPet, setIdPet] = useState(params?.appointment?.pet_id ?? 0);
 
   const [servico, setServico] = useState(params?.appointment?.servico ?? "");
@@ -59,8 +68,6 @@ export default function NewOrEditAppointment() {
     params?.appointment?.observacao ?? "",
   );
 
-  const [taEditando, setTaEditando] = useState(false);
-
   //Quando não auto gerado, o db já criar isso como false(ou seja, 0), so fica true isso aqui quando é criado na trigger
   //Minha ideia é não alterar isso, por conta de que, foi criado automatico e se o dono do petshop mudar
   //deve continuar como auto gerado
@@ -68,6 +75,8 @@ export default function NewOrEditAppointment() {
   const [autoGen, setAutoGen] = useState(
     params?.appointment?.is_auto_agen ?? 0,
   );
+
+  const [servicos, setServicos] = useState<ServiceType[]>([]);
 
   const [modalPets, setModalPets] = useState(false);
   const [page, setPage] = useState(0);
@@ -86,6 +95,14 @@ export default function NewOrEditAppointment() {
     }
   }, [searchTxt, page]);
 
+  useEffect(() => {
+    serviceTypeRepository
+      .getAllServiceTypes()
+      .then(setServicos)
+      .catch(handleError);
+    console.log(servicos)
+  }, []);
+
   const handleError = (e: unknown) =>
     showError(e instanceof Error ? e.message : "Erro inesperado.");
 
@@ -94,7 +111,7 @@ export default function NewOrEditAppointment() {
       .withPetId(idPet)
       .withServico(servico)
       .withHora(hora ?? "00:00")
-      .withData(DataStringPraNumber(data,"/"))
+      .withData(DataStringPraNumber(data, "/"))
       .withEntregarPet(entregarPet)
       .withObservacao(observacao)
       .isConcluido(concluido)
@@ -144,6 +161,16 @@ export default function NewOrEditAppointment() {
               setModal={() => setModalPets(true)}
               goEdit={true}
             />
+            <InputSelect
+              placeholder="Selecione o serviço..."
+              itens={servicos}
+              itemSelected={servicos.find((e) => e.servico === servico)}
+              labelExtractor={(item) => item.servico}
+              onChange={(item) => setServico(item.servico)}
+              renderItem={(item) => (
+                <Text style={{ padding: 15 }}>{item.servico}</Text>
+              )}
+            />
             <InputInfo
               image={require("../../../assets/outros/servicos.png")}
               item={servico}
@@ -157,7 +184,7 @@ export default function NewOrEditAppointment() {
             <InputInfo
               image={require("../../../assets/outros/data.png")}
               item={data}
-              setItem={(v) => setData(mascarar(v,1))}
+              setItem={(v) => setData(mascarar(v, 1))}
               placeHolder="Informe a data..."
               titleName="Data"
               variasLinhas={true}
@@ -167,7 +194,7 @@ export default function NewOrEditAppointment() {
             <InputInfo
               image={require("../../../assets/outros/hora.png")}
               item={hora}
-              setItem={(v) => setHora(mascarar(v,2))}
+              setItem={(v) => setHora(mascarar(v, 2))}
               placeHolder="Informe o horário..."
               titleName="Horário"
               variasLinhas={true}

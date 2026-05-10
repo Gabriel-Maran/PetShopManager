@@ -11,13 +11,7 @@ import { useState, useEffect } from "react";
 import { useScreen } from "../../hooks/useScreen";
 import { useError } from "../../hooks/useError";
 
-import {
-  Screen,
-  APP_BAR_HEIGHT,
-  EspeciesAtendidasLabel,
-  EspeciesAtendidas,
-  TipoServico,
-} from "../../config/consts";
+import { Screen, APP_BAR_HEIGHT, EspeciesAtendidas } from "../../config/consts";
 
 import { AppointmentsWithOwnerAndPet } from "../../model/Appointment";
 
@@ -43,18 +37,19 @@ export default function Agendamentos({
 }) {
   const { navigate } = useScreen();
   const { showError } = useError();
-
   const s = useThemedStyles(styles);
-  const { colors } = useTheme();
 
   const handleError = (e: unknown) =>
     showError(e instanceof Error ? e.message : "Erro inesperado.");
 
-  const [appointments, setAppointments] = useState<AppointmentsWithOwnerAndPet[]>();
+  const [appointments, setAppointments] =
+    useState<AppointmentsWithOwnerAndPet[]>();
 
   useEffect(() => {
     const fetch = appointmentController
-      .getAppointmentsByDateWithOwnerAndPet(DataStringPraNumber(dateSelected,"-"))
+      .getAppointmentsByDateWithOwnerAndPet(
+        DataStringPraNumber(dateSelected, "-"),
+      )
       .then(setAppointments);
     fetch.catch(handleError);
   }, [dateSelected]);
@@ -64,7 +59,9 @@ export default function Agendamentos({
       <View style={s.header}>
         <TouchableOpacity
           style={s.iconBtn}
-          onPress={() => navigate(Screen.NewOrEditAppointment, {dateSelected})}
+          onPress={() =>
+            navigate(Screen.NewOrEditAppointment, { dateSelected })
+          }
         >
           <Image source={require("../../assets/crud/add.png")} style={s.icon} />
         </TouchableOpacity>
@@ -105,7 +102,9 @@ export default function Agendamentos({
           <TouchableOpacity
             style={s.row}
             activeOpacity={0.6}
-            onPress={() => navigate(Screen.NewOrEditAppointment, {appointment: item})}
+            onPress={() =>
+              navigate(Screen.NewOrEditAppointment, { appointment: item })
+            }
           >
             <View style={s.avatar}>
               <Image
