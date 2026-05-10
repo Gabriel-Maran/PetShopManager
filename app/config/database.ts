@@ -56,7 +56,7 @@ export async function initDatabase(): Promise<void> {
       -- ── Tabelas ──────────────────────────────────────────────────────────────
 
       CREATE TABLE IF NOT EXISTS service_type (
-      id   INTEGER PRIMARY KEY AUTOINCREMENT,
+      id      INTEGER PRIMARY KEY AUTOINCREMENT,
       servico TEXT    NOT NULL UNIQUE
       );
 
@@ -65,8 +65,7 @@ export async function initDatabase(): Promise<void> {
       nome TEXT    NOT NULL UNIQUE  
       );
 
-
-     CREATE TABLE IF NOT EXISTS race (
+      CREATE TABLE IF NOT EXISTS race (
         id         INTEGER PRIMARY KEY AUTOINCREMENT,
         especie_id INTEGER NOT NULL,
         nome_raca  TEXT NOT NULL,
@@ -76,7 +75,7 @@ export async function initDatabase(): Promise<void> {
 
       INSERT OR IGNORE INTO service_type (id, servico) VALUES (1, 'Banho'), (2, 'Banho e Tosa');
 
-      INSERT OR IGNORE INTO species (id, nome) VALUES (1, 'Cão'), (2, 'Gato'), (3, 'Outro');
+      INSERT OR IGNORE INTO species (id, nome) VALUES (1, 'CAO'), (2, 'GATO'), (3, 'OUTRO');
       
       INSERT OR IGNORE INTO race (especie_id, nome_raca) VALUES
       -- ─── CÃES (especie_id = 1) ──────────────────────────────────
