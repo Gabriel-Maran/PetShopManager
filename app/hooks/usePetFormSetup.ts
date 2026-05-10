@@ -3,14 +3,13 @@ import { speciesController } from "../controller/SpeciesController";
 import { ownerController } from "../controller/OwnerController";
 import { LIMIT_ITEM_PAGE, ORDER } from "../config/consts";
 import { Owner } from "../model/Owner";
+import { Species } from "../repository/SpeciesRepository";
 import { useError } from "./useError";
 
 export function usePetFormSetup(formEspecieId: number) {
   const { showError } = useError();
 
-  const [especiesList, setEspeciesList] = useState<
-    { id: number; nome: string }[]
-  >([]);
+  const [especiesList, setEspeciesList] = useState<Species[]>([]);
   const [racasList, setRacasList] = useState<{ id: number; nome: string }[]>(
     [],
   );
