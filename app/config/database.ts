@@ -55,6 +55,12 @@ export async function initDatabase(): Promise<void> {
 
       -- ── Tabelas ──────────────────────────────────────────────────────────────
 
+      CREATE TABLE IF NOT EXISTS configs (
+      id       INTEGER PRIMARY KEY AUTOINCREMENT,
+      config   TEXT    NOT NULL UNIQUE,
+      is_ativo INTEGER NOT NULL DEFAULT 0
+      );
+
       CREATE TABLE IF NOT EXISTS service_type (
       id      INTEGER PRIMARY KEY AUTOINCREMENT,
       servico TEXT    NOT NULL UNIQUE
@@ -72,41 +78,6 @@ export async function initDatabase(): Promise<void> {
         FOREIGN KEY (especie_id) REFERENCES species(id) ON DELETE CASCADE,
         UNIQUE (especie_id, nome_raca)
       );
-
-      INSERT OR IGNORE INTO service_type (id, servico) VALUES (1, 'Banho'), (2, 'Banho e Tosa');
-
-      INSERT OR IGNORE INTO species (id, nome) VALUES (1, 'CAO'), (2, 'GATO'), (3, 'OUTRO');
-      
-      INSERT OR IGNORE INTO race (especie_id, nome_raca) VALUES
-      -- ─── CÃES (especie_id = 1) ──────────────────────────────────
-      (1, 'Vira-lata (SRD)'),
-      (1, 'Shih Tzu'),
-      (1, 'Yorkshire Terrier'),
-      (1, 'Poodle'),
-      (1, 'Spitz Alemão (Lulu)'),
-      (1, 'Bulldog Francês'),
-      (1, 'Pug'),
-      (1, 'Golden Retriever'),
-      (1, 'Labrador Retriever'),
-      (1, 'Pinscher'),
-      (1, 'Pitbull'),
-      (1, 'Border Collie'),
-      (1, 'Basset Hound'),
-      (1, 'Chow Chow'),
-    
-      -- ─── GATOS (especie_id = 2) ─────────────────────────────────
-      (2, 'Vira-lata (SRD)'),
-      (2, 'Siamês'),
-      (2, 'Persa'),
-      (2, 'Angorá'),
-      (2, 'Maine Coon'),
-      (2, 'Bengal'),
-      (2, 'Sphynx'),
-      (2, 'Ragdoll'),
-    
-      -- ─── OUTROS (especie_id = 3) ────────────────────────────────
-      (3, 'Não se aplica / SRD');
-
 
       CREATE TABLE IF NOT EXISTS owners (
         id        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -176,6 +147,50 @@ export async function initDatabase(): Promise<void> {
 
       CREATE INDEX IF NOT EXISTS idx_pets_nome
         ON pets (nome);
+
+      -- ── Inserts ──────────────────────────────────────────────────────────────
+
+      INSERT OR IGNORE INTO configs (id, config, is_ativo) VALUES
+      (1, 'Modo Escuro', 0);
+
+      INSERT OR IGNORE INTO service_type (id, servico) VALUES 
+      (1, 'Banho'), 
+      (2, 'Banho e Tosa');
+
+      INSERT OR IGNORE INTO species (id, nome) VALUES 
+      (1, 'CAO'), 
+      (2, 'GATO'), 
+      (3, 'OUTRO');
+      
+      INSERT OR IGNORE INTO race (especie_id, nome_raca) VALUES
+      -- ─── CÃES (especie_id = 1) ──────────────────────────────────
+      (1, 'Vira-lata (SRD)'),
+      (1, 'Shih Tzu'),
+      (1, 'Yorkshire Terrier'),
+      (1, 'Poodle'),
+      (1, 'Spitz Alemão (Lulu)'),
+      (1, 'Bulldog Francês'),
+      (1, 'Pug'),
+      (1, 'Golden Retriever'),
+      (1, 'Labrador Retriever'),
+      (1, 'Pinscher'),
+      (1, 'Pitbull'),
+      (1, 'Border Collie'),
+      (1, 'Basset Hound'),
+      (1, 'Chow Chow'),
+    
+      -- ─── GATOS (especie_id = 2) ─────────────────────────────────
+      (2, 'Vira-lata (SRD)'),
+      (2, 'Siamês'),
+      (2, 'Persa'),
+      (2, 'Angorá'),
+      (2, 'Maine Coon'),
+      (2, 'Bengal'),
+      (2, 'Sphynx'),
+      (2, 'Ragdoll'),
+    
+      -- ─── OUTROS (especie_id = 3) ────────────────────────────────
+      (3, 'Não se aplica / SRD');
 
       -- ── Trigger: atualiza current_ultima_visita_data ao CONCLUIR agendamento ─
       -- Registra a data real em que o serviço aconteceu.
