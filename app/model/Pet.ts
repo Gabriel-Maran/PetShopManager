@@ -1,5 +1,4 @@
 import {
-  EspeciesAtendidas,
   PacoteRemarcacao,
   PorteAnimal,
   TipoServico,
@@ -21,6 +20,10 @@ export interface Pet {
   ultimo_visita_data_auto?: number | null; //formato YYYYMMDD
   is_ativo: number; // 0 ou 1
   criado_em?: number;
+}
+
+export type PetWithSpecie = Pet & {
+  nome_especie: string;
 }
 
 export class PetBuilder {
