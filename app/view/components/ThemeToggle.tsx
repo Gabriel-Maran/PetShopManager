@@ -5,6 +5,7 @@ import {
   useThemedStyles,
 } from "../Themes/ThemeProvider";
 import { useRef } from "react";
+import { configsController } from "../../controller/ConfigsController";
 
 const THUMB_SIZE = 40;
 const SWITCH_WIDTH = 140;
@@ -68,7 +69,13 @@ export default function ThemeToggle() {
   });
 
   return (
-    <TouchableOpacity onPress={toggleSwitch} activeOpacity={0.85}>
+    <TouchableOpacity
+      onPress={async () => {
+        toggleSwitch();
+        await configsController.updateConfig(1, isDark ? 0 : 1);
+      }}
+      activeOpacity={0.85}
+    >
       <View
         style={[
           s.track,

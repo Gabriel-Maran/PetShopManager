@@ -1,6 +1,7 @@
 // ThemeContext.tsx
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { StyleSheet, useColorScheme } from "react-native";
+import { configsController } from "../../controller/ConfigsController";
 
 //USE: const { colors, isDark, trocarTheme } = useTheme();
 //USE: const s = useThemedStyles(styles);
@@ -92,8 +93,13 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const systemScheme = useColorScheme();
-  const [isDark, setIsDark] = useState(systemScheme === "dark");
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    configsController
+      .getConfigById(1)
+      .then((item) => setIsDark(item!.is_ativo == 1 ? true : false));
+  }, []);
 
   return (
     <ThemeContext.Provider
