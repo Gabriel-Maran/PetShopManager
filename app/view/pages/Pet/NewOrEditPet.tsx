@@ -135,8 +135,10 @@ const salvarPet = async () => {
               goEdit={true}
               onClear={form.dono_nome ? limparDono : undefined}
             />
-            <InputSelect
-              placeholder="Selecione a espéc  ie..."
+         <InputSelect
+              titleName="Espécie"
+              image={require("../../../assets/animais/iconPata.png")}
+              placeholder="Selecione a espécie..."
               itens={especiesList}
               itemSelected={especiesList.find((e) => e.id === form.especie)}
               labelExtractor={(item) => item.nome}
@@ -144,9 +146,12 @@ const salvarPet = async () => {
               renderItem={(item) => (
                 <Text style={{ padding: 15 }}>{item.nome}</Text>
               )}
+              hasBorderBottom={true}
             />
 
             <InputSelect
+              titleName="Raça"
+              image={require("../../../assets/animais/iconRaca.png")}
               placeholder={form.especie ? "Selecione a raça..." : "Escolha a espécie primeiro"}
               itens={racasList}
               itemSelected={racasList.find((e) => e.id === form.raca)}
@@ -155,6 +160,7 @@ const salvarPet = async () => {
               renderItem={(item) => (
                 <Text style={{ padding: 15 }}>{item.nome}</Text>
               )}
+              hasBorderBottom={false} // O último item da caixa não precisa de borda embaixo
             />
           </View>
           <View style={s.ctnBtnSalvar}>

@@ -2,13 +2,14 @@ import { ReactNode, useState } from "react";
 import {
   FlatList,
   Image,
-  StyleProp,
+  StyleSheet,
   Text,
-  TextStyle,
   TouchableOpacity,
   View,
-  ViewStyle,
+  ImageSourcePropType,
 } from "react-native";
+import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
+import InputWrapper from "./Cadastro/InputWrapper"; 
 
 interface InputSelectProps<T> {
   itens: T[];
@@ -17,10 +18,10 @@ interface InputSelectProps<T> {
   placeholder?: string;
   labelExtractor: (item: T) => string;
   renderItem: (item: T, index: number) => ReactNode;
-  containerStyle?: StyleProp<ViewStyle>;
-  buttonStyle?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
-  listItemStyle?: StyleProp<ViewStyle>;
+
+  titleName: string;
+  image: ImageSourcePropType;
+  hasBorderBottom?: boolean;
 }
 
 export default function InputSelect<T>({
@@ -30,25 +31,34 @@ export default function InputSelect<T>({
   placeholder = "Clique e selecione",
   labelExtractor,
   renderItem,
-  containerStyle,
-  buttonStyle,
-  textStyle,
-  listItemStyle,
+  titleName,
+  image,
+  hasBorderBottom = true,
 }: InputSelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
+  const s = useThemedStyles(styles);
 
   const handleSelect = (item: T) => {
     onChange(item);
-    setIsOpen(false); // Fecha ao selecionar
+    setIsOpen(false);
   };
 
   return (
-    <View style={containerStyle}>
-      <TouchableOpacity style={buttonStyle} onPress={() => setIsOpen(!isOpen)}>
-        <Text style={textStyle}>
+    <InputWrapper
+      image={image}
+      titleName={titleName}
+      hasBorderBottom={hasBorderBottom}
+    >
+      <TouchableOpacity
+        style={s.selectBox}
+        onPress={() => setIsOpen(!isOpen)}
+        activeOpacity={0.7}
+      >
+        <Text style={s.selectText}>
           {itemSelected ? labelExtractor(itemSelected) : placeholder}
         </Text>
         <Image
+          style={s.arrow}
           source={
             isOpen
               ? require("../../assets/setas/closeGreen.png")
@@ -58,20 +68,59 @@ export default function InputSelect<T>({
       </TouchableOpacity>
 
       {isOpen && (
-        <FlatList
-          data={itens}
-          scrollEnabled={false} // Evita conflitos de scroll se estiver dentro de uma ScrollView
-          renderItem={({ item, index }) => (
-            <TouchableOpacity
-              style={listItemStyle}
-              onPress={() => handleSelect(item)}
-            >
-              {renderItem(item, index)}
-            </TouchableOpacity>
-          )}
-          keyExtractor={(_, index) => index.toString()}
-        />
+        <View style={s.dropdown}>
+          <FlatList
+            data={itens}
+            scrollEnabled={false}
+            renderItem={({ item, index }) => (
+              <TouchableOpacity
+                style={s.listItem}
+                onPress={() => handleSelect(item)}
+              >
+                {renderItem(item, index)}
+              </TouchableOpacity>
+            )}
+            keyExtractor={(_, index) => index.toString()}
+          />
+        </View>
       )}
-    </View>
+    </InputWrapper>
   );
 }
+
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    selectBox: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      minHeight: 45,
+      borderWidth: 1,
+      borderColor: colors.BORDER_LIGHT,
+      borderRadius: 8,
+      paddingHorizontal: 15,
+      paddingVertical: 10,
+      backgroundColor: colors.BACKGROUND,
+    },
+    selectText: {
+      fontSize: 16,
+      color: colors.TEXT_PRIMARY,
+    },
+    arrow: {
+      width: 14,
+      height: 14,
+      tintColor: colors.PRIMARY_VARIANT,
+    },
+    dropdown: {
+      marginTop: 5,
+      borderWidth: 1,
+      borderColor: colors.BORDER_LIGHT,
+      borderRadius: 8,
+      backgroundColor: colors.BACKGROUND,
+      overflow: "hidden",
+    },
+    listItem: {
+      borderBottomWidth: 1,
+      borderBottomColor: colors.BORDER_LIGHT,
+    },
+  });
