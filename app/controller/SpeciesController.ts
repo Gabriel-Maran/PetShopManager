@@ -1,7 +1,8 @@
 import { speciesService } from "../service/SpeciesService";
+import { Species } from "../repository/SpeciesRepository";
 
 class SpeciesController {
-  async searchSpecies(): Promise<{ id: number; nome: string }[]> {
+  async searchSpecies(): Promise<Species[]> {
     return speciesService.searchSpecies();
   }
   async searchBreedsBySpecies(

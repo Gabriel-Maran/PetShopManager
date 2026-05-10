@@ -1,10 +1,11 @@
 import { speciesRepository } from "../repository/SpeciesRepository";
+import { Species } from "../repository/SpeciesRepository";
 
 class SpeciesService {
-  searchSpecies() {
+  searchSpecies(): Promise<Species[]> {
     return speciesRepository.searchSpecies();
   }
-  searchBreedsBySpecies(id: number) {
+  searchBreedsBySpecies(id: number): Promise<{ id: number; nome: string }[]> {
     return speciesRepository.searchBreedsBySpecies(id);
   }
 }

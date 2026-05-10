@@ -1,9 +1,15 @@
 import { getDatabase } from "../config/database";
+import { EspeciesAtendidas } from "../config/consts";
+
+export type Species = {
+  id: number;
+  nome: EspeciesAtendidas;
+};
 
 class SpeciesRepository {
-  async searchSpecies(): Promise<{ id: number; nome: string }[]> {
+  async searchSpecies(): Promise<Species[]> {
     const db = await getDatabase();
-    return db.getAllAsync<{ id: number; nome: string }>(
+    return db.getAllAsync<Species>(
       `SELECT id, nome FROM SPECIES ORDER BY nome ASC`,
     );
   }
