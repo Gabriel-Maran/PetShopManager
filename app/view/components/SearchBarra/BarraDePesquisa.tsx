@@ -23,6 +23,15 @@ export default function BarraDePesquisa({
   const { colors } = useTheme();
   const [text, setText] = useState("");
 
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (text) {
+        setSearch(text);
+      }
+    }, 600);
+    return () => clearTimeout(delayDebounceFn);
+  }, [text]);
+
   return (
     <View style={s.container}>
       <View style={s.pesquisa}>
@@ -33,10 +42,15 @@ export default function BarraDePesquisa({
           />
         </TouchableOpacity>
         <TextInput
-          onChangeText={(txt: string) => setText(txt)}
+          onChangeText={(txt: string) => {
+            setText(txt);
+            if (txt.trim() == "") {
+              setSearch(txt);
+            }
+          }}
           value={text}
           placeholder={placeHolderStr}
-          multiline={true}
+          multiline={false}
           style={s.input}
           placeholderTextColor={colors.TEXT_PRIMARY}
         />
