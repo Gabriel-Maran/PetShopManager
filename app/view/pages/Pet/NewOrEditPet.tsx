@@ -30,9 +30,7 @@ import InputSelect from "../../components/InputSelect";
 
 import { usePetFormSetup } from "../../../hooks/usePetFormSetup";
 
-import {
-  EspeciesAtendidasLabel,
-} from "../../../config/consts";
+import { EspeciesAtendidasLabel } from "../../../config/consts";
 
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { params, navigate } = useScreen<Pet>();

@@ -8,8 +8,12 @@ import {
   View,
   ImageSourcePropType,
 } from "react-native";
-import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
-import InputWrapper from "./Cadastro/InputWrapper"; 
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../Themes/ThemeProvider";
+import InputWrapper from "./Cadastro/InputWrapper";
 
 interface InputSelectProps<T> {
   itens: T[];
@@ -37,6 +41,7 @@ export default function InputSelect<T>({
 }: InputSelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const s = useThemedStyles(styles);
+  const { colors } = useTheme();
 
   const handleSelect = (item: T) => {
     onChange(item);
@@ -48,9 +53,19 @@ export default function InputSelect<T>({
       image={image}
       titleName={titleName}
       hasBorderBottom={hasBorderBottom}
+      whitGapComponents={false}
     >
       <TouchableOpacity
-        style={s.selectBox}
+        style={[
+          s.selectBox,
+          isOpen
+            ? {
+                borderBottomRightRadius: 0,
+                borderBottomLeftRadius: 0,
+                borderBottomColor: colors.BORDER_LIGHT,
+              }
+            : {},
+        ]}
         onPress={() => setIsOpen(!isOpen)}
         activeOpacity={0.7}
       >
@@ -74,7 +89,7 @@ export default function InputSelect<T>({
             scrollEnabled={false}
             renderItem={({ item, index }) => (
               <TouchableOpacity
-                style={s.listItem}
+                style={[s.listItem]}
                 onPress={() => handleSelect(item)}
               >
                 {renderItem(item, index)}
@@ -95,7 +110,7 @@ const styles = (colors: ThemeColors) =>
       alignItems: "center",
       justifyContent: "space-between",
       minHeight: 45,
-      width: '100%',
+      width: "100%",
       borderWidth: 1,
       borderColor: colors.BORDER_STRONG,
       borderRadius: 8,
@@ -108,16 +123,16 @@ const styles = (colors: ThemeColors) =>
       color: colors.TEXT_PRIMARY,
     },
     arrow: {
-      width: 14,
-      height: 14,
+      width: 25,
+      height: 25,
       tintColor: colors.PRIMARY_VARIANT,
     },
     dropdown: {
-      width:'100%',
-      marginTop: 5,
+      width: "100%",
       borderWidth: 1,
       borderColor: colors.BORDER_LIGHT,
-      borderRadius: 8,
+      borderBottomLeftRadius: 8,
+      borderBottomRightRadius: 8,
       backgroundColor: colors.BACKGROUND,
       overflow: "hidden",
     },
