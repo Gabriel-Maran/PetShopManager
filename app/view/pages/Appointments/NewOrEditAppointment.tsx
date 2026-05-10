@@ -100,7 +100,6 @@ export default function NewOrEditAppointment() {
       .getAllServiceTypes()
       .then(setServicos)
       .catch(handleError);
-    console.log(servicos);
   }, []);
 
   const handleError = (e: unknown) =>
