@@ -13,6 +13,7 @@ import {
   useTheme,
   useThemedStyles,
 } from "../../../Themes/ThemeProvider";
+import InputWrapper from "../InputWrapper";
 
 export default function Toggle({
   hasBorderBottom = false,
@@ -59,61 +60,30 @@ export default function Toggle({
   });
 
   return (
-    <View
-      style={[
-        s.ctnInput,
-        hasBorderBottom && { borderBottomWidth: 1, borderColor: colors.BORDER },
-      ]}
+    <InputWrapper 
+      image={image}
+      titleName={title}
+      hasBorderBottom={hasBorderBottom}
     >
-      <View style={s.ctnImgInput}>
-        <Image style={s.imgInput} source={image} />
+      <View style={!noEdit ? s.toggleESubtitle : s.toggleESubtitleNoEdit}>
+        <Text style={s.subtitle}>{subtitle}</Text>
+
+        <TouchableOpacity activeOpacity={0.8} onPress={toggleSwitch}>
+          <Animated.View style={[s.switchContainer, { backgroundColor }]}>
+            <Animated.View
+              style={[s.thumb, { transform: [{ translateX: moveThumb }] }]}
+            />
+          </Animated.View>
+        </TouchableOpacity>
       </View>
-
-      <View style={s.container}>
-        {title && <Text style={s.txtInput}>{title.trim().toUpperCase()}</Text>}
-
-        <View style={!noEdit ? s.toggleESubtitle : s.toggleESubtitleNoEdit}>
-          <Text style={s.subtitle}>{subtitle}</Text>
-
-          <TouchableOpacity activeOpacity={0.8} onPress={toggleSwitch}>
-            <Animated.View style={[s.switchContainer, { backgroundColor }]}>
-              <Animated.View
-                style={[s.thumb, { transform: [{ translateX: moveThumb }] }]}
-              />
-            </Animated.View>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
+    </InputWrapper>
   );
 }
 
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
-    ctnInput: {
-      width: "100%",
-      padding: 15,
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
-    },
-    ctnImgInput: {
-      backgroundColor: colors.PRIMARY_SOFT,
-      padding: 8,
-      borderRadius: 15,
-      borderWidth: 1,
-      borderColor: colors.PRIMARY_VARIANT,
-    },
-    imgInput: {
-      width: 28,
-      height: 28,
-      tintColor: colors.PRIMARY,
-    },
-    container: {
-      gap: 5,
-    },
     toggleESubtitle: {
-      width: "90%",
+      width: "100%",
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
@@ -128,8 +98,8 @@ const styles = (colors: ThemeColors) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      padding: 10,
-      paddingLeft: 15,
+      paddingHorizontal: 15,
+      paddingVertical: 10,
     },
     subtitle: {
       fontSize: 15,
