@@ -10,7 +10,7 @@ import {
 import { LIMIT_ITEM_PAGE } from "../../../../config/consts";
 import OwnerListModal from "./OwnerListModal";
 import PetListModal from "./PetListModal";
-import { Pet } from "../../../../model/Pet";
+import { PetWithSpecie } from "../../../../model/Pet";
 import { Owner } from "../../../../model/Owner";
 import Pagination from "../List/Pagination";
 import BarraDePesquisa from "../../SearchBarra/BarraDePesquisa";
@@ -87,7 +87,7 @@ export default function ModalSelectList({
               isOwner ? (
                 <OwnerListModal onSelect={onSelect} item={item as Owner} />
               ) : (
-                <PetListModal onSelect={onSelect} item={item as Pet} />
+                <PetListModal onSelect={onSelect} item={item as PetWithSpecie} />
               )
             }
             keyExtractor={(item, index) =>

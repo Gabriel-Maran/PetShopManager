@@ -1,5 +1,5 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Pet } from "../../../../model/Pet";
+import { PetWithSpecie } from "../../../../model/Pet";
 import { EspeciesAtendidas } from "../../../../config/consts";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 
@@ -7,8 +7,8 @@ export default function PetListModal({
   item,
   onSelect,
 }: {
-  item: Pet;
-  onSelect: (item: Pet) => void;
+  item: PetWithSpecie;
+  onSelect: (item: PetWithSpecie) => void;
 }) {
   const s = useThemedStyles(styles);
 
@@ -22,9 +22,9 @@ export default function PetListModal({
         <Image
           style={s.img}
           source={
-            item.especie === EspeciesAtendidas.CAO
+            item.nome_especie === EspeciesAtendidas.CAO
               ? require("../../../../assets/animais/caoGreen.png")
-              : item.especie === EspeciesAtendidas.GATO
+              : item.nome_especie === EspeciesAtendidas.GATO
                 ? require("../../../../assets/animais/gatoGreen.png")
                 : require("../../../../assets/animais/interrogacaoGreen.png")
           }

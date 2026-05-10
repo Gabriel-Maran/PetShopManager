@@ -11,7 +11,7 @@ import { Screen, LIMIT_ITEM_PAGE, ORDER } from "../../../config/consts";
 import { useScreen } from "../../../hooks/useScreen";
 import { useError } from "../../../hooks/useError";
 
-import { Pet } from "../../../model/Pet";
+import { PetWithSpecie } from "../../../model/Pet";
 import {
   AppointmentBuilder,
   NewOrEditAppointmentParams,
@@ -82,12 +82,12 @@ export default function NewOrEditAppointment() {
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
   const [searchTxt, setSearchTxt] = useState("");
-  const [pets, setPets] = useState<Pet[]>();
+  const [pets, setPets] = useState<PetWithSpecie[]>();
 
   useEffect(() => {
     try {
       petController
-        .searchPetsByNamePaged(searchTxt, page, LIMIT_ITEM_PAGE, ORDER.DESC)
+        .searchPetsByNamePagedWithSpecie(searchTxt, page, LIMIT_ITEM_PAGE, ORDER.DESC)
         .then(setPets)
         .catch(handleError);
     } catch (e) {
@@ -215,7 +215,7 @@ export default function NewOrEditAppointment() {
             {isEditing && (
               <>
                 <Toggle
-                  image={require("../../../assets/outros/entrega.png")}
+                  image={require("../../../assets/outros/concluido.png")}
                   value={concluido}
                   onChange={setConcluido}
                   title="Status"
