@@ -14,9 +14,15 @@ export default function Home() {
   const { colors } = useTheme();
 
   const [isAgenFullScreen, setIsAgenFullScreen] = useState(false);
-  const [dateSelected, setDateSelected] = useState(
-    new Date().toISOString().split("T")[0],
-  );
+  const [dateSelected, setDateSelected] = useState(() => {
+    const hoje = new Date();
+
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoje.getDate()).padStart(2, "0");
+
+    return `${ano}-${mes}-${dia}`;
+  });
   return (
     <View style={s.container}>
       <DefaultHeader />
