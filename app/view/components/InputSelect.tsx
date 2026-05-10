@@ -95,7 +95,7 @@ const styles = (colors: ThemeColors) =>
       alignItems: "center",
       justifyContent: "space-between",
       minHeight: 45,
-      width: '90%',
+      width: '100%',
       borderWidth: 1,
       borderColor: colors.BORDER_STRONG,
       borderRadius: 8,
@@ -113,6 +113,7 @@ const styles = (colors: ThemeColors) =>
       tintColor: colors.PRIMARY_VARIANT,
     },
     dropdown: {
+      width:'100%',
       marginTop: 5,
       borderWidth: 1,
       borderColor: colors.BORDER_LIGHT,

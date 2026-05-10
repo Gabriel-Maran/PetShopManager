@@ -69,7 +69,7 @@ export default function SelectionField({
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     regSelecionado: {
-      width: "90%",
+      width: "100%",
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
@@ -88,7 +88,7 @@ const styles = (colors: ThemeColors) =>
       color: colors.TEXT_PRIMARY
     },
     btnSalvar: {
-      width: "90%",
+      width: "100%",
       height: 50,
       backgroundColor: colors.PRIMARY_VARIANT,
       borderRadius: 15,

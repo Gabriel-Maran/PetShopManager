@@ -31,8 +31,8 @@ export default function InputWrapper({ image, titleName, hasBorderBottom = true,
 }
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
-      ctnInput: {
-    width: "100%",
+    ctnInput: {
+    width:'100%',
     padding: 15,
     flexDirection: "row",
     alignItems: "flex-start", 

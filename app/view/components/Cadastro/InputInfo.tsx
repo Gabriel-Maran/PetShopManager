@@ -49,7 +49,7 @@ const styles = (colors: ThemeColors) =>
   StyleSheet.create({
      input: {
       color: colors.TEXT_PRIMARY,
-      width: "90%",
+      width: "100%",
       minHeight: 45,
       maxHeight: 90,
       fontSize: 16,
