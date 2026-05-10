@@ -47,11 +47,11 @@ export enum EspeciesAtendidas {
   OUTRO = "OUTRO",
 }
 
-export enum EspeciesAtendidasLabel {
-  CAO = "Cão",
-  GATO = "Gato",
-  OUTRO = "Outro",
-}
+export const EspeciesAtendidasLabel: Record<EspeciesAtendidas, string> = {
+  [EspeciesAtendidas.CAO]: "Cão",
+  [EspeciesAtendidas.GATO]: "Gato",
+  [EspeciesAtendidas.OUTRO]: "Outro",
+};
 
 export enum PorteAnimal {
   PEQUENO = "PEQUENO",
