@@ -1,5 +1,5 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { PetWithSpecie } from "../../../../model/Pet";
+import { PetWithSpecieAndRace } from "../../../../model/Pet";
 import { EspeciesAtendidas } from "../../../../config/consts";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 
@@ -7,8 +7,8 @@ export default function PetListModal({
   item,
   onSelect,
 }: {
-  item: PetWithSpecie;
-  onSelect: (item: PetWithSpecie) => void;
+  item: PetWithSpecieAndRace;
+  onSelect: (item: PetWithSpecieAndRace) => void;
 }) {
   const s = useThemedStyles(styles);
 

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useScreen } from "../../hooks/useScreen";
 import { useError } from "../../hooks/useError";
 
-import { Pet } from "../../model/Pet";
+import { Pet, PetWithSpecieAndRace } from "../../model/Pet";
 import { Owner } from "../../model/Owner";
 
 import { ownerController } from "../../controller/OwnerController";
@@ -37,7 +37,7 @@ export default function Cadastros() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [owners, setOwners] = useState<Owner[]>([]);
-  const [pets, setPets] = useState<Pet[]>([]);
+  const [pets, setPets] = useState<PetWithSpecieAndRace[]>([]);
   const [total, setTotal] = useState(0);
   const [objSelectToDelete, setObjSelectToDelete] = useState<
     Pet | Owner | undefined
@@ -67,9 +67,8 @@ export default function Cadastros() {
           .searchOwnersByNamePaged(search, page, LIMIT_ITEM_PAGE, ORDER.DESC)
           .then(setOwners)
       : petController
-          .searchPetsByNamePaged(search, page, LIMIT_ITEM_PAGE, ORDER.DESC)
+          .searchPetsByNamePagedWithSpecieAndRace(search, page, LIMIT_ITEM_PAGE, ORDER.DESC)
           .then(setPets);
-
     fetch.catch(handleError);
   }, [search, page, isOwnerSelected]);
 

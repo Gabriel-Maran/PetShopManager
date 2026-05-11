@@ -11,7 +11,7 @@ import { Screen, LIMIT_ITEM_PAGE, ORDER } from "../../../config/consts";
 import { useScreen } from "../../../hooks/useScreen";
 import { useError } from "../../../hooks/useError";
 
-import { PetWithSpecie } from "../../../model/Pet";
+import { PetWithSpecieAndRace } from "../../../model/Pet";
 import {
   AppointmentBuilder,
   NewOrEditAppointmentParams,
@@ -88,12 +88,12 @@ export default function NewOrEditAppointment() {
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
   const [searchTxt, setSearchTxt] = useState("");
-  const [pets, setPets] = useState<PetWithSpecie[]>();
+  const [pets, setPets] = useState<PetWithSpecieAndRace[]>();
 
   useEffect(() => {
     try {
       petController
-        .searchPetsByNamePagedWithSpecie(
+        .searchPetsByNamePagedWithSpecieAndRace(
           searchTxt,
           page,
           LIMIT_ITEM_PAGE,
