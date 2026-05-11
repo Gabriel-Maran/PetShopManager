@@ -8,7 +8,12 @@ import {
 import { useEffect, useState, ReactNode } from "react";
 
 import { initDatabase } from "./app/config/database";
-import { STATUS_BAR_HEIGHT, Screen } from "./app/config/consts";
+import {
+  RelatorioParams,
+  RelatorioType,
+  STATUS_BAR_HEIGHT,
+  Screen,
+} from "./app/config/consts";
 import { useScreen } from "./app/hooks/useScreen";
 
 import {
@@ -29,9 +34,11 @@ import NewOrEditPet from "./app/view/pages/Pet/NewOrEditPet";
 import NewOrEditAppointment from "./app/view/pages/Appointments/NewOrEditAppointment";
 import Configuracoes from "./app/view/pages/Configuracoes";
 import { AgendamentosProvider } from "./app/view/contexts/agendamentos";
+import RelatorioView from "./app/view/pages/Relatorios/RelatorioView";
 
 function AppContent() {
   const { screen } = useScreen();
+  const { params } = useScreen<RelatorioParams>();
 
   let content: ReactNode;
 
@@ -62,6 +69,14 @@ function AppContent() {
 
     case Screen.NewOrEditAppointment:
       content = <NewOrEditAppointment />;
+      break;
+
+    case Screen.RelatorioView:
+      content = (
+        <RelatorioView
+          route={params?.type ?? RelatorioType.ComparativoMensal}
+        />
+      );
       break;
 
     default:

@@ -214,6 +214,7 @@ const styles = (colors: ThemeColors) =>
     container: {
       flex: 1,
       backgroundColor: colors.THIRD_BACKGROUND,
+      marginBottom: APP_BAR_HEIGHT,
     },
     escolhaItem: {
       flexDirection: "row",
