@@ -12,13 +12,18 @@ import ButtonEditar from "../Botões/ButtonEditar";
 import { Screen } from "../../../../config/consts";
 import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
+import ButtonAtivar from "../Botões/ButtonAtivar";
 
 export default function OwnerList({
   cadastros,
   onDelete,
+  saoAtivados,
+  onActive,
 }: {
   cadastros: Owner[];
   onDelete: (itemId: number) => void;
+  onActive: (itemId: number) => void;
+  saoAtivados: boolean;
 }) {
   const s = useThemedStyles(styles);
   const { navigate } = useScreen();
@@ -50,8 +55,11 @@ export default function OwnerList({
                 selectParam={{ Owner: item, mode: "edit" }}
                 navegarPara={Screen.NewOrEditOwner}
               />
-
-              <ButtonExcluir itemId={item.id ?? -1} onDelete={onDelete} />
+              {saoAtivados ? (
+                <ButtonExcluir itemId={item.id ?? -1} onDelete={onDelete} />
+              ) : (
+                <ButtonAtivar itemId={item.id ?? -1} onActive={onActive} />
+              )}
             </View>
           </TouchableOpacity>
         )}

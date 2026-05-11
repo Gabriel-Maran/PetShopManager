@@ -5,11 +5,14 @@ import {
   useThemedStyles,
 } from "../../../../Themes/ThemeProvider";
 
+type TypeDelete = "soft_delete" | "hard_delete";
+
 interface Props {
   message: string | null;
   onClose: () => void;
   onConfirmDelete: () => void;
   visible: boolean;
+  type?: TypeDelete;
 }
 
 export default function ModalConfDelete({
@@ -17,6 +20,7 @@ export default function ModalConfDelete({
   onClose,
   onConfirmDelete,
   visible,
+  type = "soft_delete",
 }: Props) {
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
@@ -28,7 +32,9 @@ export default function ModalConfDelete({
           <Text style={s.emoji}>⚠️</Text>
 
           <View style={s.messageTop}>
-            <Text style={s.title}>Deseja mesmo excluir?</Text>
+            <Text style={s.title}>
+              Deseja mesmo {type == "soft_delete" ? "desativar" : "excluir"}?
+            </Text>
             <Text style={s.message}>{message}</Text>
           </View>
 

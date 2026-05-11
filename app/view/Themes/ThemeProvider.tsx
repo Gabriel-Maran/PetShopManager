@@ -50,6 +50,10 @@ const colors = {
 
     FILTER_BACKGROUND: "#0e996d",
     FILTER_ICON: "#ffffff",
+
+    REATIVAR_MAIN_COLOR: "#0284c7",
+    REATIVAR_BORDER_COLOR: "#0ea5e9",
+    REATIVAR_BACKGROUND_COLOR: "#f0f9ff",
   },
   dark: {
     PRIMARY: "#10B981",
@@ -93,6 +97,10 @@ const colors = {
 
     FILTER_BACKGROUND: "#10B981",
     FILTER_ICON: "#0F1115",
+
+    REATIVAR_MAIN_COLOR: "#38bdf8",
+    REATIVAR_BORDER_COLOR: "#075985",
+    REATIVAR_BACKGROUND_COLOR: "#0c1e2b",
   },
 };
 

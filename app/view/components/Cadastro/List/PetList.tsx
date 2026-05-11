@@ -5,13 +5,18 @@ import { PetWithSpecieAndRace } from "../../../../model/Pet";
 import { EspeciesAtendidas, Screen } from "../../../../config/consts";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 import { EspeciesAtendidasLabel } from "../../../../config/consts";
+import ButtonAtivar from "../Botões/ButtonAtivar";
 
 export default function PetList({
   cadastros,
   onDelete,
+  saoAtivados,
+  onActive,
 }: {
   cadastros: PetWithSpecieAndRace[];
   onDelete: (itemId: number) => void;
+  onActive: (itemId: number) => void;
+  saoAtivados: boolean;
 }) {
   const s = useThemedStyles(styles);
 
@@ -25,17 +30,18 @@ export default function PetList({
               style={s.img}
               source={require("../../../../assets/animais/pet.png")}
             />
-
             <View style={s.mainContent}>
               <Text style={s.textMain}>{item.nome}</Text>
               <Text style={s.textSub}>
                 {`${EspeciesAtendidasLabel[item.nome_especie as EspeciesAtendidas]}${item.nome_raca ? ` - ${item.nome_raca}` : ""}`}
               </Text>
             </View>
-
             <ButtonEditar navegarPara={Screen.NewOrEditPet} />
-
-            <ButtonExcluir itemId={item.id ?? -1} onDelete={onDelete} />
+            {saoAtivados ? (
+              <ButtonExcluir itemId={item.id ?? -1} onDelete={onDelete} />
+            ) : (
+              <ButtonAtivar itemId={item.id ?? -1} onActive={onActive} />
+            )}
           </View>
         )}
         keyExtractor={(item) => String(item.id)}

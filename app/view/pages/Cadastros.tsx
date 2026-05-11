@@ -110,10 +110,24 @@ export default function Cadastros() {
     setObjSelectToDelete(pet);
   }
 
+  function ativarItem(itemId: number) {
+    try {
+      if (isOwnerSelected) {
+        ownerController.activeOwner(itemId);
+        setOwners((prev) => prev.filter((item) => item.id !== itemId));
+      } else {
+        petController.activePet(itemId);
+        setPets((prev) => prev.filter((item) => item.id !== itemId));
+      }
+    } catch (e) {
+      handleError(e);
+    }
+  }
+
   return (
     <>
       <ModalConfDelete
-        message={`Excluindo o ${isOwnerSelected ? "dono" : "pet"} ${objSelectToDelete?.nome}`}
+        message={`Desativando o ${isOwnerSelected ? "dono" : "pet"} ${objSelectToDelete?.nome}`}
         onClose={() => setObjSelectToDelete(undefined)}
         onConfirmDelete={() => confirmDeletar(objSelectToDelete?.id ?? 0)}
         visible={objSelectToDelete != undefined}
@@ -159,9 +173,19 @@ export default function Cadastros() {
 
         <View style={{ flex: 1 }}>
           {isOwnerSelected ? (
-            <OwnerList cadastros={owners} onDelete={handleDeleteSelected} />
+            <OwnerList
+              saoAtivados={isAtivo == 1}
+              cadastros={owners}
+              onDelete={handleDeleteSelected}
+              onActive={ativarItem}
+            />
           ) : (
-            <PetList cadastros={pets} onDelete={handleDeleteSelected} />
+            <PetList
+              saoAtivados={isAtivo == 1}
+              cadastros={pets}
+              onDelete={handleDeleteSelected}
+              onActive={ativarItem}
+            />
           )}
         </View>
       </View>
