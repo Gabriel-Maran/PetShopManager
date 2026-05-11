@@ -1,70 +1,88 @@
-import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { useEffect, useState, ReactNode } from "react";
+
 import { initDatabase } from "./app/config/database";
 import { STATUS_BAR_HEIGHT, Screen } from "./app/config/consts";
 import { useScreen } from "./app/hooks/useScreen";
-import AppBar from "./app/view/components/AppBarra/AppBar";
-import Home from "./app/view/pages/Home";
-import Cadastros from "./app/view/pages/Cadastros";
-import Relatorios from "./app/view/pages/Relatorios";
-import NewOrEditOwner from "./app/view/pages/Owner/NewOrEditOwner";
-import { ErrorProvider } from "./app/view/components/Error/ErrorProvider";
-import NewOrEditPet from "./app/view/pages/Pet/NewOrEditPet";
-import NewOrEditAppointment from "./app/view/pages/Appointments/NewOrEditAppointment";
+
 import {
   ThemeColors,
   ThemeProvider,
   useTheme,
   useThemedStyles,
 } from "./app/view/Themes/ThemeProvider";
+
+import { ErrorProvider } from "./app/view/components/Error/ErrorProvider";
+import AppBar from "./app/view/components/AppBarra/AppBar";
+
+import Home from "./app/view/pages/Home";
+import Cadastros from "./app/view/pages/Cadastros";
+import Relatorios from "./app/view/pages/Relatorios";
+import NewOrEditOwner from "./app/view/pages/Owner/NewOrEditOwner";
+import NewOrEditPet from "./app/view/pages/Pet/NewOrEditPet";
+import NewOrEditAppointment from "./app/view/pages/Appointments/NewOrEditAppointment";
 import Configuracoes from "./app/view/pages/Configuracoes";
+import { AgendamentosProvider } from "./app/view/contexts/agendamentos";
 
 function AppContent() {
   const { screen } = useScreen();
+  const { colors } = useTheme();
+
+  let content: ReactNode;
 
   switch (screen) {
     case Screen.Calendario:
-      return (
-        <>
-          <Home />
-          <AppBar />
-        </>
-      );
+      content = <Home />;
+      break;
+
     case Screen.Cadastros:
-      return (
-        <>
-          <Cadastros />
-          <AppBar />
-        </>
-      );
-    case Screen.NewOrEditOwner:
-      return <NewOrEditOwner />;
-    case Screen.NewOrEditPet:
-      return <NewOrEditPet />;
-    case Screen.NewOrEditAppointment:
-      return <NewOrEditAppointment />;
+      content = <Cadastros />;
+      break;
+
     case Screen.Relatorios:
-      return (
-        <>
-          <Relatorios />
-          <AppBar />
-        </>
-      );
+      content = <Relatorios />;
+      break;
+
     case Screen.Configuracoes:
-      return (
-        <>
-          <Configuracoes />
-          <AppBar />
-        </>
-      );
+      content = <Configuracoes />;
+      break;
+
+    case Screen.NewOrEditOwner:
+      content = <NewOrEditOwner />;
+      break;
+
+    case Screen.NewOrEditPet:
+      content = <NewOrEditPet />;
+      break;
+
+    case Screen.NewOrEditAppointment:
+      content = <NewOrEditAppointment />;
+      break;
+
     default:
-      return (
-        <>
-          <Home />
-          <AppBar />
-        </>
-      );
+      content = <Home />;
+      break;
   }
+  return (
+    <>
+      <AgendamentosProvider>
+        <>
+          <StatusBar backgroundColor={colors.BACKGROUND} />
+          {content}
+        </>
+      </AgendamentosProvider>
+      {(screen == Screen.Calendario ||
+        screen == Screen.Cadastros ||
+        screen == Screen.Relatorios ||
+        screen == Screen.Configuracoes) && <AppBar />}
+    </>
+  );
 }
 
 function AppInner() {

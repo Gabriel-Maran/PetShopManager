@@ -36,18 +36,18 @@ export default function InputInfo({
       <TextInput
         style={s.input}
         placeholder={placeHolder}
+        placeholderTextColor={colors.TEXT_PLACEHOLDER}
         onChangeText={(item) => setItem(item)}
         value={item}
         multiline={variasLinhas}
         editable={digitavel}
-        placeholderTextColor={colors.TEXT_PRIMARY}
       />
     </InputWrapper>
   );
 }
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
-     input: {
+    input: {
       color: colors.TEXT_PRIMARY,
       width: "100%",
       minHeight: 45,

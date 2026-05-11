@@ -18,32 +18,25 @@ import { AppointmentsWithOwnerAndPet } from "../../model/Appointment";
 import { appointmentController } from "../../controller/AppointmentsController";
 
 import { DataStringPraNumber } from "../../utils/converterData";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../Themes/ThemeProvider";
+import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
+import { useAgendamentos } from "../contexts/agendamentos";
 
 export default function Agendamentos({
   isFullScreen,
   margemSuperior,
   setFullScreen,
-  dateSelected,
 }: {
   isFullScreen: boolean;
   margemSuperior: number;
   setFullScreen: (isFullScreen: boolean) => void;
-  dateSelected: string;
 }) {
   const { navigate } = useScreen();
   const { showError } = useError();
   const s = useThemedStyles(styles);
+  const { dateSelected, appointments, setAppointments } = useAgendamentos();
 
   const handleError = (e: unknown) =>
     showError(e instanceof Error ? e.message : "Erro inesperado.");
-
-  const [appointments, setAppointments] =
-    useState<AppointmentsWithOwnerAndPet[]>();
 
   useEffect(() => {
     const fetch = appointmentController

@@ -1,6 +1,7 @@
 // ThemeContext.tsx
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { StyleSheet, useColorScheme } from "react-native";
+import { configsController } from "../../controller/ConfigsController";
 
 //USE: const { colors, isDark, trocarTheme } = useTheme();
 //USE: const s = useThemedStyles(styles);
@@ -22,6 +23,7 @@ const colors = {
     TEXT_PRIMARY: "#000000",
     TEXT_SECONDARY: "#2C2C2A",
     TEXT_MUTED: "#646462",
+    TEXT_PLACEHOLDER: "#9a9a98",
 
     BORDER: "#F0F0F0",
     BORDER_STRONG: "#888888",
@@ -30,6 +32,9 @@ const colors = {
 
     MODAL_BACKGROUND: "rgba(0,0,0,0.45)",
     DESATIVADO: "#CECCC3",
+
+    RED_COLOR: "#b71c1c",
+    GREEN_COLOR: "#2e7d32",
 
     EXCLUIR_MAIN_COLOR: "rgb(203, 31, 31)",
     EXCLUIR_BORDER_COLOR: "#F09595",
@@ -57,7 +62,8 @@ const colors = {
 
     TEXT_PRIMARY: "#FFFFFF",
     TEXT_SECONDARY: "#E2E8F0",
-    TEXT_MUTED: "#94A3B8",
+    TEXT_MUTED: "#aeb1b6",
+    TEXT_PLACEHOLDER: "#64748B",
 
     BORDER: "#2D3139",
     BORDER_STRONG: "#4A5568",
@@ -66,6 +72,9 @@ const colors = {
 
     MODAL_BACKGROUND: "rgba(0,0,0,0.80)",
     DESATIVADO: "#3D4148",
+
+    RED_COLOR: "#e57373",
+    GREEN_COLOR: "#81c784",
 
     EXCLUIR_MAIN_COLOR: "#F87171",
     EXCLUIR_BORDER_COLOR: "#991B1B",
@@ -90,8 +99,26 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const systemScheme = useColorScheme();
-  const [isDark, setIsDark] = useState(systemScheme === "dark");
+  const [isDark, setIsDark] = useState(false);
+  const [temaCarregado, setTemaCarregado] = useState(false);
+
+  useEffect(() => {
+    configsController
+      .getConfigById(1)
+      .then((item) => {
+        if (item != null) {
+          setIsDark(item.is_ativo === 1);
+        }
+      })
+      .catch((err) => {
+        console.warn("Erro ao carregar tema:", err);
+      })
+      .finally(() => {
+        setTemaCarregado(true); // sempre libera, mesmo se der erro
+      });
+  }, []);
+
+  if (!temaCarregado) return null; // aguarda sem renderizar nada
 
   return (
     <ThemeContext.Provider
