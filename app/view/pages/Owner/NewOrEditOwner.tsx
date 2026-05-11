@@ -77,8 +77,8 @@ export default function NewOrEditOwner() {
       <DefaultHeader />
       <TitleBar
         returnTo={Screen.Cadastros}
-        title={isEditing ? "Editar Dono" : "Novo Dono"}
-        subtitle="Preencha os dados do responsável"
+        title={isViewing ? "Visualizando Dono" : isEditing ? "Editar Dono" : "Novo Dono"}
+        subtitle={!isViewing ? "Preencha os dados do responsável" : ""}
       />
       <ScrollView
         contentContainerStyle={s.scrollContent}
