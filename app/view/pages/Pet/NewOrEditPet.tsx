@@ -8,11 +8,11 @@ import {
 } from "react-native";
 
 import {
-  EspeciesAtendidas,
   PacoteRemarcacao,
   PorteAnimal,
   Screen,
   TipoServico,
+  PorteAnimalLabel,
 } from "../../../config/consts";
 import { Pet, PetBuilder } from "../../../model/Pet";
 import {
@@ -36,6 +36,12 @@ import { usePetFormSetup } from "../../../hooks/usePetFormSetup";
 
 import { EspeciesAtendidasLabel } from "../../../config/consts";
 
+//Transforma em um array com um id e o nome
+const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
+  id: key,
+  nome: PorteAnimalLabel[key as keyof typeof PorteAnimalLabel],
+}));
+
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { params, navigate } = useScreen<Pet>();
   const { showError } = useError();
@@ -48,6 +54,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
     dono_id: petToEdit?.dono_id ?? 0,
     dono_nome: "",
     raca: petToEdit?.raca ?? 0,
+    raca_nome: petToEdit?.raca_nome ?? "",
     observacoes: petToEdit?.observacoes ?? "",
     servicoPadrao: petToEdit?.servico_padrao ?? TipoServico.Banho,
     remarcAtiva: petToEdit?.remarcacao_ativa ?? false,
@@ -72,8 +79,6 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
     setPage,
     setSearchTxt,
   } = usePetFormSetup(form.especie);
-
-  const [modalDonoVisivel, setModalDonoVisivel] = useState(false);
 
   const salvarPet = async () => {
     const petSalvar = new PetBuilder()
@@ -105,6 +110,33 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
       ...prev,
       [campo]: valor,
     }));
+  };
+
+  const [modalConfig, setModalConfig] = useState({
+    visivel: false,
+    titulo: "",
+    lista: [] as any[],
+    aoSelecionar: (item: any) => {},
+  });
+
+  const abrirModal = ({
+    titulo,
+    lista,
+    aoSelecionar,
+  }: {
+    titulo: string;
+    lista: any[];
+    aoSelecionar: (item: any) => void;
+  }) => {
+    setModalConfig({
+      visivel: true,
+      titulo: titulo,
+      lista: lista,
+      aoSelecionar: (item) => {
+        aoSelecionar(item);
+        setModalConfig((prev) => ({ ...prev, visivel: false }));
+      },
+    });
   };
 
   const limparDono = () => {
@@ -140,16 +172,26 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               hasBorderBottom={true}
               digitavel={true}
             />
+
             <SelectionField
               image={require("../../../assets/animais/iconDono.png")}
-              titleName="dono"
+              titleName="Dono"
               selectedReg={form.dono_nome}
               buttonText={form.dono_nome ? "Trocar dono" : "Selecionar dono"}
               hasBorderBottom={true}
-              onPress={() => setModalDonoVisivel(true)}
-              setModal={() => setModalDonoVisivel(true)}
-              goEdit={true}
+              onPress={() =>
+                abrirModal({
+                  titulo: "Selecionar Dono",
+                  lista: owners || [],
+                  aoSelecionar: (item) => {
+                    atualizarValores("dono_id", item.id);
+                    atualizarValores("dono_nome", item.nome);
+                  },
+                })
+              }
               onClear={form.dono_nome ? limparDono : undefined}
+              goEdit={true}
+              setModal={() => {}}
             />
             <InputSelect
               titleName="Espécie"
@@ -166,24 +208,54 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               )}
               hasBorderBottom={true}
             />
-            <InputSelect
+            <SelectionField
+              image={require("../../../assets/animais/iconPata.png")}
               titleName="Raça"
-              image={require("../../../assets/animais/iconRaca.png")}
-              placeholder={
-                form.especie
-                  ? "Selecione a raça..."
-                  : "Escolha a espécie primeiro"
+              selectedReg={form.raca_nome}
+              buttonText={form.raca_nome ? "Trocar raça" : "Selecionar raça"}
+              hasBorderBottom={true}
+              onPress={() =>
+                abrirModal({
+                  titulo: "Selecionar Raça",
+                  lista: racasList || [],
+                  aoSelecionar: (item) => {
+                    atualizarValores("raca", item.id);
+                    atualizarValores("raca_nome", item.nome);
+                  },
+                })
               }
-              itens={racasList}
-              itemSelected={racasList.find((e) => e.id === form.raca)}
+              onClear={() => {
+                atualizarValores("raca", 0);
+                atualizarValores("raca_nome", "");
+              }}
+              goEdit={true}
+              setModal={() => {}}
+            />
+            <InputSelect
+              titleName="Porte"
+              image={require("../../../assets/animais/iconPata.png")}
+              placeholder="Selecione o Porte do animal"
+              itens={portesList}
+              itemSelected={portesList.find((e) => e.id === form.porte)}
               labelExtractor={(item) => item.nome}
-              onChange={(item) => atualizarValores("raca", item.id)}
+              onChange={(item) => atualizarValores("porte", item.id)}
               renderItem={(item) => (
                 <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
                   {item.nome}
                 </Text>
               )}
-              hasBorderBottom={false} // O último item da caixa não precisa de borda embaixo
+              hasBorderBottom={true}
+            />
+
+            <InputInfo
+              image={require("../../../assets/nav_bar/artigo.png")}
+              item={form.observacoes}
+              setItem={(v) => atualizarValores("observacoes", v)}
+              placeHolder="Uma observação adicional..."
+              titleName="Observações"
+              variasLinhas={true}
+              digitavel={true}
+              hasBorderBottom={true}
             />
           </View>
           <View style={s.ctnBtnSalvar}>
@@ -197,17 +269,13 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
       </ScrollView>
 
       <ModalSelectList
-        isOpen={modalDonoVisivel}
-        isOwner={true}
-        items={owners}
+        isOpen={modalConfig.visivel}
+        items={modalConfig.lista}
+        titulo={modalConfig.titulo}
+        onSelect={modalConfig.aoSelecionar}
+        onClose={() => setModalConfig((prev) => ({ ...prev, visivel: false }))}
         page={page}
         total={total}
-        onClose={() => setModalDonoVisivel(false)}
-        onSelect={(item) => {
-          atualizarValores("dono_id", item.id);
-          atualizarValores("dono_nome", item.nome);
-          setModalDonoVisivel(false);
-        }}
         setPage={setPage}
         setSearch={(txt) => {
           setPage(0);

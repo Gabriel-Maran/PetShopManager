@@ -33,6 +33,9 @@ const colors = {
     MODAL_BACKGROUND: "rgba(0,0,0,0.45)",
     DESATIVADO: "#CECCC3",
 
+    RED_COLOR: "#b71c1c",
+    GREEN_COLOR: "#2e7d32",
+
     EXCLUIR_MAIN_COLOR: "rgb(203, 31, 31)",
     EXCLUIR_BORDER_COLOR: "#F09595",
     EXCLUIR_BACKGROUND_COLOR: "#FCEBEB",
@@ -59,7 +62,7 @@ const colors = {
 
     TEXT_PRIMARY: "#FFFFFF",
     TEXT_SECONDARY: "#E2E8F0",
-    TEXT_MUTED: "#94A3B8",
+    TEXT_MUTED: "#aeb1b6",
     TEXT_PLACEHOLDER: "#64748B",
 
     BORDER: "#2D3139",
@@ -69,6 +72,9 @@ const colors = {
 
     MODAL_BACKGROUND: "rgba(0,0,0,0.80)",
     DESATIVADO: "#3D4148",
+
+    RED_COLOR: "#e57373",
+    GREEN_COLOR: "#81c784",
 
     EXCLUIR_MAIN_COLOR: "#F87171",
     EXCLUIR_BORDER_COLOR: "#991B1B",
@@ -94,6 +100,7 @@ const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(false);
+  const [temaCarregado, setTemaCarregado] = useState(false);
 
   useEffect(() => {
     configsController
@@ -105,8 +112,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       })
       .catch((err) => {
         console.warn("Erro ao carregar tema:", err);
+      })
+      .finally(() => {
+        setTemaCarregado(true); // sempre libera, mesmo se der erro
       });
   }, []);
+
+  if (!temaCarregado) return null; // aguarda sem renderizar nada
 
   return (
     <ThemeContext.Provider

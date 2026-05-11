@@ -84,7 +84,33 @@ export default function NewOrEditAppointment() {
 
   const [servicos, setServicos] = useState<ServiceType[]>([]);
 
-  const [modalPets, setModalPets] = useState(false);
+  const [modalConfig, setModalConfig] = useState({
+    visivel: false,
+    titulo: "",
+    lista: [] as any[],
+    aoSelecionar: (item: any) => {},
+  });
+
+  const abrirModal = ({
+    titulo,
+    lista,
+    aoSelecionar,
+  }: {
+    titulo: string;
+    lista: any[];
+    aoSelecionar: (item: any) => void;
+  }) => {
+    setModalConfig({
+      visivel: true,
+      titulo: titulo,
+      lista: lista,
+      aoSelecionar: (item) => {
+        aoSelecionar(item);
+        setModalConfig((prev) => ({ ...prev, visivel: false }));
+      },
+    });
+  };
+
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
   const [searchTxt, setSearchTxt] = useState("");
@@ -167,9 +193,19 @@ export default function NewOrEditAppointment() {
               selectedReg={nomePet}
               buttonText="Selecionar Pet"
               hasBorderBottom={true}
-              onPress={() => setModalPets(true)}
-              setModal={() => setModalPets(true)}
+              onPress={() =>
+                abrirModal({
+                  titulo: "Selecionar Pet",
+                  lista: pets || [],
+                  aoSelecionar: (item) => {
+                    setIdPet(item.id);
+                    setNomePet(item.nome);
+                    setAutoGen(item.remarcacao_ativa);
+                  },
+                })
+              }
               goEdit={true}
+              setModal={() => {}}
             />
             <InputSelect
               image={require("../../../assets/outros/servicos.png")}
@@ -258,18 +294,13 @@ export default function NewOrEditAppointment() {
         </View>
       </ScrollView>
       <ModalSelectList
-        isOpen={modalPets}
-        isOwner={false}
-        items={pets}
+        isOpen={modalConfig.visivel}
+        items={modalConfig.lista}
+        titulo={modalConfig.titulo} 
+        onSelect={modalConfig.aoSelecionar}
+        onClose={() => setModalConfig((prev) => ({ ...prev, visivel: false }))}
         page={page}
         total={total}
-        onClose={() => setModalPets(false)}
-        onSelect={(item) => {
-          setIdPet(item.id);
-          setNomePet(item.nome);
-          setAutoGen(item.remarcacao_ativa);
-          setModalPets(false);
-        }}
         setPage={setPage}
         setSearch={(txt) => {
           setPage(0);

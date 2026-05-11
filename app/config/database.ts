@@ -21,14 +21,6 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   return db;
 }
 
-// ← Isso precisa existir exatamente assim
-export async function closeDatabase(): Promise<void> {
-  if (db) {
-    await db.closeAsync();
-    db = null; // sem isso o initDatabase reabre a conexão antiga
-  }
-}
-
 /* - Drops de triggers, index e tables
   //Cole lá em baixo, vai ter a indicação
   await db.execAsync(`
@@ -399,7 +391,8 @@ export async function initDatabase(): Promise<void> {
   // ── Execução ──────────────────────────────────────────────────────────────
 
   await db.execAsync(SQL_PRAGMA);
-  //Cole aqui se deseja dar drop em algo
+
+
   await db.execAsync(SQL_CREATE_TABLES);
   await db.execAsync(SQL_CREATE_INDEXES);
   await db.execAsync(SQL_INSERTS);

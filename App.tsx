@@ -1,4 +1,10 @@
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useEffect, useState, ReactNode } from "react";
 
 import { initDatabase } from "./app/config/database";
@@ -75,7 +81,7 @@ function AppContent() {
 
 function AppInner() {
   const s = useThemedStyles(styles);
-  const { colors } = useTheme();
+  const { isDark, colors } = useTheme();
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -102,8 +108,15 @@ function AppInner() {
   }
 
   return (
-    <View style={{ paddingTop: STATUS_BAR_HEIGHT, flex: 1 }}>
-      <AppContent />
+    <View style={{ flex: 1, backgroundColor: colors.BACKGROUND }}>
+      <StatusBar
+        backgroundColor={colors.BACKGROUND}
+        barStyle={isDark ? "light-content" : "dark-content"}
+        translucent={false}
+      />
+      <View style={{ paddingTop: STATUS_BAR_HEIGHT, flex: 1 }}>
+        <AppContent />
+      </View>
     </View>
   );
 }

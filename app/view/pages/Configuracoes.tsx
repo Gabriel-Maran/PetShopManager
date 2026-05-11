@@ -23,9 +23,7 @@ export default function Configuracoes() {
         contentContainerStyle={s.scroll}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── Aparência ───────────────────────────────────────────── */}
-        <SectionLabel label="Aparência" styles={s} />
-
+        <Text style={s.sectionLabel}>Aparência</Text>
         <View style={s.card}>
           <View style={s.row}>
             <View style={s.rowText}>
@@ -35,10 +33,7 @@ export default function Configuracoes() {
             <ThemeToggle />
           </View>
         </View>
-
-        {/* ── Dados ───────────────────────────────────────────────── */}
-        <SectionLabel label="Dados" styles={s} />
-
+        <Text style={s.sectionLabel}>Dados</Text>
         <View style={s.card}>
           <DatabaseTransfer
             onImportSuccess={() => navigate(Screen.Calendario)}
@@ -48,14 +43,6 @@ export default function Configuracoes() {
     </View>
   );
 }
-
-// ─── Section label ────────────────────────────────────────────────────────────
-
-function SectionLabel({ label, styles: s }: { label: string; styles: any }) {
-  return <Text style={s.sectionLabel}>{label.toUpperCase()}</Text>;
-}
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
