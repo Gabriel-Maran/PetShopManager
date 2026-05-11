@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ImageSourcePropType
 } from "react-native";
 
 import {
@@ -115,6 +116,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const [modalConfig, setModalConfig] = useState({
     visivel: false,
     titulo: "",
+    itemIcon: undefined as ImageSourcePropType | undefined,
     lista: [] as any[],
     aoSelecionar: (item: any) => {},
   });
@@ -122,15 +124,18 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const abrirModal = ({
     titulo,
     lista,
+    itemIcon,
     aoSelecionar,
   }: {
     titulo: string;
+    itemIcon?: ImageSourcePropType;
     lista: any[];
     aoSelecionar: (item: any) => void;
   }) => {
     setModalConfig({
       visivel: true,
       titulo: titulo,
+      itemIcon: itemIcon,
       lista: lista,
       aoSelecionar: (item) => {
         aoSelecionar(item);
@@ -182,6 +187,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               onPress={() =>
                 abrirModal({
                   titulo: "Selecionar Dono",
+                  itemIcon: require("../../../assets/animais/iconDono.png"),
                   lista: owners || [],
                   aoSelecionar: (item) => {
                     atualizarValores("dono_id", item.id);
@@ -217,6 +223,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               onPress={() =>
                 abrirModal({
                   titulo: "Selecionar Raça",
+                  itemIcon: require("../../../assets/animais/iconPata.png"),
                   lista: racasList || [],
                   aoSelecionar: (item) => {
                     atualizarValores("raca", item.id);
@@ -272,6 +279,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
         isOpen={modalConfig.visivel}
         items={modalConfig.lista}
         titulo={modalConfig.titulo}
+        itemIcon={modalConfig.itemIcon}
         onSelect={modalConfig.aoSelecionar}
         onClose={() => setModalConfig((prev) => ({ ...prev, visivel: false }))}
         page={page}
