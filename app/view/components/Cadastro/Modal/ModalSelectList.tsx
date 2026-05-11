@@ -8,20 +8,16 @@ import {
   Pressable,
 } from "react-native";
 import { LIMIT_ITEM_PAGE } from "../../../../config/consts";
-import OwnerListModal from "./OwnerListModal";
-import PetListModal from "./PetListModal";
-import { PetWithSpecie } from "../../../../model/Pet";
-import { Owner } from "../../../../model/Owner";
 import Pagination from "../List/Pagination";
 import BarraDePesquisa from "../../SearchBarra/BarraDePesquisa";
-import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
+import { ThemeColors, useThemedStyles} from "../../../Themes/ThemeProvider";
 
 interface ModalSelectListProps {
   items: any[] | null | undefined;
   isOpen: boolean;
   onClose: () => void;
   onSelect: (item: any) => void;
-  isOwner: boolean;
+  titulo: string;
   page: number;
   total: number;
   setPage: (page: number) => void;
@@ -33,7 +29,7 @@ export default function ModalSelectList({
   isOpen,
   onClose,
   onSelect,
-  isOwner,
+  titulo, 
   page,
   total,
   setPage,
@@ -42,54 +38,30 @@ export default function ModalSelectList({
   const s = useThemedStyles(styles);
 
   return (
-    <Modal
-      visible={isOpen}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={isOpen} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={s.overlay} onPress={onClose}>
         <Pressable style={s.modalContent} onPress={() => {}}>
-          {/* Cabeçalho */}
           <View style={s.modalHeader}>
-            <Text style={s.modalTitle}>
-              Selecionar {isOwner ? "Tutor" : "Pet"}
-            </Text>
-            <TouchableOpacity
-              style={s.closeBtn}
-              onPress={onClose}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
+            <Text style={s.modalTitle}>{titulo}</Text> 
+            <TouchableOpacity style={s.closeBtn} onPress={onClose}>
               <Text style={s.closeIcon}>✕</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Pesquisa */}
           <View style={s.searchWrap}>
             <BarraDePesquisa
-              placeHolderStr={`Pesquisar ${isOwner ? "tutor" : "pet"}...`}
+              placeHolderStr={`Pesquisar...`} 
               setSearch={setSearch}
             />
           </View>
 
-          {/* Lista */}
           <FlatList
             data={items}
-            contentContainerStyle={s.listContent}
-            ListEmptyComponent={
-              <View style={s.empty}>
-                <Text style={s.emptyTxt}>
-                  Nenhum {isOwner ? "tutor" : "pet"} encontrado.
-                </Text>
-              </View>
-            }
-            renderItem={({ item }) =>
-              isOwner ? (
-                <OwnerListModal onSelect={onSelect} item={item as Owner} />
-              ) : (
-                <PetListModal onSelect={onSelect} item={item as PetWithSpecie} />
-              )
-            }
+            renderItem={({ item }) => (
+              <TouchableOpacity style={s.itemRow} onPress={() => onSelect(item)}>
+                <Text style={s.itemText}>{item.nome}</Text>
+              </TouchableOpacity>
+            )}
             keyExtractor={(item, index) =>
               item.id?.toString() ?? index.toString()
             }
@@ -187,5 +159,15 @@ const styles = (colors: ThemeColors) =>
       borderTopWidth: 1,
       borderColor: colors.BORDER_MID,
       paddingVertical: 4,
+    },
+    itemRow: {
+      paddingHorizontal: 20,
+      paddingVertical: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.BORDER_MID, 
+    },
+    itemText: {
+      fontSize: 16,
+      color: colors.TEXT_PRIMARY,
     },
   });

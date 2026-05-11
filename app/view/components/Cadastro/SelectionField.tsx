@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   ImageSourcePropType,
 } from "react-native";
 import { Screen } from "../../../config/consts";
@@ -22,7 +21,6 @@ export default function SelectionField({
   buttonText,
   hasBorderBottom,
   onPress,
-  onClear,
   goEdit,
   setModal,
 }: {
@@ -47,7 +45,9 @@ export default function SelectionField({
       {selectedReg ? (
         <View style={s.regSelecionado}>
           <View style={s.caixaReg}>
-            <Text style={s.txtReg}>{selectedReg}</Text>
+            <Text style={s.txtReg} numberOfLines={1}>
+              {selectedReg}
+            </Text>
           </View>
 
           <ButtonEditar
@@ -81,11 +81,11 @@ const styles = (colors: ThemeColors) =>
       paddingLeft: 15,
       borderRadius: 10,
       fontSize: 20,
-      borderColor: colors.BORDER_LIGHT
+      borderColor: colors.BORDER_LIGHT,
     },
     txtReg: {
       fontSize: 15,
-      color: colors.TEXT_PRIMARY
+      color: colors.TEXT_PRIMARY,
     },
     btnSalvar: {
       width: "100%",

@@ -10,6 +10,7 @@ export interface Pet {
   especie: number;
   porte: PorteAnimal;
   raca?: number;
+  raca_nome?: string;
   observacoes?: string | null;
   dono_id: number;
   servico_padrao: TipoServico;
