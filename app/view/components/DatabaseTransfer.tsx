@@ -3,10 +3,8 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Alert,
   StyleSheet,
   ActivityIndicator,
-  Modal,
 } from "react-native";
 import { exportDatabase, importDatabase } from "../../service/BackupService";
 import {
@@ -14,77 +12,54 @@ import {
   useTheme,
   useThemedStyles,
 } from "../Themes/ThemeProvider";
-
-// ─── Tipos ────────────────────────────────────────────────────────────────────
+import ErrorModal from "./Error/ErrorModal";
+import ConfirmModal from "./ConfirmModal";
 
 type Action = "export" | "import";
 
 interface DatabaseTransferProps {
-  /** Chamado após importação bem-sucedida (ex: navegar para home) */
   onImportSuccess?: () => void;
 }
-
-// ─── Componente ───────────────────────────────────────────────────────────────
 
 export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
   const [loading, setLoading] = useState(false);
   const [loadingAction, setLoadingAction] = useState<Action | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
-
-  async function handleExport() {
+  async function runExport() {
     setLoading(true);
     setLoadingAction("export");
     try {
       await exportDatabase();
     } catch (e: any) {
-      Alert.alert("Erro ao exportar", e?.message ?? "Erro desconhecido.");
+      setErrorMsg(e?.message ?? "Erro desconhecido ao exportar.");
     } finally {
       setLoading(false);
       setLoadingAction(null);
     }
   }
 
-  function handleImportPress() {
-    Alert.alert(
-      "Importar banco de dados",
-      "Isso substituirá TODOS os dados atuais. Esta ação não pode ser desfeita.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Continuar",
-          style: "destructive",
-          onPress: handleImport,
-        },
-      ],
-    );
-  }
-
-  async function handleImport() {
+  async function runImport() {
+    setConfirmVisible(false);
     setLoading(true);
     setLoadingAction("import");
     try {
       await importDatabase();
-      Alert.alert(
-        "Importação concluída",
-        "O banco de dados foi restaurado com sucesso.",
-        [{ text: "OK", onPress: onImportSuccess }],
-      );
+      onImportSuccess?.();
     } catch (e: any) {
-      Alert.alert("Erro ao importar", e?.message ?? "Erro desconhecido.");
+      setErrorMsg(e?.message ?? "Erro desconhecido ao importar.");
     } finally {
       setLoading(false);
       setLoadingAction(null);
     }
   }
 
-  // ── Render ──────────────────────────────────────────────────────────────────
-
   return (
     <View style={s.container}>
-      {/* Cabeçalho */}
       <View style={s.header}>
         <Text style={s.title}>Backup & Restauração</Text>
         <Text style={s.subtitle}>
@@ -92,10 +67,9 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
         </Text>
       </View>
 
-      {/* Card Exportar */}
       <TouchableOpacity
         style={[s.card, s.cardExport]}
-        onPress={handleExport}
+        onPress={runExport}
         disabled={loading}
         activeOpacity={0.75}
       >
@@ -108,15 +82,14 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
             Salva o banco de dados atual e abre o compartilhamento do sistema.
           </Text>
         </View>
-        {loading && loadingAction === "export" ? (
+        {loading && loadingAction === "export" && (
           <ActivityIndicator color={colors.GREEN_COLOR} />
-        ) : null}
+        )}
       </TouchableOpacity>
 
-      {/* Card Importar */}
       <TouchableOpacity
         style={[s.card, s.cardImport]}
-        onPress={handleImportPress}
+        onPress={() => setConfirmVisible(true)}
         disabled={loading}
         activeOpacity={0.75}
       >
@@ -129,12 +102,11 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
             Seleciona um arquivo .db e substitui os dados atuais.
           </Text>
         </View>
-        {loading && loadingAction === "import" ? (
+        {loading && loadingAction === "import" && (
           <ActivityIndicator color={colors.RED_COLOR} />
-        ) : null}
+        )}
       </TouchableOpacity>
 
-      {/* Aviso */}
       <View style={s.warning}>
         <Text style={s.warningIcon}>⚠️</Text>
         <Text style={s.warningText}>
@@ -143,8 +115,8 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
         </Text>
       </View>
 
-      {/* Overlay de loading global */}
-      <Modal transparent visible={loading} animationType="fade">
+      {/* Loading overlay (mantido igual ao original) */}
+      {loading && (
         <View style={s.overlay}>
           <View style={s.overlayBox}>
             <ActivityIndicator size="large" color={colors.PRIMARY} />
@@ -153,7 +125,20 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
             </Text>
           </View>
         </View>
-      </Modal>
+      )}
+
+      <ConfirmModal
+        visible={confirmVisible}
+        emoji="📥"
+        title="Importar banco de dados"
+        message="Isso substituirá TODOS os dados atuais. Esta ação não pode ser desfeita."
+        confirmLabel="Importar"
+        variant="destructive"
+        onConfirm={runImport}
+        onCancel={() => setConfirmVisible(false)}
+      />
+
+      <ErrorModal message={errorMsg} onClose={() => setErrorMsg(null)} />
     </View>
   );
 }
