@@ -12,6 +12,7 @@ import {
   PorteAnimal,
   Screen,
   TipoServico,
+  PorteAnimalLabel,
 } from "../../../config/consts";
 import { Pet, PetBuilder } from "../../../model/Pet";
 import {
@@ -34,6 +35,12 @@ import InputSelect from "../../components/InputSelect";
 import { usePetFormSetup } from "../../../hooks/usePetFormSetup";
 
 import { EspeciesAtendidasLabel } from "../../../config/consts";
+
+//Transforma em um array com um id e o nome
+const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
+  id: key,
+  nome: PorteAnimalLabel[key as keyof typeof PorteAnimalLabel],
+}));
 
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { params, navigate } = useScreen<Pet>();
@@ -213,7 +220,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
                   lista: racasList || [],
                   aoSelecionar: (item) => {
                     atualizarValores("raca", item.id);
-                    atualizarValores("raca_nome", item.nome); 
+                    atualizarValores("raca_nome", item.nome);
                   },
                 })
               }
@@ -223,6 +230,32 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               }}
               goEdit={true}
               setModal={() => {}}
+            />
+            <InputSelect
+              titleName="Porte"
+              image={require("../../../assets/animais/iconPata.png")}
+              placeholder="Selecione o Porte do animal"
+              itens={portesList}
+              itemSelected={portesList.find((e) => e.id === form.porte)}
+              labelExtractor={(item) => item.nome}
+              onChange={(item) => atualizarValores("porte", item.id)}
+              renderItem={(item) => (
+                <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+                  {item.nome}
+                </Text>
+              )}
+              hasBorderBottom={true}
+            />
+
+            <InputInfo
+              image={require("../../../assets/nav_bar/artigo.png")}
+              item={form.observacoes}
+              setItem={(v) => atualizarValores("observacoes", v)}
+              placeHolder="Uma observação adicional..."
+              titleName="Observações"
+              variasLinhas={true}
+              digitavel={true}
+              hasBorderBottom={true}
             />
           </View>
           <View style={s.ctnBtnSalvar}>
