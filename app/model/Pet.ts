@@ -22,8 +22,9 @@ export interface Pet {
   criado_em?: number;
 }
 
-export type PetWithSpecie = Pet & {
+export type PetWithSpecieAndRace = Pet & {
   nome_especie: string;
+  nome_raca: string;
 }
 
 export class PetBuilder {
