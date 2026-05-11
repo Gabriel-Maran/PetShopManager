@@ -391,7 +391,8 @@ export async function initDatabase(): Promise<void> {
   // ── Execução ──────────────────────────────────────────────────────────────
 
   await db.execAsync(SQL_PRAGMA);
-  //Cole aqui se deseja dar drop em algo
+
+
   await db.execAsync(SQL_CREATE_TABLES);
   await db.execAsync(SQL_CREATE_INDEXES);
   await db.execAsync(SQL_INSERTS);
