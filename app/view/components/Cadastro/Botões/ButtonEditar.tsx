@@ -14,7 +14,7 @@ export default function ButtonEditar({
   setModal,
 }: {
   navegarPara: Screen;
-  selectParam?: Pet | Owner | Appointment;
+  selectParam?: Pet | Owner | Appointment | unknown;
   editCampo?: boolean;
   goEdit?: boolean;
   setModal?: () => void;

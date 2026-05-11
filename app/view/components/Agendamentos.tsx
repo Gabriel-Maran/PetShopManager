@@ -6,14 +6,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 import { useScreen } from "../../hooks/useScreen";
 import { useError } from "../../hooks/useError";
 
 import { Screen, APP_BAR_HEIGHT, EspeciesAtendidas } from "../../config/consts";
-
-import { AppointmentsWithOwnerAndPet } from "../../model/Appointment";
 
 import { appointmentController } from "../../controller/AppointmentsController";
 

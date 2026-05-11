@@ -55,7 +55,7 @@ const styles = (colors: ThemeColors) =>
       width: "95%",
       gap: 10,
       borderBottomWidth: 1,
-      borderColor: "#b5b5b5",
+      borderColor: colors.BORDER_MID,
     },
     mainContent: {
       flex: 1,
@@ -67,6 +67,7 @@ const styles = (colors: ThemeColors) =>
       width: 30,
       height: 30,
       alignSelf: "center",
+      tintColor: colors.TEXT_PRIMARY,
     },
     textMain: {
       fontSize: 16,

@@ -13,7 +13,11 @@ import { useError } from "../../../hooks/useError";
 import { useScreen } from "../../../hooks/useScreen";
 
 import { Screen } from "../../../config/consts";
-import { Owner, OwnerBuilder } from "../../../model/Owner";
+import {
+  Owner,
+  OwnerBuilder,
+  NewOrEditOwnerParams,
+} from "../../../model/Owner";
 import { ownerController } from "../../../controller/OwnerController";
 
 import TitleBar from "../../components/Cadastro/TitleBar";
@@ -33,17 +37,18 @@ const maskPhone = (v: string) => {
 };
 
 export default function NewOrEditOwner() {
-  const { params, navigate } = useScreen<Owner>();
+  const { params, navigate } = useScreen<NewOrEditOwnerParams>();
   const { showError } = useError();
 
   const s = useThemedStyles(styles);
 
-  const isEditing = Boolean(params?.id);
+  const isViewing = params?.mode === "view";
+  const isEditing = params?.mode === "edit";
 
-  const [nome, setNome] = useState(params?.nome ?? "");
-  const [telefone, setTelefone] = useState(params?.telefone ?? "");
-  const [email, setEmail] = useState(params?.email ?? "");
-  const [endereco, setEndereco] = useState(params?.endereco ?? "");
+  const [nome, setNome] = useState(params?.Owner?.nome ?? "");
+  const [telefone, setTelefone] = useState(params?.Owner?.telefone ?? "");
+  const [email, setEmail] = useState(params?.Owner?.email ?? "");
+  const [endereco, setEndereco] = useState(params?.Owner?.endereco ?? "");
 
   const salvarDono = async () => {
     const ownerSalvar: Owner = new OwnerBuilder()
@@ -54,7 +59,7 @@ export default function NewOrEditOwner() {
       .build();
     try {
       if (isEditing) {
-        await ownerController.updateOwner(params!.id!, ownerSalvar);
+        await ownerController.updateOwner(params!.Owner?.id!, ownerSalvar);
       } else {
         await ownerController.createOwner(ownerSalvar);
       }
@@ -72,8 +77,8 @@ export default function NewOrEditOwner() {
       <DefaultHeader />
       <TitleBar
         returnTo={Screen.Cadastros}
-        title={isEditing ? "Editar Dono" : "Novo Dono"}
-        subtitle="Preencha os dados do responsável"
+        title={isViewing ? "Visualizando Dono" : isEditing ? "Editar Dono" : "Novo Dono"}
+        subtitle={!isViewing ? "Preencha os dados do responsável" : ""}
       />
       <ScrollView
         contentContainerStyle={s.scrollContent}
@@ -91,7 +96,7 @@ export default function NewOrEditOwner() {
               placeHolder="Digite o nome..."
               titleName="Nome Completo"
               variasLinhas={false}
-              digitavel={true}
+              digitavel={!isViewing}
               hasBorderBottom={true}
             />
             <InputInfo
@@ -100,7 +105,7 @@ export default function NewOrEditOwner() {
               setItem={(v) => setTelefone(maskPhone(v))}
               placeHolder="(46) 90000-0000"
               titleName="Telefone"
-              digitavel={true}
+              digitavel={!isViewing}
               variasLinhas={false}
             />
           </View>
@@ -115,7 +120,7 @@ export default function NewOrEditOwner() {
               placeHolder="email@exemplo.email"
               titleName="E-mail"
               variasLinhas={false}
-              digitavel={true}
+              digitavel={!isViewing}
               hasBorderBottom={true}
             />
             <InputInfo
@@ -124,10 +129,11 @@ export default function NewOrEditOwner() {
               setItem={setEndereco}
               placeHolder="Rua X, 456"
               variasLinhas={true}
-              digitavel={true}
+              digitavel={!isViewing}
               titleName="Endereço"
             />
           </View>
+          {!isViewing && (
           <View style={s.ctnBtnSalvar}>
             <TouchableOpacity style={s.btnSalvar} onPress={salvarDono}>
               <Text style={s.txtSalvar}>
@@ -135,6 +141,7 @@ export default function NewOrEditOwner() {
               </Text>
             </TouchableOpacity>
           </View>
+          )}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

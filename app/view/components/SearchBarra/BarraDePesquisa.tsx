@@ -127,6 +127,7 @@ const styles = (colors: ThemeColors) =>
       borderRadius: 99,
       alignContent: "center",
       justifyContent: "center",
+      alignSelf: "center",
       padding: 10,
     },
     imgFilter: {

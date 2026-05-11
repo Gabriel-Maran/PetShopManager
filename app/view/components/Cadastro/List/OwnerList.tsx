@@ -1,4 +1,11 @@
-import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Owner } from "../../../../model/Owner";
 import { useScreen } from "../../../../hooks/useScreen";
 import ButtonEditar from "../Botões/ButtonEditar";
@@ -14,31 +21,41 @@ export default function OwnerList({
   onDelete: (itemId: number) => void;
 }) {
   const s = useThemedStyles(styles);
+  const { navigate } = useScreen();
   return (
     <View>
       <FlatList
         data={cadastros}
         renderItem={({ item }) => (
-          <View style={s.itemCard}>
-            <Image
-              style={s.img}
-              source={require("../../../../assets/crud/person.png")}
-            />
+          <TouchableOpacity
+            onPress={() =>
+              navigate(Screen.NewOrEditOwner, {
+                mode: "view",
+                Owner: item,
+              })
+            }
+          >
+            <View style={s.itemCard}>
+              <Image
+                style={s.img}
+                source={require("../../../../assets/crud/person.png")}
+              />
 
-            <View style={s.mainContent}>
-              <Text style={s.textMain}>{item.nome}</Text>
-              <Text style={s.textSub}>{item.telefone}</Text>
+              <View style={s.mainContent}>
+                <Text style={s.textMain}>{item.nome}</Text>
+                <Text style={s.textSub}>{item.telefone}</Text>
+              </View>
+
+              <ButtonEditar
+                selectParam={{ Owner: item, mode: "edit" }}
+                navegarPara={Screen.NewOrEditOwner}
+              />
+
+              <ButtonExcluir itemId={item.id ?? -1} onDelete={onDelete} />
             </View>
-
-            <ButtonEditar
-              selectParam={item}
-              navegarPara={Screen.NewOrEditOwner}
-            />
-
-            <ButtonExcluir itemId={item.id ?? -1} onDelete={onDelete} />
-          </View>
+          </TouchableOpacity>
         )}
-        keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
+        keyExtractor={(item) => String(item.id)}
       />
     </View>
   );

@@ -42,7 +42,7 @@ export default function Cadastros() {
   const [objSelectToDelete, setObjSelectToDelete] = useState<
     Pet | Owner | undefined
   >();
-  const [isFilterAtivo, setIsFilterAtivo] = useState(1);
+  const [isAtivo, setIsAtivo] = useState(1);
 
   const handleError = (e: unknown) =>
     showError(e instanceof Error ? e.message : "Erro inesperado.");
@@ -70,7 +70,7 @@ export default function Cadastros() {
             page,
             LIMIT_ITEM_PAGE,
             ORDER.DESC,
-            isFilterAtivo,
+            isAtivo,
           )
           .then(setOwners)
       : petController
@@ -79,11 +79,11 @@ export default function Cadastros() {
             page,
             LIMIT_ITEM_PAGE,
             ORDER.DESC,
-            isFilterAtivo,
+            isAtivo,
           )
           .then(setPets);
     fetch.catch(handleError);
-  }, [search, page, isOwnerSelected, isFilterAtivo]);
+  }, [search, page, isOwnerSelected, isAtivo]);
 
   function confirmDeletar(itemId: number) {
     try {
@@ -130,8 +130,9 @@ export default function Cadastros() {
           }}
           hasFilter={true}
           onStatusFiltroChange={(item: number) => {
-            setIsFilterAtivo(item);
+            setIsAtivo(item);
           }}
+          statusFiltro={isAtivo ? "ativo" : "inativo"}
         />
 
         <View style={s.escolhaItem}>
