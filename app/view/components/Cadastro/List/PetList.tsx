@@ -1,15 +1,16 @@
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import ButtonEditar from "../Botões/ButtonEditar";
 import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
-import { Pet } from "../../../../model/Pet";
-import { Screen } from "../../../../config/consts";
+import { PetWithSpecieAndRace } from "../../../../model/Pet";
+import { EspeciesAtendidas, Screen } from "../../../../config/consts";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
+import { EspeciesAtendidasLabel } from "../../../../config/consts";
 
 export default function PetList({
   cadastros,
   onDelete,
 }: {
-  cadastros: Pet[];
+  cadastros: PetWithSpecieAndRace[];
   onDelete: (itemId: number) => void;
 }) {
   const s = useThemedStyles(styles);
@@ -28,7 +29,7 @@ export default function PetList({
             <View style={s.mainContent}>
               <Text style={s.textMain}>{item.nome}</Text>
               <Text style={s.textSub}>
-                {`${item.especie}${item.raca ? ` - ${item.raca}` : ""}`}
+                {`${EspeciesAtendidasLabel[item.nome_especie as EspeciesAtendidas]}${item.nome_raca ? ` - ${item.nome_raca}` : ""}`}
               </Text>
             </View>
 
@@ -37,7 +38,7 @@ export default function PetList({
             <ButtonExcluir itemId={item.id ?? -1} onDelete={onDelete} />
           </View>
         )}
-        keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
+        keyExtractor={(item) => String(item.id)}
       />
     </View>
   );
