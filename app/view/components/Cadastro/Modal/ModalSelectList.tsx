@@ -5,12 +5,14 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image,
   Pressable,
+  ImageSourcePropType,
 } from "react-native";
 import { LIMIT_ITEM_PAGE } from "../../../../config/consts";
 import Pagination from "../List/Pagination";
 import BarraDePesquisa from "../../SearchBarra/BarraDePesquisa";
-import { ThemeColors, useThemedStyles} from "../../../Themes/ThemeProvider";
+import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 
 interface ModalSelectListProps {
   items: any[] | null | undefined;
@@ -18,6 +20,7 @@ interface ModalSelectListProps {
   onClose: () => void;
   onSelect: (item: any) => void;
   titulo: string;
+  itemIcon?: ImageSourcePropType;
   page: number;
   total: number;
   setPage: (page: number) => void;
@@ -29,7 +32,8 @@ export default function ModalSelectList({
   isOpen,
   onClose,
   onSelect,
-  titulo, 
+  titulo,
+  itemIcon,
   page,
   total,
   setPage,
@@ -38,11 +42,16 @@ export default function ModalSelectList({
   const s = useThemedStyles(styles);
 
   return (
-    <Modal visible={isOpen} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal
+      visible={isOpen}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
       <Pressable style={s.overlay} onPress={onClose}>
         <Pressable style={s.modalContent} onPress={() => {}}>
           <View style={s.modalHeader}>
-            <Text style={s.modalTitle}>{titulo}</Text> 
+            <Text style={s.modalTitle}>{titulo}</Text>
             <TouchableOpacity style={s.closeBtn} onPress={onClose}>
               <Text style={s.closeIcon}>✕</Text>
             </TouchableOpacity>
@@ -50,15 +59,20 @@ export default function ModalSelectList({
 
           <View style={s.searchWrap}>
             <BarraDePesquisa
-              placeHolderStr={`Pesquisar...`} 
+              placeHolderStr={`Pesquisar...`}
               setSearch={setSearch}
             />
           </View>
 
           <FlatList
             data={items}
+            contentContainerStyle={s.listContent}
             renderItem={({ item }) => (
-              <TouchableOpacity style={s.itemRow} onPress={() => onSelect(item)}>
+              <TouchableOpacity
+                style={s.itemRow}
+                onPress={() => onSelect(item)}
+              >
+                {itemIcon && <Image source={itemIcon} style={s.itemIconRow} />}
                 <Text style={s.itemText}>{item.nome}</Text>
               </TouchableOpacity>
             )}
@@ -161,13 +175,21 @@ const styles = (colors: ThemeColors) =>
       paddingVertical: 4,
     },
     itemRow: {
+      flexDirection: "row",
       paddingHorizontal: 20,
       paddingVertical: 15,
       borderBottomWidth: 1,
-      borderBottomColor: colors.BORDER_MID, 
+      borderBottomColor: colors.BORDER_MID,
+    },
+    itemIconRow: {
+      width: 24, 
+      height: 24,
+      marginRight: 12, 
+      resizeMode: "contain",
     },
     itemText: {
       fontSize: 16,
       color: colors.TEXT_PRIMARY,
     },
+  
   });
