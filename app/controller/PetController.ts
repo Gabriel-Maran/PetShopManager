@@ -1,6 +1,6 @@
 import { petService } from "../service/PetService";
 import { ORDER } from "../config/consts";
-import { Pet, PetWithSpecie } from "../model/Pet";
+import { Pet, PetWithSpecieAndRace } from "../model/Pet";
 import { ownerController } from "./OwnerController";
 
 class PetController {
@@ -18,8 +18,12 @@ class PetController {
     return petService.getAllPetsPaged(page, limit, order);
   }
 
-  getAllPetsPagedWithSpecie(page: number, limit: number, order: ORDER): Promise<PetWithSpecie[]> {
-    return petService.getAllPetsPagedWithSpecie(page, limit, order);
+  getAllPetsPagedWithSpecieAndRace(
+    page: number,
+    limit: number,
+    order: ORDER,
+  ): Promise<PetWithSpecieAndRace[]> {
+    return petService.getAllPetsPagedWithSpecieAndRace(page, limit, order);
   }
 
   searchPetsByNamePaged(
@@ -34,16 +38,21 @@ class PetController {
     return petService.searchPetsByNamePaged(query, page, limit, order);
   }
 
-  searchPetsByNamePagedWithSpecie(
+  searchPetsByNamePagedWithSpecieAndRace(
     query: string,
     page: number,
     limit: number,
     order: ORDER = ORDER.DESC,
-  ): Promise<PetWithSpecie[]> {
+  ): Promise<PetWithSpecieAndRace[]> {
     if (!query.trim()) {
-      return this.getAllPetsPagedWithSpecie(page, limit, order);
+      return this.getAllPetsPagedWithSpecieAndRace(page, limit, order);
     }
-    return petService.searchPetsByNamePagedWithSpecie(query, page, limit, order);
+    return petService.searchPetsByNamePagedWithSpecieAndRace(
+      query,
+      page,
+      limit,
+      order,
+    );
   }
 
   getPetsByOwnerId(ownerId: number): Promise<Pet[]> {
