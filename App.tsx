@@ -1,4 +1,10 @@
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useEffect, useState, ReactNode } from "react";
 
 import { initDatabase } from "./app/config/database";
@@ -26,6 +32,7 @@ import { AgendamentosProvider } from "./app/view/contexts/agendamentos";
 
 function AppContent() {
   const { screen } = useScreen();
+  const { colors } = useTheme();
 
   let content: ReactNode;
 
@@ -64,7 +71,12 @@ function AppContent() {
   }
   return (
     <>
-      <AgendamentosProvider>{content}</AgendamentosProvider>
+      <AgendamentosProvider>
+        <>
+          <StatusBar backgroundColor={colors.BACKGROUND} />
+          {content}
+        </>
+      </AgendamentosProvider>
       {(screen == Screen.Calendario ||
         screen == Screen.Cadastros ||
         screen == Screen.Relatorios ||
