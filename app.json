@@ -21,11 +21,20 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.gabriel98989898.PetShopManager"
     },
     "web": {
       "favicon": "./app/assets/default_react/favicon.png"
     },
-    "plugins": ["expo-sqlite"]
+    "plugins": [
+      "expo-sqlite"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f2085da0-5287-4f67-b88e-1acfe6b01a28"
+      }
+    },
+    "owner": "gabriel98989898"
   }
 }

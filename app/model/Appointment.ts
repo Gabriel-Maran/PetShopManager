@@ -23,7 +23,6 @@ export type NewOrEditAppointmentParams = {
   dateSelected?: string;
 };
 
-
 export class AppointmentBuilder {
   private props: Partial<Appointment>;
 

@@ -8,6 +8,7 @@ import {
   useTheme,
   useThemedStyles,
 } from "../Themes/ThemeProvider";
+import { APP_BAR_HEIGHT } from "../../config/consts";
 
 export default function Home() {
   const s = useThemedStyles(styles);

@@ -22,6 +22,7 @@ export enum Screen {
   NewOrEditOwner = "NewOrEditOwner",
   NewOrEditPet = "NewOrEditPet",
   NewOrEditAppointment = "NewOrEditAppointment",
+  RelatorioView = "RelatorioView",
 }
 
 export enum TipoServico {
@@ -71,5 +72,19 @@ export enum ORDER {
   ASC = "ASC",
   DESC = "DESC",
 }
+
+export enum RelatorioType {
+  HorariosMovimentados = "HorariosMovimentados",
+  PetsAusentes = "PetsAusentes",
+  Remarcacoes = "Remarcacoes",
+  OrigemAgendamentos = "OrigemAgendamentos",
+  ComparativoMensal = "ComparativoMensal",
+  TaxaConclusao = "TaxaConclusao",
+  Pacotes = "Pacotes",
+}
+
+export type RelatorioParams = {
+  type: RelatorioType;
+};
 
 export type StatusFiltro = "ativo" | "inativo";

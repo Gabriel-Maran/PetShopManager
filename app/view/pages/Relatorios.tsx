@@ -1,90 +1,207 @@
-import { useEffect, useState } from "react";
-import { View, Button, Text, StyleSheet } from "react-native";
-import DefaultHeader from "../components/Header/DefaultHeader";
-import ModalSelectList from "../components/Cadastro/Modal/ModalSelectList";
-import { ownerController } from "../../controller/OwnerController";
-import { useError } from "../../hooks/useError";
-import { Owner } from "../../model/Owner";
-import { Pet } from "../../model/Pet";
-import { LIMIT_ITEM_PAGE, ORDER } from "../../config/consts";
 import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../Themes/ThemeProvider";
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
+import DefaultHeader from "../components/Header/DefaultHeader";
+import { useScreen } from "../../hooks/useScreen";
+import { APP_BAR_HEIGHT, RelatorioType, Screen } from "../../config/consts";
+import { NewOrEditAppointmentParams } from "../../model/Appointment";
+
+const REPORTS: {
+  id: string;
+  type: RelatorioType;
+  title: string;
+  subtitle: string;
+  tag: string;
+  accent: string;
+}[] = [
+  {
+    id: "horarios",
+    type: RelatorioType.HorariosMovimentados,
+    title: "Horários movimentados",
+    subtitle: "Dias e turnos com mais agendamentos",
+    tag: "Operacional",
+    accent: "#6366F1",
+  },
+  {
+    id: "churn",
+    type: RelatorioType.PetsAusentes,
+    title: "Pets ausentes",
+    subtitle: "Clientes sem visita há X dias",
+    tag: "Retenção",
+    accent: "#EF4444",
+  },
+  {
+    id: "remarcacao",
+    type: RelatorioType.Remarcacoes,
+    title: "Remarcações",
+    subtitle: "Pets com remarcação ativa vs inativos",
+    tag: "Engajamento",
+    accent: "#F59E0B",
+  },
+  {
+    id: "origem",
+    type: RelatorioType.OrigemAgendamentos,
+    title: "Origem dos agendamentos",
+    subtitle: "Automáticos vs manuais",
+    tag: "Operacional",
+    accent: "#10B981",
+  },
+  {
+    id: "mensal",
+    type: RelatorioType.ComparativoMensal,
+    title: "Comparativo mensal",
+    subtitle: "Evolução mês a mês",
+    tag: "Financeiro",
+    accent: "#3B82F6",
+  },
+  {
+    id: "conclusao",
+    type: RelatorioType.TaxaConclusao,
+    title: "Taxa de conclusão",
+    subtitle: "Concluídos / total de agendamentos",
+    tag: "Qualidade",
+    accent: "#22C55E",
+  },
+  {
+    id: "pacotes",
+    type: RelatorioType.Pacotes,
+    title: "Pacotes ativos",
+    subtitle: "Pets no plano 2x/mês vs 4x/mês",
+    tag: "Financeiro",
+    accent: "#A855F7",
+  },
+];
+
+const SECTIONS = Array.from(new Set(REPORTS.map((r) => r.tag))).map((tag) => ({
+  tag,
+  items: REPORTS.filter((r) => r.tag === tag),
+}));
 
 export default function Relatorios() {
   const s = useThemedStyles(styles);
-
-  const [page, setPage] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTxt, setSearchTxt] = useState("");
-  const [owners, setOwners] = useState<Owner[] | undefined | null>();
-  const [itemSelected, setItemSelected] = useState<Owner | Pet | undefined>();
-  const { showError } = useError();
-
-  const handleError = (e: unknown) =>
-    showError(e instanceof Error ? e.message : "Erro inesperado.");
-
-  // Contagem total
-  useEffect(() => {
-    ownerController.countOwners().then(setTotal).catch(handleError);
-  }, []);
-
-  // Busca com debounce — espera 400ms após o usuário parar de digitar
-  useEffect(() => {
-    try {
-      ownerController
-        .searchOwnersByNamePaged(searchTxt, page, LIMIT_ITEM_PAGE, ORDER.DESC)
-        .then(setOwners)
-        .catch(handleError);
-    } catch (e) {
-      showError(e instanceof Error ? e.message : "Erro inesperado.");
-    }
-  }, [searchTxt, page]);
+  const { navigate } = useScreen<NewOrEditAppointmentParams>();
 
   return (
-    <View style={s.container}>
+    <>
       <DefaultHeader />
+      <ScrollView
+        style={s.scroll}
+        contentContainerStyle={s.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={s.pageTitle}>Relatórios</Text>
 
-      <Button title="ABRIR MODAL" onPress={() => setIsOpen(true)} />
+        {SECTIONS.map((section) => (
+          <View key={section.tag} style={s.section}>
+            <Text style={s.sectionLabel}>{section.tag.toUpperCase()}</Text>
 
-      <Text style={s.selected}>
-        {itemSelected?.nome ?? "Nenhum selecionado"}
-      </Text>
-
-      <ModalSelectList
-        isOpen={isOpen}
-        isOwner={true}
-        items={owners}
-        page={page}
-        total={total}
-        onClose={() => setIsOpen(false)}
-        onSelect={(item) => {
-          setItemSelected(item);
-          setIsOpen(false);
-        }}
-        setPage={setPage}
-        setSearch={(txt) => {
-          setPage(0);
-          setSearchTxt(txt);
-        }}
-      />
-    </View>
+            <View style={s.cardList}>
+              {section.items.map((report, index) => (
+                <TouchableOpacity
+                  key={report.id}
+                  style={[
+                    s.card,
+                    index === section.items.length - 1 && s.cardLast,
+                  ]}
+                  onPress={() =>
+                    navigate(Screen.RelatorioView, { type: report.type })
+                  }
+                  activeOpacity={0.65}
+                >
+                  <View
+                    style={[s.cardAccent, { backgroundColor: report.accent }]}
+                  />
+                  <View style={s.cardBody}>
+                    <Text style={s.cardTitle}>{report.title}</Text>
+                    <Text style={s.cardSubtitle}>{report.subtitle}</Text>
+                  </View>
+                  <Text style={s.cardArrow}>›</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+    </>
   );
 }
 
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
-    container: {
+    scroll: {
       flex: 1,
       backgroundColor: colors.BACKGROUND,
+      marginBottom: APP_BAR_HEIGHT,
     },
-    selected: {
-      marginHorizontal: 16,
-      marginTop: 12,
-      fontSize: 13,
+    content: {
+      paddingHorizontal: 16,
+      paddingTop: 28,
+      paddingBottom: 40,
+      gap: 28,
+    },
+    pageTitle: {
+      fontSize: 26,
+      fontWeight: "700",
+      color: colors.TEXT_PRIMARY,
+      letterSpacing: -0.5,
+    },
+    section: {
+      gap: 8,
+    },
+    sectionLabel: {
+      fontSize: 10,
+      fontWeight: "700",
+      letterSpacing: 1.3,
       color: colors.TEXT_MUTED,
+      marginLeft: 2,
+    },
+    cardList: {
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.BORDER_STRONG,
+      overflow: "hidden",
+      backgroundColor: colors.THIRD_BACKGROUND,
+    },
+    card: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 14,
+      paddingRight: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.BORDER_STRONG,
+      gap: 12,
+    },
+    cardLast: {
+      borderBottomWidth: 0,
+    },
+    cardAccent: {
+      width: 3,
+      height: 36,
+      borderRadius: 99,
+      marginLeft: 14,
+    },
+    cardBody: {
+      flex: 1,
+      gap: 2,
+    },
+    cardTitle: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.TEXT_PRIMARY,
+    },
+    cardSubtitle: {
+      fontSize: 12,
+      color: colors.TEXT_MUTED,
+    },
+    cardArrow: {
+      fontSize: 20,
+      color: colors.TEXT_MUTED,
+      fontWeight: "300",
+      lineHeight: 22,
     },
   });

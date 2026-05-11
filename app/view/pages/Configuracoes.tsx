@@ -8,7 +8,7 @@ import {
 import ThemeToggle from "../components/ThemeToggle";
 import { DatabaseTransfer } from "../components/DatabaseTransfer";
 import { useScreen } from "../../hooks/useScreen";
-import { Screen } from "../../config/consts";
+import { APP_BAR_HEIGHT, Screen } from "../../config/consts";
 
 export default function Configuracoes() {
   const { colors } = useTheme();
@@ -48,6 +48,7 @@ const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     root: {
       flex: 1,
+      marginBottom: APP_BAR_HEIGHT,
     },
     scroll: {
       paddingHorizontal: 16,
