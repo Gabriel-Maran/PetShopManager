@@ -32,24 +32,25 @@ class PetRepository {
     page: number = 0,
     limit: number = 20,
     order: ORDER,
+    ativo: number = 1,
   ): Promise<PetWithSpecieAndRace[]> {
     const db = await getDatabase();
     const offset = page * limit;
+
     return db.getAllAsync<PetWithSpecieAndRace>(
       `
-      SELECT 
-       PT.*,
-       SP.nome           as nome_especie,
-       RC.nome_raca      as nome_raca
-      FROM  pets    as PT
-      JOIN  species as SP ON PT.especie = SP.id
-      JOIN  race    as RC ON PT.raca    = RC.id
-      WHERE is_ativo = 1 
-      ORDER BY criado_em ${order} 
-      LIMIT ? 
-      OFFSET ?
-      `,
-      [limit, offset],
+    SELECT 
+      PT.*,
+      SP.nome as nome_especie,
+      RC.nome_raca as nome_raca
+    FROM pets as PT
+    JOIN species as SP ON PT.especie = SP.id
+    JOIN race as RC ON PT.raca = RC.id
+    WHERE PT.is_ativo = ? 
+    ORDER BY PT.criado_em ${order} 
+    LIMIT ? OFFSET ?
+    `,
+      [ativo, limit, offset],
     );
   }
 
@@ -77,24 +78,25 @@ class PetRepository {
     page: number = 0,
     limit: number = 20,
     order: ORDER = ORDER.ASC,
+    ativo: number = 1,
   ): Promise<PetWithSpecieAndRace[]> {
     const db = await getDatabase();
     const offset = page * limit;
 
     return db.getAllAsync<PetWithSpecieAndRace>(
       `
-       SELECT 
-        PT.*,
-        SP.nome           as nome_especie,
-        RC.nome_raca      as nome_raca
-       FROM  pets    as PT
-       JOIN  species as SP ON PT.especie = SP.id
-       JOIN  race    as RC ON PT.raca    = RC.id
-       WHERE nome LIKE ? 
-       AND is_ativo = 1 
-       ORDER BY nome ${order} 
-       LIMIT ? OFFSET ?`,
-      [`%${query}%`, limit, offset],
+     SELECT 
+      PT.*,
+      SP.nome      as nome_especie,
+      RC.nome_raca as nome_raca
+     FROM pets    as PT
+     JOIN species as SP ON PT.especie = SP.id
+     JOIN race    as RC ON PT.raca    = RC.id
+     WHERE PT.nome LIKE ? 
+     AND PT.is_ativo = ? 
+     ORDER BY PT.nome ${order} 
+     LIMIT ? OFFSET ?`,
+      [`%${query}%`, ativo, limit, offset],
     );
   }
 

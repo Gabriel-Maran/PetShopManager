@@ -18,13 +18,18 @@ class OwnerRepository {
   async getAllOwnersPaged(
     page: number = 0,
     limit: number = 20,
-    order: ORDER,
+    order: ORDER = ORDER.ASC,
+    ativo: number = 1,
   ): Promise<Owner[]> {
     const db = await getDatabase();
     const offset = page * limit;
+
     return db.getAllAsync<Owner>(
-      `SELECT * FROM owners WHERE is_ativo = 1 ORDER BY criado_em ${order} LIMIT ? OFFSET ?`,
-      [limit, offset],
+      `SELECT * FROM owners 
+     WHERE is_ativo = ? 
+     ORDER BY criado_em ${order} 
+     LIMIT ? OFFSET ?`,
+      [ativo, limit, offset],
     );
   }
 
@@ -33,13 +38,16 @@ class OwnerRepository {
     page: number = 0,
     limit: number = 20,
     order: ORDER = ORDER.ASC,
+    ativo: number = 1,
   ): Promise<Owner[]> {
     const db = await getDatabase();
     const offset = page * limit;
 
+    const whereAtivo = ativo !== undefined ? `AND is_ativo = ${ativo}` : "";
+
     return db.getAllAsync<Owner>(
       `SELECT * FROM owners 
-     WHERE nome LIKE ? AND is_ativo = 1 
+     WHERE nome LIKE ? ${whereAtivo}
      ORDER BY nome ${order} 
      LIMIT ? OFFSET ?`,
       [`%${query}%`, limit, offset],

@@ -18,19 +18,27 @@ class OwnerController {
     page: number,
     limit: number,
     order: ORDER = ORDER.DESC,
+    ativo: number = 1,
   ): Promise<Owner[]> {
     if (!query.trim()) {
-      return this.getAllOwnersPaged(page, limit, order);
+      return this.getAllOwnersPaged(page, limit, order, ativo);
     }
-    return ownerService.searchOwnersByNamePaged(query, page, limit, order);
+    return ownerService.searchOwnersByNamePaged(
+      query,
+      page,
+      limit,
+      order,
+      ativo,
+    );
   }
 
   getAllOwnersPaged(
     page: number,
     limit: number,
     order: ORDER = ORDER.DESC,
+    ativo: number = 1,
   ): Promise<Owner[]> {
-    return ownerService.getAllOwnersPaged(page, limit, order);
+    return ownerService.getAllOwnersPaged(page, limit, order, ativo);
   }
 
   countOwners(): Promise<number> {

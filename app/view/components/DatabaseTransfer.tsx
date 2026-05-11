@@ -115,18 +115,6 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
         </Text>
       </View>
 
-      {/* Loading overlay (mantido igual ao original) */}
-      {loading && (
-        <View style={s.overlay}>
-          <View style={s.overlayBox}>
-            <ActivityIndicator size="large" color={colors.PRIMARY} />
-            <Text style={s.overlayText}>
-              {loadingAction === "export" ? "Exportando..." : "Importando..."}
-            </Text>
-          </View>
-        </View>
-      )}
-
       <ConfirmModal
         visible={confirmVisible}
         emoji="📥"

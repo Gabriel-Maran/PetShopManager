@@ -5,23 +5,33 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  Text,
 } from "react-native";
 import {
   ThemeColors,
   useTheme,
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
+import { StatusFiltro } from "../../../config/consts";
+import FilterPanel from "./FilterPanel";
 
 export default function BarraDePesquisa({
   placeHolderStr,
   setSearch,
+  hasFilter = false,
+  statusFiltro = "ativo",
+  onStatusFiltroChange,
 }: {
   placeHolderStr: string;
   setSearch: (txt: string) => void;
+  hasFilter?: boolean;
+  statusFiltro?: StatusFiltro;
+  onStatusFiltroChange?: (n: number) => void;
 }) {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
   const [text, setText] = useState("");
+  const [isSelectedFilter, setIsSelectedFilter] = useState(false);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -34,27 +44,46 @@ export default function BarraDePesquisa({
 
   return (
     <View style={s.container}>
-      <View style={s.pesquisa}>
-        <TouchableOpacity onPress={() => setSearch(text)} style={s.btnImg}>
+      {isSelectedFilter ? (
+        <FilterPanel
+          value={statusFiltro}
+          onChange={onStatusFiltroChange ?? (() => {})}
+          onClose={() => setIsSelectedFilter(false)}
+        />
+      ) : (
+        <View style={s.pesquisa}>
+          <TouchableOpacity onPress={() => setSearch(text)} style={s.btnImg}>
+            <Image
+              style={s.img}
+              source={require("../../../assets/outros/search.png")}
+            />
+          </TouchableOpacity>
+          <TextInput
+            onChangeText={(txt: string) => {
+              setText(txt);
+              if (txt.trim() == "") {
+                setSearch(txt);
+              }
+            }}
+            value={text}
+            placeholder={placeHolderStr}
+            multiline={false}
+            style={s.input}
+            placeholderTextColor={colors.TEXT_PRIMARY}
+          />
+        </View>
+      )}
+      {hasFilter && (
+        <TouchableOpacity
+          onPress={() => setIsSelectedFilter(!isSelectedFilter)}
+          style={s.btnFilter}
+        >
           <Image
-            style={s.img}
-            source={require("../../../assets/outros/search.png")}
+            style={s.imgFilter}
+            source={require("../../../assets/outros/filter.png")}
           />
         </TouchableOpacity>
-        <TextInput
-          onChangeText={(txt: string) => {
-            setText(txt);
-            if (txt.trim() == "") {
-              setSearch(txt);
-            }
-          }}
-          value={text}
-          placeholder={placeHolderStr}
-          multiline={false}
-          style={s.input}
-          placeholderTextColor={colors.TEXT_PRIMARY}
-        />
-      </View>
+      )}
     </View>
   );
 }
@@ -64,10 +93,13 @@ const styles = (colors: ThemeColors) =>
     container: {
       width: "100%",
       marginTop: 10,
+      flexDirection: "row",
+      paddingHorizontal: 16,
+      gap: 5,
     },
     pesquisa: {
+      flex: 1,
       flexDirection: "row",
-      width: "90%",
       alignSelf: "center",
       alignItems: "center",
       backgroundColor: colors.THIRD_BACKGROUND,
@@ -77,7 +109,6 @@ const styles = (colors: ThemeColors) =>
       borderColor: colors.BORDER_STRONG,
     },
     input: {
-      width: "80%",
       minHeight: 30,
       maxHeight: 100,
       fontSize: 16,
@@ -90,5 +121,17 @@ const styles = (colors: ThemeColors) =>
       width: 30,
       height: 30,
       tintColor: colors.TEXT_MUTED,
+    },
+    btnFilter: {
+      backgroundColor: colors.FILTER_BACKGROUND,
+      borderRadius: 99,
+      alignContent: "center",
+      justifyContent: "center",
+      padding: 10,
+    },
+    imgFilter: {
+      tintColor: colors.FILTER_ICON,
+      width: 36,
+      height: 36,
     },
   });

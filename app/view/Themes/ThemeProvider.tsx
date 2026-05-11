@@ -47,6 +47,9 @@ const colors = {
     EDITAR_CAMPO_MAIN_COLOR: "#888888",
     EDITAR_CAMPO_BORDER_COLOR: "#000000",
     EDITAR_CAMPO_BACKGROUND_COLOR: "#ffffff",
+
+    FILTER_BACKGROUND: "#0e996d",
+    FILTER_ICON: "#ffffff",
   },
   dark: {
     PRIMARY: "#10B981",
@@ -87,6 +90,9 @@ const colors = {
     EDITAR_CAMPO_MAIN_COLOR: "#CBD5E1",
     EDITAR_CAMPO_BORDER_COLOR: "#10B981",
     EDITAR_CAMPO_BACKGROUND_COLOR: "#1E2128",
+
+    FILTER_BACKGROUND: "#10B981",
+    FILTER_ICON: "#0F1115",
   },
 };
 

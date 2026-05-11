@@ -22,8 +22,14 @@ class PetController {
     page: number,
     limit: number,
     order: ORDER,
+    ativo: number = 1,
   ): Promise<PetWithSpecieAndRace[]> {
-    return petService.getAllPetsPagedWithSpecieAndRace(page, limit, order);
+    return petService.getAllPetsPagedWithSpecieAndRace(
+      page,
+      limit,
+      order,
+      ativo,
+    );
   }
 
   searchPetsByNamePaged(
@@ -43,15 +49,17 @@ class PetController {
     page: number,
     limit: number,
     order: ORDER = ORDER.DESC,
+    ativo: number = 1,
   ): Promise<PetWithSpecieAndRace[]> {
     if (!query.trim()) {
-      return this.getAllPetsPagedWithSpecieAndRace(page, limit, order);
+      return this.getAllPetsPagedWithSpecieAndRace(page, limit, order, ativo);
     }
     return petService.searchPetsByNamePagedWithSpecieAndRace(
       query,
       page,
       limit,
       order,
+      ativo,
     );
   }
 

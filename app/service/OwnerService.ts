@@ -11,8 +11,13 @@ class OwnerService {
     return ownerRepository.getAllOwners();
   }
 
-  getAllOwnersPaged(page: number, limit: number, order: ORDER) {
-    return ownerRepository.getAllOwnersPaged(page, limit, order);
+  getAllOwnersPaged(
+    page: number,
+    limit: number,
+    order: ORDER,
+    ativo: number = 1,
+  ) {
+    return ownerRepository.getAllOwnersPaged(page, limit, order, ativo);
   }
 
   searchOwnersByNamePaged(
@@ -20,8 +25,15 @@ class OwnerService {
     page: number,
     limit: number,
     order: ORDER,
+    ativo: number = 1,
   ) {
-    return ownerRepository.searchOwnersByNamePaged(query, page, limit, order);
+    return ownerRepository.searchOwnersByNamePaged(
+      query,
+      page,
+      limit,
+      order,
+      ativo,
+    );
   }
   countOwners() {
     return ownerRepository.countOwners();

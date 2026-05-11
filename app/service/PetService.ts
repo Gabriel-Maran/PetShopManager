@@ -15,8 +15,18 @@ class PetService {
     return petRepository.getAllPetsPaged(page, limit, order);
   }
 
-  getAllPetsPagedWithSpecieAndRace(page: number, limit: number, order: ORDER) {
-    return petRepository.getAllPetsPagedWithSpecieAndRace(page, limit, order);
+  getAllPetsPagedWithSpecieAndRace(
+    page: number,
+    limit: number,
+    order: ORDER,
+    ativo: number = 1,
+  ) {
+    return petRepository.getAllPetsPagedWithSpecieAndRace(
+      page,
+      limit,
+      order,
+      ativo,
+    );
   }
 
   searchPetsByNamePaged(
@@ -33,12 +43,14 @@ class PetService {
     page: number,
     limit: number,
     order: ORDER,
+    ativo: number = 1,
   ) {
     return petRepository.searchPetsByNamePagedWithSpecieAndRace(
       query,
       page,
       limit,
       order,
+      ativo,
     );
   }
 

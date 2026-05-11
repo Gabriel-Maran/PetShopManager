@@ -71,3 +71,5 @@ export enum ORDER {
   ASC = "ASC",
   DESC = "DESC",
 }
+
+export type StatusFiltro = "ativo" | "inativo";

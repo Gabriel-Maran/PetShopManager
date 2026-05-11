@@ -27,7 +27,7 @@ import ModalConfDelete from "../components/Cadastro/Botões/Delete/ModalConfDele
 import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
 
 export default function Cadastros() {
-  const { navigate, params} = useScreen();
+  const { navigate, params } = useScreen();
   const { showError } = useError();
 
   const s = useThemedStyles(styles);
@@ -42,6 +42,7 @@ export default function Cadastros() {
   const [objSelectToDelete, setObjSelectToDelete] = useState<
     Pet | Owner | undefined
   >();
+  const [isFilterAtivo, setIsFilterAtivo] = useState(1);
 
   const handleError = (e: unknown) =>
     showError(e instanceof Error ? e.message : "Erro inesperado.");
@@ -64,13 +65,25 @@ export default function Cadastros() {
   useEffect(() => {
     const fetch = isOwnerSelected
       ? ownerController
-          .searchOwnersByNamePaged(search, page, LIMIT_ITEM_PAGE, ORDER.DESC)
+          .searchOwnersByNamePaged(
+            search,
+            page,
+            LIMIT_ITEM_PAGE,
+            ORDER.DESC,
+            isFilterAtivo,
+          )
           .then(setOwners)
       : petController
-          .searchPetsByNamePagedWithSpecieAndRace(search, page, LIMIT_ITEM_PAGE, ORDER.DESC)
+          .searchPetsByNamePagedWithSpecieAndRace(
+            search,
+            page,
+            LIMIT_ITEM_PAGE,
+            ORDER.DESC,
+            isFilterAtivo,
+          )
           .then(setPets);
     fetch.catch(handleError);
-  }, [search, page, isOwnerSelected]);
+  }, [search, page, isOwnerSelected, isFilterAtivo]);
 
   function confirmDeletar(itemId: number) {
     try {
@@ -114,6 +127,10 @@ export default function Cadastros() {
           setSearch={(txt) => {
             setPage(0); // Volta pra página 1 a cada nova busca
             setSearch(txt);
+          }}
+          hasFilter={true}
+          onStatusFiltroChange={(item: number) => {
+            setIsFilterAtivo(item);
           }}
         />
 
