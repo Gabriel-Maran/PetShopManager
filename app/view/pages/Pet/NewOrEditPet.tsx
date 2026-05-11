@@ -36,13 +36,11 @@ import { usePetFormSetup } from "../../../hooks/usePetFormSetup";
 
 import { EspeciesAtendidasLabel } from "../../../config/consts";
 
-
-//Transforma em um array com um id e o nome 
-  const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
+//Transforma em um array com um id e o nome
+const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
   id: key,
   nome: PorteAnimalLabel[key as keyof typeof PorteAnimalLabel],
 }));
-
 
 export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const { params, navigate } = useScreen<Pet>();
@@ -146,7 +144,6 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
     atualizarValores("dono_nome", "");
   };
 
-
   return (
     <>
       <DefaultHeader />
@@ -247,6 +244,17 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
                   {item.nome}
                 </Text>
               )}
+              hasBorderBottom={true}
+            />
+
+            <InputInfo
+              image={require("../../../assets/nav_bar/artigo.png")}
+              item={form.observacoes}
+              setItem={(v) => atualizarValores("observacoes", v)}
+              placeHolder="Uma observação adicional..."
+              titleName="Observações"
+              variasLinhas={true}
+              digitavel={true}
               hasBorderBottom={true}
             />
           </View>
