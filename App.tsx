@@ -32,7 +32,6 @@ import { AgendamentosProvider } from "./app/view/contexts/agendamentos";
 
 function AppContent() {
   const { screen } = useScreen();
-  const { colors } = useTheme();
 
   let content: ReactNode;
 
@@ -71,12 +70,7 @@ function AppContent() {
   }
   return (
     <>
-      <AgendamentosProvider>
-        <>
-          <StatusBar backgroundColor={colors.BACKGROUND} />
-          {content}
-        </>
-      </AgendamentosProvider>
+      <AgendamentosProvider>{content}</AgendamentosProvider>
       {(screen == Screen.Calendario ||
         screen == Screen.Cadastros ||
         screen == Screen.Relatorios ||
@@ -87,7 +81,7 @@ function AppContent() {
 
 function AppInner() {
   const s = useThemedStyles(styles);
-  const { colors } = useTheme();
+  const { isDark, colors } = useTheme();
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -114,8 +108,15 @@ function AppInner() {
   }
 
   return (
-    <View style={{ paddingTop: STATUS_BAR_HEIGHT, flex: 1 }}>
-      <AppContent />
+    <View style={{ flex: 1, backgroundColor: colors.BACKGROUND }}>
+      <StatusBar
+        backgroundColor={colors.BACKGROUND}
+        barStyle={isDark ? "light-content" : "dark-content"}
+        translucent={false}
+      />
+      <View style={{ paddingTop: STATUS_BAR_HEIGHT, flex: 1 }}>
+        <AppContent />
+      </View>
     </View>
   );
 }
