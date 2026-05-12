@@ -1,11 +1,11 @@
 import { RelatorioType } from "../../../config/consts";
-import DiasMaisAtendidos from "./DiasMaisAtendidos";
+import DiasHorasMaisAtendidas from "./DiasHorasMaisAtendidas";
 
 export default function RelatorioView({ route }: { route: RelatorioType }) {
   switch (route) {
     case RelatorioType.DiasMovimentados:
-      return <DiasMaisAtendidos />;
+      return <DiasHorasMaisAtendidas />;
     default:
-      return <DiasMaisAtendidos />;
+      return <DiasHorasMaisAtendidas />;
   }
 }

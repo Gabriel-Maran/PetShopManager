@@ -39,6 +39,7 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
     DROP INDEX IF EXISTS idx_owners_nome_normalizado;
     DROP INDEX IF EXISTS idx_pets_nome_normalizado;
     DROP INDEX IF EXISTS idx_appointments_stats;
+    DROP INDEX IF EXISTS idx_appointments_analytics_hora;
 
     DROP TABLE IF EXISTS appointments;
     DROP TABLE IF EXISTS pets;
@@ -161,6 +162,11 @@ export async function initDatabase(): Promise<void> {
 
     CREATE INDEX IF NOT EXISTS idx_appointments_stats 
       ON appointments (concluido, dia_semana);
+      
+    CREATE INDEX IF NOT EXISTS idx_appointments_perf_hora 
+      ON appointments (concluido, CAST(substr(hora, 1, 2) AS INTEGER));
+
+
   `;
 
   // ── Dados iniciais ────────────────────────────────────────────────────────

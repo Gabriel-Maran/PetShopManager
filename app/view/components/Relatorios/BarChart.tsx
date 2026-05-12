@@ -44,6 +44,7 @@ export default function BarChart({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={s.scroll}
         contentContainerStyle={s.scrollContent}
       >
         {data.map((item, index) => {
@@ -99,12 +100,12 @@ function formatValue(n: number): string {
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     card: {
-      backgroundColor: colors.SURFACE_VARIANT ?? colors.THIRD_BACKGROUND,
       borderRadius: 14,
-      borderWidth: 1,
-      borderColor: colors.BORDER_MID,
       padding: 16,
-      paddingBottom: 12,
+      alignSelf: "flex-start",
+    },
+    scroll: {
+      flexGrow: 0,
     },
     title: {
       fontSize: 14,
