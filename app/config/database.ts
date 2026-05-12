@@ -29,6 +29,8 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
     DROP TRIGGER IF EXISTS trg_pet_remarcacao_insert;
     DROP TRIGGER IF EXISTS trg_pet_remarcacao_ativar;
     DROP TRIGGER IF EXISTS trg_pet_remarcacao_desativar;
+    DROP TRIGGER IF EXISTS trg_owner_desativar_pets;
+    DROP TRIGGER IF EXISTS trg_pet_ativar_owner;
 
     DROP INDEX IF EXISTS idx_pets_dono_id;
     DROP INDEX IF EXISTS idx_appointments_pet_id;
@@ -395,6 +397,30 @@ export async function initDatabase(): Promise<void> {
     END;
   `;
 
+  const SQL_TRIGGER_OWNER_DESATIVAR_PETS = `
+    CREATE TRIGGER IF NOT EXISTS trg_owner_desativar_pets
+    AFTER UPDATE OF is_ativo ON owners
+    FOR EACH ROW
+    WHEN NEW.is_ativo = 0
+    BEGIN
+        UPDATE pets 
+        SET is_ativo = 0 
+        WHERE dono_id = NEW.id;
+    END;
+  `;
+
+  const SQL_TRIGGER_PET_ATIVAR_OWNER = `
+    CREATE TRIGGER IF NOT EXISTS trg_pet_ativar_owner
+    AFTER UPDATE OF is_ativo ON pets
+    FOR EACH ROW
+    WHEN NEW.is_ativo = 1
+    BEGIN
+        UPDATE owners 
+        SET is_ativo = 1 
+        WHERE id = NEW.dono_id AND is_ativo = 0;
+    END;
+  `;
+
   // ── Execução ──────────────────────────────────────────────────────────────
   try {
     await db.execAsync(SQL_PRAGMA);
@@ -410,6 +436,8 @@ export async function initDatabase(): Promise<void> {
     await db.execAsync(SQL_TRIGGER_PET_REMARCACAO_INSERT);
     await db.execAsync(SQL_TRIGGER_PET_REMARCACAO_ATIVAR);
     await db.execAsync(SQL_TRIGGER_PET_REMARCACAO_DESATIVAR);
+    await db.execAsync(SQL_TRIGGER_OWNER_DESATIVAR_PETS);
+    await db.execAsync(SQL_TRIGGER_PET_ATIVAR_OWNER);
   } catch (e) {
     console.log(e);
   }
