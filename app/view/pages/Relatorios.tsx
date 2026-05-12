@@ -20,10 +20,10 @@ const REPORTS: {
   accent: string;
 }[] = [
   {
-    id: "horarios",
-    type: RelatorioType.HorariosMovimentados,
-    title: "Horários movimentados",
-    subtitle: "Dias e turnos com mais agendamentos",
+    id: "dias",
+    type: RelatorioType.DiasMovimentados,
+    title: "Dias movimentados",
+    subtitle: "Dias com mais agendamentos",
     tag: "Operacional",
     accent: "#6366F1",
   },

@@ -23,7 +23,7 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 
 /* - Drops de triggers, index e tables
   //Cole lá em baixo, vai ter a indicação
-  await db.execAsync(`
+    await db.execAsync(`
     DROP TRIGGER IF EXISTS trg_ultima_visita;
     DROP TRIGGER IF EXISTS trg_remarcacao_automatica;
     DROP TRIGGER IF EXISTS trg_pet_remarcacao_insert;
@@ -36,6 +36,7 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
     DROP INDEX IF EXISTS idx_appointments_data_concluido;
     DROP INDEX IF EXISTS idx_owners_nome_normalizado;
     DROP INDEX IF EXISTS idx_pets_nome_normalizado;
+    DROP INDEX IF EXISTS idx_appointments_stats;
 
     DROP TABLE IF EXISTS appointments;
     DROP TABLE IF EXISTS pets;
@@ -121,6 +122,11 @@ export async function initDatabase(): Promise<void> {
       servico      TEXT    NOT NULL,
       data         INTEGER NOT NULL,
       hora         TEXT    NOT NULL DEFAULT '00:00',
+      dia_semana INTEGER GENERATED ALWAYS AS (
+        CAST(strftime('%w', 
+          substr(data, 1, 4) || '-' || substr(data, 5, 2) || '-' || substr(data, 7, 2)
+        ) AS INTEGER)
+      ) VIRTUAL,
       entregar_pet INTEGER NOT NULL DEFAULT 0,
       concluido    INTEGER NOT NULL DEFAULT 0,
       observacao   TEXT,
@@ -150,6 +156,9 @@ export async function initDatabase(): Promise<void> {
 
     CREATE INDEX IF NOT EXISTS idx_pets_nome_normalizado
       ON pets (nome_normalizado);
+
+    CREATE INDEX IF NOT EXISTS idx_appointments_stats 
+      ON appointments (concluido, dia_semana);
   `;
 
   // ── Dados iniciais ────────────────────────────────────────────────────────

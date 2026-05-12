@@ -77,7 +77,13 @@ export default function NewOrEditOwner() {
       <DefaultHeader />
       <TitleBar
         returnTo={Screen.Cadastros}
-        title={isViewing ? "Visualizando Dono" : isEditing ? "Editar Dono" : "Novo Dono"}
+        title={
+          isViewing
+            ? "Visualizando Dono"
+            : isEditing
+              ? "Editar Dono"
+              : "Novo Dono"
+        }
         subtitle={!isViewing ? "Preencha os dados do responsável" : ""}
       />
       <ScrollView
@@ -134,13 +140,13 @@ export default function NewOrEditOwner() {
             />
           </View>
           {!isViewing && (
-          <View style={s.ctnBtnSalvar}>
-            <TouchableOpacity style={s.btnSalvar} onPress={salvarDono}>
-              <Text style={s.txtSalvar}>
-                {isEditing ? "Salvar alterações" : "Salvar"}
-              </Text>
-            </TouchableOpacity>
-          </View>
+            <View style={s.ctnBtnSalvar}>
+              <TouchableOpacity style={s.btnSalvar} onPress={salvarDono}>
+                <Text style={s.txtSalvar}>
+                  {isEditing ? "Salvar alterações" : "Salvar"}
+                </Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </ScrollView>
