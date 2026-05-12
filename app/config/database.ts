@@ -24,27 +24,26 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 /* - Drops de triggers, index e tables
   //Cole lá em baixo, vai ter a indicação
   await db.execAsync(`
-  DROP TRIGGER IF EXISTS trg_ultima_visita;
-  DROP TRIGGER IF EXISTS trg_remarcacao_automatica;
-  DROP TRIGGER IF EXISTS trg_pet_remarcacao_insert;
-  DROP TRIGGER IF EXISTS trg_pet_remarcacao_ativar;
-  DROP TRIGGER IF EXISTS trg_pet_remarcacao_desativar;
-  
-  DROP INDEX IF EXISTS idx_pets_dono_id;
-  DROP INDEX IF EXISTS idx_appointments_pet_id;
-  DROP INDEX IF EXISTS idx_appointments_pet_data;
-  DROP INDEX IF EXISTS idx_appointments_data_concluido;
-  DROP INDEX IF EXISTS idx_owners_nome;
-  DROP INDEX IF EXISTS idx_pets_nome;
-  
-  DROP TABLE IF EXISTS appointments;
-  DROP TABLE IF EXISTS pets;
-  DROP TABLE IF EXISTS owners;
-  DROP TABLE IF EXISTS race;
-  DROP TABLE IF EXISTS species;
-  DROP TABLE IF EXISTS service_type;
-  DROP TABLE IF EXISTS configs;`);
+    DROP TRIGGER IF EXISTS trg_ultima_visita;
+    DROP TRIGGER IF EXISTS trg_remarcacao_automatica;
+    DROP TRIGGER IF EXISTS trg_pet_remarcacao_insert;
+    DROP TRIGGER IF EXISTS trg_pet_remarcacao_ativar;
+    DROP TRIGGER IF EXISTS trg_pet_remarcacao_desativar;
 
+    DROP INDEX IF EXISTS idx_pets_dono_id;
+    DROP INDEX IF EXISTS idx_appointments_pet_id;
+    DROP INDEX IF EXISTS idx_appointments_pet_data;
+    DROP INDEX IF EXISTS idx_appointments_data_concluido;
+    DROP INDEX IF EXISTS idx_owners_nome_normalizado;
+    DROP INDEX IF EXISTS idx_pets_nome_normalizado;
+
+    DROP TABLE IF EXISTS appointments;
+    DROP TABLE IF EXISTS pets;
+    DROP TABLE IF EXISTS owners;
+    DROP TABLE IF EXISTS race;
+    DROP TABLE IF EXISTS species;
+    DROP TABLE IF EXISTS service_type;
+    DROP TABLE IF EXISTS configs;`);
 */
 
 export async function initDatabase(): Promise<void> {
@@ -84,18 +83,20 @@ export async function initDatabase(): Promise<void> {
     );
 
     CREATE TABLE IF NOT EXISTS owners (
-      id        INTEGER PRIMARY KEY AUTOINCREMENT,
-      nome      TEXT    NOT NULL,
-      telefone  TEXT    NOT NULL,
-      email     TEXT,
-      endereco  TEXT,
-      is_ativo  INTEGER NOT NULL DEFAULT 1,
-      criado_em INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now'))
+      id               INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome             TEXT    NOT NULL,
+      nome_normalizado TEXT    NOT NULL DEFAULT '',
+      telefone         TEXT    NOT NULL,
+      email            TEXT,
+      endereco         TEXT,
+      is_ativo         INTEGER NOT NULL DEFAULT 1,
+      criado_em        INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now'))
     );
 
     CREATE TABLE IF NOT EXISTS pets (
       id                         INTEGER PRIMARY KEY AUTOINCREMENT,
       nome                       TEXT    NOT NULL,
+      nome_normalizado           TEXT    NOT NULL DEFAULT '',
       especie                    INTEGER NOT NULL,
       porte                      TEXT    NOT NULL,
       raca                       INTEGER NOT NULL,
@@ -144,11 +145,11 @@ export async function initDatabase(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_appointments_data_concluido
       ON appointments (data, concluido);
 
-    CREATE INDEX IF NOT EXISTS idx_owners_nome
-      ON owners (nome);
+    CREATE INDEX IF NOT EXISTS idx_owners_nome_normalizado
+      ON owners (nome_normalizado);
 
-    CREATE INDEX IF NOT EXISTS idx_pets_nome
-      ON pets (nome);
+    CREATE INDEX IF NOT EXISTS idx_pets_nome_normalizado
+      ON pets (nome_normalizado);
   `;
 
   // ── Dados iniciais ────────────────────────────────────────────────────────
@@ -167,7 +168,6 @@ export async function initDatabase(): Promise<void> {
       (3, 'OUTRO');
 
     INSERT OR IGNORE INTO race (especie_id, nome_raca) VALUES
-      -- ─── CÃES (especie_id = 1) ───────────────────────────────
       (1, 'Vira-lata (SRD)'),
       (1, 'Shih Tzu'),
       (1, 'Yorkshire Terrier'),
@@ -182,7 +182,6 @@ export async function initDatabase(): Promise<void> {
       (1, 'Border Collie'),
       (1, 'Basset Hound'),
       (1, 'Chow Chow'),
-      -- ─── GATOS (especie_id = 2) ──────────────────────────────
       (2, 'Vira-lata (SRD)'),
       (2, 'Siamês'),
       (2, 'Persa'),
@@ -191,7 +190,6 @@ export async function initDatabase(): Promise<void> {
       (2, 'Bengal'),
       (2, 'Sphynx'),
       (2, 'Ragdoll'),
-      -- ─── OUTROS (especie_id = 3) ─────────────────────────────
       (3, 'Não se aplica / SRD');
   `;
 
@@ -389,16 +387,21 @@ export async function initDatabase(): Promise<void> {
   `;
 
   // ── Execução ──────────────────────────────────────────────────────────────
+  try {
+    await db.execAsync(SQL_PRAGMA);
 
-  await db.execAsync(SQL_PRAGMA);
+    await db.execAsync(SQL_CREATE_TABLES);
 
+    await db.execAsync(SQL_CREATE_INDEXES);
 
-  await db.execAsync(SQL_CREATE_TABLES);
-  await db.execAsync(SQL_CREATE_INDEXES);
-  await db.execAsync(SQL_INSERTS);
-  await db.execAsync(SQL_TRIGGER_ULTIMA_VISITA);
-  await db.execAsync(SQL_TRIGGER_REMARCACAO_AUTOMATICA);
-  await db.execAsync(SQL_TRIGGER_PET_REMARCACAO_INSERT);
-  await db.execAsync(SQL_TRIGGER_PET_REMARCACAO_ATIVAR);
-  await db.execAsync(SQL_TRIGGER_PET_REMARCACAO_DESATIVAR);
+    await db.execAsync(SQL_INSERTS);
+
+    await db.execAsync(SQL_TRIGGER_ULTIMA_VISITA);
+    await db.execAsync(SQL_TRIGGER_REMARCACAO_AUTOMATICA);
+    await db.execAsync(SQL_TRIGGER_PET_REMARCACAO_INSERT);
+    await db.execAsync(SQL_TRIGGER_PET_REMARCACAO_ATIVAR);
+    await db.execAsync(SQL_TRIGGER_PET_REMARCACAO_DESATIVAR);
+  } catch (e) {
+    console.log(e);
+  }
 }

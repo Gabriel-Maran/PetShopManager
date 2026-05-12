@@ -1,6 +1,7 @@
 import { ORDER } from "../config/consts";
 import { getDatabase } from "../config/database";
 import { Pet, PetWithSpecieAndRace } from "../model/Pet";
+import { normalizeForSearch } from "../utils/normalizaNome";
 
 class PetRepository {
   async getPetById(id: number): Promise<Pet | null> {
@@ -54,22 +55,24 @@ class PetRepository {
     );
   }
 
-  // Busca por nome usando o idx_pets_nome (prefixo) ou substring
   async searchPetsByNamePaged(
     query: string,
     page: number = 0,
     limit: number = 20,
     order: ORDER = ORDER.ASC,
+    ativo: number = 1,
   ): Promise<Pet[]> {
     const db = await getDatabase();
     const offset = page * limit;
+    const query_normalizada = normalizeForSearch(query);
 
     return db.getAllAsync<Pet>(
       `SELECT * FROM pets 
-       WHERE nome LIKE ? AND is_ativo = 1 
-       ORDER BY nome ${order} 
+       WHERE nome_normalizado LIKE ? 
+       AND is_ativo = ?
+       ORDER BY nome_normalizado ${order} 
        LIMIT ? OFFSET ?`,
-      [`%${query}%`, limit, offset],
+      [`%${query_normalizada}%`, ativo, limit, offset],
     );
   }
 
@@ -82,6 +85,7 @@ class PetRepository {
   ): Promise<PetWithSpecieAndRace[]> {
     const db = await getDatabase();
     const offset = page * limit;
+    const query_normalizada = normalizeForSearch(query);
 
     return db.getAllAsync<PetWithSpecieAndRace>(
       `
@@ -92,11 +96,11 @@ class PetRepository {
      FROM pets    as PT
      JOIN species as SP ON PT.especie = SP.id
      JOIN race    as RC ON PT.raca    = RC.id
-     WHERE PT.nome LIKE ? 
+     WHERE PT.nome_normalizado LIKE ? 
      AND PT.is_ativo = ? 
-     ORDER BY PT.nome ${order} 
+     ORDER BY PT.nome_normalizado ${order} 
      LIMIT ? OFFSET ?`,
-      [`%${query}%`, ativo, limit, offset],
+      [`%${query_normalizada}%`, ativo, limit, offset],
     );
   }
 
@@ -118,9 +122,11 @@ class PetRepository {
 
   async createPet(pet: Pet): Promise<void> {
     const db = await getDatabase();
+    const nome_normalizado = normalizeForSearch(pet.nome);
     await db.runAsync(
       `INSERT INTO pets (
         nome,
+        nome_normalizado,
         especie,
         porte,
         raca,
@@ -130,9 +136,10 @@ class PetRepository {
         remarcacao_ativa,
         pacote_remarcacao,
         data_inicio_pacote
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         pet.nome,
+        nome_normalizado,
         pet.especie,
         pet.porte,
         pet.raca ?? null,
@@ -148,9 +155,11 @@ class PetRepository {
 
   async updatePet(id: number, pet: Pet): Promise<void> {
     const db = await getDatabase();
+    const nome_normalizado = normalizeForSearch(pet.nome);
     await db.runAsync(
       `UPDATE pets SET
         nome = ?,
+        nome_normalizado = ?,
         especie = ?,
         porte = ?,
         raca = ?,
@@ -163,6 +172,7 @@ class PetRepository {
       WHERE id = ?`,
       [
         pet.nome,
+        nome_normalizado,
         pet.especie,
         pet.porte,
         pet.raca ?? null,
@@ -177,7 +187,6 @@ class PetRepository {
     );
   }
 
-  // Atualiza apenas os campos de remarcação (evita sobrescrever dados não relacionados)
   async updateRemarcacao(
     id: number,
     remarcacaoAtiva: number,
@@ -197,7 +206,6 @@ class PetRepository {
 
   async deletePet(id: number): Promise<void> {
     const db = await getDatabase();
-    // Soft delete: marca como inativo sem remover do banco
     await db.runAsync(`UPDATE pets SET is_ativo = 0 WHERE id = ?`, [id]);
   }
 

@@ -1,6 +1,7 @@
 import { ORDER } from "../config/consts";
 import { getDatabase } from "../config/database";
 import { Owner } from "../model/Owner";
+import { normalizeForSearch } from "../utils/normalizaNome";
 
 class OwnerRepository {
   async getOwnerById(id: number): Promise<Owner | null> {
@@ -42,15 +43,15 @@ class OwnerRepository {
   ): Promise<Owner[]> {
     const db = await getDatabase();
     const offset = page * limit;
-
-    const whereAtivo = ativo !== undefined ? `AND is_ativo = ${ativo}` : "";
+    const query_normalizada = normalizeForSearch(query);
 
     return db.getAllAsync<Owner>(
       `SELECT * FROM owners 
-     WHERE nome LIKE ? ${whereAtivo}
-     ORDER BY nome ${order} 
-     LIMIT ? OFFSET ?`,
-      [`%${query}%`, limit, offset],
+    WHERE nome_normalizado LIKE ? 
+    AND is_ativo = ?
+    ORDER BY nome_normalizado ${order} 
+    LIMIT ? OFFSET ?`,
+      [`%${query_normalizada}%`, ativo, limit, offset],
     );
   }
 
@@ -63,19 +64,29 @@ class OwnerRepository {
   }
 
   async createOwner(owner: Owner): Promise<void> {
+    const nome_normalizado = normalizeForSearch(owner.nome);
     const db = await getDatabase();
     await db.runAsync(
-      `INSERT INTO owners (nome, telefone, email, endereco) VALUES (?, ?, ?, ?)`,
-      [owner.nome, owner.telefone, owner.email ?? null, owner.endereco ?? null],
+      `INSERT INTO owners (nome, nome_normalizado, telefone, email, endereco) VALUES (?, ?, ?, ?, ?)`,
+      [
+        owner.nome,
+        nome_normalizado,
+        owner.telefone,
+        owner.email ?? null,
+        owner.endereco ?? null,
+      ],
     );
   }
 
   async updateOwner(id: number, owner: Owner): Promise<void> {
+    const nome_normalizado = normalizeForSearch(owner.nome);
+    console.log(nome_normalizado);
     const db = await getDatabase();
     await db.runAsync(
-      `UPDATE owners SET nome = ?, telefone = ?, email = ?, endereco = ? WHERE id = ?`,
+      `UPDATE owners SET nome = ?, nome_normalizado = ?, telefone = ?, email = ?, endereco = ? WHERE id = ?`,
       [
         owner.nome,
+        nome_normalizado,
         owner.telefone,
         owner.email ?? null,
         owner.endereco ?? null,
