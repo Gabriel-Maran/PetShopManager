@@ -13,12 +13,14 @@ import {
   autoVsManuaisAgendados,
   autoVsManuaisConcluidos,
 } from "../../../utils/relatorios/origemDados";
+import { useError } from "../../../hooks/useError";
 
 export default function OrigemAgendamentos() {
   const [dataOrigemAgen, setDataOrigemAgen] = useState<BarChartItem[]>([]);
   const [dataOrigemConcl, setDataOrigemConcl] = useState<BarChartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { showError } = useError();
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
@@ -42,12 +44,25 @@ export default function OrigemAgendamentos() {
     );
   }
 
+  if (error) {
+    showError(error);
+    return (
+      <View style={s.loader}>
+        <TitleBar
+          returnTo={Screen.Relatorios}
+          title="Origem dos Agendamentos"
+          subtitle="Canais automáticos e manuais"
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={s.mainContainer}>
       <TitleBar
         returnTo={Screen.Relatorios}
         title="Origem dos Agendamentos"
-        subtitle="Comparativo entre canais automáticos e manuais"
+        subtitle="Canais automáticos e manuais"
       />
       <ScrollView
         contentContainerStyle={s.scrollContent}
@@ -56,15 +71,17 @@ export default function OrigemAgendamentos() {
         <View style={s.card}>
           <BarChart
             data={dataOrigemConcl}
-            title="Agendamentos concluidos"
+            title="Agendamentos Concluídos"
             suffix="atend."
+            invertLabelY={true}
           />
         </View>
         <View style={s.card}>
           <BarChart
             data={dataOrigemAgen}
-            title="Agendamentos manuais"
+            title="Agendamentos Pendentes"
             suffix="atend."
+            invertLabelY={true}
           />
         </View>
       </ScrollView>

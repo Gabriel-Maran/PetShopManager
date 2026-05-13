@@ -34,7 +34,7 @@ import NewOrEditPet from "./app/view/pages/Pet/NewOrEditPet";
 import NewOrEditAppointment from "./app/view/pages/Appointments/NewOrEditAppointment";
 import Configuracoes from "./app/view/pages/Configuracoes";
 import { AgendamentosProvider } from "./app/view/contexts/agendamentos";
-import RelatorioView from "./app/view/pages/Relatorios/RelatorioView";
+import RelatorioView from "./app/view/pages/Relatorios/Render/RelatorioView";
 
 function AppContent() {
   const { screen } = useScreen();

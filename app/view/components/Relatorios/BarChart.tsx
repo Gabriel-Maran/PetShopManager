@@ -12,9 +12,11 @@ export interface BarChartItem {
 interface BarChartProps {
   data: BarChartItem[];
   title?: string;
-  suffix?: string; // ex: "R$", "kg", "atend."
-  color?: string; // cor das barras (opcional, usa PRIMARY_VARIANT por padrão)
-  height?: number; // altura da área do gráfico (padrão: 180)
+  suffix?: string;
+  color?: string;
+  height?: number;
+  verticalLabels?: boolean; // ← labels rotacionadas -40°, ideal para textos longos
+  invertLabelY?: boolean; // ← labels invertidas (suffix e formatted value em ordem contrária)
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -25,6 +27,8 @@ export default function BarChart({
   suffix = "",
   color,
   height = 180,
+  verticalLabels = false,
+  invertLabelY = false,
 }: BarChartProps) {
   const s = useThemedStyles(styles);
 
@@ -38,6 +42,9 @@ export default function BarChart({
 
   const maxY = Math.max(...data.map((d) => d.y));
 
+  // Reserva espaço extra embaixo para o texto rotacionado
+  const labelAreaHeight = verticalLabels ? 64 : 36;
+
   return (
     <View style={s.card}>
       {title && <Text style={s.title}>{title}</Text>}
@@ -46,7 +53,7 @@ export default function BarChart({
         horizontal
         showsHorizontalScrollIndicator={false}
         style={s.scroll}
-        contentContainerStyle={s.scrollContent}
+        contentContainerStyle={[s.scrollContent, verticalLabels && { gap: 20 }]}
       >
         {data.map((item, index) => {
           const ratio = maxY > 0 ? item.y / maxY : 0;
@@ -54,11 +61,26 @@ export default function BarChart({
           const isMax = item.y === maxY && maxY > 0;
 
           return (
-            <View key={index} style={s.barWrapper}>
+            <View
+              key={index}
+              style={[
+                s.barWrapper,
+                verticalLabels && { minWidth: 36, maxWidth: 52 },
+              ]}
+            >
               {/* Valor no topo */}
               <Text style={[s.valueLabel, isMax && s.valueLabelMax]}>
-                {suffix && <Text style={s.suffix}>{suffix} </Text>}
-                {formatValue(item.y)}
+                {invertLabelY ? (
+                  <>
+                    {formatValue(item.y)}
+                    {suffix && <Text style={s.suffix}> {suffix}</Text>}
+                  </>
+                ) : (
+                  <>
+                    {suffix && <Text style={s.suffix}>{suffix} </Text>}
+                    {formatValue(item.y)}
+                  </>
+                )}
               </Text>
 
               {/* Área da barra */}
@@ -74,10 +96,15 @@ export default function BarChart({
                 />
               </View>
 
-              {/* Label X */}
-              <Text style={s.xLabel} numberOfLines={2}>
-                {item.x}
-              </Text>
+              {/* Label X — área de altura fixa para não deslocar as barras */}
+              <View style={[s.labelArea, { height: labelAreaHeight }]}>
+                <Text
+                  style={[s.xLabel, verticalLabels && s.xLabelVertical]}
+                  numberOfLines={verticalLabels ? 1 : 2}
+                >
+                  {item.x}
+                </Text>
+              </View>
             </View>
           );
         })}
@@ -125,7 +152,7 @@ const styles = (colors: ThemeColors) =>
       fontWeight: "500",
       color: colors.TEXT_MUTED,
       marginBottom: 4,
-      textAlign: "center",
+      textAlign: "justify",
     },
     valueLabelMax: {
       color: "#185FA5",
@@ -141,14 +168,24 @@ const styles = (colors: ThemeColors) =>
     bar: {
       width: "100%",
       borderRadius: 6,
-      minHeight: 0,
+    },
+    labelArea: {
+      width: "100%",
+      alignItems: "center",
+      justifyContent: "flex-start",
+      overflow: "visible",
+      marginTop: 6,
     },
     xLabel: {
-      marginTop: 6,
       fontSize: 11,
       color: colors.TEXT_MUTED,
       textAlign: "center",
       maxWidth: 60,
+    },
+    xLabelVertical: {
+      transform: [{ rotate: "-40deg" }, { translateX: -10 }],
+      textAlign: "left",
+      maxWidth: 80,
     },
     baseline: {
       height: 1,

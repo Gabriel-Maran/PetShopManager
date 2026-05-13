@@ -24,13 +24,16 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 /* - Drops de triggers, index e tables
   //Cole lá em baixo, vai ter a indicação
     await db.execAsync(`
-    DROP TRIGGER IF EXISTS trg_ultima_visita;
-    DROP TRIGGER IF EXISTS trg_remarcacao_automatica;
-    DROP TRIGGER IF EXISTS trg_pet_remarcacao_insert;
-    DROP TRIGGER IF EXISTS trg_pet_remarcacao_ativar;
-    DROP TRIGGER IF EXISTS trg_pet_remarcacao_desativar;
-    DROP TRIGGER IF EXISTS trg_owner_desativar_pets;
-    DROP TRIGGER IF EXISTS trg_pet_ativar_owner;
+    DROP INDEX IF EXISTS idx_pets_dono_id;
+    DROP INDEX IF EXISTS idx_appointments_pet_id;
+    DROP INDEX IF EXISTS idx_appointments_pet_data;
+    DROP INDEX IF EXISTS idx_appointments_data_concluido;
+    DROP INDEX IF EXISTS idx_owners_nome_normalizado;
+    DROP INDEX IF EXISTS idx_pets_nome_normalizado;
+    DROP INDEX IF EXISTS idx_appointments_stats;
+    DROP INDEX IF EXISTS idx_appointments_perf_hora;
+    DROP INDEX IF EXISTS idx_appointments_auto_agen;
+    DROP INDEX IF EXISTS idx_pets_ausentes;
 
     DROP INDEX IF EXISTS idx_pets_dono_id;
     DROP INDEX IF EXISTS idx_appointments_pet_id;
@@ -168,6 +171,9 @@ export async function initDatabase(): Promise<void> {
 
     CREATE INDEX IF NOT EXISTS idx_appointments_auto_agen
       ON appointments (concluido, is_auto_agen);
+
+    CREATE INDEX IF NOT EXISTS idx_pets_ausentes
+      ON pets (remarcacao_ativa, is_ativo, current_ultima_visita_data);
   `;
 
   // ── Dados iniciais ────────────────────────────────────────────────────────

@@ -1,12 +1,4 @@
-import {
-  ActivityIndicator,
-  Button,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { useScreen } from "../../../hooks/useScreen";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import {
   ThemeColors,
   useTheme,
@@ -21,12 +13,14 @@ import {
   getDiasMaisAtendidos,
   getHorasMaisAtendidas,
 } from "../../../utils/relatorios/datasSearcher";
+import { useError } from "../../../hooks/useError";
 
 export default function DiasHorasMaisAtendidas() {
   const [data, setData] = useState<BarChartItem[]>([]);
   const [hora, setHora] = useState<BarChartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { showError } = useError();
 
   const { colors } = useTheme(); // Pega as cores para o ActivityIndicator
   const s = useThemedStyles(styles);
@@ -45,12 +39,23 @@ export default function DiasHorasMaisAtendidas() {
       .finally(() => setLoading(false));
   }, []);
 
-  const { navigate } = useScreen();
-
   if (loading) {
     return (
       <View style={s.loader}>
         <ActivityIndicator size="large" color={colors.PRIMARY} />
+      </View>
+    );
+  }
+
+  if (error) {
+    showError(error);
+    return (
+      <View style={s.loader}>
+        <TitleBar
+          returnTo={Screen.Relatorios}
+          title="Origem dos Agendamentos"
+          subtitle="Canais automáticos e manuais"
+        />
       </View>
     );
   }
@@ -69,7 +74,12 @@ export default function DiasHorasMaisAtendidas() {
           showsVerticalScrollIndicator={false}
         >
           <View style={s.card}>
-            <BarChart data={data} title="Dias mais atendidos" suffix="atend." />
+            <BarChart
+              data={data}
+              title="Dias mais atendidos"
+              suffix="atend."
+              invertLabelY={true}
+            />
           </View>
 
           <View style={s.card}>
@@ -77,6 +87,7 @@ export default function DiasHorasMaisAtendidas() {
               data={hora}
               title="Horas mais atendidas"
               suffix="atend."
+              invertLabelY={true}
             />
           </View>
         </ScrollView>
