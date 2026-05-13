@@ -5,7 +5,7 @@ class SpeciesService {
   searchSpecies(): Promise<Species[]> {
     return speciesRepository.searchSpecies();
   }
-  searchBreedsBySpecies(id: number): Promise<{ id: number; nome: string }[]> {
+  searchBreedsBySpecies(id: number): Promise<Species[]> {
     return speciesRepository.searchBreedsBySpecies(id);
   }
 }

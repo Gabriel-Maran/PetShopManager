@@ -15,9 +15,9 @@ class SpeciesRepository {
   }
   async searchBreedsBySpecies(
     speciesId: number,
-  ): Promise<{ id: number; nome: string }[]> {
+  ): Promise<Species[]> {
     const db = await getDatabase();
-    return db.getAllAsync<{ id: number; nome: string }>(
+    return db.getAllAsync<Species>(
       `SELECT id, nome_raca as nome FROM race WHERE especie_id = ? ORDER BY nome_raca asc `,
       [speciesId],
     );
