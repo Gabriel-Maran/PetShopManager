@@ -33,9 +33,10 @@ import SelectionField from "../../components/Cadastro/SelectionField";
 import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
 import InputSelect from "../../components/InputSelect";
 
-import { usePetFormSetup } from "../../../hooks/usePetFormSetup";
+import { pegarDonosBanco, pegarRacasBanco } from "../../../utils/buscaBanco/pet";
 
 import { EspeciesAtendidasLabel } from "../../../config/consts";
+import useFormState from "../../../hooks/useFormState";
 
 //Transforma em um array com um id e o nome
 const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
@@ -49,7 +50,10 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
 
-  const [form, setForm] = useState({
+  const {
+    form,
+    updateField
+  } = useFormState({
     nome: petToEdit?.nome ?? "",
     especie: petToEdit?.especie ?? 0,
     dono_id: petToEdit?.dono_id ?? 0,
@@ -65,21 +69,21 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
         : PorteAnimal.MEDIO,
     pacoteRemarcacao:
       petToEdit?.pacote_remarcacao &&
-      petToEdit.pacote_remarcacao in PacoteRemarcacao
+        petToEdit.pacote_remarcacao in PacoteRemarcacao
         ? (petToEdit.pacote_remarcacao as PacoteRemarcacao)
         : undefined,
     dataInicioPacote: petToEdit?.data_inicio_pacote ?? undefined,
-  });
+  }
+  )
 
+  const { racasList, especiesList } = pegarRacasBanco(form.especie)
   const {
-    especiesList,
-    racasList,
     owners,
     page,
-    total,
     setPage,
     setSearchTxt,
-  } = usePetFormSetup(form.especie);
+    total,
+  } = pegarDonosBanco()
 
   const salvarPet = async () => {
     const petSalvar = new PetBuilder()
@@ -106,19 +110,12 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
     }
   };
 
-  const atualizarValores = (campo: keyof typeof form, valor: any) => {
-    setForm((prev) => ({
-      ...prev,
-      [campo]: valor,
-    }));
-  };
-
   const [modalConfig, setModalConfig] = useState({
     visivel: false,
     titulo: "",
     itemIcon: undefined as ImageSourcePropType | undefined,
     lista: [] as any[],
-    aoSelecionar: (item: any) => {},
+    aoSelecionar: (item: any) => { },
   });
 
   const abrirModal = ({
@@ -144,11 +141,6 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
     });
   };
 
-  const limparDono = () => {
-    atualizarValores("dono_id", 0);
-    atualizarValores("dono_nome", "");
-  };
-
   return (
     <>
       <DefaultHeader />
@@ -170,7 +162,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
             <InputInfo
               image={require("../../../assets/animais/iconNome.png")}
               item={form.nome}
-              setItem={(v) => atualizarValores("nome", v)}
+              setItem={(v) => updateField("nome", v)}
               placeHolder="Digite o nome..."
               titleName="Nome Completo"
               variasLinhas={false}
@@ -190,14 +182,17 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
                   itemIcon: require("../../../assets/animais/iconDono.png"),
                   lista: owners || [],
                   aoSelecionar: (item) => {
-                    atualizarValores("dono_id", item.id);
-                    atualizarValores("dono_nome", item.nome);
+                    updateField("dono_id", item.id);
+                    updateField("dono_nome", item.nome);
                   },
                 })
               }
-              onClear={form.dono_nome ? limparDono : undefined}
+              onClear={() => {
+                updateField("dono_id", 0);
+                updateField("dono_nome", "");
+              }}
               goEdit={true}
-              setModal={() => {}}
+              setModal={() => { }}
             />
             <InputSelect
               titleName="Espécie"
@@ -206,7 +201,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               itens={especiesList}
               itemSelected={especiesList.find((e) => e.id === form.especie)}
               labelExtractor={(item) => EspeciesAtendidasLabel[item.nome]}
-              onChange={(item) => atualizarValores("especie", item.id)}
+              onChange={(item) => updateField("especie", item.id)}
               renderItem={(item) => (
                 <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
                   {EspeciesAtendidasLabel[item.nome]}
@@ -226,17 +221,17 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
                   itemIcon: require("../../../assets/animais/iconPata.png"),
                   lista: racasList || [],
                   aoSelecionar: (item) => {
-                    atualizarValores("raca", item.id);
-                    atualizarValores("raca_nome", item.nome);
+                    updateField("raca", item.id);
+                    updateField("raca_nome", item.nome);
                   },
                 })
               }
               onClear={() => {
-                atualizarValores("raca", 0);
-                atualizarValores("raca_nome", "");
+                updateField("raca", 0);
+                updateField("raca_nome", "");
               }}
               goEdit={true}
-              setModal={() => {}}
+              setModal={() => { }}
             />
             <InputSelect
               titleName="Porte"
@@ -245,7 +240,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               itens={portesList}
               itemSelected={portesList.find((e) => e.id === form.porte)}
               labelExtractor={(item) => item.nome}
-              onChange={(item) => atualizarValores("porte", item.id)}
+              onChange={(item) => updateField("porte", item.nome as PorteAnimal)}
               renderItem={(item) => (
                 <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
                   {item.nome}
@@ -257,7 +252,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
             <InputInfo
               image={require("../../../assets/nav_bar/artigo.png")}
               item={form.observacoes}
-              setItem={(v) => atualizarValores("observacoes", v)}
+              setItem={(v) => updateField("observacoes", v)}
               placeHolder="Uma observação adicional..."
               titleName="Observações"
               variasLinhas={true}
