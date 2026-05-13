@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
+import { formatValue } from "../../../utils/formaterHelper";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -88,13 +89,6 @@ export default function BarChart({
   );
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatValue(n: number): string {
-  if (n >= 1000) return (n / 1000).toFixed(1).replace(".", ",") + "k";
-  return n % 1 === 0 ? String(n) : n.toFixed(1).replace(".", ",");
-}
-
 // ─── Estilos ──────────────────────────────────────────────────────────────────
 
 const styles = (colors: ThemeColors) =>
@@ -115,13 +109,16 @@ const styles = (colors: ThemeColors) =>
     },
     scrollContent: {
       flexDirection: "row",
-      gap: 8,
-      paddingHorizontal: 2,
+      justifyContent: "space-evenly",
+      minWidth: "100%",
+      paddingHorizontal: 8,
+      gap: 15,
     },
     barWrapper: {
       alignItems: "center",
+      flex: 1,
       minWidth: 44,
-      maxWidth: 64,
+      maxWidth: 80,
     },
     valueLabel: {
       fontSize: 11,

@@ -74,7 +74,7 @@ export enum ORDER {
 }
 
 export enum RelatorioType {
-  HorariosMovimentados = "HorariosMovimentados",
+  DiasHorasMovimentados = "DiasHorasMovimentados",
   PetsAusentes = "PetsAusentes",
   Remarcacoes = "Remarcacoes",
   OrigemAgendamentos = "OrigemAgendamentos",

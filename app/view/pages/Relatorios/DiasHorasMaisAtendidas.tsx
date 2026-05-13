@@ -14,12 +14,13 @@ import {
 } from "../../Themes/ThemeProvider";
 import BarChart, { BarChartItem } from "../../components/Relatorios/BarChart";
 import { useEffect, useState } from "react";
+
+import { Screen } from "../../../config/consts";
+import TitleBar from "../../components/Cadastro/TitleBar";
 import {
   getDiasMaisAtendidos,
   getHorasMaisAtendidas,
-} from "../../../utils/atendimentosHoraDia";
-import { Screen } from "../../../config/consts";
-import TitleBar from "../../components/Cadastro/TitleBar";
+} from "../../../utils/relatorios/datasSearcher";
 
 export default function DiasHorasMaisAtendidas() {
   const [data, setData] = useState<BarChartItem[]>([]);
@@ -58,7 +59,7 @@ export default function DiasHorasMaisAtendidas() {
     <>
       <View style={s.mainContainer}>
         <TitleBar
-          returnTo={Screen.Cadastros}
+          returnTo={Screen.Relatorios}
           title="Frequência de Atendimento"
           subtitle="Análise de picos de horários e dias"
         />

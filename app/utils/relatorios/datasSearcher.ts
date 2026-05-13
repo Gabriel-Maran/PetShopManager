@@ -1,5 +1,5 @@
-import { getDatabase } from "../config/database";
-import { BarChartItem } from "../view/components/Relatorios/BarChart";
+import { getDatabase } from "../../config/database";
+import { BarChartItem } from "../../view/components/Relatorios/BarChart";
 
 const DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 

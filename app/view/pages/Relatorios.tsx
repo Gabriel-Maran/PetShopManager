@@ -21,7 +21,7 @@ const REPORTS: {
 }[] = [
   {
     id: "dias",
-    type: RelatorioType.DiasMovimentados,
+    type: RelatorioType.DiasHorasMovimentados,
     title: "Dias movimentados",
     subtitle: "Dias com mais agendamentos",
     tag: "Operacional",
