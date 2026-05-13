@@ -20,6 +20,7 @@ import { ServiceType } from "../../../model/ServiceType";
 
 import { petController } from "../../../controller/PetController";
 import { appointmentController } from "../../../controller/AppointmentsController";
+import { serviceTypeRepository } from "../../../repository/ServiceTypeRepository";
 
 import DefaultHeader from "../../components/Header/DefaultHeader";
 import TitleBar from "../../components/Cadastro/TitleBar";
@@ -38,9 +39,10 @@ import {
   DataHifenPraBarra,
   DataNumberPraString,
   DataStringPraNumber,
-} from "../../../utils/converterData";
+} from "../../../utils/formatadores/converterData";
 import Mascarar from "../../../utils/mascarar";
-import { serviceTypeRepository } from "../../../repository/ServiceTypeRepository";
+import useFormState from "../../../hooks/useFormState";
+
 
 export default function NewOrEditAppointment() {
   const { params, navigate } = useScreen<NewOrEditAppointmentParams>();
@@ -52,33 +54,39 @@ export default function NewOrEditAppointment() {
 
   const isEditing = Boolean(params?.appointment?.id);
 
-  const [nomePet, setNomePet] = useState(params?.appointment?.nome_pet ?? "");
-  const [idPet, setIdPet] = useState(params?.appointment?.pet_id ?? 0);
-
-  const [servico, setServico] = useState(params?.appointment?.servico ?? "");
-  const [data, setData] = useState<string>(
-    params?.appointment?.data
+  const {
+    form,
+    setForm,
+    updateField,
+    resetForm,
+    setAllFields,
+  } = useFormState({
+    nomePet: params?.appointment?.nome_pet ?? "",
+    idPet: params?.appointment?.pet_id ?? 0,
+    servico: params?.appointment?.servico ?? "",
+    data: params?.appointment?.data
       ? DataNumberPraString(params?.appointment?.data)
       : params?.dateSelected
         ? DataHifenPraBarra(params?.dateSelected)
         : "",
-  );
-  const [hora, setHora] = useState(params?.appointment?.hora ?? "");
-  const [entregarPet, setEntregarPet] = useState<number>(
-    params?.appointment?.entregar_pet ?? 0,
-  );
-  const [concluido, setConcluido] = useState(
-    params?.appointment?.concluido ?? 0,
-  );
-  const [observacao, setObservacao] = useState(
-    params?.appointment?.observacao ?? "",
-  );
+    hora: params?.appointment?.hora ?? "",
+    entregarPet: params?.appointment?.entregar_pet ?? 0,
+    concluido: params?.appointment?.concluido ?? 0,
+    observacao: params?.appointment?.observacao ?? "",
+
+
+    //Quando não auto gerado, o db já criar isso como false(ou seja, 0), so fica true isso aqui quando é criado na trigger
+    //Minha ideia é não alterar isso, por conta de que, foi criado automatico e se o dono do petshop mudar
+    //deve continuar como auto gerado
+    //Mas é interessante fazer algo visual para mostrar se foi auto gerado ou não
+    autoGen: params?.appointment?.is_auto_agen ?? 0
+  })
 
   //Quando não auto gerado, o db já criar isso como false(ou seja, 0), so fica true isso aqui quando é criado na trigger
   //Minha ideia é não alterar isso, por conta de que, foi criado automatico e se o dono do petshop mudar
   //deve continuar como auto gerado
   //Mas é interessante fazer algo visual para mostrar se foi auto gerado ou não
-  const [autoGen, setAutoGen] = useState(
+  const [autoGen, setAutoGen] = useState<number>(
     params?.appointment?.is_auto_agen ?? 0,
   );
 
@@ -88,7 +96,7 @@ export default function NewOrEditAppointment() {
     visivel: false,
     titulo: "",
     lista: [] as any[],
-    aoSelecionar: (item: any) => {},
+    aoSelecionar: (item: any) => { },
   });
 
   const abrirModal = ({
@@ -144,13 +152,13 @@ export default function NewOrEditAppointment() {
 
   const salvarAgendamento = async () => {
     const appointmentSalvar = new AppointmentBuilder()
-      .withPetId(idPet)
-      .withServico(servico)
-      .withHora(hora ?? "00:00")
-      .withData(DataStringPraNumber(data, "/"))
-      .withEntregarPet(entregarPet)
-      .withObservacao(observacao)
-      .isConcluido(concluido)
+      .withPetId(form.idPet)
+      .withServico(form.servico)
+      .withHora(form.hora ?? "00:00")
+      .withData(DataStringPraNumber(form.data, "/"))
+      .withEntregarPet(form.entregarPet)
+      .withObservacao(form.observacao)
+      .isConcluido(form.concluido)
       .build();
 
     try {
@@ -190,7 +198,7 @@ export default function NewOrEditAppointment() {
             <SelectionField
               image={require("../../../assets/animais/petHome.png")}
               titleName={"PET"}
-              selectedReg={nomePet}
+              selectedReg={form.nomePet}
               buttonText="Selecionar Pet"
               hasBorderBottom={true}
               onPress={() =>
@@ -198,23 +206,23 @@ export default function NewOrEditAppointment() {
                   titulo: "Selecionar Pet",
                   lista: pets || [],
                   aoSelecionar: (item) => {
-                    setIdPet(item.id);
-                    setNomePet(item.nome);
-                    setAutoGen(item.remarcacao_ativa);
+                    updateField("idPet", item.id);
+                    updateField("nomePet", item.nome);
+                    updateField("autoGen", item.remarcacao_ativa);
                   },
                 })
               }
               goEdit={true}
-              setModal={() => {}}
+              setModal={() => { }}
             />
             <InputSelect
               image={require("../../../assets/outros/servicos.png")}
               titleName="Serviço"
               placeholder="Selecione o serviço..."
               itens={servicos}
-              itemSelected={servicos.find((e) => e.servico === servico)}
+              itemSelected={servicos.find((e) => e.servico === form.servico)}
               labelExtractor={(item) => item.servico}
-              onChange={(item) => setServico(item.servico)}
+              onChange={(item) => updateField("servico", item.servico)}
               renderItem={(item) => (
                 <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
                   {item.servico}
@@ -224,28 +232,28 @@ export default function NewOrEditAppointment() {
             />
             <InputInfo
               image={require("../../../assets/outros/data.png")}
-              item={data}
-              setItem={(v) => setData(mascarar(v, 1))}
+              item={form.data}
+              setItem={(v) => updateField("data", mascarar(v, 1))}
               placeHolder="Informe a data..."
               titleName="Data"
-              variasLinhas={true}
+              variasLinhas={false}
               digitavel={true}
               hasBorderBottom={true}
             />
             <InputInfo
               image={require("../../../assets/outros/hora.png")}
-              item={hora}
-              setItem={(v) => setHora(mascarar(v, 2))}
+              item={form.hora}
+              setItem={(v) => updateField("hora", mascarar(v, 2))}
               placeHolder="Informe o horário..."
               titleName="Horário"
-              variasLinhas={true}
+              variasLinhas={false}
               digitavel={true}
               hasBorderBottom={true}
             />
             <Toggle
               image={require("../../../assets/outros/entrega.png")}
-              value={entregarPet}
-              onChange={setEntregarPet}
+              value={form.entregarPet}
+              onChange={(value) => updateField("entregarPet", value)}
               title="Entrega"
               subtitle="Vai entregar o pet?"
               hasBorderBottom={true}
@@ -253,8 +261,8 @@ export default function NewOrEditAppointment() {
             />
             <InputInfo
               image={require("../../../assets/nav_bar/artigo.png")}
-              item={observacao}
-              setItem={setObservacao}
+              item={form.observacao}
+              setItem={(item) => updateField("observacao", item)}
               placeHolder="Uma observação adicional..."
               titleName="Observações"
               variasLinhas={true}
@@ -265,20 +273,21 @@ export default function NewOrEditAppointment() {
               <>
                 <Toggle
                   image={require("../../../assets/outros/concluido.png")}
-                  value={concluido}
-                  onChange={setConcluido}
+                  value={form.concluido}
+                  onChange={(value) => updateField("concluido", value)}
                   title="Status"
                   subtitle="Serviço concluído?"
                   hasBorderBottom={true}
                 />
-                {autoGen == 1 && (
+                {form.autoGen == 1 && (
                   <Toggle
                     image={require("../../../assets/outros/auto_gen.png")}
-                    value={autoGen}
+                    value={form.autoGen}
+                    onChange={(value) => updateField("autoGen", value)}
                     title="Agendamento Auto-gerado"
                     subtitle="Serviço concluído?"
-                    noEdit={true}
                     hasBorderBottom={true}
+                    noEdit={true}
                   />
                 )}
               </>
@@ -296,7 +305,7 @@ export default function NewOrEditAppointment() {
       <ModalSelectList
         isOpen={modalConfig.visivel}
         items={modalConfig.lista}
-        titulo={modalConfig.titulo} 
+        titulo={modalConfig.titulo}
         onSelect={modalConfig.aoSelecionar}
         onClose={() => setModalConfig((prev) => ({ ...prev, visivel: false }))}
         page={page}
