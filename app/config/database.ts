@@ -166,7 +166,8 @@ export async function initDatabase(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_appointments_perf_hora 
       ON appointments (concluido, CAST(substr(hora, 1, 2) AS INTEGER));
 
-
+    CREATE INDEX IF NOT EXISTS idx_appointments_auto_agen
+      ON appointments (concluido, is_auto_agen);
   `;
 
   // ── Dados iniciais ────────────────────────────────────────────────────────

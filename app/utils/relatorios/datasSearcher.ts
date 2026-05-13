@@ -3,10 +3,10 @@ import { BarChartItem } from "../../view/components/Relatorios/BarChart";
 
 const DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
+// ─── Dias mais atendidos: Seg, Ter, Qua... ─────────────────────
 export async function getDiasMaisAtendidos(): Promise<BarChartItem[]> {
   const db = await getDatabase();
 
-  // Agora apenas selecionamos a coluna virtual dia_semana
   const rows = await db.getAllAsync<{ dia_semana: number; total: number }>(`
     SELECT dia_semana, COUNT(*) AS total
     FROM appointments
@@ -23,18 +23,19 @@ export async function getDiasMaisAtendidos(): Promise<BarChartItem[]> {
   }));
 }
 
+// ─── Horarios mais atendidos: 10:00, 11:00... ─────────────────────
 export async function getHorasMaisAtendidas(): Promise<BarChartItem[]> {
   const db = await getDatabase();
 
   const rows = await db.getAllAsync<{ hora_inteira: number; total: number }>(`
-  SELECT 
-    CAST(substr(hora, 1, 2) AS INTEGER) AS hora_inteira, 
-    COUNT(*) AS total
-  FROM appointments
-  WHERE concluido = 1
-  GROUP BY CAST(substr(hora, 1, 2) AS INTEGER) -- Garante o uso do índice
-  ORDER BY hora_inteira ASC
-`);
+    SELECT
+      CAST(substr(hora, 1, 2) AS INTEGER) AS hora_inteira,
+      COUNT(*) AS total
+    FROM appointments
+    WHERE concluido = 1
+    GROUP BY CAST(substr(hora, 1, 2) AS INTEGER)
+    ORDER BY hora_inteira ASC
+  `);
 
   const mapa = new Map(rows.map((r) => [r.hora_inteira, r.total]));
 

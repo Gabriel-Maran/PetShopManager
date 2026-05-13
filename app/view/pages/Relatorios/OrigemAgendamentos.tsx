@@ -9,11 +9,14 @@ import { useEffect, useState } from "react";
 
 import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
-
-import { autoVsManuais } from "../../../utils/relatorios/origemDados";
+import {
+  autoVsManuaisAgendados,
+  autoVsManuaisConcluidos,
+} from "../../../utils/relatorios/origemDados";
 
 export default function OrigemAgendamentos() {
-  const [dataOrigem, setDataOrigem] = useState<BarChartItem[]>([]);
+  const [dataOrigemAgen, setDataOrigemAgen] = useState<BarChartItem[]>([]);
+  const [dataOrigemConcl, setDataOrigemConcl] = useState<BarChartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,8 +25,11 @@ export default function OrigemAgendamentos() {
 
   useEffect(() => {
     setLoading(true);
-    autoVsManuais()
-      .then(setDataOrigem)
+    autoVsManuaisConcluidos()
+      .then(setDataOrigemConcl)
+      .catch((e) => setError(e.message));
+    autoVsManuaisAgendados()
+      .then(setDataOrigemAgen)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
@@ -49,8 +55,15 @@ export default function OrigemAgendamentos() {
       >
         <View style={s.card}>
           <BarChart
-            data={dataOrigem}
-            title="Agendamentos por Canal"
+            data={dataOrigemConcl}
+            title="Agendamentos concluidos"
+            suffix="atend."
+          />
+        </View>
+        <View style={s.card}>
+          <BarChart
+            data={dataOrigemAgen}
+            title="Agendamentos manuais"
             suffix="atend."
           />
         </View>
