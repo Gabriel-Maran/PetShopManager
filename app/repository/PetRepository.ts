@@ -1,7 +1,7 @@
 import { ORDER } from "../config/consts";
 import { getDatabase } from "../config/database";
 import { Pet, PetWithSpecieAndRace } from "../model/Pet";
-import { normalizeForSearch } from "../utils/normalizaNome";
+import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
 
 class PetRepository {
   async getPetById(id: number): Promise<Pet | null> {

@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
-import { formatValue } from "../../../utils/formaterHelper";
+import { formatValue } from "../../../utils/formatadores/formaterHelper";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 

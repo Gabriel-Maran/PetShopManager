@@ -1,7 +1,7 @@
 import { ORDER } from "../config/consts";
 import { getDatabase } from "../config/database";
 import { Owner } from "../model/Owner";
-import { normalizeForSearch } from "../utils/normalizaNome";
+import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
 
 class OwnerRepository {
   async getOwnerById(id: number): Promise<Owner | null> {

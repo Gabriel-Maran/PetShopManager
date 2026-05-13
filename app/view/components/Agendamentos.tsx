@@ -15,7 +15,7 @@ import { Screen, APP_BAR_HEIGHT, EspeciesAtendidas } from "../../config/consts";
 
 import { appointmentController } from "../../controller/AppointmentsController";
 
-import { DataStringPraNumber } from "../../utils/converterData";
+import { DataStringPraNumber } from "../../utils/formatadores/converterData";
 import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
 import { useAgendamentos } from "../contexts/agendamentos";
 

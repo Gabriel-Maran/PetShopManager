@@ -12,7 +12,7 @@ import { Appointment } from "../../model/Appointment";
 
 import { appointmentController } from "../../controller/AppointmentsController";
 
-import { DataNumberPraStringHifen } from "../../utils/converterData";
+import { DataNumberPraStringHifen } from "../../utils/formatadores/converterData";
 import { useAgendamentos } from "../contexts/agendamentos";
 
 // Configuração do calendário para português do Brasil
