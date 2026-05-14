@@ -80,7 +80,6 @@ class OwnerRepository {
 
   async updateOwner(id: number, owner: Owner): Promise<void> {
     const nome_normalizado = normalizeForSearch(owner.nome);
-    console.log(nome_normalizado);
     const db = await getDatabase();
     await db.runAsync(
       `UPDATE owners SET nome = ?, nome_normalizado = ?, telefone = ?, email = ?, endereco = ? WHERE id = ?`,

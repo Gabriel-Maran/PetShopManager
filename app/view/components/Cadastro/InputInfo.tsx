@@ -17,7 +17,7 @@ export default function InputInfo({
   digitavel,
 }: {
   image: ImageSourcePropType;
-  item: string;
+  item: string | null;
   setItem: (item: any) => void;
   placeHolder: string;
   titleName: string;
@@ -38,7 +38,7 @@ export default function InputInfo({
         placeholder={placeHolder}
         placeholderTextColor={colors.TEXT_PLACEHOLDER}
         onChangeText={(item) => setItem(item)}
-        value={item}
+        value={item ?? undefined}
         multiline={variasLinhas}
         editable={digitavel}
       />

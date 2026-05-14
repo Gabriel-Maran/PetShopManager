@@ -6,7 +6,6 @@ import { Owner } from "../../model/Owner";
 import { Species } from "../../repository/SpeciesRepository";
 import { useError } from "../../hooks/useError";
 
-
 export function pegarRacasBanco(formEspecieId: number): {
   racasList: Species[];
   especiesList: Species[];
@@ -72,8 +71,6 @@ export function pegarDonosBanco(): ({
       .then(setTotal)
       .catch(handleError);
   }, []);
-
-  console.log()
 
   return {
     owners,
