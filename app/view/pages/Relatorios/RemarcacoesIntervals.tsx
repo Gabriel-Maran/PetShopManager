@@ -9,7 +9,7 @@ import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import BarChart, { BarChartItem } from "../../components/Relatorios/BarChart";
 import { useError } from "../../../hooks/useError";
-import { comparativoRemarcacao } from "../../../utils/relatorios/remarcacoes";
+import { comparativoRemarcacao } from "../../../utils/relatorios/Remarcacoes";
 
 export default function RemarcacoesIntervals() {
   const [petsRemarc, setPetsRemarc] = useState<BarChartItem[]>([]);
