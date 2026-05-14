@@ -184,8 +184,9 @@ export async function initDatabase(): Promise<void> {
 
     INSERT OR IGNORE INTO service_type (id, servico) VALUES
       (1, 'Banho'),
-      (2, 'Banho e Tosa');
-
+      (2, 'Banho e Tosa'),
+      (3, 'Banho e Higiênica');
+      
     INSERT OR IGNORE INTO species (id, nome) VALUES
       (1, 'CAO'),
       (2, 'GATO'),
