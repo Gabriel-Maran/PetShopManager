@@ -72,7 +72,7 @@ export default function NewOrEditOwner() {
   return (
     <KeyboardAvoidingView
       style={s.flex}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      
     >
       <DefaultHeader />
       <TitleBar
