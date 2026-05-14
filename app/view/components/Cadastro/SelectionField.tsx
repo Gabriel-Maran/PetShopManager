@@ -22,7 +22,6 @@ export default function SelectionField({
   hasBorderBottom,
   onPress,
   goEdit,
-  setModal,
 }: {
   image: ImageSourcePropType;
   titleName: string;
@@ -32,7 +31,6 @@ export default function SelectionField({
   onPress: () => void;
   onClear?: () => void;
   goEdit: boolean;
-  setModal: () => void;
 }) {
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
@@ -53,7 +51,7 @@ export default function SelectionField({
           <ButtonEditar
             navegarPara={Screen.Cadastros}
             goEdit={goEdit}
-            setModal={setModal}
+            setModal={onPress}
             editCampo={true}
           />
         </View>

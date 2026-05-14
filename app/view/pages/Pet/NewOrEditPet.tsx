@@ -192,7 +192,6 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
                 updateField("dono_nome", "");
               }}
               goEdit={true}
-              setModal={() => { }}
             />
             <InputSelect
               titleName="Espécie"
@@ -231,7 +230,6 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
                 updateField("raca_nome", "");
               }}
               goEdit={true}
-              setModal={() => { }}
             />
             <InputSelect
               titleName="Porte"
