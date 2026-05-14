@@ -79,7 +79,6 @@ export enum RelatorioType {
   Remarcacoes = "Remarcacoes",
   OrigemAgendamentos = "OrigemAgendamentos",
   ComparativoMensal = "ComparativoMensal",
-  TaxaConclusao = "TaxaConclusao",
   Pacotes = "Pacotes",
 }
 

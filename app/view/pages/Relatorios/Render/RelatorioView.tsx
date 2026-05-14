@@ -3,7 +3,7 @@ import ComparativoMensal from "../ComparativoMensal";
 import DiasHorasMaisAtendidas from "../DiasHorasMaisAtendidas";
 import OrigemAgendamentos from "../OrigemAgendamentos";
 import PetsAusentes from "../PetsAusentes";
-import Remarcacoes from "../Remarcacoes";
+import RemarcacoesIntervals from "../RemarcacoesIntervals";
 
 export default function RelatorioView({ route }: { route: RelatorioType }) {
   switch (route) {
@@ -14,13 +14,11 @@ export default function RelatorioView({ route }: { route: RelatorioType }) {
     case RelatorioType.PetsAusentes:
       return <PetsAusentes />;
     case RelatorioType.Remarcacoes:
-      return <Remarcacoes />;
+      return <RemarcacoesIntervals />;
     case RelatorioType.ComparativoMensal:
       return <ComparativoMensal />;
     case RelatorioType.Pacotes:
-      return <OrigemAgendamentos />;
-    case RelatorioType.TaxaConclusao:
-      return <OrigemAgendamentos />;
+      return <OrigemAgendamentos />; // TODO
     default:
       return <DiasHorasMaisAtendidas />;
   }
