@@ -58,6 +58,7 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 
 export async function initDatabase(): Promise<void> {
   const db = await getDatabase();
+  
 
   // ── Pragma ────────────────────────────────────────────────────────────────
 
@@ -140,6 +141,9 @@ export async function initDatabase(): Promise<void> {
       concluido    INTEGER NOT NULL DEFAULT 0,
       observacao   TEXT,
       is_auto_agen INTEGER NOT NULL DEFAULT 0,
+      valor        TEXT    NOT NULL DEFAULT 0,
+      tipo_pgto    TEXT    NOT NULL DEFAULT '0,00',
+      ta_pago      INTEGER NOT NULL DEFAULT 0,
       criado_em    INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now')),
       FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
     );

@@ -60,20 +60,19 @@ export default function NewOrEditAppointment() {
 
   const { servicesForm } = useServicos();
 
-  const [appointmentSelected, setAppointmentSelected] = useState<boolean>(true)
+  const [appointmentSelected, setAppointmentSelected] = useState<boolean>(true);
 
   const [modalConfig, setModalConfig] = useState<ModalConfig>({
     visivel: false,
     titulo: "",
     itemIcon: undefined,
     lista: [],
-    aoSelecionar: () => { },
+    aoSelecionar: () => {},
   });
 
   const { petsForm, updatePetsField } = usePetsComEspecieERacaBanco(
-    modalConfig.visivel
+    modalConfig.visivel,
   );
-
 
   const salvarAgendamento = async () => {
     const appointmentSalvar = new AppointmentBuilder()
@@ -123,7 +122,7 @@ export default function NewOrEditAppointment() {
         />
         <ItemSelect
           title="Valores"
-          isThisSelected={appointmentSelected}
+          isThisSelected={!appointmentSelected}
           setValorSelect={() => setAppointmentSelected(false)}
           valorSelect={false}
         />
@@ -185,7 +184,9 @@ export default function NewOrEditAppointment() {
                 <InputInfo
                   image={require("../../../assets/outros/data.png")}
                   item={appointmentsForm.data}
-                  setItem={(v) => updateAppointmentsField("data", mascarar(v, 1))}
+                  setItem={(v) =>
+                    updateAppointmentsField("data", mascarar(v, 1))
+                  }
                   placeHolder="Informe a data..."
                   titleName="Data"
                   variasLinhas={false}
@@ -195,7 +196,9 @@ export default function NewOrEditAppointment() {
                 <InputInfo
                   image={require("../../../assets/outros/hora.png")}
                   item={appointmentsForm.hora}
-                  setItem={(v) => updateAppointmentsField("hora", mascarar(v, 2))}
+                  setItem={(v) =>
+                    updateAppointmentsField("hora", mascarar(v, 2))
+                  }
                   placeHolder="Informe o horário..."
                   titleName="Horário"
                   variasLinhas={false}
@@ -216,7 +219,9 @@ export default function NewOrEditAppointment() {
                 <InputInfo
                   image={require("../../../assets/nav_bar/artigo.png")}
                   item={appointmentsForm.observacao}
-                  setItem={(item) => updateAppointmentsField("observacao", item)}
+                  setItem={(item) =>
+                    updateAppointmentsField("observacao", item)
+                  }
                   placeHolder="Uma observação adicional..."
                   titleName="Observações"
                   variasLinhas={true}
@@ -252,7 +257,10 @@ export default function NewOrEditAppointment() {
                 )}
               </View>
               <View style={s.ctnBtnSalvar}>
-                <TouchableOpacity style={s.btnSalvar} onPress={salvarAgendamento}>
+                <TouchableOpacity
+                  style={s.btnSalvar}
+                  onPress={salvarAgendamento}
+                >
                   <Text style={s.txtSalvar}>
                     {isEditing ? "Salvar alterações" : "Salvar"}
                   </Text>
@@ -265,7 +273,9 @@ export default function NewOrEditAppointment() {
             items={modalConfig.lista}
             titulo={modalConfig.titulo}
             onSelect={modalConfig.aoSelecionar}
-            onClose={() => setModalConfig((prev) => ({ ...prev, visivel: false }))}
+            onClose={() =>
+              setModalConfig((prev) => ({ ...prev, visivel: false }))
+            }
             page={petsForm.page}
             total={petsForm.total}
             setPage={(value) => updatePetsField("page", value)}
@@ -276,29 +286,85 @@ export default function NewOrEditAppointment() {
           />
         </>
       )}
+      {!appointmentSelected && (
+        <ScrollView
+          contentContainerStyle={s.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={s.ctnCadastro}>
+            <View style={s.viewDataReq}>
+              <Text style={s.titleDataInfo}>DADOS</Text>
+            </View>
+            <View style={s.inputs}>
+              <InputInfo
+                image={require("../../../assets/outros/data.png")}
+                item={appointmentsForm.data}
+                setItem={(v) => updateAppointmentsField("data", mascarar(v, 1))}
+                placeHolder="Valor do serviço..."
+                titleName="Valor"
+                variasLinhas={false}
+                digitavel={true}
+                hasBorderBottom={true}
+              />
+              <InputSelect
+                image={require("../../../assets/outros/servicos.png")}
+                titleName="Tipo de Pagamento"
+                placeholder="Selecione o serviço..."
+                itens={servicesForm.servico}
+                itemSelected={servicesForm.servico.find(
+                  (e) => e.servico === appointmentsForm.servico,
+                )}
+                labelExtractor={(item) => item.servico}
+                onChange={(item) =>
+                  updateAppointmentsField("servico", item.servico)
+                }
+                renderItem={(item) => (
+                  <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+                    {item.servico}
+                  </Text>
+                )}
+                hasBorderBottom={true}
+              />
+              <Toggle
+                image={require("../../../assets/outros/entrega.png")}
+                value={appointmentsForm.entregar_pet}
+                onChange={(value) =>
+                  updateAppointmentsField("entregar_pet", value)
+                }
+                title="Pagamento"
+                subtitle="Cliente Pagou?"
+                hasBorderBottom={true}
+                noEdit={false}
+              />
+            </View>
+          </View>
+        </ScrollView>
+      )}
     </KeyboardAvoidingView>
   );
 }
 
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
-    flex: { flex: 1 },
+    flex: { flex: 1, backgroundColor: colors.THIRD_BACKGROUND },
     scrollContent: {
       backgroundColor: colors.THIRD_BACKGROUND,
       flexGrow: 1,
+      marginTop: 10,
     },
     escolhaItem: {
       flexDirection: "row",
       justifyContent: "space-evenly",
       width: "100%",
       marginTop: 15,
+      marginBottom: 10,
     },
     ctnCadastro: {
       flex: 1,
       padding: 20,
       alignItems: "center",
     },
-    viewDataReq: { width: "100%" },
+    viewDataReq: { width: "100%", height: 28 },
     viewDataNotReq: {
       width: "100%",
       marginTop: 20,
