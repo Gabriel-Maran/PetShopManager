@@ -117,6 +117,7 @@ const styles = (colors: ThemeColors) =>
       paddingHorizontal: 15,
       paddingVertical: 10,
       backgroundColor: colors.BACKGROUND,
+      marginTop: 5,
     },
     selectText: {
       fontSize: 16,

@@ -98,7 +98,6 @@ const styles = (colors: ThemeColors) =>
       alignItems: "center",
       justifyContent: "space-between",
       paddingHorizontal: 15,
-      paddingVertical: 10,
     },
     subtitle: {
       fontSize: 15,
