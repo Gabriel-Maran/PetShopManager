@@ -1,0 +1,102 @@
+await db.execAsync(`
+  -- =====================================================
+  -- OWNERS (20)
+  -- =====================================================
+
+  INSERT INTO owners (nome, nome_normalizado, telefone, email, endereco) VALUES
+  ('João Silva', 'joao silva', '(44) 99911-1111', 'joao1@email.com', 'Rua A, 100'),
+  ('Maria Oliveira', 'maria oliveira', '(44) 99911-1112', 'maria2@email.com', 'Rua B, 101'),
+  ('Carlos Souza', 'carlos souza', '(44) 99911-1113', 'carlos3@email.com', 'Rua C, 102'),
+  ('Fernanda Lima', 'fernanda lima', '(44) 99911-1114', 'fernanda4@email.com', 'Rua D, 103'),
+  ('Lucas Pereira', 'lucas pereira', '(44) 99911-1115', 'lucas5@email.com', 'Rua E, 104'),
+  ('Juliana Costa', 'juliana costa', '(44) 99911-1116', 'juliana6@email.com', 'Rua F, 105'),
+  ('Ricardo Alves', 'ricardo alves', '(44) 99911-1117', 'ricardo7@email.com', 'Rua G, 106'),
+  ('Patrícia Gomes', 'patricia gomes', '(44) 99911-1118', 'patricia8@email.com', 'Rua H, 107'),
+  ('André Martins', 'andre martins', '(44) 99911-1119', 'andre9@email.com', 'Rua I, 108'),
+  ('Camila Rocha', 'camila rocha', '(44) 99911-1120', 'camila10@email.com', 'Rua J, 109'),
+  ('Roberto Mendes', 'roberto mendes', '(44) 99911-1121', 'roberto11@email.com', 'Rua K, 110'),
+  ('Larissa Freitas', 'larissa freitas', '(44) 99911-1122', 'larissa12@email.com', 'Rua L, 111'),
+  ('Thiago Ribeiro', 'thiago ribeiro', '(44) 99911-1123', 'thiago13@email.com', 'Rua M, 112'),
+  ('Aline Barbosa', 'aline barbosa', '(44) 99911-1124', 'aline14@email.com', 'Rua N, 113'),
+  ('Marcelo Dias', 'marcelo dias', '(44) 99911-1125', 'marcelo15@email.com', 'Rua O, 114'),
+  ('Vanessa Teixeira', 'vanessa teixeira', '(44) 99911-1126', 'vanessa16@email.com', 'Rua P, 115'),
+  ('Eduardo Nunes', 'eduardo nunes', '(44) 99911-1127', 'eduardo17@email.com', 'Rua Q, 116'),
+  ('Bruna Castro', 'bruna castro', '(44) 99911-1128', 'bruna18@email.com', 'Rua R, 117'),
+  ('Felipe Cardoso', 'felipe cardoso', '(44) 99911-1129', 'felipe19@email.com', 'Rua S, 118'),
+  ('Tatiane Moraes', 'tatiane moraes', '(44) 99911-1130', 'tatiane20@email.com', 'Rua T, 119');
+
+  -- =====================================================
+  -- PETS (20)
+  -- =====================================================
+
+  INSERT INTO pets (
+    nome,
+    nome_normalizado,
+    especie,
+    porte,
+    raca,
+    observacoes,
+    dono_id,
+    servico_padrao,
+    remarcacao_ativa,
+    pacote_remarcacao,
+    data_inicio_pacote,
+    current_ultima_visita_data,
+    ultimo_visita_data_auto
+  ) VALUES
+  ('Thor', 'thor', 1, 'Grande', 3, 'Muito ativo', 1, 'Banho e Tosa', 1, 4, 20260501, 20260510, 20260510),
+  ('Luna', 'luna', 2, 'Pequeno', 4, 'Assustada', 2, 'Banho', 0, NULL, NULL, 20260502, 20260502),
+  ('Mel', 'mel', 1, 'Pequeno', 1, 'Dócil', 3, 'Banho', 1, 2, 20260425, 20260505, 20260505),
+  ('Bob', 'bob', 1, 'Grande', 3, 'Agitado', 4, 'Tosa Higiênica', 0, NULL, NULL, 20260428, 20260428),
+  ('Nina', 'nina', 2, 'Pequeno', 5, 'Calma', 5, 'Banho', 0, NULL, NULL, 20260501, 20260501),
+  ('Max', 'max', 1, 'Médio', 2, 'Late bastante', 6, 'Banho e Tosa', 1, 4, 20260420, 20260506, 20260506),
+  ('Bella', 'bella', 1, 'Pequeno', 1, 'Precisa cortar unhas', 7, 'Banho', 0, NULL, NULL, 20260504, 20260504),
+  ('Simba', 'simba', 2, 'Pequeno', 4, 'Arisco', 8, 'Banho', 0, NULL, NULL, 20260503, 20260503),
+  ('Toby', 'toby', 1, 'Médio', 2, 'Muito energético', 9, 'Banho e Tosa', 1, 2, 20260418, 20260507, 20260507),
+  ('Mia', 'mia', 2, 'Pequeno', 5, 'Quietinha', 10, 'Banho', 0, NULL, NULL, 20260505, 20260505),
+  ('Fred', 'fred', 1, 'Grande', 3, 'Amigável', 11, 'Tosa Higiênica', 0, NULL, NULL, 20260502, 20260502),
+  ('Julie', 'julie', 1, 'Pequeno', 1, 'Sensível ao secador', 12, 'Banho', 1, 4, 20260415, 20260509, 20260509),
+  ('Oliver', 'oliver', 2, 'Pequeno', 4, 'Gosta de colo', 13, 'Banho', 0, NULL, NULL, 20260501, 20260501),
+  ('Rex', 'rex', 1, 'Grande', 3, 'Muito forte', 14, 'Banho e Tosa', 1, 2, 20260422, 20260508, 20260508),
+  ('Lola', 'lola', 1, 'Pequeno', 2, 'Boazinha', 15, 'Banho', 0, NULL, NULL, 20260506, 20260506),
+  ('Pandora', 'pandora', 2, 'Pequeno', 5, 'Pelagem longa', 16, 'Banho', 0, NULL, NULL, 20260504, 20260504),
+  ('Spike', 'spike', 1, 'Médio', 2, 'Corre muito', 17, 'Tosa Higiênica', 1, 4, 20260410, 20260503, 20260503),
+  ('Kiara', 'kiara', 2, 'Pequeno', 4, 'Muito dócil', 18, 'Banho', 0, NULL, NULL, 20260507, 20260507),
+  ('Zeus', 'zeus', 1, 'Grande', 3, 'Obediente', 19, 'Banho e Tosa', 1, 2, 20260419, 20260510, 20260510),
+  ('Amora', 'amora', 1, 'Pequeno', 1, 'Filhote', 20, 'Banho', 0, NULL, NULL, 20260508, 20260508);
+
+  -- =====================================================
+  -- APPOINTMENTS (20)
+  -- =====================================================
+
+  INSERT INTO appointments (
+    pet_id,
+    servico,
+    data,
+    hora,
+    entregar_pet,
+    concluido,
+    observacao,
+    is_auto_agen
+  ) VALUES
+  (1, 'Banho e Tosa', 20260515, '09:00', 1, 0, 'Perfume suave', 0),
+  (2, 'Banho', 20260515, '09:30', 0, 1, 'Tudo ok', 0),
+  (3, 'Banho', 20260515, '10:00', 1, 0, 'Remarcação ativa', 1),
+  (4, 'Tosa Higiênica', 20260515, '10:30', 0, 0, 'Agitado', 0),
+  (5, 'Banho', 20260515, '11:00', 1, 1, 'Calma durante banho', 0),
+  (6, 'Banho e Tosa', 20260515, '11:30', 0, 0, 'Cliente atrasado', 1),
+  (7, 'Banho', 20260515, '13:00', 1, 0, 'Cortar unhas', 0),
+  (8, 'Banho', 20260515, '13:30', 0, 1, 'Muito quieto', 0),
+  (9, 'Banho e Tosa', 20260515, '14:00', 1, 0, 'Tosa baixa', 1),
+  (10, 'Banho', 20260515, '14:30', 0, 0, 'Sem observações', 0),
+  (11, 'Tosa Higiênica', 20260516, '09:00', 1, 1, 'Muito amigável', 0),
+  (12, 'Banho', 20260516, '09:30', 0, 0, 'Sensível ao secador', 1),
+  (13, 'Banho', 20260516, '10:00', 1, 0, 'Gosta de colo', 0),
+  (14, 'Banho e Tosa', 20260516, '10:30', 0, 1, 'Muito forte', 1),
+  (15, 'Banho', 20260516, '11:00', 1, 0, 'Cliente pediu hidratação', 0),
+  (16, 'Banho', 20260516, '11:30', 0, 0, 'Pelagem longa', 0),
+  (17, 'Tosa Higiênica', 20260516, '13:00', 1, 1, 'Muito ativo', 1),
+  (18, 'Banho', 20260516, '13:30', 0, 0, 'Muito dócil', 0),
+  (19, 'Banho e Tosa', 20260516, '14:00', 1, 0, 'Obediente', 1),
+  (20, 'Banho', 20260516, '14:30', 0, 1, 'Filhote', 0);
+`);
