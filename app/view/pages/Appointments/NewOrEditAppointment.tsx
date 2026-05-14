@@ -5,22 +5,19 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Platform,
 } from "react-native";
-import { useEffect, useState } from "react";
-import { Screen, LIMIT_ITEM_PAGE, ORDER } from "../../../config/consts";
+import { useState } from "react";
+import { Screen } from "../../../config/consts";
 import { useScreen } from "../../../hooks/useScreen";
 import { useError } from "../../../hooks/useError";
 
-import { PetWithSpecieAndRace } from "../../../model/Pet";
 import {
   AppointmentBuilder,
   NewOrEditAppointmentParams,
 } from "../../../model/Appointment";
-import { ServiceType } from "../../../model/ServiceType";
 
-import { petController } from "../../../controller/PetController";
 import { appointmentController } from "../../../controller/AppointmentsController";
-import { serviceTypeRepository } from "../../../repository/ServiceTypeRepository";
 
 import DefaultHeader from "../../components/Header/DefaultHeader";
 import TitleBar from "../../components/Cadastro/TitleBar";
@@ -35,14 +32,18 @@ import {
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
 
-import {
-  DataHifenPraBarra,
-  DataNumberPraString,
-  DataStringPraNumber,
-} from "../../../utils/formatadores/converterData";
+import { DataStringPraNumber } from "../../../utils/formatadores/converterData";
 import Mascarar from "../../../utils/mascarar";
-import useFormState from "../../../hooks/useFormState";
 
+import {
+  useAgendamentos,
+  usePetsComEspecieERacaBanco,
+  useServicos,
+} from "../../../utils/buscaBanco/appointment";
+import {
+  abrirModalSelecao,
+  ModalConfig,
+} from "../../../utils/abrirModalSelecao";
 
 export default function NewOrEditAppointment() {
   const { params, navigate } = useScreen<NewOrEditAppointmentParams>();
@@ -54,111 +55,32 @@ export default function NewOrEditAppointment() {
 
   const isEditing = Boolean(params?.appointment?.id);
 
-  const {
-    form,
-    setForm,
-    updateField,
-    resetForm,
-    setAllFields,
-  } = useFormState({
-    nomePet: params?.appointment?.nome_pet ?? "",
-    idPet: params?.appointment?.pet_id ?? 0,
-    servico: params?.appointment?.servico ?? "",
-    data: params?.appointment?.data
-      ? DataNumberPraString(params?.appointment?.data)
-      : params?.dateSelected
-        ? DataHifenPraBarra(params?.dateSelected)
-        : "",
-    hora: params?.appointment?.hora ?? "",
-    entregarPet: params?.appointment?.entregar_pet ?? 0,
-    concluido: params?.appointment?.concluido ?? 0,
-    observacao: params?.appointment?.observacao ?? "",
+  const { appointmentsForm, updateAppointmentsField } = useAgendamentos();
 
+  const { servicesForm } = useServicos();
 
-    //Quando não auto gerado, o db já criar isso como false(ou seja, 0), so fica true isso aqui quando é criado na trigger
-    //Minha ideia é não alterar isso, por conta de que, foi criado automatico e se o dono do petshop mudar
-    //deve continuar como auto gerado
-    //Mas é interessante fazer algo visual para mostrar se foi auto gerado ou não
-    autoGen: params?.appointment?.is_auto_agen ?? 0
-  })
-
-  //Quando não auto gerado, o db já criar isso como false(ou seja, 0), so fica true isso aqui quando é criado na trigger
-  //Minha ideia é não alterar isso, por conta de que, foi criado automatico e se o dono do petshop mudar
-  //deve continuar como auto gerado
-  //Mas é interessante fazer algo visual para mostrar se foi auto gerado ou não
-  const [autoGen, setAutoGen] = useState<number>(
-    params?.appointment?.is_auto_agen ?? 0,
-  );
-
-  const [servicos, setServicos] = useState<ServiceType[]>([]);
-
-  const [modalConfig, setModalConfig] = useState({
+  const [modalConfig, setModalConfig] = useState<ModalConfig>({
     visivel: false,
     titulo: "",
-    lista: [] as any[],
-    aoSelecionar: (item: any) => { },
+    itemIcon: undefined,
+    lista: [],
+    aoSelecionar: () => {},
   });
 
-  const abrirModal = ({
-    titulo,
-    lista,
-    aoSelecionar,
-  }: {
-    titulo: string;
-    lista: any[];
-    aoSelecionar: (item: any) => void;
-  }) => {
-    setModalConfig({
-      visivel: true,
-      titulo: titulo,
-      lista: lista,
-      aoSelecionar: (item) => {
-        aoSelecionar(item);
-        setModalConfig((prev) => ({ ...prev, visivel: false }));
-      },
-    });
-  };
+  const { petsForm, updatePetsField } = usePetsComEspecieERacaBanco(
+    modalConfig.visivel
+  );
 
-  const [page, setPage] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [searchTxt, setSearchTxt] = useState("");
-  const [pets, setPets] = useState<PetWithSpecieAndRace[]>();
-
-  useEffect(() => {
-    try {
-      petController
-        .searchPetsByNamePagedWithSpecieAndRace(
-          searchTxt,
-          page,
-          LIMIT_ITEM_PAGE,
-          ORDER.DESC,
-        )
-        .then(setPets)
-        .catch(handleError);
-    } catch (e) {
-      showError(e instanceof Error ? e.message : "Erro inesperado.");
-    }
-  }, [searchTxt, page]);
-
-  useEffect(() => {
-    serviceTypeRepository
-      .getAllServiceTypes()
-      .then(setServicos)
-      .catch(handleError);
-  }, []);
-
-  const handleError = (e: unknown) =>
-    showError(e instanceof Error ? e.message : "Erro inesperado.");
 
   const salvarAgendamento = async () => {
     const appointmentSalvar = new AppointmentBuilder()
-      .withPetId(form.idPet)
-      .withServico(form.servico)
-      .withHora(form.hora ?? "00:00")
-      .withData(DataStringPraNumber(form.data, "/"))
-      .withEntregarPet(form.entregarPet)
-      .withObservacao(form.observacao)
-      .isConcluido(form.concluido)
+      .withPetId(appointmentsForm.pet_id)
+      .withServico(appointmentsForm.servico)
+      .withHora(appointmentsForm.hora ?? "00:00")
+      .withData(DataStringPraNumber(appointmentsForm.data, "/"))
+      .withEntregarPet(appointmentsForm.entregar_pet)
+      .withObservacao(appointmentsForm.observacao)
+      .isConcluido(appointmentsForm.concluido)
       .build();
 
     try {
@@ -179,7 +101,10 @@ export default function NewOrEditAppointment() {
   const s = useThemedStyles(styles);
 
   return (
-    <KeyboardAvoidingView style={s.flex}>
+    <KeyboardAvoidingView
+      style={s.flex}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <DefaultHeader />
       <TitleBar
         returnTo={Screen.Calendario}
@@ -198,31 +123,39 @@ export default function NewOrEditAppointment() {
             <SelectionField
               image={require("../../../assets/animais/petHome.png")}
               titleName={"PET"}
-              selectedReg={form.nomePet}
+              selectedReg={appointmentsForm.nome_pet}
               buttonText="Selecionar Pet"
               hasBorderBottom={true}
               onPress={() =>
-                abrirModal({
+                abrirModalSelecao({
                   titulo: "Selecionar Pet",
-                  lista: pets || [],
-                  aoSelecionar: (item) => {
-                    updateField("idPet", item.id);
-                    updateField("nomePet", item.nome);
-                    updateField("autoGen", item.remarcacao_ativa);
+                  itemIcon: require("../../../assets/animais/pet.png"),
+                  lista: petsForm.pets,
+                  setModalConfig,
+                  aoSelecionar: (pet) => {
+                    updateAppointmentsField("pet_id", pet.id);
+                    updateAppointmentsField("nome_pet", pet.nome);
+                    updateAppointmentsField(
+                      "is_auto_agen",
+                      pet.remarcacao_ativa,
+                    );
                   },
                 })
               }
               goEdit={true}
-              setModal={() => { }}
             />
             <InputSelect
               image={require("../../../assets/outros/servicos.png")}
               titleName="Serviço"
               placeholder="Selecione o serviço..."
-              itens={servicos}
-              itemSelected={servicos.find((e) => e.servico === form.servico)}
+              itens={servicesForm.servico}
+              itemSelected={servicesForm.servico.find(
+                (e) => e.servico === appointmentsForm.servico,
+              )}
               labelExtractor={(item) => item.servico}
-              onChange={(item) => updateField("servico", item.servico)}
+              onChange={(item) =>
+                updateAppointmentsField("servico", item.servico)
+              }
               renderItem={(item) => (
                 <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
                   {item.servico}
@@ -232,8 +165,8 @@ export default function NewOrEditAppointment() {
             />
             <InputInfo
               image={require("../../../assets/outros/data.png")}
-              item={form.data}
-              setItem={(v) => updateField("data", mascarar(v, 1))}
+              item={appointmentsForm.data}
+              setItem={(v) => updateAppointmentsField("data", mascarar(v, 1))}
               placeHolder="Informe a data..."
               titleName="Data"
               variasLinhas={false}
@@ -242,8 +175,8 @@ export default function NewOrEditAppointment() {
             />
             <InputInfo
               image={require("../../../assets/outros/hora.png")}
-              item={form.hora}
-              setItem={(v) => updateField("hora", mascarar(v, 2))}
+              item={appointmentsForm.hora}
+              setItem={(v) => updateAppointmentsField("hora", mascarar(v, 2))}
               placeHolder="Informe o horário..."
               titleName="Horário"
               variasLinhas={false}
@@ -252,17 +185,19 @@ export default function NewOrEditAppointment() {
             />
             <Toggle
               image={require("../../../assets/outros/entrega.png")}
-              value={form.entregarPet}
-              onChange={(value) => updateField("entregarPet", value)}
-              title="Entrega"
-              subtitle="Vai entregar o pet?"
+              value={appointmentsForm.entregar_pet}
+              onChange={(value) =>
+                updateAppointmentsField("entregar_pet", value)
+              }
+              title="Táxi dog"
+              subtitle="Vai usar táxi dog?"
               hasBorderBottom={true}
               noEdit={false}
             />
             <InputInfo
               image={require("../../../assets/nav_bar/artigo.png")}
-              item={form.observacao}
-              setItem={(item) => updateField("observacao", item)}
+              item={appointmentsForm.observacao}
+              setItem={(item) => updateAppointmentsField("observacao", item)}
               placeHolder="Uma observação adicional..."
               titleName="Observações"
               variasLinhas={true}
@@ -273,17 +208,21 @@ export default function NewOrEditAppointment() {
               <>
                 <Toggle
                   image={require("../../../assets/outros/concluido.png")}
-                  value={form.concluido}
-                  onChange={(value) => updateField("concluido", value)}
+                  value={appointmentsForm.concluido}
+                  onChange={(value) =>
+                    updateAppointmentsField("concluido", value)
+                  }
                   title="Status"
                   subtitle="Serviço concluído?"
                   hasBorderBottom={true}
                 />
-                {form.autoGen == 1 && (
+                {appointmentsForm.is_auto_agen == 1 && (
                   <Toggle
                     image={require("../../../assets/outros/auto_gen.png")}
-                    value={form.autoGen}
-                    onChange={(value) => updateField("autoGen", value)}
+                    value={appointmentsForm.is_auto_agen}
+                    onChange={(value) =>
+                      updateAppointmentsField("is_auto_agen", value)
+                    }
                     title="Agendamento Auto-gerado"
                     subtitle="Serviço concluído?"
                     hasBorderBottom={true}
@@ -308,12 +247,12 @@ export default function NewOrEditAppointment() {
         titulo={modalConfig.titulo}
         onSelect={modalConfig.aoSelecionar}
         onClose={() => setModalConfig((prev) => ({ ...prev, visivel: false }))}
-        page={page}
-        total={total}
-        setPage={setPage}
+        page={petsForm.page}
+        total={petsForm.total}
+        setPage={(value) => updatePetsField("page", value)}
         setSearch={(txt) => {
-          setPage(0);
-          setSearchTxt(txt);
+          updatePetsField("page", 0);
+          updatePetsField("searchTxt", txt);
         }}
       />
     </KeyboardAvoidingView>
