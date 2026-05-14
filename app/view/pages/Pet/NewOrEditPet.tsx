@@ -195,7 +195,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
             />
             <InputSelect
               titleName="Espécie"
-              image={require("../../../assets/animais/iconPata.png")}
+              image={require("../../../assets/animais/iconEspecie.png")}
               placeholder="Selecione a espécie..."
               itens={especiesList}
               itemSelected={especiesList.find((e) => e.id === form.especie)}
@@ -209,7 +209,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
               hasBorderBottom={true}
             />
             <SelectionField
-              image={require("../../../assets/animais/iconPata.png")}
+              image={require("../../../assets/animais/iconRaca.png")}
               titleName="Raça"
               selectedReg={form.raca_nome}
               buttonText={form.raca_nome ? "Trocar raça" : "Selecionar raça"}
@@ -233,7 +233,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
             />
             <InputSelect
               titleName="Porte"
-              image={require("../../../assets/animais/iconPata.png")}
+              image={require("../../../assets/animais/iconPorte.png")}
               placeholder="Selecione o Porte do animal"
               itens={portesList}
               itemSelected={portesList.find((e) => e.id === form.porte)}
