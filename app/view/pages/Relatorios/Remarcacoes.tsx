@@ -4,12 +4,12 @@ import {
   useTheme,
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
-import { comparativoRemarcacao } from "../../../utils/relatorios/Remarcacoes";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import BarChart, { BarChartItem } from "../../components/Relatorios/BarChart";
 import { useError } from "../../../hooks/useError";
+import { comparativoRemarcacao } from "../../../utils/relatorios/Remarcacoes";
 
 export default function Remarcacoes() {
   const [petsRemarc, setPetsRemarc] = useState<BarChartItem[]>([]);

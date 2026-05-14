@@ -1,4 +1,5 @@
 import { RelatorioType } from "../../../../config/consts";
+import ComparativoMensal from "../ComparativoMensal";
 import DiasHorasMaisAtendidas from "../DiasHorasMaisAtendidas";
 import OrigemAgendamentos from "../OrigemAgendamentos";
 import PetsAusentes from "../PetsAusentes";
@@ -15,7 +16,7 @@ export default function RelatorioView({ route }: { route: RelatorioType }) {
     case RelatorioType.Remarcacoes:
       return <Remarcacoes />;
     case RelatorioType.ComparativoMensal:
-      return <OrigemAgendamentos />;
+      return <ComparativoMensal />;
     case RelatorioType.Pacotes:
       return <OrigemAgendamentos />;
     case RelatorioType.TaxaConclusao:

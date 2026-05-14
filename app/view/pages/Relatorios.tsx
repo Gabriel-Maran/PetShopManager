@@ -60,14 +60,6 @@ const REPORTS: {
     accent: "#3B82F6",
   },
   {
-    id: "conclusao",
-    type: RelatorioType.TaxaConclusao,
-    title: "Taxa de conclusão",
-    subtitle: "Concluídos / total de agendamentos",
-    tag: "Qualidade",
-    accent: "#22C55E",
-  },
-  {
     id: "pacotes",
     type: RelatorioType.Pacotes,
     title: "Pacotes ativos",
