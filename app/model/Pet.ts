@@ -1,8 +1,4 @@
-import {
-  PacoteRemarcacao,
-  PorteAnimal,
-  TipoServico,
-} from "../config/consts";
+import { PacoteRemarcacao, PorteAnimal, TipoServico } from "../config/consts";
 
 export interface Pet {
   id?: number;
@@ -26,7 +22,7 @@ export interface Pet {
 export type PetWithSpecieAndRace = Pet & {
   nome_especie: string;
   nome_raca: string;
-}
+};
 
 export class PetBuilder {
   private props: Partial<Pet>;
@@ -34,7 +30,7 @@ export class PetBuilder {
   constructor() {
     this.props = {
       nome: "",
-      especie: 0 ,
+      especie: 0,
       porte: PorteAnimal.MEDIO,
       dono_id: 0,
       servico_padrao: TipoServico.BanhoETosa,

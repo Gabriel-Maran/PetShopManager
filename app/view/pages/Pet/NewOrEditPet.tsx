@@ -5,7 +5,7 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ImageSourcePropType
+  ImageSourcePropType,
 } from "react-native";
 
 import {
@@ -28,15 +28,17 @@ import { petController } from "../../../controller/PetController";
 
 import TitleBar from "../../components/Cadastro/TitleBar";
 import DefaultHeader from "../../components/Header/DefaultHeader";
-import InputInfo from "../../components/Cadastro/InputInfo";
-import SelectionField from "../../components/Cadastro/SelectionField";
 import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
-import InputSelect from "../../components/InputSelect";
 
-import { pegarDonosBanco, pegarRacasBanco } from "../../../utils/buscaBanco/pet";
+import {
+  pegarDonosBanco,
+  pegarRacasBanco,
+} from "../../../utils/buscaBanco/pet";
 
-import { EspeciesAtendidasLabel } from "../../../config/consts";
 import useFormState from "../../../hooks/useFormState";
+import ItemSelect from "../../components/Cadastro/ItemSelect";
+import AbaInfoPet from "../../components/Cadastro/Tabs/AbaInfoPet";
+import AbaAgendamentoPet from "../../components/Cadastro/Tabs/AbaAgendamentoPet";
 
 //Transforma em um array com um id e o nome
 const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
@@ -44,46 +46,35 @@ const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
   nome: PorteAnimalLabel[key as keyof typeof PorteAnimalLabel],
 }));
 
-export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
+export default function NewOrEditPet() {
+  const [isCadastroPetSelecte, setIsCadastroPetSelecte] = useState(true);
   const { params, navigate } = useScreen<Pet>();
   const { showError } = useError();
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
-
-  const {
-    form,
-    updateField
-  } = useFormState({
-    nome: petToEdit?.nome ?? "",
-    especie: petToEdit?.especie ?? 0,
-    dono_id: petToEdit?.dono_id ?? 0,
+  const { form, updateField } = useFormState({
+    nome: params?.nome ?? "",
+    especie: params?.especie ?? 0,
+    dono_id: params?.dono_id ?? 0,
     dono_nome: "",
-    raca: petToEdit?.raca ?? 0,
-    raca_nome: petToEdit?.raca_nome ?? "",
-    observacoes: petToEdit?.observacoes ?? "",
-    servicoPadrao: petToEdit?.servico_padrao ?? TipoServico.Banho,
-    remarcAtiva: petToEdit?.remarcacao_ativa ?? false,
+    raca: params?.raca ?? 0,
+    raca_nome: params?.raca_nome ?? "",
+    observacoes: params?.observacoes ?? "",
+    servicoPadrao: params?.servico_padrao ?? TipoServico.Banho,
+    remarcAtiva: Boolean(params?.remarcacao_ativa ?? false),
     porte:
-      petToEdit?.porte && petToEdit.porte in PorteAnimal
-        ? (petToEdit.porte as PorteAnimal)
+      params?.porte && params.porte in PorteAnimal
+        ? (params.porte as PorteAnimal)
         : PorteAnimal.MEDIO,
     pacoteRemarcacao:
-      petToEdit?.pacote_remarcacao &&
-        petToEdit.pacote_remarcacao in PacoteRemarcacao
-        ? (petToEdit.pacote_remarcacao as PacoteRemarcacao)
+      params?.pacote_remarcacao && params.pacote_remarcacao in PacoteRemarcacao
+        ? (params.pacote_remarcacao as PacoteRemarcacao)
         : undefined,
-    dataInicioPacote: petToEdit?.data_inicio_pacote ?? undefined,
-  }
-  )
+    dataInicioPacote: params?.data_inicio_pacote ?? undefined,
+  });
 
-  const { racasList, especiesList } = pegarRacasBanco(form.especie)
-  const {
-    owners,
-    page,
-    setPage,
-    setSearchTxt,
-    total,
-  } = pegarDonosBanco()
+  const { racasList, especiesList } = pegarRacasBanco(form.especie);
+  const { owners, page, setPage, setSearchTxt, total } = pegarDonosBanco();
 
   const salvarPet = async () => {
     const petSalvar = new PetBuilder()
@@ -99,8 +90,8 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
       .withInicioPacote(form.dataInicioPacote)
       .build();
     try {
-      if (petToEdit?.id) {
-        await petController.updatePet(petToEdit.id, petSalvar);
+      if (params?.id) {
+        await petController.updatePet(params.id, petSalvar);
       } else {
         await petController.createPet(petSalvar);
       }
@@ -115,7 +106,7 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
     titulo: "",
     itemIcon: undefined as ImageSourcePropType | undefined,
     lista: [] as any[],
-    aoSelecionar: (item: any) => { },
+    aoSelecionar: (item: any) => {},
   });
 
   const abrirModal = ({
@@ -144,127 +135,58 @@ export default function NewOrEditPet({ petToEdit }: { petToEdit?: Pet }) {
   return (
     <>
       <DefaultHeader />
-      <TitleBar
-        returnTo={Screen.Cadastros}
-        title={petToEdit ? "Editar Pet" : "Novo Pet"}
-        subtitle="Preencha os dados do pet"
-      />
+      <View style={{ backgroundColor: colors.THIRD_BACKGROUND }}>
+        <TitleBar
+          returnTo={Screen.Cadastros}
+          title={params ? "Editar Pet" : "Novo Pet"}
+          subtitle="Preencha os dados do pet"
+        />
+        <View style={s.escolhaItem}>
+          <ItemSelect
+            title="Pet"
+            isThisSelected={isCadastroPetSelecte}
+            setValorSelect={() => setIsCadastroPetSelecte(true)}
+            valorSelect={true}
+          />
+          <ItemSelect
+            title="Agendamento"
+            isThisSelected={!isCadastroPetSelecte}
+            setValorSelect={() => setIsCadastroPetSelecte(false)}
+            valorSelect={false}
+          />
+        </View>
+      </View>
+
       <ScrollView
         contentContainerStyle={s.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
         <View style={s.ctnCadastro}>
-          <View style={s.viewDataReq}>
-            <Text style={s.titleDataInfo}>DADOS OBRIGATÓRIOS</Text>
-          </View>
-
-          <View style={s.inputs}>
-            <InputInfo
-              image={require("../../../assets/animais/iconNome.png")}
-              item={form.nome}
-              setItem={(v) => updateField("nome", v)}
-              placeHolder="Digite o nome..."
-              titleName="Nome Completo"
-              variasLinhas={false}
-              hasBorderBottom={true}
-              digitavel={true}
-            />
-
-            <SelectionField
-              image={require("../../../assets/animais/iconDono.png")}
-              titleName="Dono"
-              selectedReg={form.dono_nome}
-              buttonText={form.dono_nome ? "Trocar dono" : "Selecionar dono"}
-              hasBorderBottom={true}
-              onPress={() =>
+          {isCadastroPetSelecte ? (
+            <AbaInfoPet
+              form={form}
+              updateField={updateField as (field: string, value: any) => void}
+              portesList={portesList}
+              racasList={racasList}
+              especiesList={especiesList}
+              abrirModal={(config) =>
                 abrirModal({
-                  titulo: "Selecionar Dono",
-                  itemIcon: require("../../../assets/animais/iconDono.png"),
-                  lista: owners || [],
-                  aoSelecionar: (item) => {
-                    updateField("dono_id", item.id);
-                    updateField("dono_nome", item.nome);
-                  },
+                  ...config,
+                  lista:
+                    config.titulo === "Selecionar Dono"
+                      ? (owners ?? [])
+                      : config.lista,
                 })
               }
-              onClear={() => {
-                updateField("dono_id", 0);
-                updateField("dono_nome", "");
-              }}
-              goEdit={true}
+              salvarPet={salvarPet}
+              petToEdit={params}
             />
-            <InputSelect
-              titleName="Espécie"
-              image={require("../../../assets/animais/iconEspecie.png")}
-              placeholder="Selecione a espécie..."
-              itens={especiesList}
-              itemSelected={especiesList.find((e) => e.id === form.especie)}
-              labelExtractor={(item) => EspeciesAtendidasLabel[item.nome]}
-              onChange={(item) => updateField("especie", item.id)}
-              renderItem={(item) => (
-                <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
-                  {EspeciesAtendidasLabel[item.nome]}
-                </Text>
-              )}
-              hasBorderBottom={true}
+          ) : (
+            <AbaAgendamentoPet
+              form={form}
+              updateField={updateField as (field: string, value: any) => void}
             />
-            <SelectionField
-              image={require("../../../assets/animais/iconRaca.png")}
-              titleName="Raça"
-              selectedReg={form.raca_nome}
-              buttonText={form.raca_nome ? "Trocar raça" : "Selecionar raça"}
-              hasBorderBottom={true}
-              onPress={() =>
-                abrirModal({
-                  titulo: "Selecionar Raça",
-                  itemIcon: require("../../../assets/animais/iconPata.png"),
-                  lista: racasList || [],
-                  aoSelecionar: (item) => {
-                    updateField("raca", item.id);
-                    updateField("raca_nome", item.nome);
-                  },
-                })
-              }
-              onClear={() => {
-                updateField("raca", 0);
-                updateField("raca_nome", "");
-              }}
-              goEdit={true}
-            />
-            <InputSelect
-              titleName="Porte"
-              image={require("../../../assets/animais/iconPorte.png")}
-              placeholder="Selecione o Porte do animal"
-              itens={portesList}
-              itemSelected={portesList.find((e) => e.id === form.porte)}
-              labelExtractor={(item) => item.nome}
-              onChange={(item) => updateField("porte", item.nome as PorteAnimal)}
-              renderItem={(item) => (
-                <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
-                  {item.nome}
-                </Text>
-              )}
-              hasBorderBottom={true}
-            />
-
-            <InputInfo
-              image={require("../../../assets/nav_bar/artigo.png")}
-              item={form.observacoes}
-              setItem={(v) => updateField("observacoes", v)}
-              placeHolder="Uma observação adicional..."
-              titleName="Observações"
-              variasLinhas={true}
-              digitavel={true}
-              hasBorderBottom={true}
-            />
-          </View>
-          <View style={s.ctnBtnSalvar}>
-            <TouchableOpacity style={s.btnSalvar} onPress={salvarPet}>
-              <Text style={s.txtSalvar}>
-                {petToEdit ? "Salvar alterações" : "Salvar"}
-              </Text>
-            </TouchableOpacity>
-          </View>
+          )}
         </View>
       </ScrollView>
 
@@ -316,15 +238,12 @@ const styles = (colors: ThemeColors) =>
       fontWeight: "500",
       marginBottom: 8,
     },
-    ctnBtnSalvar: { marginTop: 25 },
-    btnSalvar: {
-      paddingVertical: 20,
-      paddingHorizontal: 75,
-      backgroundColor: colors.PRIMARY_VARIANT,
-      borderRadius: 15,
-    },
-    txtSalvar: {
-      color: colors.BACKGROUND,
-      textAlign: "center",
+
+    escolhaItem: {
+      flexDirection: "row",
+      justifyContent: "space-evenly",
+      width: "100%",
+      marginTop: 15,
+      marginBottom: 10,
     },
   });

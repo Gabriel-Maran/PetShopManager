@@ -36,7 +36,10 @@ export default function PetList({
                 {`${EspeciesAtendidasLabel[item.nome_especie as EspeciesAtendidas]}${item.nome_raca ? ` - ${item.nome_raca}` : ""}`}
               </Text>
             </View>
-            <ButtonEditar navegarPara={Screen.NewOrEditPet} />
+            <ButtonEditar
+              navegarPara={Screen.NewOrEditPet}
+              selectParam={item}
+            />
             {saoAtivados ? (
               <ButtonExcluir itemId={item.id ?? -1} onDelete={onDelete} />
             ) : (

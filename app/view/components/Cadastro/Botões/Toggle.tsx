@@ -26,7 +26,7 @@ export default function Toggle({
   hasBorderBottom?: boolean;
   image: ImageSourcePropType;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   onChange?: (value: number) => void;
   value: number;
   noEdit?: boolean;
@@ -38,7 +38,7 @@ export default function Toggle({
 
   const toggleSwitch = () => {
     const newValue = !value;
-    onChange?.(newValue ? 1 : 0); // ✅ onChange era opcional mas chamado sem verificar
+    onChange?.(newValue ? 1 : 0); // onChange era opcional mas chamado sem verificar
 
     Animated.timing(animatedValue, {
       toValue: newValue ? 1 : 0,
@@ -52,7 +52,7 @@ export default function Toggle({
     outputRange: [2, 22],
   });
 
-  // ✅ cores animadas precisam vir do useTheme diretamente (não do StyleSheet)
+  // cores animadas precisam vir do useTheme diretamente (não do StyleSheet)
   const backgroundColor = animatedValue.interpolate({
     inputRange: [0, 1],
     outputRange: [colors.DESATIVADO, colors.PRIMARY],
@@ -65,7 +65,7 @@ export default function Toggle({
       hasBorderBottom={hasBorderBottom}
     >
       <View style={!noEdit ? s.toggleESubtitle : s.toggleESubtitleNoEdit}>
-        <Text style={s.subtitle}>{subtitle}</Text>
+        {subtitle && <Text style={s.subtitle}>{subtitle}</Text>}
 
         <TouchableOpacity activeOpacity={0.8} onPress={toggleSwitch}>
           <Animated.View style={[s.switchContainer, { backgroundColor }]}>

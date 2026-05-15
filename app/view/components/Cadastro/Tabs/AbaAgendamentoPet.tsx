@@ -1,0 +1,137 @@
+import { StyleSheet, Text, View } from "react-native";
+import { PacoteRemarcacao, TipoServico } from "../../../../config/consts";
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../../../Themes/ThemeProvider";
+import InputInfo from "../InputInfo";
+import InputSelect from "../../InputSelect";
+import Toggle from "../Botões/Toggle";
+import Mascarar from "../../../../utils/mascarar";
+import {
+  DataNumberPraString,
+  DataStringPraNumber,
+} from "../../../../utils/formatadores/converterData";
+
+// Correção 1: Filtra apenas os valores numéricos do enum
+const tiposServicoList = Object.values(TipoServico).map((v) => ({
+  id: v,
+  nome: v,
+}));
+
+const pacotesRemarcacaoList = Object.values(PacoteRemarcacao)
+  .filter((v): v is PacoteRemarcacao => typeof v === "number")
+  .map((v) => ({
+    id: v,
+    nome:
+      v === PacoteRemarcacao.Mensal
+        ? "Mensal (4 semanas)"
+        : "Quinzenal (2 semanas)",
+  }));
+
+interface AbaAgendamentoPetProps {
+  form: {
+    servicoPadrao: TipoServico;
+    remarcAtiva: boolean;
+    pacoteRemarcacao?: PacoteRemarcacao;
+    dataInicioPacote?: number;
+  };
+  updateField: (field: string, value: any) => void;
+}
+
+export default function AbaAgendamentoPet({
+  form,
+  updateField,
+}: AbaAgendamentoPetProps) {
+  const s = useThemedStyles(styles);
+  const { colors } = useTheme();
+
+  const mascarar = Mascarar;
+
+  return (
+    <View style={s.inputs}>
+      <InputSelect
+        image={require("../../../../assets/outros/servicos.png")}
+        titleName="Serviço Padrão"
+        placeholder="Selecione o serviço padrão..."
+        itens={tiposServicoList}
+        itemSelected={tiposServicoList.find((e) => e.id === form.servicoPadrao)}
+        labelExtractor={(item) => item.nome}
+        onChange={(item) => updateField("servicoPadrao", item.id)}
+        renderItem={(item) => (
+          <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+            {item.nome}
+          </Text>
+        )}
+        hasBorderBottom={true}
+      />
+
+      <Toggle
+        image={require("../../../../assets/outros/auto_gen.png")}
+        value={form.remarcAtiva ? 1 : 0}
+        onChange={(value) => updateField("remarcAtiva", value === 1)}
+        title="Remarcação automática ativa"
+        subtitle=""
+        hasBorderBottom={true}
+        noEdit={false}
+      />
+
+      {form.remarcAtiva && (
+        <>
+          <InputSelect
+            image={require("../../../../assets/outros/servicos.png")}
+            titleName="Pacote de Remarcação"
+            placeholder="Selecione o pacote..."
+            itens={pacotesRemarcacaoList}
+            itemSelected={pacotesRemarcacaoList.find(
+              (e) => e.id === form.pacoteRemarcacao,
+            )}
+            labelExtractor={(item) => item.nome}
+            onChange={(item) => updateField("pacoteRemarcacao", item.id)}
+            renderItem={(item) => (
+              <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+                {item.nome}
+              </Text>
+            )}
+            hasBorderBottom={true}
+          />
+          <InputInfo
+            image={require("../../../../assets/outros/data.png")}
+            item={
+              typeof form.dataInicioPacote === "number"
+                ? DataNumberPraString(form.dataInicioPacote)
+                : (form.dataInicioPacote ?? "")
+            }
+            setItem={(v) => {
+              const dataMascarada = mascarar(v, 1);
+              if (dataMascarada.length === 10) {
+                const dataNumerica = DataStringPraNumber(dataMascarada, "/");
+                updateField("dataInicioPacote", dataNumerica);
+              } else {
+                updateField("dataInicioPacote", dataMascarada);
+              }
+            }}
+            placeHolder="Informe a data de início..."
+            titleName="Início do Pacote"
+            variasLinhas={false}
+            digitavel={true}
+            hasBorderBottom={false}
+          />
+        </>
+      )}
+    </View>
+  );
+}
+
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    inputs: {
+      width: "100%",
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.BORDER_LIGHT,
+      backgroundColor: colors.BACKGROUND,
+      overflow: "hidden",
+    },
+  });

@@ -58,7 +58,6 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 
 export async function initDatabase(): Promise<void> {
   const db = await getDatabase();
-  
 
   // ── Pragma ────────────────────────────────────────────────────────────────
 

@@ -169,50 +169,24 @@ export default function Calendario() {
           setDateSelected(day.dateString);
         }}
         onMonthChange={(month) => {
-          setMesSelecionado(month.dateString)
+          setMesSelecionado(month.dateString);
           setDateSelected(month.dateString);
         }}
         markingType="custom"
         markedDates={{
-         ...datasMarcadas,
+          ...datasMarcadas,
 
-        [hoje]: {
-          ...datasMarcadas[hoje],
-          marked: datasMarcadas[hoje]?.marked ?? true,
-          dotColor: "#FFFFFF",
-          selectedDotColor: "#FFFFFF",
-          selected: true,
-          customStyles: {
-            container: {
-              width: 40,
-              height: 40,
-              backgroundColor: colors.PRIMARY_CONTRAST,
-              borderRadius: 2,
-              alignItems: "center",
-              justifyContent: "center",
-              margin: 0,
-              padding: 0,
-            },
-            text: {
-              color: "#FFFFFF",
-              fontWeight: "bold",
-              includeFontPadding: false,
-              textAlignVertical: "center",
-            },
-          },
-        },
-
-        ...(!isHojeSelecionado && {
-          [dateSelected]: {
-            ...datasMarcadas[dateSelected],
+          [hoje]: {
+            ...datasMarcadas[hoje],
+            marked: datasMarcadas[hoje]?.marked ?? true,
+            dotColor: "#FFFFFF",
+            selectedDotColor: "#FFFFFF",
             selected: true,
             customStyles: {
               container: {
                 width: 40,
                 height: 40,
-                borderColor: colors.PRIMARY_CONTRAST,
-                backgroundColor: "transparent",
-                borderWidth: 2.5,
+                backgroundColor: colors.PRIMARY_CONTRAST,
                 borderRadius: 2,
                 alignItems: "center",
                 justifyContent: "center",
@@ -220,13 +194,39 @@ export default function Calendario() {
                 padding: 0,
               },
               text: {
-                color: colors.TEXT_SECONDARY,
+                color: "#FFFFFF",
+                fontWeight: "bold",
                 includeFontPadding: false,
                 textAlignVertical: "center",
               },
             },
           },
-        }),
+
+          ...(!isHojeSelecionado && {
+            [dateSelected]: {
+              ...datasMarcadas[dateSelected],
+              selected: true,
+              customStyles: {
+                container: {
+                  width: 40,
+                  height: 40,
+                  borderColor: colors.PRIMARY_CONTRAST,
+                  backgroundColor: "transparent",
+                  borderWidth: 2.5,
+                  borderRadius: 2,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: 0,
+                  padding: 0,
+                },
+                text: {
+                  color: colors.TEXT_SECONDARY,
+                  includeFontPadding: false,
+                  textAlignVertical: "center",
+                },
+              },
+            },
+          }),
         }}
         theme={
           {

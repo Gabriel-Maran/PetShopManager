@@ -28,6 +28,7 @@ export enum Screen {
 export enum TipoServico {
   Banho = "Banho",
   BanhoETosa = "Banho e Tosa",
+  BanhoEHigienica = "Banho e Higiênica",
 }
 
 export enum IMAGENS_NAMES {
