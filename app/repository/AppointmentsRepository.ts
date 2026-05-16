@@ -15,7 +15,11 @@ class AppointmentRepository {
   async getAppointmentsByDate(date: number): Promise<Appointment[]> {
     const db = await getDatabase();
     return db.getAllAsync<Appointment>(
-      `SELECT * FROM appointments WHERE data = ? ORDER BY id ASC`,
+      `SELECT 
+        * 
+       FROM appointments 
+       WHERE data = ? 
+       ORDER BY ORDER BY AP.concluido, AP.hora ASC`,
       [date],
     );
   }
@@ -36,7 +40,7 @@ class AppointmentRepository {
     JOIN owners  AS OW ON PT.dono_id = OW.id
     JOIN species AS SP ON PT.especie = SP.id
     WHERE AP.data = ?
-    ORDER BY AP.id ASC
+    ORDER BY AP.concluido, AP.hora ASC
     `,
       [date],
     );
