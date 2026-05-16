@@ -79,7 +79,7 @@ const styles = (colors: ThemeColors) =>
       paddingLeft: 15,
       borderRadius: 10,
       fontSize: 20,
-      borderColor: colors.BORDER_LIGHT,
+      borderColor: colors.BORDER_STRONG,
     },
     txtReg: {
       fontSize: 15,
