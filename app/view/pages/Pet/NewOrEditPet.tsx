@@ -33,7 +33,7 @@ import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
 import {
   pegarDonosBanco,
   pegarRacasBanco,
-} from "../../../utils/buscaBanco/pet";
+} from "../../../hooks/buscaBanco/usePet";
 
 import useFormState from "../../../hooks/useFormState";
 import ItemSelect from "../../components/Cadastro/ItemSelect";
