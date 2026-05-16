@@ -190,7 +190,7 @@ export default function AbaInfoPet({
           }}
           goEdit={true}
           isEditavel={isEditavel}
-          fazCadastro={true}
+          fazCadastro={isEditavel}
           onCadastro={() => setRacaModalAberto(true)}
         />
 
