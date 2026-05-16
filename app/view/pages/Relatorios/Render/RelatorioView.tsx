@@ -1,23 +1,15 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import {
-  PorteAnimal,
-  RelatorioType,
-  Screen,
-  TipoServico,
-} from "../../../../config/consts";
+import { StyleSheet, Text } from "react-native";
+import { RelatorioType, Screen } from "../../../../config/consts";
 import ComparativoMensal from "../ComparativoMensal";
 import DiasHorasMaisAtendidas from "../DiasHorasMaisAtendidas";
 import OrigemAgendamentos from "../OrigemAgendamentos";
 import PetsAusentes from "../PetsAusentes";
 import RemarcacoesIntervals from "../RemarcacoesIntervals";
-import { PetBuilder } from "../../../../model/Pet";
-import { petController } from "../../../../controller/PetController";
-import { ownerController } from "../../../../controller/OwnerController";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import TitleBar from "../../../components/Cadastro/TitleBar";
-import { getDatabase } from "../../../../config/database";
 import { DatePicker } from "../../../components/Cadastro/Botões/DataPicker/DatePicker";
 import { hoje } from "../../../../utils/dataPicker/dataPickerAux";
+import InputDataPicker from "../../../components/Cadastro/Botões/DataPicker/InputDataPicker";
 
 export default function RelatorioView({ route }: { route: RelatorioType }) {
   const [date, setDate] = useState(hoje());
@@ -42,13 +34,6 @@ export default function RelatorioView({ route }: { route: RelatorioType }) {
             returnTo={Screen.Relatorios}
             title="TESTE"
             subtitle="TESTE"
-          />
-          <DatePicker
-            label="Data do agendamento"
-            value={date}
-            onChange={setDate}
-            minDate="2024-01-01"
-            error={erro}
           />
         </>
       );

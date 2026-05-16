@@ -14,6 +14,7 @@ import { DatePickerModal } from "./DatePickerModal";
 */
 
 interface DatePickerProps {
+  withIcon?: boolean;
   value?: string; // YYYY-MM-DD
   onChange: (date: string) => void;
   label?: string;
@@ -25,6 +26,7 @@ interface DatePickerProps {
 }
 
 export function DatePicker({
+  withIcon = true,
   value,
   onChange,
   label,
@@ -56,6 +58,7 @@ export function DatePicker({
   return (
     <>
       <DatePickerInput
+        withIcon={withIcon}
         value={value}
         label={label}
         placeholder={placeholder}

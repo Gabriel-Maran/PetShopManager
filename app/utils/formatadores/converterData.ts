@@ -13,10 +13,9 @@ export function DataStringPraNumber(data: string, separador: string): number {
   if (separador === "/") {
     const [dia, mes, ano] = data.split(separador);
     return Number(`${ano}${mes}${dia}`);
-  } else {
-    const [ano, mes, dia] = data.split(separador);
-    return Number(`${ano}${mes}${dia}`);
   }
+  const [ano, mes, dia] = data.split(separador);
+  return Number(`${ano}${mes}${dia}`);
 }
 
 // Transformar em String contendo Hífen pra usar no calendário = AAAA-MM-DD

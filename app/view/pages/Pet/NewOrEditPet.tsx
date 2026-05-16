@@ -49,6 +49,7 @@ const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
 export default function NewOrEditPet() {
   const [isCadastroPetSelecte, setIsCadastroPetSelecte] = useState(true);
   const { params, navigate } = useScreen<Pet>();
+  const [isNewPet, setIsNewPet] = useState(params?.nome ? false : true);
   const { showError } = useError();
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
@@ -167,6 +168,7 @@ export default function NewOrEditPet() {
           {isCadastroPetSelecte ? (
             <AbaInfoPet
               form={form}
+              isNewPet={isNewPet}
               updateField={updateField as (field: string, value: any) => void}
               portesList={portesList}
               racasList={racasList}

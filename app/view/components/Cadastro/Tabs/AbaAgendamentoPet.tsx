@@ -11,9 +11,12 @@ import Toggle from "../Botões/Toggle";
 import Mascarar from "../../../../utils/mascarar";
 import {
   DataNumberPraString,
+  DataNumberPraStringHifen,
   DataStringPraNumber,
 } from "../../../../utils/formatadores/converterData";
 import { useEffect } from "react";
+import InputDataPicker from "../Botões/DataPicker/InputDataPicker";
+import { hoje } from "../../../../utils/dataPicker/dataPickerAux";
 
 // Correção 1: Filtra apenas os valores numéricos do enum
 const tiposServicoList = Object.values(TipoServico).map((v) => ({
@@ -102,26 +105,15 @@ export default function AbaAgendamentoPet({
             )}
             hasBorderBottom={true}
           />
-          <InputInfo
-            image={require("../../../../assets/outros/data.png")}
-            item={
-              typeof form.dataInicioPacote === "number"
-                ? DataNumberPraString(form.dataInicioPacote)
-                : (form.dataInicioPacote ?? "")
-            }
+          <InputDataPicker
+            image={require("../../../../assets/nav_bar/calendario.png")}
+            item={DataNumberPraStringHifen(
+              form.dataInicioPacote ?? DataStringPraNumber(hoje(), "-"),
+            )}
             setItem={(v) => {
-              const dataMascarada = mascarar(v, 1);
-              if (dataMascarada.length === 10) {
-                const dataNumerica = DataStringPraNumber(dataMascarada, "/");
-                updateField("dataInicioPacote", dataNumerica);
-              } else {
-                updateField("dataInicioPacote", dataMascarada);
-              }
+              updateField("dataInicioPacote", DataStringPraNumber(v, "-"));
             }}
-            placeHolder="Informe a data de início..."
-            titleName="Início do Pacote"
-            variasLinhas={false}
-            digitavel={true}
+            titleName={"Data do agendamento"}
             hasBorderBottom={false}
           />
         </>

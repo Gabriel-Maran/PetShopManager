@@ -7,6 +7,7 @@ import {
 import { hifen_para_br } from "../../../../../utils/dataPicker/dataPickerAux";
 
 export interface DatePickerInputProps {
+  withIcon?: boolean;
   value?: string; // YYYY-MM-DD
   placeholder?: string;
   label?: string;
@@ -15,6 +16,7 @@ export interface DatePickerInputProps {
 }
 
 export function DatePickerInput({
+  withIcon = true,
   value,
   placeholder = "Selecione uma data",
   label,
@@ -36,7 +38,7 @@ export function DatePickerInput({
         accessibilityLabel={label ?? placeholder}
       >
         {/* Ícone de calendário (unicode simples — troque por um ícone da sua lib) */}
-        <Text style={s.icon}>📅</Text>
+        {withIcon && <Text style={s.icon}>📅</Text>}
 
         <Text style={[s.text, !value && s.placeholder]}>
           {value ? hifen_para_br(value) : placeholder}

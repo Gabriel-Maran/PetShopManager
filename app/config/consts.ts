@@ -1,4 +1,5 @@
 import { Platform, StatusBar } from "react-native";
+import { Pet } from "../model/Pet";
 
 export const STATUS_BAR_HEIGHT =
   Platform.OS === "ios" ? 44 : (StatusBar.currentHeight ?? 24);
@@ -37,6 +38,11 @@ export enum IMAGENS_NAMES {
   CALENDARIO = "CALENDARIO",
   CONFIGURACOES = "CONFIGURACOES",
 }
+
+export type PET_PARAM = {
+  pet: Pet;
+  type: "DONO" | "PET";
+};
 
 export enum PacoteRemarcacao {
   Mensal = 4,
