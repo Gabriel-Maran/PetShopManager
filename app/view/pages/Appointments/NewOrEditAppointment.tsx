@@ -13,6 +13,31 @@ import { useScreen } from "../../../hooks/useScreen";
 import { useError } from "../../../hooks/useError";
 
 import {
+  useAgendamentos,
+  usePetsComEspecieERacaBanco,
+  useServicos,
+  useTiposPagamento,
+} from "../../../hooks/buscaBanco/useAppointment";
+
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../../Themes/ThemeProvider";
+
+import {
+  DataHifenPraBarra,
+  DataNumberPraStringHifen,
+  DataStringPraNumber,
+} from "../../../utils/formatadores/converterData";
+import Mascarar from "../../../utils/mascarar";
+import { hoje } from "../../../utils/dataPicker/dataPickerAux";
+import {
+  abrirModalSelecao,
+  ModalConfig,
+} from "../../../utils/abrirModalSelecao";
+
+import {
   AppointmentBuilder,
   NewOrEditAppointmentParams,
 } from "../../../model/Appointment";
@@ -26,26 +51,9 @@ import Toggle from "../../components/Cadastro/Botões/Toggle";
 import SelectionField from "../../components/Cadastro/SelectionField";
 import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
 import InputSelect from "../../components/InputSelect";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../Themes/ThemeProvider";
-
-import { DataStringPraNumber } from "../../../utils/formatadores/converterData";
-import Mascarar from "../../../utils/mascarar";
-
-import {
-  useAgendamentos,
-  usePetsComEspecieERacaBanco,
-  useServicos,
-  useTiposPagamento,
-} from "../../../utils/buscaBanco/appointment";
-import {
-  abrirModalSelecao,
-  ModalConfig,
-} from "../../../utils/abrirModalSelecao";
 import ItemSelect from "../../components/Cadastro/ItemSelect";
+import InputDataPicker from "../../components/Cadastro/Botões/DataPicker/InputDataPicker";
+
 
 export default function NewOrEditAppointment() {
   const { params, navigate } = useScreen<NewOrEditAppointmentParams>();
@@ -187,16 +195,17 @@ export default function NewOrEditAppointment() {
                   )}
                   hasBorderBottom={true}
                 />
-                <InputInfo
+                <InputDataPicker
                   image={require("../../../assets/outros/data.png")}
-                  item={appointmentsForm.data}
-                  setItem={(v) =>
-                    updateAppointmentsField("data", mascarar(v, 1))
-                  }
-                  placeHolder="Informe a data..."
-                  titleName="Data"
-                  variasLinhas={false}
-                  digitavel={true}
+                  item={DataNumberPraStringHifen(
+                    DataStringPraNumber(appointmentsForm.data, "/") ??
+                      DataStringPraNumber(hoje(), "-"),
+                  )}
+                  setItem={(v) => {
+                    updateAppointmentsField("data", DataHifenPraBarra(v));
+                    () => console.log(v);
+                  }}
+                  titleName={"Data do agendamento"}
                   hasBorderBottom={true}
                 />
                 <InputInfo
@@ -336,9 +345,7 @@ export default function NewOrEditAppointment() {
               <Toggle
                 image={require("../../../assets/outros/pagamento.png")}
                 value={appointmentsForm.ta_pago}
-                onChange={(value) =>
-                  updateAppointmentsField("ta_pago", value)
-                }
+                onChange={(value) => updateAppointmentsField("ta_pago", value)}
                 title="Pagamento"
                 subtitle="Cliente Pagou?"
                 hasBorderBottom={true}
