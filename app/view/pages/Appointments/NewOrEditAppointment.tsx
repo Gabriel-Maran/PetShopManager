@@ -39,6 +39,7 @@ import {
   useAgendamentos,
   usePetsComEspecieERacaBanco,
   useServicos,
+  useTiposPagamento,
 } from "../../../utils/buscaBanco/appointment";
 import {
   abrirModalSelecao,
@@ -59,6 +60,8 @@ export default function NewOrEditAppointment() {
   const { appointmentsForm, updateAppointmentsField } = useAgendamentos();
 
   const { servicesForm } = useServicos();
+
+  const { pgtosForm } = useTiposPagamento();
 
   const [appointmentSelected, setAppointmentSelected] = useState<boolean>(true);
 
@@ -82,6 +85,9 @@ export default function NewOrEditAppointment() {
       .withData(DataStringPraNumber(appointmentsForm.data, "/"))
       .withEntregarPet(appointmentsForm.entregar_pet)
       .withObservacao(appointmentsForm.observacao)
+      .withValor(appointmentsForm.valor)
+      .withTipoPgto(appointmentsForm.tipo_pgto)
+      .isTaPago(appointmentsForm.ta_pago)
       .isConcluido(appointmentsForm.concluido)
       .build();
 
@@ -203,6 +209,7 @@ export default function NewOrEditAppointment() {
                   titleName="Horário"
                   variasLinhas={false}
                   digitavel={true}
+                  tipoTeclado="numeric"
                   hasBorderBottom={true}
                 />
                 <Toggle
@@ -212,7 +219,7 @@ export default function NewOrEditAppointment() {
                     updateAppointmentsField("entregar_pet", value)
                   }
                   title="Táxi dog"
-                  subtitle="Vai usar táxi dog?"
+                  subtitle="Usará Táxi Dog?"
                   hasBorderBottom={true}
                   noEdit={false}
                 />
@@ -297,39 +304,40 @@ export default function NewOrEditAppointment() {
             </View>
             <View style={s.inputs}>
               <InputInfo
-                image={require("../../../assets/outros/data.png")}
-                item={appointmentsForm.data}
-                setItem={(v) => updateAppointmentsField("data", mascarar(v, 1))}
+                image={require("../../../assets/outros/valor.png")}
+                item={appointmentsForm.valor}
+                setItem={(v) => updateAppointmentsField("valor", v)}
                 placeHolder="Valor do serviço..."
                 titleName="Valor"
                 variasLinhas={false}
                 digitavel={true}
+                tipoTeclado="numeric"
                 hasBorderBottom={true}
               />
               <InputSelect
-                image={require("../../../assets/outros/servicos.png")}
+                image={require("../../../assets/outros/tipo_pgto.png")}
                 titleName="Tipo de Pagamento"
-                placeholder="Selecione o serviço..."
-                itens={servicesForm.servico}
-                itemSelected={servicesForm.servico.find(
-                  (e) => e.servico === appointmentsForm.servico,
+                placeholder="Selecione o tipo de pgto..."
+                itens={pgtosForm.tipos_pgto}
+                itemSelected={pgtosForm.tipos_pgto.find(
+                  (e) => e.tipo_pgto === appointmentsForm.tipo_pgto,
                 )}
-                labelExtractor={(item) => item.servico}
+                labelExtractor={(item) => item.tipo_pgto}
                 onChange={(item) =>
-                  updateAppointmentsField("servico", item.servico)
+                  updateAppointmentsField("tipo_pgto", item.tipo_pgto)
                 }
                 renderItem={(item) => (
                   <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
-                    {item.servico}
+                    {item.tipo_pgto}
                   </Text>
                 )}
                 hasBorderBottom={true}
               />
               <Toggle
-                image={require("../../../assets/outros/entrega.png")}
-                value={appointmentsForm.entregar_pet}
+                image={require("../../../assets/outros/pagamento.png")}
+                value={appointmentsForm.ta_pago}
                 onChange={(value) =>
-                  updateAppointmentsField("entregar_pet", value)
+                  updateAppointmentsField("ta_pago", value)
                 }
                 title="Pagamento"
                 subtitle="Cliente Pagou?"
