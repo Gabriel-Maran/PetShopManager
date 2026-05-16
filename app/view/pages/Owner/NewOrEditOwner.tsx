@@ -81,7 +81,8 @@ export default function NewOrEditOwner() {
               ? "Editar Dono"
               : "Novo Dono"
         }
-        subtitle={!isViewing ? "Preencha os dados do responsável" : ""}
+        subtitle={"Preencha os dados do responsável"}
+        isViewing={isViewing}
       />
       <ScrollView
         contentContainerStyle={s.scrollContent}

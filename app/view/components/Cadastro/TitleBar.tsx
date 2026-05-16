@@ -11,10 +11,12 @@ export default function TitleBar({
   title,
   subtitle,
   returnTo,
+  isViewing,
 }: {
   title: string;
   subtitle: string;
   returnTo: Screen;
+  isViewing?: boolean;
 }) {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
@@ -23,7 +25,7 @@ export default function TitleBar({
       <ButtonBack backTo={returnTo} />
       <View>
         <Text style={s.txtTitle}>{title}</Text>
-        <Text style={s.txtSubTitle}>{subtitle}</Text>
+        {!isViewing && <Text style={s.txtSubTitle}>{subtitle}</Text>}
       </View>
     </View>
   );
