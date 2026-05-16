@@ -97,7 +97,7 @@ export default function Agendamentos({
               navigate(Screen.NewOrEditAppointment, { appointment: item })
             }
           >
-            <View style={s.avatar}>
+            <View style={!item.concluido ? s.avatar : s.avatarDone}>
               <Image
                 source={
                   item.especie === EspeciesAtendidas.CAO
@@ -106,21 +106,29 @@ export default function Agendamentos({
                       ? require("../../assets/animais/gatoGreen.png")
                       : require("../../assets/animais/interrogacaoGreen.png")
                 }
-                style={s.imgPetImg}
+                style={!item.concluido ? s.imgPetImg : s.imgPetImgDone}
               />
             </View>
 
             <View style={s.info}>
-              <Text style={s.petName}>{item.nome_pet}</Text>
+              <Text style={!item.concluido ? s.petName : s.petNameDone}>
+                {item.nome_pet}
+              </Text>
               <Text style={s.ownerName}>{item.nome_dono}</Text>
             </View>
 
             <View style={s.right}>
               <View style={s.servicoBadge}>
-                <Text style={s.servicoTxt}>{item.servico}</Text>
+                <Text style={!item.concluido ? s.servicoTxt : s.servicoTxtDone}>
+                  {item.servico}
+                </Text>
               </View>
               <Text style={s.time}>{item.hora}</Text>
             </View>
+
+            {item.concluido ? (
+              <View pointerEvents="none" style={s.linhaRiscando} />
+            ) : null}
           </TouchableOpacity>
         )}
       />
@@ -194,6 +202,16 @@ const styles = (colors: ThemeColors) =>
       gap: 10,
       backgroundColor: colors.BACKGROUND,
     },
+    linhaRiscando: {
+      width: 360,
+      position: "absolute",
+      left: "3%",
+      right: 0,
+      top: "65%",
+      height: 7,
+      borderRadius: 10,
+      backgroundColor: colors.BORDER_MID,
+    },
 
     // Avatar
     avatar: {
@@ -204,9 +222,22 @@ const styles = (colors: ThemeColors) =>
       justifyContent: "center",
       alignItems: "center",
     },
+    avatarDone: {
+      width: 44,
+      height: 44,
+      borderRadius: 20,
+      backgroundColor: colors.BORDER_LIGHT,
+      justifyContent: "center",
+      alignItems: "center",
+    },
     imgPetImg: {
       width: 30,
       height: 30,
+    },
+      imgPetImgDone: {
+      width: 30,
+      height: 30,
+      tintColor: colors.BORDER_MID
     },
 
     // Infos
@@ -217,6 +248,11 @@ const styles = (colors: ThemeColors) =>
       fontSize: 16,
       fontWeight: "700",
       color: colors.TEXT_PRIMARY,
+    },
+    petNameDone: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: colors.TEXT_PLACEHOLDER,
     },
     ownerName: {
       fontSize: 14,
@@ -239,6 +275,11 @@ const styles = (colors: ThemeColors) =>
       fontSize: 13,
       fontWeight: "600",
       color: colors.PRIMARY,
+    },
+    servicoTxtDone: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: colors.BORDER_STRONG,
     },
     time: {
       fontSize: 15,
