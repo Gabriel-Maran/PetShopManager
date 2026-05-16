@@ -8,6 +8,9 @@ export interface Appointment {
   concluido: number; // 0 ou 1
   observacao?: string | null;
   is_auto_agen: number; // 0 ou 1
+  valor: string;
+  tipo_pgto: string;
+  ta_pago: number;
   criado_em?: number;
 }
 
@@ -35,6 +38,9 @@ export class AppointmentBuilder {
       entregar_pet: 0,
       concluido: 0,
       is_auto_agen: 0,
+      valor: "0,00",
+      tipo_pgto: "",
+      ta_pago: 0,
     };
   }
 
@@ -75,6 +81,21 @@ export class AppointmentBuilder {
 
   public withIsAutoAgen(num: number): this {
     this.props.is_auto_agen = num !== 0 ? 1 : 0;
+    return this;
+  }
+
+  public withValor(valor: string): this {
+    this.props.valor = valor;
+    return this;
+  }
+
+  public withTipoPgto(tipo_pgto: string): this {
+    this.props.tipo_pgto = tipo_pgto;
+    return this; 
+  }
+
+  public isTaPago(ta_pago: number): this {
+    this.props.ta_pago = ta_pago;
     return this;
   }
 
