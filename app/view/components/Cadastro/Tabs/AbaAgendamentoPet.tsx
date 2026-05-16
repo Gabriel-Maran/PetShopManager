@@ -5,12 +5,10 @@ import {
   useTheme,
   useThemedStyles,
 } from "../../../Themes/ThemeProvider";
-import InputInfo from "../InputInfo";
 import InputSelect from "../../InputSelect";
 import Toggle from "../Botões/Toggle";
 import Mascarar from "../../../../utils/mascarar";
 import {
-  DataNumberPraString,
   DataNumberPraStringHifen,
   DataStringPraNumber,
 } from "../../../../utils/formatadores/converterData";
@@ -50,8 +48,6 @@ export default function AbaAgendamentoPet({
 }: AbaAgendamentoPetProps) {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
-
-  const mascarar = Mascarar;
 
   useEffect(() => {
     form.pacoteRemarcacao = undefined;
