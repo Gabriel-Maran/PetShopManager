@@ -64,10 +64,14 @@ export default function Toggle({
       titleName={title}
       hasBorderBottom={hasBorderBottom}
     >
-      <View style={!noEdit ? s.toggleESubtitle : s.toggleESubtitleNoEdit}>
+      <View style={s.toggleESubtitle}>
         {subtitle && <Text style={s.subtitle}>{subtitle}</Text>}
 
-        <TouchableOpacity activeOpacity={0.8} onPress={toggleSwitch}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={!noEdit ? toggleSwitch : undefined}
+          disabled={noEdit}
+        >
           <Animated.View style={[s.switchContainer, { backgroundColor }]}>
             <Animated.View
               style={[s.thumb, { transform: [{ translateX: moveThumb }] }]}
