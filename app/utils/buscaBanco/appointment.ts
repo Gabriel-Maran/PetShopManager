@@ -6,16 +6,16 @@ import { LIMIT_ITEM_PAGE, ORDER } from "../../config/consts";
 import { PetWithSpecieAndRace } from "../../model/Pet";
 import { ServiceType } from "../../model/ServiceType";
 import { serviceTypeRepository } from "../../repository/ServiceTypeRepository";
-import {
-  Appointment,
-  AppointmentsWithOwnerAndPet,
-  NewOrEditAppointmentParams,
-} from "../../model/Appointment";
+import { NewOrEditAppointmentParams } from "../../model/Appointment";
 import { useScreen } from "../../hooks/useScreen";
 import {
   DataHifenPraBarra,
   DataNumberPraString,
 } from "../formatadores/converterData";
+import { PaymentsMethod } from "../../model/PaymentMethod";
+import { paymentMethodRepository } from "../../repository/PaymentsMethodsRepository";
+
+//========================================================================//
 
 type PetsForm = {
   page: number;
@@ -32,7 +32,7 @@ type PegarPetsReturn = {
   ) => void;
 };
 
-export function usePetsComEspecieERacaBanco(ativada?: boolean): PegarPetsReturn {
+export function usePetsComEspecieERacaBanco(ativada: boolean): PegarPetsReturn {
   const { showError } = useError();
   const handleError = (e: unknown) =>
     showError(e instanceof Error ? e.message : "Erro inesperado.");
@@ -95,6 +95,37 @@ export function useServicos(): ServiceTypeReturn {
 
 //================================================================================//
 
+type PaymentMethodType = {
+  tipos_pgto: PaymentsMethod[];
+};
+
+type PaymentMethodReturn = {
+  pgtosForm: PaymentMethodType;
+};
+
+export function useTiposPagamento(): PaymentMethodReturn {
+  const { showError } = useError();
+  const handleError = (e: unknown) =>
+    showError(e instanceof Error ? e.message : "Erro inesperado.");
+
+  const { form, updateField } = useFormState<PaymentMethodType>({
+    tipos_pgto: [],
+  });
+
+  useEffect(() => {
+    paymentMethodRepository
+      .getAllPaymentMethod()
+      .then((value) => updateField("tipos_pgto", value))
+      .catch(handleError);
+  });
+
+  return {
+    pgtosForm: form,
+  };
+}
+
+//================================================================================//
+
 type AppointmentType = {
   nome_pet: string;
   pet_id: number;
@@ -107,6 +138,9 @@ type AppointmentType = {
   is_auto_agen: number; // 0 ou 1
   nome_dono: string;
   especie: string;
+  valor: string;
+  tipo_pgto: string;
+  ta_pago: number;
 };
 
 type AppointmentTypeReturn = {
@@ -138,6 +172,10 @@ export function useAgendamentos(): AppointmentTypeReturn {
     //deve continuar como auto gerado
     //Mas é interessante fazer algo visual para mostrar se foi auto gerado ou não
     is_auto_agen: params?.appointment?.is_auto_agen ?? 0,
+    //================================================
+    valor: params?.appointment?.valor ?? "",
+    tipo_pgto: params?.appointment?.tipo_pgto ?? "",
+    ta_pago: params?.appointment?.ta_pago ?? 0,
     //================================================
     especie: "",
     nome_dono: "",
