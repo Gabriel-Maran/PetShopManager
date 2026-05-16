@@ -15,8 +15,13 @@ import InputInfo from "../../Cadastro/InputInfo";
 import InputSelect from "../../InputSelect";
 import SelectionField from "../../Cadastro/SelectionField";
 import { Pet } from "../../../../model/Pet";
+import { useEffect } from "react";
+import { petController } from "../../../../controller/PetController";
+import { ownerController } from "../../../../controller/OwnerController";
+import { reaceRepository } from "../../../../repository/RaceRepository";
 
 interface AbaInfoPetProps {
+  isNewPet: boolean;
   form: {
     nome: string;
     especie: number;
@@ -42,6 +47,7 @@ interface AbaInfoPetProps {
 }
 
 export default function AbaInfoPet({
+  isNewPet,
   form,
   updateField,
   abrirModal,
@@ -53,6 +59,30 @@ export default function AbaInfoPet({
 }: AbaInfoPetProps) {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
+
+  useEffect(() => {
+    if (!isNewPet && form.dono_id) {
+      ownerController
+        .getOwnerById(form.dono_id)
+        .then((resultado) => {
+          if (resultado?.nome) {
+            updateField("dono_nome", resultado.nome);
+          }
+        })
+        .catch((error) => console.error("Erro ao buscar dono:", error));
+    }
+
+    if (!isNewPet && form.raca) {
+      reaceRepository
+        .findRaceById(form.raca)
+        .then((resultado) => {
+          if (resultado?.nome_raca) {
+            updateField("raca_nome", resultado.nome_raca);
+          }
+        })
+        .catch((error) => console.error("Erro ao buscar raça:", error));
+    }
+  }, [isNewPet]);
 
   return (
     <>

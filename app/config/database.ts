@@ -38,14 +38,14 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
     DROP INDEX IF EXISTS idx_appointments_auto_pendentes;
 
 
-    DROP INDEX IF EXISTS idx_pets_dono_id;
-    DROP INDEX IF EXISTS idx_appointments_pet_id;
-    DROP INDEX IF EXISTS idx_appointments_pet_data;
-    DROP INDEX IF EXISTS idx_appointments_data_concluido;
-    DROP INDEX IF EXISTS idx_owners_nome_normalizado;
-    DROP INDEX IF EXISTS idx_pets_nome_normalizado;
-    DROP INDEX IF EXISTS idx_appointments_stats;
-    DROP INDEX IF EXISTS idx_appointments_analytics_hora;
+    DROP TRIGGER IF EXISTS trg_ultima_visita;
+    DROP TRIGGER IF EXISTS trg_remarcacao_automatica;
+    DROP TRIGGER IF EXISTS trg_pet_remarcacao_insert;
+    DROP TRIGGER IF EXISTS trg_pet_remarcacao_ativar;
+    DROP TRIGGER IF EXISTS trg_pet_remarcacao_desativar;
+    DROP TRIGGER IF EXISTS trg_owner_desativar_pets;
+    DROP TRIGGER IF EXISTS trg_pet_ativar_owner;
+    DROP TRIGGER IF EXISTS trg_pet_desativar_limpar_remarcacao;
 
     DROP TABLE IF EXISTS appointments;
     DROP TABLE IF EXISTS pets;
@@ -64,6 +64,7 @@ export async function initDatabase(): Promise<void> {
 
   const SQL_PRAGMA = `
     PRAGMA foreign_keys = ON;
+    PRAGMA recursive_triggers = ON;
   `;
 
   // ── Tabelas ───────────────────────────────────────────────────────────────
@@ -289,6 +290,7 @@ export async function initDatabase(): Promise<void> {
         1
       FROM pets p
       WHERE p.id = NEW.pet_id
+        AND p.is_ativo = 1
         AND p.remarcacao_ativa = 1
         AND p.pacote_remarcacao IS NOT NULL
         -- Rate limit: conta pendentes no mês alvo
@@ -321,6 +323,7 @@ export async function initDatabase(): Promise<void> {
           AND concluido = 0
       )
       WHERE id = NEW.pet_id
+        AND is_ativo = 1
         AND remarcacao_ativa = 1;
     END;
   `;
@@ -411,24 +414,21 @@ export async function initDatabase(): Promise<void> {
       WHERE id = NEW.id;
     END;
   `;
-  // Ao ALTERAR/REATIVAR dados da remarcação:
-  //   - Limpa pendentes futuros antes de regenerar (segurança contra duplicatas)
-  //   - Inicia os agendamentos EXATAMENTE na data_inicio_pacote selecionada (sem pular gap)
-  //   - Gera agendamentos passados e futuros seguindo a lógica do cadastro
-  //   - Grava agendamentos ANTERIORES a hoje com is_auto_agen = 0
-  //   - Grava agendamentos a partir de HOJE com is_auto_agen = 1
   const SQL_TRIGGER_PET_REMARCACAO_ATIVAR = `
     CREATE TRIGGER IF NOT EXISTS trg_pet_remarcacao_ativar
-    AFTER UPDATE OF remarcacao_ativa, pacote_remarcacao, data_inicio_pacote ON pets
+    AFTER UPDATE OF remarcacao_ativa, pacote_remarcacao, data_inicio_pacote, is_ativo ON pets
     FOR EACH ROW
-    WHEN NEW.remarcacao_ativa = 1 AND NEW.pacote_remarcacao IS NOT NULL
+    WHEN (
+      (NEW.remarcacao_ativa = 1 AND NEW.pacote_remarcacao IS NOT NULL AND NEW.is_ativo = 1)  -- ← + AND NEW.is_ativo = 1
+      OR 
+      (OLD.is_ativo = 0 AND NEW.is_ativo = 1 AND NEW.remarcacao_ativa = 1 AND NEW.pacote_remarcacao IS NOT NULL)
+    )
     BEGIN
-      -- Limpa agendamentos futuros gerados automaticamente para evitar sobreposição
+      -- Limpa todos os agendamentos automáticos pendentes (passados e futuros) para evitar sobreposição ou duplicados na reativação
       DELETE FROM appointments
       WHERE pet_id = NEW.id
         AND is_auto_agen = 1
-        AND concluido = 0
-        AND data >= CAST(strftime('%Y%m%d', 'now') AS INTEGER);
+        AND concluido = 0;
   
       INSERT INTO appointments (pet_id, servico, data, entregar_pet, is_auto_agen)
       WITH RECURSIVE agenda(data_int, mes_atual, contagem_mes) AS (
@@ -491,7 +491,14 @@ export async function initDatabase(): Promise<void> {
           ELSE 1 
         END
       FROM agenda
-      WHERE contagem_mes <= NEW.pacote_remarcacao;
+      WHERE contagem_mes <= NEW.pacote_remarcacao
+        -- Garante que não vai reinserir um agendamento antigo que já tenha sido CONCLUÍDO manualmente
+        AND NOT EXISTS (
+          SELECT 1 FROM appointments a 
+          WHERE a.pet_id = NEW.id 
+            AND a.data = data_int 
+            AND a.concluido = 1
+        );
   
       -- Atualiza o ponteiro do último agendamento automatizado em aberto
       UPDATE pets
@@ -519,7 +526,7 @@ export async function initDatabase(): Promise<void> {
       WHERE pet_id = NEW.id
         AND is_auto_agen = 1
         AND concluido = 0
-        AND data > CAST(strftime('%Y%m%d', 'now') AS INTEGER);
+        AND data > CAST(strftime('%Y%m%d', 'now', 'localtime') AS INTEGER);
     END;
   `;
 
@@ -547,6 +554,28 @@ export async function initDatabase(): Promise<void> {
     END;
   `;
 
+  const SQL_TRIGGER_PET_DESATIVAR_LIMPAR_REMARCACAO = `
+    CREATE TRIGGER IF NOT EXISTS trg_pet_desativar_limpar_remarcacao
+    AFTER UPDATE OF is_ativo ON pets
+    FOR EACH ROW
+    WHEN OLD.is_ativo = 1 AND NEW.is_ativo = 0
+    BEGIN
+      -- Remove os agendamentos futuros do pet desativado
+      DELETE FROM appointments
+      WHERE pet_id = NEW.id
+        AND is_auto_agen = 1
+        AND concluido = 0
+        AND data > CAST(strftime('%Y%m%d', 'now', 'localtime') AS INTEGER);
+
+      -- Limpa o pacote, o histórico automático e desativa a flag de remarcação
+      UPDATE pets
+      SET data_inicio_pacote = NULL,
+          ultimo_visita_data_auto = NULL,
+          remarcacao_ativa = 0
+      WHERE id = NEW.id;
+    END;
+  `;
+
   // ── Execução ──────────────────────────────────────────────────────────────
   try {
     await db.execAsync(SQL_PRAGMA);
@@ -564,6 +593,7 @@ export async function initDatabase(): Promise<void> {
     await db.execAsync(SQL_TRIGGER_PET_REMARCACAO_DESATIVAR);
     await db.execAsync(SQL_TRIGGER_OWNER_DESATIVAR_PETS);
     await db.execAsync(SQL_TRIGGER_PET_ATIVAR_OWNER);
+    await db.execAsync(SQL_TRIGGER_PET_DESATIVAR_LIMPAR_REMARCACAO);
   } catch (e) {
     console.log(e);
   }
