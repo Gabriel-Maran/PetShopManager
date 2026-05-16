@@ -13,6 +13,7 @@ import { petController } from "../../controller/PetController";
 import {
   APP_BAR_HEIGHT,
   LIMIT_ITEM_PAGE,
+  NewOrEditCadastros,
   ORDER,
   Screen,
 } from "../../config/consts";
@@ -27,12 +28,12 @@ import ModalConfDelete from "../components/Cadastro/Botões/Delete/ModalConfDele
 import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
 
 export default function Cadastros() {
-  const { navigate, params } = useScreen();
+  const { navigate, params } = useScreen<NewOrEditCadastros>();
   const { showError } = useError();
 
   const s = useThemedStyles(styles);
 
-  const [isOwnerSelected, setIsOwnerSelected] = useState(params !== "PETS");
+  const [isOwnerSelected, setIsOwnerSelected] = useState(params?.type != "PET");
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);

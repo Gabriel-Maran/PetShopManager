@@ -8,11 +8,13 @@ import {
 } from "../../Themes/ThemeProvider";
 
 export default function TitleBar({
+  params,
   title,
   subtitle,
   returnTo,
   isViewing,
 }: {
+  params?: any;
   title: string;
   subtitle: string;
   returnTo: Screen;
@@ -22,7 +24,7 @@ export default function TitleBar({
   const { colors } = useTheme();
   return (
     <View style={s.container}>
-      <ButtonBack backTo={returnTo} />
+      <ButtonBack backTo={returnTo} params={params} />
       <View>
         <Text style={s.txtTitle}>{title}</Text>
         {!isViewing && <Text style={s.txtSubTitle}>{subtitle}</Text>}

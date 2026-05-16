@@ -40,11 +40,13 @@ interface AbaAgendamentoPetProps {
     dataInicioPacote?: number;
   };
   updateField: (field: string, value: any) => void;
+  isEditavel: boolean;
 }
 
 export default function AbaAgendamentoPet({
   form,
   updateField,
+  isEditavel = true,
 }: AbaAgendamentoPetProps) {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
@@ -70,6 +72,7 @@ export default function AbaAgendamentoPet({
           </Text>
         )}
         hasBorderBottom={true}
+        isEditavel={isEditavel}
       />
 
       <Toggle
@@ -79,7 +82,7 @@ export default function AbaAgendamentoPet({
         title="Remarcação automática ativa"
         subtitle=""
         hasBorderBottom={true}
-        noEdit={false}
+        noEdit={!isEditavel}
       />
 
       {form.remarcAtiva && (
@@ -100,6 +103,7 @@ export default function AbaAgendamentoPet({
               </Text>
             )}
             hasBorderBottom={true}
+            isEditavel={isEditavel}
           />
           <InputDataPicker
             image={require("../../../../assets/nav_bar/calendario.png")}
@@ -111,6 +115,7 @@ export default function AbaAgendamentoPet({
             }}
             titleName={"Data do agendamento"}
             hasBorderBottom={false}
+            isEditavel={isEditavel}
           />
         </>
       )}

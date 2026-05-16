@@ -1,11 +1,26 @@
-import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import ButtonEditar from "../Botões/ButtonEditar";
 import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
 import { PetWithSpecieAndRace } from "../../../../model/Pet";
-import { EspeciesAtendidas, Screen } from "../../../../config/consts";
+import {
+  EspeciesAtendidas,
+  NewOrEditCadastros,
+  Screen,
+} from "../../../../config/consts";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 import { EspeciesAtendidasLabel } from "../../../../config/consts";
 import ButtonAtivar from "../Botões/ButtonAtivar";
+import { useEffect, useState } from "react";
+import { Owner } from "../../../../model/Owner";
+import { ownerController } from "../../../../controller/OwnerController";
+import { useScreen } from "../../../../hooks/useScreen";
 
 export default function PetList({
   cadastros,
@@ -19,33 +34,50 @@ export default function PetList({
   saoAtivados: boolean;
 }) {
   const s = useThemedStyles(styles);
+  const { navigate } = useScreen();
 
   return (
     <View>
       <FlatList
         data={cadastros}
         renderItem={({ item }) => (
-          <View style={s.itemCard}>
+          <TouchableOpacity
+            onPress={() =>
+              navigate(Screen.NewOrEditPet, {
+                mode: "view",
+                pet: item,
+              })
+            }
+            style={s.itemCard}
+          >
             <Image
               style={s.img}
               source={require("../../../../assets/animais/pet.png")}
             />
+
             <View style={s.mainContent}>
-              <Text style={s.textMain}>{item.nome}</Text>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={s.textMain}>{item.nome}</Text>
+              </View>
               <Text style={s.textSub}>
                 {`${EspeciesAtendidasLabel[item.nome_especie as EspeciesAtendidas]}${item.nome_raca ? ` - ${item.nome_raca}` : ""}`}
               </Text>
             </View>
             <ButtonEditar
               navegarPara={Screen.NewOrEditPet}
-              selectParam={item}
+              selectParam={
+                {
+                  mode: "edit",
+                  pet: item,
+                } as NewOrEditCadastros
+              }
             />
             {saoAtivados ? (
               <ButtonExcluir itemId={item.id ?? -1} onDelete={onDelete} />
             ) : (
               <ButtonAtivar itemId={item.id ?? -1} onActive={onActive} />
             )}
-          </View>
+          </TouchableOpacity>
         )}
         keyExtractor={(item) => String(item.id)}
       />

@@ -21,6 +21,7 @@ import { ownerController } from "../../../../controller/OwnerController";
 import { reaceRepository } from "../../../../repository/RaceRepository";
 
 interface AbaInfoPetProps {
+  isEditavel?: boolean;
   isNewPet: boolean;
   form: {
     nome: string;
@@ -47,6 +48,7 @@ interface AbaInfoPetProps {
 }
 
 export default function AbaInfoPet({
+  isEditavel = true,
   isNewPet,
   form,
   updateField,
@@ -84,6 +86,10 @@ export default function AbaInfoPet({
     }
   }, [isNewPet]);
 
+  useEffect(() => {
+    updateField("raca_nome", null);
+  }, [form.especie]);
+
   return (
     <>
       <View style={s.inputs}>
@@ -95,7 +101,7 @@ export default function AbaInfoPet({
           titleName="Nome Completo"
           variasLinhas={false}
           hasBorderBottom={true}
-          digitavel={true}
+          digitavel={isEditavel}
         />
 
         <SelectionField
@@ -120,6 +126,7 @@ export default function AbaInfoPet({
             updateField("dono_nome", "");
           }}
           goEdit={true}
+          isEditavel={isEditavel}
         />
 
         <InputSelect
@@ -144,6 +151,7 @@ export default function AbaInfoPet({
             </Text>
           )}
           hasBorderBottom={true}
+          isEditavel={isEditavel}
         />
 
         <SelectionField
@@ -168,6 +176,7 @@ export default function AbaInfoPet({
             updateField("raca_nome", "");
           }}
           goEdit={true}
+          isEditavel={isEditavel}
         />
 
         <InputSelect
@@ -184,6 +193,7 @@ export default function AbaInfoPet({
             </Text>
           )}
           hasBorderBottom={true}
+          isEditavel={isEditavel}
         />
 
         <InputInfo
@@ -193,17 +203,9 @@ export default function AbaInfoPet({
           placeHolder="Uma observação adicional..."
           titleName="Observações"
           variasLinhas={true}
-          digitavel={true}
+          digitavel={isEditavel}
           hasBorderBottom={false}
         />
-      </View>
-
-      <View style={s.ctnBtnSalvar}>
-        <TouchableOpacity style={s.btnSalvar} onPress={salvarPet}>
-          <Text style={s.txtSalvar}>
-            {petToEdit ? "Salvar alterações" : "Salvar"}
-          </Text>
-        </TouchableOpacity>
       </View>
     </>
   );
@@ -218,18 +220,5 @@ const styles = (colors: ThemeColors) =>
       borderColor: colors.BORDER_LIGHT,
       backgroundColor: colors.BACKGROUND,
       overflow: "hidden",
-    },
-    ctnBtnSalvar: {
-      marginTop: 25,
-    },
-    btnSalvar: {
-      paddingVertical: 20,
-      paddingHorizontal: 75,
-      backgroundColor: colors.PRIMARY_VARIANT,
-      borderRadius: 15,
-    },
-    txtSalvar: {
-      color: colors.BACKGROUND,
-      textAlign: "center",
     },
   });

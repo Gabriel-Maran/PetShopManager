@@ -92,7 +92,7 @@ export async function initDatabase(): Promise<void> {
       nome_raca  TEXT    NOT NULL,
       FOREIGN KEY (especie_id) REFERENCES species(id) ON DELETE CASCADE,
       UNIQUE (especie_id, nome_raca)
-    );
+    );    
 
     CREATE TABLE IF NOT EXISTS payment_methods (
       id        INTEGER PRIMARY KEY AUTOINCREMENT,

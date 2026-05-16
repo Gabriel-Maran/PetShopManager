@@ -12,12 +12,8 @@ import { useState } from "react";
 import { useError } from "../../../hooks/useError";
 import { useScreen } from "../../../hooks/useScreen";
 
-import { Screen } from "../../../config/consts";
-import {
-  Owner,
-  OwnerBuilder,
-  NewOrEditOwnerParams,
-} from "../../../model/Owner";
+import { NewOrEditCadastros, Screen } from "../../../config/consts";
+import { Owner, OwnerBuilder } from "../../../model/Owner";
 import { ownerController } from "../../../controller/OwnerController";
 
 import TitleBar from "../../components/Cadastro/TitleBar";
@@ -37,7 +33,7 @@ const maskPhone = (v: string) => {
 };
 
 export default function NewOrEditOwner() {
-  const { params, navigate } = useScreen<NewOrEditOwnerParams>();
+  const { params, navigate } = useScreen<NewOrEditCadastros>();
   const { showError } = useError();
 
   const s = useThemedStyles(styles);
@@ -45,10 +41,10 @@ export default function NewOrEditOwner() {
   const isViewing = params?.mode === "view";
   const isEditing = params?.mode === "edit";
 
-  const [nome, setNome] = useState(params?.Owner?.nome ?? "");
-  const [telefone, setTelefone] = useState(params?.Owner?.telefone ?? "");
-  const [email, setEmail] = useState(params?.Owner?.email ?? "");
-  const [endereco, setEndereco] = useState(params?.Owner?.endereco ?? "");
+  const [nome, setNome] = useState(params?.owner?.nome ?? "");
+  const [telefone, setTelefone] = useState(params?.owner?.telefone ?? "");
+  const [email, setEmail] = useState(params?.owner?.email ?? "");
+  const [endereco, setEndereco] = useState(params?.owner?.endereco ?? "");
 
   const salvarDono = async () => {
     const ownerSalvar: Owner = new OwnerBuilder()
@@ -59,11 +55,14 @@ export default function NewOrEditOwner() {
       .build();
     try {
       if (isEditing) {
-        await ownerController.updateOwner(params!.Owner?.id!, ownerSalvar);
+        await ownerController.updateOwner(params!.owner?.id!, ownerSalvar);
       } else {
         await ownerController.createOwner(ownerSalvar);
       }
-      navigate(Screen.Cadastros, "OWNERS");
+      navigate(Screen.Cadastros, {
+        type: "DONO",
+        mode: "view",
+      } as NewOrEditCadastros);
     } catch (erro) {
       showError(erro instanceof Error ? erro.message : "Erro inesperado.");
     }
@@ -74,6 +73,12 @@ export default function NewOrEditOwner() {
       <DefaultHeader />
       <TitleBar
         returnTo={Screen.Cadastros}
+        params={
+          {
+            type: "DONO",
+            mode: "view",
+          } as NewOrEditCadastros
+        }
         title={
           isViewing
             ? "Visualizando Dono"

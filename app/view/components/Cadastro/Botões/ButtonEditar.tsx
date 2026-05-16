@@ -1,5 +1,5 @@
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Screen } from "../../../../config/consts";
+import { NewOrEditCadastros, Screen } from "../../../../config/consts";
 import { useScreen } from "../../../../hooks/useScreen";
 import { Owner } from "../../../../model/Owner";
 import { Pet } from "../../../../model/Pet";
@@ -14,7 +14,7 @@ export default function ButtonEditar({
   setModal,
 }: {
   navegarPara: Screen;
-  selectParam?: Pet | Owner | Appointment | unknown;
+  selectParam?: NewOrEditCadastros | Pet | Owner | Appointment | unknown;
   editCampo?: boolean;
   goEdit?: boolean;
   setModal?: () => void;

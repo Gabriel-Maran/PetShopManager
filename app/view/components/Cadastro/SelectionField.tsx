@@ -15,6 +15,7 @@ import {
 import InputWrapper from "../../components/Cadastro/InputWrapper";
 
 export default function SelectionField({
+  isEditavel = true,
   image,
   titleName,
   selectedReg,
@@ -23,6 +24,7 @@ export default function SelectionField({
   onPress,
   goEdit,
 }: {
+  isEditavel: boolean;
   image: ImageSourcePropType;
   titleName: string;
   selectedReg?: string;
@@ -42,23 +44,26 @@ export default function SelectionField({
     >
       {selectedReg ? (
         <View style={s.regSelecionado}>
-          <View style={s.caixaReg}>
+          <View style={[s.caixaReg, isEditavel ? { marginRight: 10 } : {}]}>
             <Text style={s.txtReg} numberOfLines={1}>
               {selectedReg}
             </Text>
           </View>
-
-          <ButtonEditar
-            navegarPara={Screen.Cadastros}
-            goEdit={goEdit}
-            setModal={onPress}
-            editCampo={true}
-          />
+          {isEditavel && (
+            <ButtonEditar
+              navegarPara={Screen.Cadastros}
+              goEdit={goEdit}
+              setModal={onPress}
+              editCampo={true}
+            />
+          )}
         </View>
       ) : (
-        <TouchableOpacity style={s.btnSalvar} onPress={onPress}>
-          <Text style={s.txtSalvar}>{buttonText}</Text>
-        </TouchableOpacity>
+        isEditavel && (
+          <TouchableOpacity style={s.btnSalvar} onPress={onPress}>
+            <Text style={s.txtSalvar}>{buttonText}</Text>
+          </TouchableOpacity>
+        )
       )}
     </InputWrapper>
   );
@@ -74,7 +79,7 @@ const styles = (colors: ThemeColors) =>
     },
     caixaReg: {
       borderWidth: 1.3,
-      width: "80%",
+      flex: 1,
       padding: 10,
       paddingLeft: 15,
       borderRadius: 10,

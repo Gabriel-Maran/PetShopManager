@@ -54,7 +54,6 @@ import InputSelect from "../../components/InputSelect";
 import ItemSelect from "../../components/Cadastro/ItemSelect";
 import InputDataPicker from "../../components/Cadastro/Botões/DataPicker/InputDataPicker";
 
-
 export default function NewOrEditAppointment() {
   const { params, navigate } = useScreen<NewOrEditAppointmentParams>();
   const { showError } = useError();
@@ -175,6 +174,7 @@ export default function NewOrEditAppointment() {
                     })
                   }
                   goEdit={true}
+                  isEditavel={true}
                 />
                 <InputSelect
                   image={require("../../../assets/outros/servicos.png")}
@@ -194,6 +194,7 @@ export default function NewOrEditAppointment() {
                     </Text>
                   )}
                   hasBorderBottom={true}
+                  isEditavel={true}
                 />
                 <InputDataPicker
                   image={require("../../../assets/outros/data.png")}
@@ -207,6 +208,7 @@ export default function NewOrEditAppointment() {
                   }}
                   titleName={"Data do agendamento"}
                   hasBorderBottom={true}
+                  isEditavel={true}
                 />
                 <InputInfo
                   image={require("../../../assets/outros/hora.png")}
@@ -264,7 +266,7 @@ export default function NewOrEditAppointment() {
                           updateAppointmentsField("is_auto_agen", value)
                         }
                         title="Agendamento Auto-gerado"
-                        subtitle="Serviço concluído?"
+                        subtitle="Serviço auto-gerado?"
                         hasBorderBottom={true}
                         noEdit={true}
                       />
@@ -341,6 +343,7 @@ export default function NewOrEditAppointment() {
                   </Text>
                 )}
                 hasBorderBottom={true}
+                isEditavel={true}
               />
               <Toggle
                 image={require("../../../assets/outros/pagamento.png")}

@@ -3,12 +3,21 @@ import { Screen } from "../../../../config/consts";
 import { useScreen } from "../../../../hooks/useScreen";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 
-export default function ButtonBack({ backTo }: { backTo: Screen }) {
+export default function ButtonBack({
+  backTo,
+  params,
+}: {
+  backTo: Screen;
+  params: any;
+}) {
   const { screen, navigate } = useScreen();
   const s = useThemedStyles(styles);
 
   return (
-    <TouchableOpacity onPress={() => navigate(backTo)} style={s.btnBack}>
+    <TouchableOpacity
+      onPress={() => navigate(backTo, params)}
+      style={s.btnBack}
+    >
       <Image
         style={s.imgBack}
         source={require("../../../../assets/setas/voltarBlack.png")}

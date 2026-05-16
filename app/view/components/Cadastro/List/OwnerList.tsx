@@ -9,7 +9,7 @@ import {
 import { Owner } from "../../../../model/Owner";
 import { useScreen } from "../../../../hooks/useScreen";
 import ButtonEditar from "../Botões/ButtonEditar";
-import { Screen } from "../../../../config/consts";
+import { NewOrEditCadastros, Screen } from "../../../../config/consts";
 import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 import ButtonAtivar from "../Botões/ButtonAtivar";
@@ -36,7 +36,7 @@ export default function OwnerList({
             onPress={() =>
               navigate(Screen.NewOrEditOwner, {
                 mode: "view",
-                Owner: item,
+                owner: item,
               })
             }
           >
@@ -52,7 +52,9 @@ export default function OwnerList({
               </View>
 
               <ButtonEditar
-                selectParam={{ Owner: item, mode: "edit" }}
+                selectParam={
+                  { owner: item, mode: "edit" } as NewOrEditCadastros
+                }
                 navegarPara={Screen.NewOrEditOwner}
               />
               {saoAtivados ? (

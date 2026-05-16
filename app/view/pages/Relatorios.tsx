@@ -127,7 +127,7 @@ const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     scroll: {
       flex: 1,
-      backgroundColor: colors.BACKGROUND,
+      backgroundColor: colors.THIRD_BACKGROUND,
       marginBottom: APP_BAR_HEIGHT,
     },
     content: {

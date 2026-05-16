@@ -9,12 +9,14 @@ import InputWrapper from "../../InputWrapper";
 import { hoje } from "../../../../../utils/dataPicker/dataPickerAux";
 
 export default function InputDataPicker({
+  isEditavel = true,
   image,
   item,
   setItem,
   titleName,
   hasBorderBottom = false,
 }: {
+  isEditavel: boolean;
   image: ImageSourcePropType;
   item: string | null;
   setItem: (item: any) => void;
@@ -30,6 +32,7 @@ export default function InputDataPicker({
       hasBorderBottom={hasBorderBottom}
     >
       <DatePicker
+        isEditavel={isEditavel}
         withIcon={false}
         label=""
         value={item ?? hoje()}

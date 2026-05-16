@@ -8,11 +8,6 @@ export interface Owner {
   criado_em?: number;
 }
 
-export type NewOrEditOwnerParams = {
-  mode: "create" | "view" | "edit";
-  Owner?: Owner;
-};
-
 export class OwnerBuilder {
   private props: Partial<Owner>;
 

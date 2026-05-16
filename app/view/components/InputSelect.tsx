@@ -16,6 +16,7 @@ import {
 import InputWrapper from "./Cadastro/InputWrapper";
 
 interface InputSelectProps<T> {
+  isEditavel: boolean;
   itens: T[];
   itemSelected?: T | null;
   onChange: (item: T) => void;
@@ -29,6 +30,7 @@ interface InputSelectProps<T> {
 }
 
 export default function InputSelect<T>({
+  isEditavel = true,
   itens,
   itemSelected,
   onChange,
@@ -66,20 +68,26 @@ export default function InputSelect<T>({
               }
             : {},
         ]}
-        onPress={() => setIsOpen(!isOpen)}
+        onPress={() => {
+          if (isEditavel) {
+            setIsOpen(!isOpen);
+          }
+        }}
         activeOpacity={0.7}
       >
         <Text style={s.selectText}>
           {itemSelected ? labelExtractor(itemSelected) : placeholder}
         </Text>
-        <Image
-          style={s.arrow}
-          source={
-            isOpen
-              ? require("../../assets/setas/closeGreen.png")
-              : require("../../assets/setas/openGreen.png")
-          }
-        />
+        {isEditavel && (
+          <Image
+            style={s.arrow}
+            source={
+              isOpen
+                ? require("../../assets/setas/closeGreen.png")
+                : require("../../assets/setas/openGreen.png")
+            }
+          />
+        )}
       </TouchableOpacity>
 
       {isOpen && (

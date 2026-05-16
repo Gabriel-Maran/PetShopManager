@@ -203,12 +203,10 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.BACKGROUND,
     },
     linhaRiscando: {
-      width: 360,
       position: "absolute",
-      left: "3%",
-      right: 0,
-      top: "65%",
-      height: 7,
+      left: 14,
+      right: 14,
+      height: 4,
       borderRadius: 10,
       backgroundColor: colors.BORDER_MID,
     },
@@ -234,10 +232,10 @@ const styles = (colors: ThemeColors) =>
       width: 30,
       height: 30,
     },
-      imgPetImgDone: {
+    imgPetImgDone: {
       width: 30,
       height: 30,
-      tintColor: colors.BORDER_MID
+      tintColor: colors.BORDER_MID,
     },
 
     // Infos

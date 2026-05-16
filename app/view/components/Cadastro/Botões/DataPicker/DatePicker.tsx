@@ -14,6 +14,7 @@ import { DatePickerModal } from "./DatePickerModal";
 */
 
 interface DatePickerProps {
+  isEditavel: boolean;
   withIcon?: boolean;
   value?: string; // YYYY-MM-DD
   onChange: (date: string) => void;
@@ -26,6 +27,7 @@ interface DatePickerProps {
 }
 
 export function DatePicker({
+  isEditavel = true,
   withIcon = true,
   value,
   onChange,
@@ -41,8 +43,10 @@ export function DatePicker({
   const [temp, setTemp] = useState<string | undefined>(value);
 
   const handleOpen = useCallback(() => {
-    setTemp(value); // reseta para o valor atual ao abrir
-    setOpen(true);
+    if (isEditavel) {
+      setTemp(value); // reseta para o valor atual ao abrir
+      setOpen(true);
+    }
   }, [value]);
 
   const handleClose = useCallback(() => setOpen(false), []);

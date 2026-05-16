@@ -14,6 +14,7 @@ import {
   Screen,
   TipoServico,
   PorteAnimalLabel,
+  NewOrEditCadastros,
 } from "../../../config/consts";
 import { Pet, PetBuilder } from "../../../model/Pet";
 import {
@@ -48,30 +49,35 @@ const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
 
 export default function NewOrEditPet() {
   const [isCadastroPetSelecte, setIsCadastroPetSelecte] = useState(true);
-  const { params, navigate } = useScreen<Pet>();
-  const [isNewPet, setIsNewPet] = useState(params?.nome ? false : true);
+  const { params, navigate } = useScreen<NewOrEditCadastros>();
+  const [isNewPet, setIsNewPet] = useState(params?.pet?.nome ? false : true);
   const { showError } = useError();
+  const isViewing = params?.mode === "view";
+  const isEditing = params?.mode === "edit";
+
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
+
   const { form, updateField } = useFormState({
-    nome: params?.nome ?? "",
-    especie: params?.especie ?? 0,
-    dono_id: params?.dono_id ?? 0,
+    nome: params?.pet?.nome ?? "",
+    especie: params?.pet?.especie ?? 0,
+    dono_id: params?.pet?.dono_id ?? 0,
     dono_nome: "",
-    raca: params?.raca ?? 0,
-    raca_nome: params?.raca_nome ?? "",
-    observacoes: params?.observacoes ?? "",
-    servicoPadrao: params?.servico_padrao ?? TipoServico.Banho,
-    remarcAtiva: Boolean(params?.remarcacao_ativa ?? false),
+    raca: params?.pet?.raca ?? 0,
+    raca_nome: params?.pet?.raca_nome ?? "",
+    observacoes: params?.pet?.observacoes ?? "",
+    servicoPadrao: params?.pet?.servico_padrao ?? TipoServico.Banho,
+    remarcAtiva: Boolean(params?.pet?.remarcacao_ativa ?? false),
     porte:
-      params?.porte && params.porte in PorteAnimal
-        ? (params.porte as PorteAnimal)
+      params?.pet?.porte && params.pet?.porte in PorteAnimal
+        ? (params.pet?.porte as PorteAnimal)
         : PorteAnimal.MEDIO,
     pacoteRemarcacao:
-      params?.pacote_remarcacao && params.pacote_remarcacao in PacoteRemarcacao
-        ? (params.pacote_remarcacao as PacoteRemarcacao)
+      params?.pet?.pacote_remarcacao &&
+      params.pet?.pacote_remarcacao in PacoteRemarcacao
+        ? (params.pet?.pacote_remarcacao as PacoteRemarcacao)
         : undefined,
-    dataInicioPacote: params?.data_inicio_pacote ?? undefined,
+    dataInicioPacote: params?.pet?.data_inicio_pacote ?? undefined,
   });
 
   const { racasList, especiesList } = pegarRacasBanco(form.especie);
@@ -93,12 +99,15 @@ export default function NewOrEditPet() {
       )
       .build();
     try {
-      if (params?.id) {
-        await petController.updatePet(params.id, petSalvar);
+      if (params?.pet?.id) {
+        await petController.updatePet(params.pet.id, petSalvar);
       } else {
         await petController.createPet(petSalvar);
       }
-      navigate(Screen.Cadastros, "PETS");
+      navigate(Screen.Cadastros, {
+        type: "PET",
+        mode: "view",
+      } as NewOrEditCadastros);
     } catch (erro) {
       showError(erro instanceof Error ? erro.message : "Erro inesperado.");
     }
@@ -141,8 +150,21 @@ export default function NewOrEditPet() {
       <View style={{ backgroundColor: colors.THIRD_BACKGROUND }}>
         <TitleBar
           returnTo={Screen.Cadastros}
-          title={params ? "Editar Pet" : "Novo Pet"}
+          params={
+            {
+              type: "PET",
+              mode: "view",
+            } as NewOrEditCadastros
+          }
+          title={
+            isEditing
+              ? "Editar Pet"
+              : isViewing
+                ? "Visualizando Pet"
+                : "Novo Pet"
+          }
           subtitle="Preencha os dados do pet"
+          isViewing={isViewing}
         />
         <View style={s.escolhaItem}>
           <ItemSelect
@@ -167,6 +189,7 @@ export default function NewOrEditPet() {
         <View style={s.ctnCadastro}>
           {isCadastroPetSelecte ? (
             <AbaInfoPet
+              isEditavel={!isViewing}
               form={form}
               isNewPet={isNewPet}
               updateField={updateField as (field: string, value: any) => void}
@@ -183,15 +206,25 @@ export default function NewOrEditPet() {
                 })
               }
               salvarPet={salvarPet}
-              petToEdit={params}
+              petToEdit={params?.pet}
             />
           ) : (
             <AbaAgendamentoPet
+              isEditavel={!isViewing}
               form={form}
               updateField={updateField as (field: string, value: any) => void}
             />
           )}
         </View>
+        {!isViewing && (
+          <View style={s.ctnBtnSalvar}>
+            <TouchableOpacity style={s.btnSalvar} onPress={salvarPet}>
+              <Text style={s.txtSalvar}>
+                {isEditing ? "Salvar alterações" : "Salvar"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
 
       <ModalSelectList
@@ -249,5 +282,19 @@ const styles = (colors: ThemeColors) =>
       width: "100%",
       marginTop: 15,
       marginBottom: 10,
+    },
+    ctnBtnSalvar: {
+      margin: "auto",
+      marginBottom: 25,
+    },
+    btnSalvar: {
+      paddingVertical: 20,
+      paddingHorizontal: 75,
+      backgroundColor: colors.PRIMARY_VARIANT,
+      borderRadius: 15,
+    },
+    txtSalvar: {
+      color: colors.BACKGROUND,
+      textAlign: "center",
     },
   });

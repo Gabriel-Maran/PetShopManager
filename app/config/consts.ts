@@ -1,5 +1,6 @@
 import { Platform, StatusBar } from "react-native";
-import { Pet } from "../model/Pet";
+import { Pet, PetWithSpecieAndRace } from "../model/Pet";
+import { Owner } from "../model/Owner";
 
 export const STATUS_BAR_HEIGHT =
   Platform.OS === "ios" ? 44 : (StatusBar.currentHeight ?? 24);
@@ -38,9 +39,10 @@ export enum IMAGENS_NAMES {
   CALENDARIO = "CALENDARIO",
   CONFIGURACOES = "CONFIGURACOES",
 }
-
-export type PET_PARAM = {
-  pet: Pet;
+export type NewOrEditCadastros = {
+  mode: "create" | "view" | "edit";
+  owner?: Owner;
+  pet?: Pet | PetWithSpecieAndRace;
   type: "DONO" | "PET";
 };
 
@@ -94,3 +96,7 @@ export type RelatorioParams = {
 };
 
 export type StatusFiltro = "ativo" | "inativo";
+
+export interface PlanoItem extends BarChartItem {
+  pacote: 2 | 4;
+}
