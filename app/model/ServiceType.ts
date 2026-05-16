@@ -1,4 +1,4 @@
-export interface ServiceType{
-    id?: number,
-    servico: string,
+export interface ServiceType {
+  id: number;
+  servico: string;
 }
