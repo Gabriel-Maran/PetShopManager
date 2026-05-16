@@ -53,7 +53,8 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
     DROP TABLE IF EXISTS race;
     DROP TABLE IF EXISTS species;
     DROP TABLE IF EXISTS service_type;
-    DROP TABLE IF EXISTS configs;`);
+    DROP TABLE IF EXISTS configs;
+    DROP TABLE IF EXISTS payment_methods;`);
 */
 
 export async function initDatabase(): Promise<void> {
@@ -90,6 +91,11 @@ export async function initDatabase(): Promise<void> {
       nome_raca  TEXT    NOT NULL,
       FOREIGN KEY (especie_id) REFERENCES species(id) ON DELETE CASCADE,
       UNIQUE (especie_id, nome_raca)
+    );
+
+    CREATE TABLE IF NOT EXISTS payment_methods (
+      id        INTEGER PRIMARY KEY AUTOINCREMENT,
+      tipo_pgto TEXT    NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS owners (
@@ -140,8 +146,8 @@ export async function initDatabase(): Promise<void> {
       concluido    INTEGER NOT NULL DEFAULT 0,
       observacao   TEXT,
       is_auto_agen INTEGER NOT NULL DEFAULT 0,
-      valor        TEXT    NOT NULL DEFAULT 0,
-      tipo_pgto    TEXT    NOT NULL DEFAULT '0,00',
+      valor        TEXT    NOT NULL DEFAULT '0,00',
+      tipo_pgto    TEXT    NOT NULL DEFAULT 0,
       ta_pago      INTEGER NOT NULL DEFAULT 0,
       criado_em    INTEGER NOT NULL DEFAULT (strftime('%Y%m%d', 'now')),
       FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
@@ -199,6 +205,12 @@ export async function initDatabase(): Promise<void> {
       (1, 'Banho'),
       (2, 'Banho e Tosa'),
       (3, 'Banho e Higiênica');
+
+    INSERT OR IGNORE INTO payment_methods (id, tipo_pgto) VALUES
+      (1, 'Cartão de Crédito'),
+      (2, 'Cartão de Débito'),
+      (3, 'PIX'),
+      (4, 'Dinheiro');
       
     INSERT OR IGNORE INTO species (id, nome) VALUES
       (1, 'CAO'),
