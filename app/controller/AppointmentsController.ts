@@ -13,7 +13,9 @@ class AppointmentsController {
     return appointmentsService.getAppointmentsByDate(date);
   }
 
-  getAppointmentsByDateWithOwnerAndPet(date: number): Promise<AppointmentsWithOwnerAndPet[]> {
+  getAppointmentsByDateWithOwnerAndPet(
+    date: number,
+  ): Promise<AppointmentsWithOwnerAndPet[]> {
     return appointmentsService.getAppointmentsByDateWithOwnerAndPet(date);
   }
 
@@ -34,6 +36,7 @@ class AppointmentsController {
       !appointment.pet_id ||
       !appointment.servico ||
       !appointment.data ||
+      !appointment.hora ||
       appointment.servico.trim() === ""
     ) {
       throw new Error("Dados faltando.");
@@ -47,6 +50,7 @@ class AppointmentsController {
       !appointment.pet_id ||
       !appointment.servico ||
       !appointment.data ||
+      !appointment.hora ||
       appointment.servico.trim() === ""
     ) {
       throw new Error("Dados faltando.");
