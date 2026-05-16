@@ -110,6 +110,7 @@ export default function Calendario() {
     const { inicio, fim } = pegarIntervaloMes();
     appointmentController
       .getAppointmentsByDateRange(inicio, fim)
+      //.getAppointmentsByDateRangeNotDone(inicio, fim)
       .then(setDatasComAgendamento)
       .catch(handleError);
   }, [mesSelecionado, dateSelected]);

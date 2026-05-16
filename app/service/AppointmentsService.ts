@@ -18,6 +18,11 @@ class AppointmentsService {
     return appointmentsRepository.getAppointmentsByDateRange(from, to);
   }
 
+   getAppointmentsByDateRangeNotDone(from: number, to: number) {
+    return appointmentsRepository.getAppointmentsByDateRangeNotDone(from, to);
+  }
+
+
   getAppointmentsByPetId(petId: number) {
     return appointmentsRepository.getAppointmentsByPetId(petId);
   }

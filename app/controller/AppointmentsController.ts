@@ -23,6 +23,10 @@ class AppointmentsController {
     return appointmentsService.getAppointmentsByDateRange(from, to);
   }
 
+  getAppointmentsByDateRangeNotDone(from: number, to: number): Promise<Appointment[]> {
+    return appointmentsService.getAppointmentsByDateRangeNotDone(from, to);
+  }
+
   getAppointmentsByPetId(petId: number): Promise<Appointment[]> {
     return appointmentsService.getAppointmentsByPetId(petId);
   }

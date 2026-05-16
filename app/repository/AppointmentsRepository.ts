@@ -58,6 +58,24 @@ class AppointmentRepository {
     );
   }
 
+  // Retorna agendamentos de um intervalo de datas que não estão concluídos
+  async getAppointmentsByDateRangeNotDone(
+    from: number,
+    to: number,
+  ): Promise<Appointment[]> {
+    const db = await getDatabase();
+    return db.getAllAsync<Appointment>(
+      `SELECT 
+        * 
+       FROM 
+       appointments 
+       WHERE data BETWEEN ? AND ? 
+       AND concluido <> 1
+       ORDER BY data ASC`,
+      [from, to],
+    );
+  }
+
   // Retorna todos os agendamentos de um pet (histórico)
   async getAppointmentsByPetId(petId: number): Promise<Appointment[]> {
     const db = await getDatabase();
