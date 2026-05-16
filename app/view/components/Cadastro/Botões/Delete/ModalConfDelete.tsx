@@ -50,7 +50,7 @@ export default function ModalConfDelete({
               style={[s.btn, { backgroundColor: colors.EXCLUIR_MAIN_COLOR }]}
               onPress={onConfirmDelete}
             >
-              <Text style={s.btnTxt}>Excluir</Text>
+              <Text style={s.btnTxt}>Desativar</Text>
             </TouchableOpacity>
           </View>
         </View>

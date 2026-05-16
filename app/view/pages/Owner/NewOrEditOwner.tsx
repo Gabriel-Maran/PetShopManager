@@ -70,10 +70,7 @@ export default function NewOrEditOwner() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={s.flex}
-      
-    >
+    <KeyboardAvoidingView style={s.flex}>
       <DefaultHeader />
       <TitleBar
         returnTo={Screen.Cadastros}

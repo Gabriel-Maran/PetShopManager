@@ -86,8 +86,10 @@ export default function NewOrEditPet() {
       .withObservacoes(form.observacoes)
       .withServicoPadrao(form.servicoPadrao)
       .isRemarcacaoAtiva(form.remarcAtiva ? 1 : 0)
-      .withPacote(form.pacoteRemarcacao)
-      .withInicioPacote(form.dataInicioPacote)
+      .withPacote(form.pacoteRemarcacao ? form.pacoteRemarcacao : undefined)
+      .withInicioPacote(
+        form.dataInicioPacote ? form.dataInicioPacote : undefined,
+      )
       .build();
     try {
       if (params?.id) {

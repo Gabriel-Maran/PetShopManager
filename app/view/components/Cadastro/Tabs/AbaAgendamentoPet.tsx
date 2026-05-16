@@ -13,6 +13,7 @@ import {
   DataNumberPraString,
   DataStringPraNumber,
 } from "../../../../utils/formatadores/converterData";
+import { useEffect } from "react";
 
 // Correção 1: Filtra apenas os valores numéricos do enum
 const tiposServicoList = Object.values(TipoServico).map((v) => ({
@@ -49,6 +50,11 @@ export default function AbaAgendamentoPet({
 
   const mascarar = Mascarar;
 
+  useEffect(() => {
+    form.pacoteRemarcacao = undefined;
+    form.dataInicioPacote = undefined;
+  }, [form.remarcAtiva]);
+
   return (
     <View style={s.inputs}>
       <InputSelect
@@ -80,7 +86,7 @@ export default function AbaAgendamentoPet({
       {form.remarcAtiva && (
         <>
           <InputSelect
-            image={require("../../../../assets/outros/servicos.png")}
+            image={require("../../../../assets/outros/pacoteRemarcacao.webp")}
             titleName="Pacote de Remarcação"
             placeholder="Selecione o pacote..."
             itens={pacotesRemarcacaoList}
