@@ -15,10 +15,12 @@ import InputInfo from "../../Cadastro/InputInfo";
 import InputSelect from "../../InputSelect";
 import SelectionField from "../../Cadastro/SelectionField";
 import { Pet } from "../../../../model/Pet";
-import { useEffect } from "react";
-import { petController } from "../../../../controller/PetController";
+import { useEffect, useState } from "react";
 import { ownerController } from "../../../../controller/OwnerController";
-import { reaceRepository } from "../../../../repository/RaceRepository";
+import { raceRepository } from "../../../../repository/RaceRepository";
+import ModalCadastroRaca from "../Modal/ModalCreateRacePet";
+import { pegarRacasBanco } from "../../../../hooks/buscaBanco/usePet";
+import { Species } from "../../../../repository/SpeciesRepository";
 
 interface AbaInfoPetProps {
   isEditavel?: boolean;
@@ -40,7 +42,7 @@ interface AbaInfoPetProps {
     lista: any[];
     aoSelecionar: (item: any) => void;
   }) => void;
-  racasList: any[];
+  rList: any[];
   especiesList: any[];
   portesList: { id: string; nome: string }[];
   petToEdit?: Pet;
@@ -53,7 +55,7 @@ export default function AbaInfoPet({
   form,
   updateField,
   abrirModal,
-  racasList,
+  rList,
   especiesList,
   portesList,
   petToEdit,
@@ -61,6 +63,17 @@ export default function AbaInfoPet({
 }: AbaInfoPetProps) {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
+
+  const [racaModalAberto, setRacaModalAberto] = useState(false);
+
+  // Hook chamado no nível do componente, reage à espécie selecionada
+  const { racasList } = pegarRacasBanco(form.especie);
+
+  function handleRacaCriada(id: number, nomeRaca: string, especieId: number) {
+    updateField("raca", id);
+    updateField("raca_nome", nomeRaca);
+    setRacaModalAberto(false);
+  }
 
   useEffect(() => {
     if (!isNewPet && form.dono_id) {
@@ -75,7 +88,7 @@ export default function AbaInfoPet({
     }
 
     if (!isNewPet && form.raca) {
-      reaceRepository
+      raceRepository
         .findRaceById(form.raca)
         .then((resultado) => {
           if (resultado?.nome_raca) {
@@ -164,7 +177,7 @@ export default function AbaInfoPet({
             abrirModal({
               titulo: "Selecionar Raça",
               itemIcon: require("../../../../assets/animais/iconPata.png"),
-              lista: racasList || [],
+              lista: racasList ?? [],
               aoSelecionar: (item) => {
                 updateField("raca", item.id);
                 updateField("raca_nome", item.nome);
@@ -177,6 +190,8 @@ export default function AbaInfoPet({
           }}
           goEdit={true}
           isEditavel={isEditavel}
+          fazCadastro={true}
+          onCadastro={() => setRacaModalAberto(true)}
         />
 
         <InputSelect
@@ -207,6 +222,13 @@ export default function AbaInfoPet({
           hasBorderBottom={false}
         />
       </View>
+
+      <ModalCadastroRaca
+        isOpen={racaModalAberto}
+        onClose={() => setRacaModalAberto(false)}
+        especiesList={especiesList}
+        onSuccess={handleRacaCriada}
+      />
     </>
   );
 }

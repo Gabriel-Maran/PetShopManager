@@ -182,14 +182,13 @@ const styles = (colors: ThemeColors) =>
       borderBottomColor: colors.BORDER_MID,
     },
     itemIconRow: {
-      width: 24, 
+      width: 24,
       height: 24,
-      marginRight: 12, 
+      marginRight: 12,
       resizeMode: "contain",
     },
     itemText: {
       fontSize: 16,
       color: colors.TEXT_PRIMARY,
     },
-  
   });

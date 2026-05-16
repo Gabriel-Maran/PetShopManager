@@ -37,4 +37,4 @@ class RaceTypeRepository {
   }
 }
 
-export const reaceRepository = new RaceTypeRepository();
+export const raceRepository = new RaceTypeRepository();

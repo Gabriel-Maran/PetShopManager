@@ -194,7 +194,7 @@ export default function NewOrEditPet() {
               isNewPet={isNewPet}
               updateField={updateField as (field: string, value: any) => void}
               portesList={portesList}
-              racasList={racasList}
+              rList={racasList}
               especiesList={especiesList}
               abrirModal={(config) =>
                 abrirModal({
