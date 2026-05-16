@@ -4,7 +4,7 @@ import { ownerController } from "../../controller/OwnerController";
 import { LIMIT_ITEM_PAGE, ORDER } from "../../config/consts";
 import { Owner } from "../../model/Owner";
 import { Species } from "../../repository/SpeciesRepository";
-import { useError } from "../../hooks/useError";
+import { useError } from "../useError";
 
 export function pegarRacasBanco(formEspecieId: number): {
   racasList: Species[];
@@ -15,15 +15,10 @@ export function pegarRacasBanco(formEspecieId: number): {
     showError(e instanceof Error ? e.message : "Erro inesperado.");
 
   const [especiesList, setEspeciesList] = useState<Species[]>([]);
-  const [racasList, setRacasList] = useState<Species[]>(
-    [],
-  );
+  const [racasList, setRacasList] = useState<Species[]>([]);
 
   useEffect(() => {
-    speciesController
-      .searchSpecies()
-      .then(setEspeciesList)
-      .catch(handleError);
+    speciesController.searchSpecies().then(setEspeciesList).catch(handleError);
   }, []);
 
   useEffect(() => {
@@ -36,16 +31,16 @@ export function pegarRacasBanco(formEspecieId: number): {
       setRacasList([]);
     }
   }, [formEspecieId]);
-  return { racasList, especiesList }
+  return { racasList, especiesList };
 }
 
-export function pegarDonosBanco(): ({
-  owners: Owner[],
-  page: number,
-  setPage: (page: number) => void,
-  setSearchTxt: (stxt: string) => void,
-  total: number,
-}) {
+export function pegarDonosBanco(): {
+  owners: Owner[];
+  page: number;
+  setPage: (page: number) => void;
+  setSearchTxt: (stxt: string) => void;
+  total: number;
+} {
   const { showError } = useError();
   const handleError = (e: unknown) =>
     showError(e instanceof Error ? e.message : "Erro inesperado.");
@@ -66,10 +61,7 @@ export function pegarDonosBanco(): ({
   }, [searchTxt, page]);
 
   useEffect(() => {
-    ownerController
-      .countOwners()
-      .then(setTotal)
-      .catch(handleError);
+    ownerController.countOwners().then(setTotal).catch(handleError);
   }, []);
 
   return {
@@ -78,5 +70,5 @@ export function pegarDonosBanco(): ({
     setPage,
     setSearchTxt,
     total,
-  }
+  };
 }

@@ -1,17 +1,17 @@
 import { useEffect } from "react";
-import { useError } from "../../hooks/useError";
-import useFormState from "../../hooks/useFormState";
+import { useError } from "../useError";
+import useFormState from "../useFormState";
 import { petController } from "../../controller/PetController";
 import { LIMIT_ITEM_PAGE, ORDER } from "../../config/consts";
 import { PetWithSpecieAndRace } from "../../model/Pet";
 import { ServiceType } from "../../model/ServiceType";
 import { serviceTypeRepository } from "../../repository/ServiceTypeRepository";
 import { NewOrEditAppointmentParams } from "../../model/Appointment";
-import { useScreen } from "../../hooks/useScreen";
+import { useScreen } from "../useScreen";
 import {
   DataHifenPraBarra,
   DataNumberPraString,
-} from "../formatadores/converterData";
+} from "../../utils/formatadores/converterData";
 import { PaymentsMethod } from "../../model/PaymentMethod";
 import { paymentMethodRepository } from "../../repository/PaymentsMethodsRepository";
 
