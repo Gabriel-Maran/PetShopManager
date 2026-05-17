@@ -111,9 +111,10 @@ export default function AbaInfoPet({
           item={form.nome}
           setItem={(v) => updateField("nome", v)}
           placeHolder="Digite o nome..."
-          titleName="Nome Completo"
+          titleName="Nome do Pet"
           variasLinhas={false}
           hasBorderBottom={true}
+          maximoCaracteres={25}
           digitavel={isEditavel}
         />
 
@@ -167,39 +168,41 @@ export default function AbaInfoPet({
           isEditavel={isEditavel}
         />
 
-        <SelectionField
-          image={require("../../../../assets/animais/iconRaca.png")}
-          titleName="Raça"
-          selectedReg={form.raca_nome}
-          buttonText={form.raca_nome ? "Trocar raça" : "Selecionar raça"}
-          hasBorderBottom={true}
-          onPress={() =>
-            abrirModal({
-              titulo: "Selecionar Raça",
-              itemIcon: require("../../../../assets/animais/iconPata.png"),
-              lista: racasList ?? [],
-              aoSelecionar: (item) => {
-                updateField("raca", item.id);
-                updateField("raca_nome", item.nome);
-              },
-            })
-          }
-          onClear={() => {
-            updateField("raca", 0);
-            updateField("raca_nome", "");
-          }}
-          goEdit={true}
-          isEditavel={isEditavel}
-          fazCadastro={isEditavel}
-          onCadastro={() => setRacaModalAberto(true)}
-        />
+        {form.especie ? (
+          <SelectionField
+            image={require("../../../../assets/animais/iconRaca.png")}
+            titleName="Raça"
+            selectedReg={form.raca_nome}
+            buttonText={form.raca_nome ? "Trocar raça" : "Selecionar raça"}
+            hasBorderBottom={true}
+            onPress={() =>
+              abrirModal({
+                titulo: "Selecionar Raça",
+                itemIcon: require("../../../../assets/animais/iconPata.png"),
+                lista: racasList ?? [],
+                aoSelecionar: (item) => {
+                  updateField("raca", item.id);
+                  updateField("raca_nome", item.nome);
+                },
+              })
+            }
+            onClear={() => {
+              updateField("raca", 0);
+              updateField("raca_nome", "");
+            }}
+            goEdit={true}
+            isEditavel={isEditavel}
+            fazCadastro={isEditavel}
+            onCadastro={() => setRacaModalAberto(true)}
+          />
+        ) : null}
 
         <InputSelect
           titleName="Porte"
           image={require("../../../../assets/animais/iconPorte.png")}
           placeholder="Selecione o Porte do animal"
           itens={portesList}
-          itemSelected={portesList.find((e) => e.id === form.porte)}
+          itemSelected={portesList.find((e) => e.nome === form.porte)}
           labelExtractor={(item) => item.nome}
           onChange={(item) => updateField("porte", item.nome)}
           renderItem={(item) => (
@@ -219,6 +222,7 @@ export default function AbaInfoPet({
           titleName="Observações"
           variasLinhas={true}
           digitavel={isEditavel}
+          maximoCaracteres={250}
           hasBorderBottom={false}
         />
       </View>
