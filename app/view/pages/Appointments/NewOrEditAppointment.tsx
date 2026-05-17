@@ -129,6 +129,7 @@ export default function NewOrEditAppointment() {
         returnTo={Screen.Calendario}
         title={isEditing ? "Editar Agendamento" : "Novo Agendamento"}
         subtitle="Preencha as informações"
+        confirmReturn={true}
       />
       <View style={s.escolhaItem}>
         <ItemSelect

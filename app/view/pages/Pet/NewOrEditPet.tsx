@@ -7,7 +7,7 @@ import {
   View,
   ImageSourcePropType,
   Platform,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
 } from "react-native";
 
 import {
@@ -170,6 +170,7 @@ export default function NewOrEditPet() {
           }
           subtitle="Preencha os dados do pet"
           isViewing={isViewing}
+          confirmReturn={!isViewing}
         />
         <View style={s.escolhaItem}>
           <ItemSelect
