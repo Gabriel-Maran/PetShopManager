@@ -60,6 +60,9 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 export async function initDatabase(): Promise<void> {
   const db = await getDatabase();
 
+  // Cole abaixo os drops:
+  
+
   // ── Pragma ────────────────────────────────────────────────────────────────
 
   const SQL_PRAGMA = `
@@ -210,8 +213,9 @@ export async function initDatabase(): Promise<void> {
     INSERT OR IGNORE INTO payment_methods (id, tipo_pgto) VALUES
       (1, 'Cartão de Crédito'),
       (2, 'Cartão de Débito'),
-      (3, 'PIX'),
-      (4, 'Dinheiro');
+      (3, 'Dinheiro'),
+      (4, 'PIX'),
+      (5, 'Outro');
       
     INSERT OR IGNORE INTO species (id, nome) VALUES
       (1, 'CAO'),
