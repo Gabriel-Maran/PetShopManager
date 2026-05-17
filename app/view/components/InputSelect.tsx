@@ -69,10 +69,9 @@ export default function InputSelect<T>({
             : {},
         ]}
         onPress={() => {
-          if (isEditavel) {
-            setIsOpen(!isOpen);
-          }
+          setIsOpen(!isOpen);
         }}
+        disabled={!isEditavel}
         activeOpacity={0.7}
       >
         <Text style={s.selectText}>
