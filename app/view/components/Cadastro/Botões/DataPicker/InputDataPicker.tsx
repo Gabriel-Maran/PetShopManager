@@ -23,8 +23,6 @@ export default function InputDataPicker({
   titleName: string;
   hasBorderBottom?: boolean;
 }) {
-  const { colors } = useTheme();
-  const s = useThemedStyles(styles);
   return (
     <InputWrapper
       image={image}
@@ -42,18 +40,3 @@ export default function InputDataPicker({
     </InputWrapper>
   );
 }
-const styles = (colors: ThemeColors) =>
-  StyleSheet.create({
-    input: {
-      color: colors.TEXT_PRIMARY,
-      width: "100%",
-      minHeight: 45,
-      maxHeight: 90,
-      fontSize: 16,
-      borderWidth: 1,
-      borderRadius: 8,
-      paddingHorizontal: 15,
-      paddingVertical: 5,
-      borderColor: colors.BORDER_STRONG,
-    },
-  });
