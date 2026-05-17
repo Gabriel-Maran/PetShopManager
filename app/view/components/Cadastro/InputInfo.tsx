@@ -1,4 +1,9 @@
-import { ImageSourcePropType, TextInput, StyleSheet, KeyboardTypeOptions } from "react-native";
+import {
+  ImageSourcePropType,
+  TextInput,
+  StyleSheet,
+  KeyboardTypeOptions,
+} from "react-native";
 import {
   ThemeColors,
   useTheme,
@@ -16,6 +21,7 @@ export default function InputInfo({
   variasLinhas,
   digitavel,
   tipoTeclado,
+  maximoCaracteres,
 }: {
   image: ImageSourcePropType;
   item: string | null;
@@ -24,8 +30,9 @@ export default function InputInfo({
   titleName: string;
   hasBorderBottom?: boolean;
   variasLinhas: boolean;
-  digitavel: boolean;
+  digitavel?: boolean;
   tipoTeclado?: KeyboardTypeOptions;
+  maximoCaracteres: number;
 }) {
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
@@ -42,8 +49,10 @@ export default function InputInfo({
         onChangeText={(item) => setItem(item)}
         value={item ?? undefined}
         multiline={variasLinhas}
+        
         editable={digitavel}
         keyboardType={tipoTeclado}
+        maxLength={maximoCaracteres}
       />
     </InputWrapper>
   );
@@ -56,8 +65,8 @@ const styles = (colors: ThemeColors) =>
       minHeight: 45,
       maxHeight: 90,
       fontSize: 16,
-      borderWidth: 1,
-      borderRadius: 8,
+      borderWidth: 1.5,
+      borderRadius: 10,
       paddingHorizontal: 15,
       paddingVertical: 5,
       borderColor: colors.BORDER_STRONG,
