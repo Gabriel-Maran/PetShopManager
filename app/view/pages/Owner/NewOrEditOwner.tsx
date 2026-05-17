@@ -69,7 +69,10 @@ export default function NewOrEditOwner() {
   };
 
   return (
-    <KeyboardAvoidingView style={s.flex}>
+    <KeyboardAvoidingView
+      style={s.flex}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <DefaultHeader />
       <TitleBar
         returnTo={Screen.Cadastros}
@@ -106,6 +109,7 @@ export default function NewOrEditOwner() {
               titleName="Nome Completo"
               variasLinhas={false}
               digitavel={!isViewing}
+              maximoCaracteres={100}
               hasBorderBottom={true}
             />
             <InputInfo
@@ -115,6 +119,8 @@ export default function NewOrEditOwner() {
               placeHolder="(46) 90000-0000"
               titleName="Telefone"
               digitavel={!isViewing}
+              maximoCaracteres={15}
+              tipoTeclado="phone-pad"
               variasLinhas={false}
             />
           </View>
@@ -130,6 +136,8 @@ export default function NewOrEditOwner() {
               titleName="E-mail"
               variasLinhas={false}
               digitavel={!isViewing}
+              maximoCaracteres={254}
+              tipoTeclado="email-address"
               hasBorderBottom={true}
             />
             <InputInfo
@@ -137,9 +145,10 @@ export default function NewOrEditOwner() {
               item={endereco}
               setItem={setEndereco}
               placeHolder="Rua X, 456"
+              titleName="Endereço"
               variasLinhas={true}
               digitavel={!isViewing}
-              titleName="Endereço"
+              maximoCaracteres={120}
             />
           </View>
           {!isViewing && (
