@@ -1,6 +1,7 @@
 import { Platform, StatusBar } from "react-native";
-import { Pet, PetWithSpecieAndRace } from "../model/Pet";
+import { Pet, PetWithSpecieRaceAndOwner } from "../model/Pet";
 import { Owner } from "../model/Owner";
+import { BarChartItem } from "../view/components/Relatorios/BarChart";
 
 export const STATUS_BAR_HEIGHT =
   Platform.OS === "ios" ? 44 : (StatusBar.currentHeight ?? 24);
@@ -42,7 +43,7 @@ export enum IMAGENS_NAMES {
 export type NewOrEditCadastros = {
   mode: "create" | "view" | "edit";
   owner?: Owner;
-  pet?: Pet | PetWithSpecieAndRace;
+  pet?: Pet | PetWithSpecieRaceAndOwner;
   type: "DONO" | "PET";
 };
 
