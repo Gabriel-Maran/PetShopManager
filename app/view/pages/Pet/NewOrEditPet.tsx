@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   View,
   ImageSourcePropType,
+  Platform,
+  KeyboardAvoidingView
 } from "react-native";
 
 import {
@@ -145,7 +147,10 @@ export default function NewOrEditPet() {
   };
 
   return (
-    <>
+    <KeyboardAvoidingView
+      style={s.flex}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <DefaultHeader />
       <View style={{ backgroundColor: colors.THIRD_BACKGROUND }}>
         <TitleBar
@@ -242,7 +247,7 @@ export default function NewOrEditPet() {
           setSearchTxt(txt);
         }}
       />
-    </>
+    </KeyboardAvoidingView>
   );
 }
 const styles = (colors: ThemeColors) =>
