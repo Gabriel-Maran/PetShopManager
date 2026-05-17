@@ -15,13 +15,13 @@ class PetService {
     return petRepository.getAllPetsPaged(page, limit, order);
   }
 
-  getAllPetsPagedWithSpecieAndRace(
+  getAllPetsPagedWithSpecieRaceAndOwner(
     page: number,
     limit: number,
     order: ORDER,
     ativo: number = 1,
   ) {
-    return petRepository.getAllPetsPagedWithSpecieAndRace(
+    return petRepository.getAllPetsPagedWithSpecieRaceAndOwner(
       page,
       limit,
       order,
@@ -38,14 +38,14 @@ class PetService {
     return petRepository.searchPetsByNamePaged(query, page, limit, order);
   }
 
-  searchPetsByNamePagedWithSpecieAndRace(
+  searchPetsByNamePagedWithSpecieRaceAndOwner(
     query: string,
     page: number,
     limit: number,
     order: ORDER,
     ativo: number = 1,
   ) {
-    return petRepository.searchPetsByNamePagedWithSpecieAndRace(
+    return petRepository.searchPetsByNamePagedWithSpecieRaceAndOwner(
       query,
       page,
       limit,

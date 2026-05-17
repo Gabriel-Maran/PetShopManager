@@ -1,6 +1,6 @@
 import { ORDER } from "../config/consts";
 import { getDatabase } from "../config/database";
-import { Pet, PetWithSpecieAndRace } from "../model/Pet";
+import { Pet, PetWithSpecieRaceAndOwner } from "../model/Pet";
 import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
 
 class PetRepository {
@@ -29,24 +29,26 @@ class PetRepository {
     );
   }
 
-  async getAllPetsPagedWithSpecieAndRace(
+  async getAllPetsPagedWithSpecieRaceAndOwner(
     page: number = 0,
     limit: number = 20,
     order: ORDER,
     ativo: number = 1,
-  ): Promise<PetWithSpecieAndRace[]> {
+  ): Promise<PetWithSpecieRaceAndOwner[]> {
     const db = await getDatabase();
     const offset = page * limit;
 
-    return db.getAllAsync<PetWithSpecieAndRace>(
+    return db.getAllAsync<PetWithSpecieRaceAndOwner>(
       `
     SELECT 
       PT.*,
-      SP.nome as nome_especie,
-      RC.nome_raca as nome_raca
-    FROM pets as PT
-    JOIN species as SP ON PT.especie = SP.id
-    JOIN race as RC ON PT.raca = RC.id
+      SP.nome      as nome_especie,
+      RC.nome_raca as nome_raca,
+      OW.nome      as nome_dono
+    FROM pets     as PT
+    JOIN species  as SP ON PT.especie = SP.id
+    JOIN race     as RC ON PT.raca    = RC.id
+    JOIN owners   as OW ON PT.dono_id = OW.id 
     WHERE PT.is_ativo = ? 
     ORDER BY PT.criado_em ${order} 
     LIMIT ? OFFSET ?
@@ -76,26 +78,28 @@ class PetRepository {
     );
   }
 
-  async searchPetsByNamePagedWithSpecieAndRace(
+  async searchPetsByNamePagedWithSpecieRaceAndOwner(
     query: string,
     page: number = 0,
     limit: number = 20,
     order: ORDER = ORDER.ASC,
     ativo: number = 1,
-  ): Promise<PetWithSpecieAndRace[]> {
+  ): Promise<PetWithSpecieRaceAndOwner[]> {
     const db = await getDatabase();
     const offset = page * limit;
     const query_normalizada = normalizeForSearch(query);
 
-    return db.getAllAsync<PetWithSpecieAndRace>(
+    return db.getAllAsync<PetWithSpecieRaceAndOwner>(
       `
      SELECT 
-      PT.*,
-      SP.nome      as nome_especie,
-      RC.nome_raca as nome_raca
-     FROM pets    as PT
-     JOIN species as SP ON PT.especie = SP.id
-     JOIN race    as RC ON PT.raca    = RC.id
+       PT.*,
+       SP.nome      as nome_especie,
+       RC.nome_raca as nome_raca,
+       OW.nome      as nome_dono
+     FROM pets     as PT
+     JOIN species  as SP ON PT.especie = SP.id
+     JOIN race     as RC ON PT.raca    = RC.id
+     JOIN owners   as OW ON PT.dono_id = OW.id
      WHERE PT.nome_normalizado LIKE ? 
      AND PT.is_ativo = ? 
      ORDER BY PT.nome_normalizado ${order} 

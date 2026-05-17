@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import ButtonEditar from "../Botões/ButtonEditar";
 import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
-import { PetWithSpecieAndRace } from "../../../../model/Pet";
+import { PetWithSpecieRaceAndOwner } from "../../../../model/Pet";
 import {
   EspeciesAtendidas,
   NewOrEditCadastros,
@@ -17,9 +17,6 @@ import {
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 import { EspeciesAtendidasLabel } from "../../../../config/consts";
 import ButtonAtivar from "../Botões/ButtonAtivar";
-import { useEffect, useState } from "react";
-import { Owner } from "../../../../model/Owner";
-import { ownerController } from "../../../../controller/OwnerController";
 import { useScreen } from "../../../../hooks/useScreen";
 
 export default function PetList({
@@ -28,7 +25,7 @@ export default function PetList({
   saoAtivados,
   onActive,
 }: {
-  cadastros: PetWithSpecieAndRace[];
+  cadastros: PetWithSpecieRaceAndOwner[];
   onDelete: (itemId: number) => void;
   onActive: (itemId: number) => void;
   saoAtivados: boolean;
@@ -60,6 +57,8 @@ export default function PetList({
                 <Text style={s.textMain}>{item.nome}</Text>
               </View>
               <Text style={s.textSub}>
+                {item.nome_dono}
+                {"\n"}
                 {`${EspeciesAtendidasLabel[item.nome_especie as EspeciesAtendidas]}${item.nome_raca ? ` - ${item.nome_raca}` : ""}`}
               </Text>
             </View>
