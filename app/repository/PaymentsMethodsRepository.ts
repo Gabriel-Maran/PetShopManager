@@ -6,7 +6,7 @@ class PaymentMethodRepository {
     const db = await getDatabase();
 
     return db.getAllAsync<PaymentsMethod>(
-      `SELECT * FROM payment_methods ORDER BY tipo_pgto ASC`,
+      `SELECT * FROM payment_methods ORDER BY id ASC`,
     );
   }
 }
