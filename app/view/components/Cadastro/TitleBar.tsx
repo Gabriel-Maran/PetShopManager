@@ -6,14 +6,19 @@ import {
   useTheme,
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
+import { useState } from "react";
+import { useScreen } from "../../../hooks/useScreen";
+import ConfirmModal from "../ConfirmModal";
 
 export default function TitleBar({
+  confirmReturn = false,
   params,
   title,
   subtitle,
   returnTo,
   isViewing,
 }: {
+  confirmReturn?: boolean;
   params?: any;
   title: string;
   subtitle: string;
@@ -22,14 +27,37 @@ export default function TitleBar({
 }) {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const { navigate } = useScreen();
+  function navegarBack() {
+    navigate(returnTo);
+  }
   return (
-    <View style={s.container}>
-      <ButtonBack backTo={returnTo} params={params} />
-      <View>
-        <Text style={s.txtTitle}>{title}</Text>
-        {!isViewing && <Text style={s.txtSubTitle}>{subtitle}</Text>}
+    <>
+      <View style={s.container}>
+        <ButtonBack
+          confirmReturn={confirmReturn}
+          backTo={returnTo}
+          params={params}
+          onPress={() => setIsOpenModal(true)}
+        />
+
+        <View>
+          <Text style={s.txtTitle}>{title}</Text>
+          {!isViewing && <Text style={s.txtSubTitle}>{subtitle}</Text>}
+        </View>
       </View>
-    </View>
+      <ConfirmModal
+        visible={isOpenModal}
+        emoji="⚠️"
+        title="Confirma voltar?"
+        message="Você perderá todos os novos dados não salvos."
+        confirmLabel="Voltar"
+        variant="destructive"
+        onConfirm={navegarBack}
+        onCancel={() => setIsOpenModal(false)}
+      />
+    </>
   );
 }
 const styles = (colors: ThemeColors) =>

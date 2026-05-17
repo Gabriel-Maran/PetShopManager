@@ -117,8 +117,6 @@ export default function NewOrEditAppointment() {
 
   const s = useThemedStyles(styles);
 
-  
-
   return (
     <KeyboardAvoidingView
       style={s.flex}
@@ -129,6 +127,7 @@ export default function NewOrEditAppointment() {
         returnTo={Screen.Calendario}
         title={isEditing ? "Editar Agendamento" : "Novo Agendamento"}
         subtitle="Preencha as informações"
+        confirmReturn={true}
       />
       <View style={s.escolhaItem}>
         <ItemSelect
@@ -217,9 +216,7 @@ export default function NewOrEditAppointment() {
                 <InputInfo
                   image={require("../../../assets/outros/hora.png")}
                   item={appointmentsForm.hora}
-                  setItem={(v) =>
-                    updateAppointmentsField("hora", mascarar(v))
-                  }
+                  setItem={(v) => updateAppointmentsField("hora", mascarar(v))}
                   placeHolder="Informe o horário..."
                   titleName="Horário"
                   variasLinhas={false}

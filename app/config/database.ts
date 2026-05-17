@@ -61,7 +61,6 @@ export async function initDatabase(): Promise<void> {
   const db = await getDatabase();
 
   // Cole abaixo os drops:
-  
 
   // ── Pragma ────────────────────────────────────────────────────────────────
 
@@ -263,8 +262,8 @@ export async function initDatabase(): Promise<void> {
   `;
 
   // Ao concluir um agendamento AUTO:
-  //   1. Calcula próxima data = ultimo_visita_data_auto + gap
-  //   2. Só insere se o rate limit do mês alvo não foi atingido
+  //   1. Se o limite do mês foi atingido, calcula a data saltando para o próximo mês (no mesmo dia da semana)
+  //   2. Se ainda há saldo no mês, apenas soma o gap (7 ou 14 dias)
   //   3. Atualiza ultimo_visita_data_auto para o novo MAX
   const SQL_TRIGGER_REMARCACAO_AUTOMATICA = `
     CREATE TRIGGER IF NOT EXISTS trg_remarcacao_automatica
@@ -277,18 +276,44 @@ export async function initDatabase(): Promise<void> {
       SELECT
         NEW.pet_id,
         NEW.servico,
-        CAST(strftime('%Y%m%d', date(
-          COALESCE(
-            substr(CAST(p.ultimo_visita_data_auto AS TEXT), 1, 4) || '-' ||
-            substr(CAST(p.ultimo_visita_data_auto AS TEXT), 5, 2) || '-' ||
-            substr(CAST(p.ultimo_visita_data_auto AS TEXT), 7, 2),
-            -- fallback: usa a data do agendamento concluído
-            substr(CAST(NEW.data AS TEXT), 1, 4) || '-' ||
-            substr(CAST(NEW.data AS TEXT), 5, 2) || '-' ||
-            substr(CAST(NEW.data AS TEXT), 7, 2)
-          ),
-          '+' || CASE p.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
-        )) AS INTEGER),
+        CAST(strftime('%Y%m%d', CASE 
+          -- Se a quantidade de agendamentos em aberto no mês alvo JÁ atingiu o limite do pacote
+          WHEN (
+            SELECT COUNT(*)
+            FROM appointments a2
+            WHERE a2.pet_id = NEW.pet_id
+              AND a2.is_auto_agen = 1
+              AND a2.concluido = 0
+              AND substr(CAST(a2.data AS TEXT), 1, 6) = strftime('%Y%m', date(
+                COALESCE(
+                  substr(CAST(p.ultimo_visita_data_auto AS TEXT), 1, 4) || '-' || substr(CAST(p.ultimo_visita_data_auto AS TEXT), 5, 2) || '-' || substr(CAST(p.ultimo_visita_data_auto AS TEXT), 7, 2),
+                  substr(CAST(NEW.data AS TEXT), 1, 4) || '-' || substr(CAST(NEW.data AS TEXT), 5, 2) || '-' || substr(CAST(NEW.data AS TEXT), 7, 2)
+                )
+              ))
+          ) >= p.pacote_remarcacao THEN
+            -- PULA PARA O PRÓXIMO MÊS: Vai para o dia 01 e calcula o deslocamento para manter o mesmo dia da semana
+            date(
+              COALESCE(
+                substr(CAST(p.ultimo_visita_data_auto AS TEXT), 1, 4) || '-' || substr(CAST(p.ultimo_visita_data_auto AS TEXT), 5, 2) || '-01',
+                substr(CAST(NEW.data AS TEXT), 1, 4) || '-' || substr(CAST(NEW.data AS TEXT), 5, 2) || '-01'
+              ), 
+              '+1 month', 
+              '+' || ((
+                CAST(strftime('%w', date(substr(CAST(NEW.data AS TEXT), 1, 4) || '-' || substr(CAST(NEW.data AS TEXT), 5, 2) || '-' || substr(CAST(NEW.data AS TEXT), 7, 2))) AS INTEGER) 
+                - CAST(strftime('%w', date(COALESCE(substr(CAST(p.ultimo_visita_data_auto AS TEXT), 1, 4) || '-' || substr(CAST(p.ultimo_visita_data_auto AS TEXT), 5, 2) || '-01', substr(CAST(NEW.data AS TEXT), 1, 4) || '-' || substr(CAST(NEW.data AS TEXT), 5, 2) || '-01'), '+1 month')) AS INTEGER) 
+                + 7
+              ) % 7) || ' days'
+            )
+          ELSE
+            -- SE ESTÁ DENTRO DA COTA: Soma apenas o intervalo padrão de 7 ou 14 dias
+            date(
+              COALESCE(
+                substr(CAST(p.ultimo_visita_data_auto AS TEXT), 1, 4) || '-' || substr(CAST(p.ultimo_visita_data_auto AS TEXT), 5, 2) || '-' || substr(CAST(p.ultimo_visita_data_auto AS TEXT), 7, 2),
+                substr(CAST(NEW.data AS TEXT), 1, 4) || '-' || substr(CAST(NEW.data AS TEXT), 5, 2) || '-' || substr(CAST(NEW.data AS TEXT), 7, 2)
+              ),
+              '+' || CASE p.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+            )
+        END) AS INTEGER),
         NEW.entregar_pet,
         NEW.observacao,
         1
@@ -296,28 +321,9 @@ export async function initDatabase(): Promise<void> {
       WHERE p.id = NEW.pet_id
         AND p.is_ativo = 1
         AND p.remarcacao_ativa = 1
-        AND p.pacote_remarcacao IS NOT NULL
-        -- Rate limit: conta pendentes no mês alvo
-        AND (
-          SELECT COUNT(*)
-          FROM appointments a2
-          WHERE a2.pet_id = NEW.pet_id
-            AND a2.is_auto_agen = 1
-            AND a2.concluido = 0
-            AND substr(CAST(a2.data AS TEXT), 1, 6) = strftime('%Y%m', date(
-              COALESCE(
-                substr(CAST(p.ultimo_visita_data_auto AS TEXT), 1, 4) || '-' ||
-                substr(CAST(p.ultimo_visita_data_auto AS TEXT), 5, 2) || '-' ||
-                substr(CAST(p.ultimo_visita_data_auto AS TEXT), 7, 2),
-                substr(CAST(NEW.data AS TEXT), 1, 4) || '-' ||
-                substr(CAST(NEW.data AS TEXT), 5, 2) || '-' ||
-                substr(CAST(NEW.data AS TEXT), 7, 2)
-              ),
-              '+' || CASE p.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
-            ))
-        ) < p.pacote_remarcacao;
+        AND p.pacote_remarcacao IS NOT NULL;
   
-      -- Atualiza ultimo_visita_data_auto para o MAX de pendentes
+      -- Atualiza ultimo_visita_data_auto para o novo MAX de pendentes
       UPDATE pets
       SET ultimo_visita_data_auto = (
         SELECT MAX(data)
@@ -344,7 +350,7 @@ export async function initDatabase(): Promise<void> {
     WHEN NEW.remarcacao_ativa = 1 AND NEW.pacote_remarcacao IS NOT NULL
     BEGIN
       INSERT INTO appointments (pet_id, servico, data, entregar_pet, is_auto_agen)
-      WITH RECURSIVE agenda(data_int, mes_atual, contagem_mes) AS (
+      WITH RECURSIVE agenda(data_int, mes_atual, contagem_mes, dia_semana_base) AS (
         -- Base: Primeira visita é EXATAMENTE na data_inicio_pacote selecionada
         SELECT
           CAST(strftime('%Y%m%d', date(
@@ -363,32 +369,55 @@ export async function initDatabase(): Promise<void> {
               'now'
             )
           )),
-          1
+          1,
+          -- Guarda o dia da semana original (0 = Domingo, 1 = Segunda, ..., 5 = Sexta)
+          CAST(strftime('%w', date(
+            COALESCE(
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 1, 4) || '-' ||
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 5, 2) || '-' ||
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 7, 2),
+              'now'
+            )
+          )) AS INTEGER)
+        
         UNION ALL
-        -- Recursão: Próximas visitas avançam pelo gap (7 ou 14 dias)
+        
+        -- Recursão: Próximas visitas aplicam o salto dinâmico ao atingir a meta
         SELECT
-          CAST(strftime('%Y%m%d', date(
-            substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
-            substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
-            substr(CAST(data_int AS TEXT), 7, 2),
-            '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
-          )) AS INTEGER),
-          strftime('%Y%m', date(
-            substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
-            substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
-            substr(CAST(data_int AS TEXT), 7, 2),
-            '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
-          )),
-          CASE
-            WHEN strftime('%Y%m', date(
-              substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
-              substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
-              substr(CAST(data_int AS TEXT), 7, 2),
-              '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
-            )) = mes_atual
-            THEN contagem_mes + 1
-            ELSE 1
-          END
+          -- NOVA DATA_INT: Se bateu a cota do mês, calcula a primeira ocorrência do dia da semana no mês seguinte
+          CAST(strftime('%Y%m%d', CASE 
+            WHEN contagem_mes >= NEW.pacote_remarcacao THEN
+              date(
+                substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-01', 
+                '+1 month', 
+                '+' || ((dia_semana_base - CAST(strftime('%w', date(substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-01', '+1 month')) AS INTEGER) + 7) % 7) || ' days'
+              )
+            ELSE
+              -- Se ainda tem saldo no mês, aplica o intervalo normal do pacote (7 ou 14 dias)
+              date(
+                substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-' || substr(CAST(data_int AS TEXT), 7, 2),
+                '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+              )
+          END) AS INTEGER),
+          
+          -- NOVO MES_ATUAL
+          strftime('%Y%m', CASE 
+            WHEN contagem_mes >= NEW.pacote_remarcacao THEN
+              date(substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-01', '+1 month')
+            ELSE
+              date(
+                substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-' || substr(CAST(data_int AS TEXT), 7, 2),
+                '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+              )
+          END),
+          
+          -- NOVA CONTAGEM_MES: Reseta para 1 se pulou de mês, senão incrementa
+          CASE 
+            WHEN contagem_mes >= NEW.pacote_remarcacao THEN 1
+            ELSE contagem_mes + 1
+          END,
+          
+          dia_semana_base
         FROM agenda
         -- Alvo: Avança até a data atual + PERIODO_REMARCACAO
         WHERE data_int < CAST(strftime('%Y%m%d', date('now', '${PERIODO_REMARCACAO}')) AS INTEGER)
@@ -403,8 +432,8 @@ export async function initDatabase(): Promise<void> {
           WHEN data_int < CAST(strftime('%Y%m%d', 'now') AS INTEGER) THEN 0 
           ELSE 1 
         END
-      FROM agenda
-      WHERE contagem_mes <= NEW.pacote_remarcacao;
+      FROM agenda;
+      -- Filtro antigo "WHERE contagem_mes <= pacote" foi removido pois a própria árvore acima controla o fluxo e avança de mês!
   
       -- Salva a última data gerada em ultimo_visita_data_auto (considerando concluido = 0)
       UPDATE pets
@@ -418,25 +447,26 @@ export async function initDatabase(): Promise<void> {
       WHERE id = NEW.id;
     END;
   `;
+
   const SQL_TRIGGER_PET_REMARCACAO_ATIVAR = `
     CREATE TRIGGER IF NOT EXISTS trg_pet_remarcacao_ativar
     AFTER UPDATE OF remarcacao_ativa, pacote_remarcacao, data_inicio_pacote, is_ativo ON pets
     FOR EACH ROW
     WHEN (
-      (NEW.remarcacao_ativa = 1 AND NEW.pacote_remarcacao IS NOT NULL AND NEW.is_ativo = 1)  -- ← + AND NEW.is_ativo = 1
+      (NEW.remarcacao_ativa = 1 AND NEW.pacote_remarcacao IS NOT NULL AND NEW.is_ativo = 1)
       OR 
       (OLD.is_ativo = 0 AND NEW.is_ativo = 1 AND NEW.remarcacao_ativa = 1 AND NEW.pacote_remarcacao IS NOT NULL)
     )
     BEGIN
-      -- Limpa todos os agendamentos automáticos pendentes (passados e futuros) para evitar sobreposição ou duplicados na reativação
+      -- Limpa todos os agendamentos automáticos pendentes anteriores
       DELETE FROM appointments
       WHERE pet_id = NEW.id
         AND is_auto_agen = 1
         AND concluido = 0;
   
       INSERT INTO appointments (pet_id, servico, data, entregar_pet, is_auto_agen)
-      WITH RECURSIVE agenda(data_int, mes_atual, contagem_mes) AS (
-        -- Base: Primeira visita ocorre EXATAMENTE na data_inicio_pacote editada/designada
+      WITH RECURSIVE agenda(data_int, mes_atual, contagem_mes, dia_semana_base) AS (
+        -- Base: Primeira visita na data_inicio_pacote
         SELECT
           CAST(strftime('%Y%m%d', date(
             COALESCE(
@@ -454,34 +484,58 @@ export async function initDatabase(): Promise<void> {
               'now'
             )
           )),
-          1
+          1,
+          -- Guarda o dia da semana original (0 = Domingo, 1 = Segunda, ..., 5 = Sexta, 6 = Sábado)
+          CAST(strftime('%w', date(
+            COALESCE(
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 1, 4) || '-' ||
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 5, 2) || '-' ||
+              substr(CAST(NEW.data_inicio_pacote AS TEXT), 7, 2),
+              'now'
+            )
+          )) AS INTEGER)
+        
         UNION ALL
-        -- Recursão: Próximas visitas aplicam o intervalo (7 ou 14 dias); reinicia contador no novo mês
+        
+        -- Recursão com inteligência de salto de mês
         SELECT
-          CAST(strftime('%Y%m%d', date(
-            substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
-            substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
-            substr(CAST(data_int AS TEXT), 7, 2),
-            '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
-          )) AS INTEGER),
-          strftime('%Y%m', date(
-            substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
-            substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
-            substr(CAST(data_int AS TEXT), 7, 2),
-            '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
-          )),
-          CASE
-            WHEN strftime('%Y%m', date(
-              substr(CAST(data_int AS TEXT), 1, 4) || '-' ||
-              substr(CAST(data_int AS TEXT), 5, 2) || '-' ||
-              substr(CAST(data_int AS TEXT), 7, 2),
-              '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
-            )) = mes_atual
-            THEN contagem_mes + 1
-            ELSE 1
-          END
+          -- NOVA DATA_INT: Se estourou a cota do mês, pula pro início do próximo mês e ajusta para o mesmo dia da semana
+          CAST(strftime('%Y%m%d', CASE 
+            WHEN contagem_mes >= NEW.pacote_remarcacao THEN
+              -- Avança para o dia 1 do próximo mês e adiciona os dias necessários para bater o dia da semana correto
+              date(
+                substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-01', 
+                '+1 month', 
+                '+' || ((dia_semana_base - CAST(strftime('%w', date(substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-01', '+1 month')) AS INTEGER) + 7) % 7) || ' days'
+              )
+            ELSE
+              -- Se ainda está dentro da cota mensal, aplica o intervalo normal (7 ou 14 dias)
+              date(
+                substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-' || substr(CAST(data_int AS TEXT), 7, 2),
+                '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+              )
+          END) AS INTEGER),
+          
+          -- NOVO MES_ATUAL
+          strftime('%Y%m', CASE 
+            WHEN contagem_mes >= NEW.pacote_remarcacao THEN
+              date(substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-01', '+1 month')
+            ELSE
+              date(
+                substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-' || substr(CAST(data_int AS TEXT), 7, 2),
+                '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+              )
+          END),
+          
+          -- NOVA CONTAGEM_MES: Se pulou de mês, reinicia em 1. Caso contrário, soma 1.
+          CASE 
+            WHEN contagem_mes >= NEW.pacote_remarcacao THEN 1
+            ELSE contagem_mes + 1
+          END,
+          
+          dia_semana_base
         FROM agenda
-        -- Alvo: Estende as possibilidades até o período máximo contado a partir de HOJE
+        -- Alvo: Gera datas até o limite estipulado
         WHERE data_int < CAST(strftime('%Y%m%d', date('now', '${PERIODO_REMARCACAO}')) AS INTEGER)
       )
       SELECT 
@@ -489,15 +543,13 @@ export async function initDatabase(): Promise<void> {
         NEW.servico_padrao, 
         data_int, 
         0, 
-        -- Filtro de retroatividade: marca com 0 se ficou no passado, mantendo coerência com o insert
         CASE 
           WHEN data_int < CAST(strftime('%Y%m%d', 'now') AS INTEGER) THEN 0 
           ELSE 1 
         END
       FROM agenda
-      WHERE contagem_mes <= NEW.pacote_remarcacao
-        -- Garante que não vai reinserir um agendamento antigo que já tenha sido CONCLUÍDO manualmente
-        AND NOT EXISTS (
+      -- Removemos o filtro de corte antigo daqui, pois o controle agora é feito direto na linha de cima (na geração)
+      WHERE NOT EXISTS (
           SELECT 1 FROM appointments a 
           WHERE a.pet_id = NEW.id 
             AND a.data = data_int 

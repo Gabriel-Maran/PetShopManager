@@ -91,6 +91,7 @@ export default function NewOrEditOwner() {
         }
         subtitle={"Preencha os dados do responsável"}
         isViewing={isViewing}
+        confirmReturn={!isViewing}
       />
       <ScrollView
         contentContainerStyle={s.scrollContent}

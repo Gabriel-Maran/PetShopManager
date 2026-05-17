@@ -1,10 +1,4 @@
-import {
-  ImageSourcePropType,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ImageSourcePropType, StyleSheet, Text, View } from "react-native";
 import { EspeciesAtendidasLabel } from "../../../../config/consts";
 import {
   ThemeColors,
@@ -15,12 +9,11 @@ import InputInfo from "../../Cadastro/InputInfo";
 import InputSelect from "../../InputSelect";
 import SelectionField from "../../Cadastro/SelectionField";
 import { Pet } from "../../../../model/Pet";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ownerController } from "../../../../controller/OwnerController";
 import { raceRepository } from "../../../../repository/RaceRepository";
 import ModalCadastroRaca from "../Modal/ModalCreateRacePet";
 import { pegarRacasBanco } from "../../../../hooks/buscaBanco/usePet";
-import { Species } from "../../../../repository/SpeciesRepository";
 
 interface AbaInfoPetProps {
   isEditavel?: boolean;
@@ -66,42 +59,165 @@ export default function AbaInfoPet({
 
   const [racaModalAberto, setRacaModalAberto] = useState(false);
 
-  // Hook chamado no nível do componente, reage à espécie selecionada
   const { racasList } = pegarRacasBanco(form.especie);
 
-  function handleRacaCriada(id: number, nomeRaca: string, especieId: number) {
-    updateField("raca", id);
-    updateField("raca_nome", nomeRaca);
-    setRacaModalAberto(false);
-  }
-
+  // --- Busca nome do dono quando não é novo pet e dono_id muda ---
   useEffect(() => {
-    if (!isNewPet && form.dono_id) {
-      ownerController
-        .getOwnerById(form.dono_id)
-        .then((resultado) => {
-          if (resultado?.nome) {
-            updateField("dono_nome", resultado.nome);
-          }
-        })
-        .catch((error) => console.error("Erro ao buscar dono:", error));
-    }
+    if (isNewPet || !form.dono_id) return;
 
-    if (!isNewPet && form.raca) {
-      raceRepository
-        .findRaceById(form.raca)
-        .then((resultado) => {
-          if (resultado?.nome_raca) {
-            updateField("raca_nome", resultado.nome_raca);
-          }
-        })
-        .catch((error) => console.error("Erro ao buscar raça:", error));
+    let cancelled = false;
+
+    ownerController
+      .getOwnerById(form.dono_id)
+      .then((resultado) => {
+        if (!cancelled && resultado?.nome) {
+          updateField("dono_nome", resultado.nome);
+        }
+      })
+      .catch((error) => console.error("Erro ao buscar dono:", error));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isNewPet, form.dono_id]);
+
+  // --- Busca nome da raça quando não é novo pet e raca muda ---
+  useEffect(() => {
+    if (isNewPet || !form.raca) return;
+
+    let cancelled = false;
+
+    raceRepository
+      .findRaceById(form.raca)
+      .then((resultado) => {
+        if (!cancelled && resultado?.nome_raca) {
+          updateField("raca_nome", resultado.nome_raca);
+        }
+      })
+      .catch((error) => console.error("Erro ao buscar raça:", error));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isNewPet, form.raca]);
+
+  // --- Sincroniza porte ao carregar pet existente ---
+  useEffect(() => {
+    if (isNewPet || !form.porte) return;
+
+    const porteEncontrado = portesList.find((item) => item.id === form.porte);
+    if (porteEncontrado) {
+      updateField("porte", porteEncontrado.id);
     }
   }, [isNewPet]);
 
+  // --- Limpa raça ao trocar espécie ---
   useEffect(() => {
-    updateField("raca_nome", null);
+    updateField("raca_nome", "");
   }, [form.especie]);
+
+  // --- Memoização dos itens selecionados para evitar .find() a cada render ---
+  const especieSelecionada = useMemo(
+    () => especiesList.find((e) => e.id === form.especie),
+    [especiesList, form.especie],
+  );
+
+  const porteSelecionado = useMemo(
+    () => portesList.find((item) => item.id === form.porte),
+    [portesList, form.porte],
+  );
+
+  // --- Callbacks memoizados para evitar re-renders desnecessários nos filhos ---
+  const handleSelecionarDono = useCallback(
+    (item: any) => {
+      updateField("dono_id", item.id);
+      updateField("dono_nome", item.nome);
+    },
+    [updateField],
+  );
+
+  const handleLimparDono = useCallback(() => {
+    updateField("dono_id", 0);
+    updateField("dono_nome", "");
+  }, [updateField]);
+
+  const handleAbrirModalDono = useCallback(() => {
+    abrirModal({
+      titulo: "Selecionar Dono",
+      itemIcon: require("../../../../assets/animais/iconDono.png"),
+      lista: [],
+      aoSelecionar: handleSelecionarDono,
+    });
+  }, [abrirModal, handleSelecionarDono]);
+
+  const handleSelecionarRaca = useCallback(
+    (item: any) => {
+      updateField("raca", item.id);
+      updateField("raca_nome", item.nome);
+    },
+    [updateField],
+  );
+
+  const handleLimparRaca = useCallback(() => {
+    updateField("raca", 0);
+    updateField("raca_nome", "");
+  }, [updateField]);
+
+  const handleAbrirModalRaca = useCallback(() => {
+    abrirModal({
+      titulo: "Selecionar Raça",
+      itemIcon: require("../../../../assets/animais/iconPata.png"),
+      lista: racasList ?? [],
+      aoSelecionar: handleSelecionarRaca,
+    });
+  }, [abrirModal, racasList, handleSelecionarRaca]);
+
+  const handleRacaCriada = useCallback(
+    (id: number, nomeRaca: string, _especieId: number) => {
+      updateField("raca", id);
+      updateField("raca_nome", nomeRaca);
+      setRacaModalAberto(false);
+    },
+    [updateField],
+  );
+
+  const handleAbrirCadastroRaca = useCallback(() => {
+    setRacaModalAberto(true);
+  }, []);
+
+  const handleFecharCadastroRaca = useCallback(() => {
+    setRacaModalAberto(false);
+  }, []);
+
+  const renderEspecieItem = useCallback(
+    (item: any) => (
+      <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+        {
+          EspeciesAtendidasLabel[
+            item.nome as keyof typeof EspeciesAtendidasLabel
+          ]
+        }
+      </Text>
+    ),
+    [colors.TEXT_PRIMARY],
+  );
+
+  const renderPorteItem = useCallback(
+    (item: any) => (
+      <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+        {item.nome}
+      </Text>
+    ),
+    [colors.TEXT_PRIMARY],
+  );
+
+  const labelExtractorEspecie = useCallback(
+    (item: any) =>
+      EspeciesAtendidasLabel[item.nome as keyof typeof EspeciesAtendidasLabel],
+    [],
+  );
+
+  const labelExtractorPorte = useCallback((item: any) => item.nome, []);
 
   return (
     <>
@@ -124,21 +240,8 @@ export default function AbaInfoPet({
           selectedReg={form.dono_nome}
           buttonText={form.dono_nome ? "Trocar dono" : "Selecionar dono"}
           hasBorderBottom={true}
-          onPress={() =>
-            abrirModal({
-              titulo: "Selecionar Dono",
-              itemIcon: require("../../../../assets/animais/iconDono.png"),
-              lista: [],
-              aoSelecionar: (item) => {
-                updateField("dono_id", item.id);
-                updateField("dono_nome", item.nome);
-              },
-            })
-          }
-          onClear={() => {
-            updateField("dono_id", 0);
-            updateField("dono_nome", "");
-          }}
+          onPress={handleAbrirModalDono}
+          onClear={handleLimparDono}
           goEdit={true}
           isEditavel={isEditavel}
         />
@@ -148,22 +251,10 @@ export default function AbaInfoPet({
           image={require("../../../../assets/animais/iconEspecie.png")}
           placeholder="Selecione a espécie..."
           itens={especiesList}
-          itemSelected={especiesList.find((e) => e.id === form.especie)}
-          labelExtractor={(item) =>
-            EspeciesAtendidasLabel[
-              item.nome as keyof typeof EspeciesAtendidasLabel
-            ]
-          }
+          itemSelected={especieSelecionada}
+          labelExtractor={labelExtractorEspecie}
           onChange={(item) => updateField("especie", item.id)}
-          renderItem={(item) => (
-            <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
-              {
-                EspeciesAtendidasLabel[
-                  item.nome as keyof typeof EspeciesAtendidasLabel
-                ]
-              }
-            </Text>
-          )}
+          renderItem={renderEspecieItem}
           hasBorderBottom={true}
           isEditavel={isEditavel}
         />
@@ -175,25 +266,12 @@ export default function AbaInfoPet({
             selectedReg={form.raca_nome}
             buttonText={form.raca_nome ? "Trocar raça" : "Selecionar raça"}
             hasBorderBottom={true}
-            onPress={() =>
-              abrirModal({
-                titulo: "Selecionar Raça",
-                itemIcon: require("../../../../assets/animais/iconPata.png"),
-                lista: racasList ?? [],
-                aoSelecionar: (item) => {
-                  updateField("raca", item.id);
-                  updateField("raca_nome", item.nome);
-                },
-              })
-            }
-            onClear={() => {
-              updateField("raca", 0);
-              updateField("raca_nome", "");
-            }}
+            onPress={handleAbrirModalRaca}
+            onClear={handleLimparRaca}
             goEdit={true}
             isEditavel={isEditavel}
             fazCadastro={isEditavel}
-            onCadastro={() => setRacaModalAberto(true)}
+            onCadastro={handleAbrirCadastroRaca}
           />
         ) : null}
 
@@ -202,14 +280,10 @@ export default function AbaInfoPet({
           image={require("../../../../assets/animais/iconPorte.png")}
           placeholder="Selecione o Porte do animal"
           itens={portesList}
-          itemSelected={portesList.find((e) => e.nome === form.porte)}
-          labelExtractor={(item) => item.nome}
-          onChange={(item) => updateField("porte", item.nome)}
-          renderItem={(item) => (
-            <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
-              {item.nome}
-            </Text>
-          )}
+          itemSelected={porteSelecionado}
+          labelExtractor={labelExtractorPorte}
+          onChange={(item) => updateField("porte", item.id)}
+          renderItem={renderPorteItem}
           hasBorderBottom={true}
           isEditavel={isEditavel}
         />
@@ -229,7 +303,7 @@ export default function AbaInfoPet({
 
       <ModalCadastroRaca
         isOpen={racaModalAberto}
-        onClose={() => setRacaModalAberto(false)}
+        onClose={handleFecharCadastroRaca}
         especiesList={especiesList}
         onSuccess={handleRacaCriada}
       />
