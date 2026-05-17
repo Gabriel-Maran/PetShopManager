@@ -30,7 +30,7 @@ import {
   DataNumberPraStringHifen,
   DataStringPraNumber,
 } from "../../../utils/formatadores/converterData";
-import Mascarar from "../../../utils/mascarar";
+import { numeroComVirgula, mascararHorario } from "../../../utils/mascarar";
 import { hoje } from "../../../utils/dataPicker/dataPickerAux";
 import {
   abrirModalSelecao,
@@ -60,7 +60,9 @@ export default function NewOrEditAppointment() {
 
   const { colors } = useTheme();
 
-  const mascarar = Mascarar;
+  const mascarar = mascararHorario;
+
+  const converterValor = numeroComVirgula;
 
   const isEditing = Boolean(params?.appointment?.id);
 
@@ -114,6 +116,8 @@ export default function NewOrEditAppointment() {
   };
 
   const s = useThemedStyles(styles);
+
+  
 
   return (
     <KeyboardAvoidingView
@@ -214,13 +218,13 @@ export default function NewOrEditAppointment() {
                   image={require("../../../assets/outros/hora.png")}
                   item={appointmentsForm.hora}
                   setItem={(v) =>
-                    updateAppointmentsField("hora", mascarar(v, 2))
+                    updateAppointmentsField("hora", mascarar(v))
                   }
                   placeHolder="Informe o horário..."
                   titleName="Horário"
                   variasLinhas={false}
-                  digitavel={true}
                   tipoTeclado="numeric"
+                  maximoCaracteres={5}
                   hasBorderBottom={true}
                 />
                 <Toggle
@@ -243,7 +247,7 @@ export default function NewOrEditAppointment() {
                   placeHolder="Uma observação adicional..."
                   titleName="Observações"
                   variasLinhas={true}
-                  digitavel={true}
+                  maximoCaracteres={250}
                   hasBorderBottom={true}
                 />
                 {isEditing && (
@@ -317,12 +321,14 @@ export default function NewOrEditAppointment() {
               <InputInfo
                 image={require("../../../assets/outros/valor.png")}
                 item={appointmentsForm.valor}
-                setItem={(v) => updateAppointmentsField("valor", v)}
+                setItem={(v) =>
+                  updateAppointmentsField("valor", converterValor(v))
+                }
                 placeHolder="Valor do serviço..."
                 titleName="Valor"
                 variasLinhas={false}
-                digitavel={true}
                 tipoTeclado="numeric"
+                maximoCaracteres={7}
                 hasBorderBottom={true}
               />
               <InputSelect
