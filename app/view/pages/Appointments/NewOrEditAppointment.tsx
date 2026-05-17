@@ -8,7 +8,10 @@ import {
   Platform,
 } from "react-native";
 import { useState } from "react";
-import { Screen } from "../../../config/consts";
+import {
+  EspeciesAtendidas,
+  Screen,
+} from "../../../config/consts";
 import { useScreen } from "../../../hooks/useScreen";
 import { useError } from "../../../hooks/useError";
 
@@ -59,6 +62,7 @@ export default function NewOrEditAppointment() {
   const { showError } = useError();
 
   const { colors } = useTheme();
+  const s = useThemedStyles(styles);
 
   const mascarar = mascararHorario;
 
@@ -115,10 +119,6 @@ export default function NewOrEditAppointment() {
     }
   };
 
-  const s = useThemedStyles(styles);
-
-  
-
   return (
     <KeyboardAvoidingView
       style={s.flex}
@@ -164,7 +164,13 @@ export default function NewOrEditAppointment() {
                   onPress={() =>
                     abrirModalSelecao({
                       titulo: "Selecionar Pet",
-                      itemIcon: require("../../../assets/animais/pet.png"),
+                      itemIcon: (pet) => {
+                        return pet.nome_especie === EspeciesAtendidas.CAO
+                          ? require("../../../assets/animais/caoGreen.png")
+                          : pet.nome_especie === EspeciesAtendidas.GATO
+                            ? require("../../../assets/animais/gatoGreen.png")
+                            : require("../../../assets/animais/interrogacaoGreen.png");
+                      },
                       lista: petsForm.pets,
                       setModalConfig,
                       aoSelecionar: (pet) => {
@@ -208,7 +214,6 @@ export default function NewOrEditAppointment() {
                   )}
                   setItem={(v) => {
                     updateAppointmentsField("data", DataHifenPraBarra(v));
-                    () => console.log(v);
                   }}
                   titleName={"Data do agendamento"}
                   hasBorderBottom={true}
@@ -217,9 +222,7 @@ export default function NewOrEditAppointment() {
                 <InputInfo
                   image={require("../../../assets/outros/hora.png")}
                   item={appointmentsForm.hora}
-                  setItem={(v) =>
-                    updateAppointmentsField("hora", mascarar(v))
-                  }
+                  setItem={(v) => updateAppointmentsField("hora", mascarar(v))}
                   placeHolder="Informe o horário..."
                   titleName="Horário"
                   variasLinhas={false}
@@ -270,8 +273,8 @@ export default function NewOrEditAppointment() {
                           updateAppointmentsField("is_auto_agen", value)
                         }
                         title="Agendamento Auto-gerado"
-                        subtitle="Serviço auto-gerado?"
-                        hasBorderBottom={true}
+                        subtitle=""
+                        hasBorderBottom={false}
                         noEdit={true}
                       />
                     )}
@@ -292,8 +295,10 @@ export default function NewOrEditAppointment() {
           </ScrollView>
           <ModalSelectList
             isOpen={modalConfig.visivel}
+            ehPet={true}
             items={modalConfig.lista}
             titulo={modalConfig.titulo}
+            itemIcon={modalConfig.itemIcon}
             onSelect={modalConfig.aoSelecionar}
             onClose={() =>
               setModalConfig((prev) => ({ ...prev, visivel: false }))
@@ -357,9 +362,16 @@ export default function NewOrEditAppointment() {
                 onChange={(value) => updateAppointmentsField("ta_pago", value)}
                 title="Pagamento"
                 subtitle="Cliente Pagou?"
-                hasBorderBottom={true}
+                hasBorderBottom={false}
                 noEdit={false}
               />
+            </View>
+            <View style={s.ctnBtnSalvar}>
+              <TouchableOpacity style={s.btnSalvar} onPress={salvarAgendamento}>
+                <Text style={s.txtSalvar}>
+                  {isEditing ? "Salvar alterações" : "Salvar"}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>

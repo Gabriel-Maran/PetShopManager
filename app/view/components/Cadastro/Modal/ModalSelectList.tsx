@@ -20,7 +20,8 @@ interface ModalSelectListProps {
   onClose: () => void;
   onSelect: (item: any) => void;
   titulo: string;
-  itemIcon?: ImageSourcePropType;
+  itemIcon?: ImageSourcePropType | ((item: any) => ImageSourcePropType);
+  ehPet?: boolean;
   page: number;
   total: number;
   setPage: (page: number) => void;
@@ -34,6 +35,7 @@ export default function ModalSelectList({
   onSelect,
   titulo,
   itemIcon,
+  ehPet,
   page,
   total,
   setPage,
@@ -67,15 +69,26 @@ export default function ModalSelectList({
           <FlatList
             data={items}
             contentContainerStyle={s.listContent}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={s.itemRow}
-                onPress={() => onSelect(item)}
-              >
-                {itemIcon && <Image source={itemIcon} style={s.itemIconRow} />}
-                <Text style={s.itemText}>{item.nome}</Text>
-              </TouchableOpacity>
-            )}
+            renderItem={({ item }) => {
+              const iconSource =
+                typeof itemIcon === "function" ? itemIcon(item) : itemIcon;
+              return (
+                <TouchableOpacity
+                  style={s.itemRow}
+                  onPress={() => onSelect(item)}
+                >
+                  {iconSource && (
+                    <Image source={iconSource} style={s.itemIconRow} />
+                  )}
+                  <Text style={s.itemText}>
+                    {ehPet ? `Nome: `: ""}{item.nome}
+                    {ehPet
+                      ? `${"\n"}Dono(a): ${item.nome_dono}`
+                      : null}
+                  </Text>
+                </TouchableOpacity>
+              );
+            }}
             keyExtractor={(item, index) =>
               item.id?.toString() ?? index.toString()
             }
@@ -182,13 +195,15 @@ const styles = (colors: ThemeColors) =>
       borderBottomColor: colors.BORDER_MID,
     },
     itemIconRow: {
-      width: 24,
-      height: 24,
+      width: 30,
+      height: 30,
       marginRight: 12,
       resizeMode: "contain",
+      alignSelf: "center"
     },
     itemText: {
       fontSize: 16,
       color: colors.TEXT_PRIMARY,
+      alignSelf: "center"
     },
   });

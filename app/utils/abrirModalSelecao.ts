@@ -4,7 +4,7 @@ import { ImageSourcePropType } from "react-native";
 export type ModalConfig = {
   visivel: boolean;
   titulo: string;
-  itemIcon?: ImageSourcePropType;
+  itemIcon?: ImageSourcePropType | ((item: any) => ImageSourcePropType);
   lista: any[];
   aoSelecionar: (item: any) => void;
 };
@@ -17,7 +17,7 @@ export function abrirModalSelecao({
   setModalConfig,
 }: {
   titulo: string;
-  itemIcon?: ImageSourcePropType;
+  itemIcon?: ImageSourcePropType | ((item: any) => ImageSourcePropType);
   lista: any[];
   aoSelecionar: (item: any) => void;
   setModalConfig: Dispatch<SetStateAction<ModalConfig>>;
