@@ -18,6 +18,7 @@ interface InputWrapperProps {
   hasBorderBottom?: boolean;
   children: ReactNode;
   whitGapComponents?: boolean;
+  inputSelectIsOpen?: boolean;
 }
 
 export default function InputWrapper({
@@ -26,6 +27,7 @@ export default function InputWrapper({
   hasBorderBottom = true,
   children,
   whitGapComponents = true,
+  inputSelectIsOpen,
 }: InputWrapperProps) {
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
@@ -39,7 +41,14 @@ export default function InputWrapper({
           : {},
       ]}
     >
-      <View style={s.ctnImgInput}>
+      <View
+        style={[
+          s.ctnImgInput,
+          inputSelectIsOpen
+            ? { alignSelf: "flex-start", marginTop: 12.1 }
+            : { alignSelf: "center" },
+        ]}
+      >
         <Image style={s.imgInput} source={image} />
       </View>
 

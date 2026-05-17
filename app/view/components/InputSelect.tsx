@@ -56,6 +56,7 @@ export default function InputSelect<T>({
       titleName={titleName}
       hasBorderBottom={hasBorderBottom}
       whitGapComponents={false}
+      inputSelectIsOpen={isOpen}
     >
       <TouchableOpacity
         style={[
