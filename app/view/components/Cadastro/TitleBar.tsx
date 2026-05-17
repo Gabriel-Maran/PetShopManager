@@ -30,7 +30,7 @@ export default function TitleBar({
   const [isOpenModal, setIsOpenModal] = useState(false);
   const { navigate } = useScreen();
   function navegarBack() {
-    navigate(returnTo);
+    navigate(returnTo, params);
   }
   return (
     <>
