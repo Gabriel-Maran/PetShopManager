@@ -90,12 +90,13 @@ const styles = (colors: ThemeColors) =>
       justifyContent: "space-between",
     },
     caixaReg: {
-      borderWidth: 1.3,
+      borderWidth: 1.5,
       flex: 1,
-      padding: 10,
-      paddingLeft: 15,
+      paddingHorizontal: 15,
+      paddingVertical: 12,
       borderRadius: 10,
       fontSize: 20,
+      minHeight: 45,
       borderColor: colors.BORDER_STRONG,
     },
     txtReg: {

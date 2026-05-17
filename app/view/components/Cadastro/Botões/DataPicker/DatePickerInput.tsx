@@ -69,7 +69,6 @@ const inputStyles = (colors: ThemeColors) =>
       borderRadius: 10,
       paddingVertical: 12,
       paddingHorizontal: 14,
-      backgroundColor: colors.BACKGROUND,
     },
     inputRowError: {
       borderColor: "#E53E3E",
