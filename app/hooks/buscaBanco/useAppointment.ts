@@ -3,7 +3,7 @@ import { useError } from "../useError";
 import useFormState from "../useFormState";
 import { petController } from "../../controller/PetController";
 import { LIMIT_ITEM_PAGE, ORDER } from "../../config/consts";
-import { PetWithSpecieAndRace } from "../../model/Pet";
+import { PetWithSpecieRaceAndOwner } from "../../model/Pet";
 import { ServiceType } from "../../model/ServiceType";
 import { serviceTypeRepository } from "../../repository/ServiceTypeRepository";
 import { NewOrEditAppointmentParams } from "../../model/Appointment";
@@ -21,7 +21,7 @@ type PetsForm = {
   page: number;
   total: number;
   searchTxt: string;
-  pets: PetWithSpecieAndRace[];
+  pets: PetWithSpecieRaceAndOwner[];
 };
 
 type PegarPetsReturn = {
