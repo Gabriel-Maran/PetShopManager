@@ -22,6 +22,7 @@ export default function DefaultHeader({ screenBack }: { screenBack?: Screen }) {
         onPress={() => navigate(Screen.Calendario)}
       >
         <Image
+          resizeMode="contain"
           source={
             isDark
               ? require("../../../assets/logo/logoPetShopFundoEscuro.png")
@@ -57,8 +58,7 @@ const styles = (colors: ThemeColors) =>
       justifyContent: "center",
     },
     img: {
-      width: 180,
-      height: 50,
+      width: 200,
       alignSelf: "center",
     },
     btnVoltar: {

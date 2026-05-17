@@ -163,6 +163,7 @@ export default function ModalCadastroRaca({
                 variasLinhas={false}
                 digitavel={true}
                 tipoTeclado="default"
+                maximoCaracteres={50}
                 hasBorderBottom={false}
               />
             </View>
