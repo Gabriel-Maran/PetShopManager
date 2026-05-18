@@ -6,12 +6,10 @@ import {
   Text,
   TouchableOpacity,
   Platform,
+  ActivityIndicator,
 } from "react-native";
-import { useState } from "react";
-import {
-  EspeciesAtendidas,
-  Screen,
-} from "../../../config/consts";
+import { useState, useEffect, useCallback } from "react";
+import { EspeciesAtendidas, Screen } from "../../../config/consts";
 import { useScreen } from "../../../hooks/useScreen";
 import { useError } from "../../../hooks/useError";
 
@@ -57,6 +55,14 @@ import InputSelect from "../../components/InputSelect";
 import ItemSelect from "../../components/Cadastro/ItemSelect";
 import InputDataPicker from "../../components/Cadastro/Botões/DataPicker/InputDataPicker";
 
+const MODAL_INICIAL: ModalConfig = {
+  visivel: false,
+  titulo: "",
+  itemIcon: undefined,
+  lista: [],
+  aoSelecionar: () => {},
+};
+
 export default function NewOrEditAppointment() {
   const { params, navigate } = useScreen<NewOrEditAppointmentParams>();
   const { showError } = useError();
@@ -64,33 +70,33 @@ export default function NewOrEditAppointment() {
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
-  const mascarar = mascararHorario;
-
-  const converterValor = numeroComVirgula;
-
   const isEditing = Boolean(params?.appointment?.id);
 
+  const [isSalvando, setIsSalvando] = useState(false);
+  const [appointmentSelected, setAppointmentSelected] = useState(true);
+  const [modalConfig, setModalConfig] = useState<ModalConfig>(MODAL_INICIAL);
+
   const { appointmentsForm, updateAppointmentsField } = useAgendamentos();
-
   const { servicesForm } = useServicos();
-
   const { pgtosForm } = useTiposPagamento();
-
-  const [appointmentSelected, setAppointmentSelected] = useState<boolean>(true);
-
-  const [modalConfig, setModalConfig] = useState<ModalConfig>({
-    visivel: false,
-    titulo: "",
-    itemIcon: undefined,
-    lista: [],
-    aoSelecionar: () => {},
-  });
 
   const { petsForm, updatePetsField } = usePetsComEspecieERacaBanco(
     modalConfig.visivel,
   );
 
-  const salvarAgendamento = async () => {
+  // --- Sincroniza lista do modal quando petsForm.pets muda (busca/paginação) ---
+  // Sem isso, modalConfig.lista fica congelada no momento em que o modal abriu
+  useEffect(() => {
+    if (modalConfig.visivel) {
+      setModalConfig((prev) => ({ ...prev, lista: petsForm.pets ?? [] }));
+    }
+  }, [petsForm.pets]);
+
+  // --- Salvar agendamento com proteção contra duplo clique ---
+  const salvarAgendamento = useCallback(async () => {
+    if (isSalvando) return;
+    setIsSalvando(true);
+
     const appointmentSalvar = new AppointmentBuilder()
       .withPetId(appointmentsForm.pet_id)
       .withServico(appointmentsForm.servico)
@@ -116,8 +122,128 @@ export default function NewOrEditAppointment() {
       navigate(Screen.Calendario);
     } catch (erro) {
       showError(erro instanceof Error ? erro.message : "Erro inesperado.");
+    } finally {
+      setIsSalvando(false);
     }
-  };
+  }, [isSalvando, appointmentsForm, isEditing, params, navigate, showError]);
+
+  const fecharModal = useCallback(() => {
+    setModalConfig((prev) => ({ ...prev, visivel: false }));
+  }, []);
+
+  const handleAbrirModalPet = useCallback(() => {
+    abrirModalSelecao({
+      titulo: "Selecionar Pet",
+      itemIcon: (pet) => {
+        if (pet.nome_especie === EspeciesAtendidas.CAO)
+          return require("../../../assets/animais/caoGreen.png");
+        if (pet.nome_especie === EspeciesAtendidas.GATO)
+          return require("../../../assets/animais/gatoGreen.png");
+        return require("../../../assets/animais/interrogacaoGreen.png");
+      },
+      lista: petsForm.pets,
+      setModalConfig,
+      aoSelecionar: (pet) => {
+        updateAppointmentsField("pet_id", pet.id);
+        updateAppointmentsField("nome_pet", pet.nome);
+        updateAppointmentsField("is_auto_agen", pet.remarcacao_ativa);
+      },
+    });
+  }, [petsForm.pets, updateAppointmentsField]);
+
+  const handleSetPage = useCallback(
+    (value: number) => updatePetsField("page", value),
+    [updatePetsField],
+  );
+
+  const handleSetSearch = useCallback(
+    (txt: string) => {
+      updatePetsField("page", 0);
+      updatePetsField("searchTxt", txt);
+    },
+    [updatePetsField],
+  );
+
+  const handleChangeServico = useCallback(
+    (item: any) => updateAppointmentsField("servico", item.servico),
+    [updateAppointmentsField],
+  );
+
+  const handleChangeData = useCallback(
+    (v: string) => updateAppointmentsField("data", DataHifenPraBarra(v)),
+    [updateAppointmentsField],
+  );
+
+  const handleChangeHora = useCallback(
+    (v: string) => updateAppointmentsField("hora", mascararHorario(v)),
+    [updateAppointmentsField],
+  );
+
+  const handleChangeEntregarPet = useCallback(
+    (value: any) => updateAppointmentsField("entregar_pet", value),
+    [updateAppointmentsField],
+  );
+
+  const handleChangeObservacao = useCallback(
+    (item: string) => updateAppointmentsField("observacao", item),
+    [updateAppointmentsField],
+  );
+
+  const handleChangeConcluido = useCallback(
+    (value: any) => updateAppointmentsField("concluido", value),
+    [updateAppointmentsField],
+  );
+
+  const handleChangeValor = useCallback(
+    (v: string) => updateAppointmentsField("valor", numeroComVirgula(v)),
+    [updateAppointmentsField],
+  );
+
+  const handleChangeTipoPgto = useCallback(
+    (item: any) => updateAppointmentsField("tipo_pgto", item.tipo_pgto),
+    [updateAppointmentsField],
+  );
+
+  const handleChangeTaPago = useCallback(
+    (value: any) => updateAppointmentsField("ta_pago", value),
+    [updateAppointmentsField],
+  );
+
+  const renderServicoItem = useCallback(
+    (item: any) => (
+      <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+        {item.servico}
+      </Text>
+    ),
+    [colors.TEXT_PRIMARY],
+  );
+
+  const renderPgtoItem = useCallback(
+    (item: any) => (
+      <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+        {item.tipo_pgto}
+      </Text>
+    ),
+    [colors.TEXT_PRIMARY],
+  );
+
+  const BtnSalvar = (
+    <View style={s.ctnBtnSalvar}>
+      <TouchableOpacity
+        style={[s.btnSalvar, isSalvando && s.btnSalvarDisabled]}
+        onPress={salvarAgendamento}
+        disabled={isSalvando}
+      >
+        {isSalvando ? (
+          <ActivityIndicator color={colors.BACKGROUND} />
+        ) : (
+          <Text style={s.txtSalvar}>
+            {isEditing ? "Salvar alterações" : "Salvar"}
+          </Text>
+        )}
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <KeyboardAvoidingView
@@ -145,6 +271,7 @@ export default function NewOrEditAppointment() {
           valorSelect={false}
         />
       </View>
+
       {appointmentSelected && (
         <>
           <ScrollView
@@ -158,32 +285,11 @@ export default function NewOrEditAppointment() {
               <View style={s.inputs}>
                 <SelectionField
                   image={require("../../../assets/animais/petHome.png")}
-                  titleName={"PET"}
+                  titleName="PET"
                   selectedReg={appointmentsForm.nome_pet}
                   buttonText="Selecionar Pet"
                   hasBorderBottom={true}
-                  onPress={() =>
-                    abrirModalSelecao({
-                      titulo: "Selecionar Pet",
-                      itemIcon: (pet) => {
-                        return pet.nome_especie === EspeciesAtendidas.CAO
-                          ? require("../../../assets/animais/caoGreen.png")
-                          : pet.nome_especie === EspeciesAtendidas.GATO
-                            ? require("../../../assets/animais/gatoGreen.png")
-                            : require("../../../assets/animais/interrogacaoGreen.png");
-                      },
-                      lista: petsForm.pets,
-                      setModalConfig,
-                      aoSelecionar: (pet) => {
-                        updateAppointmentsField("pet_id", pet.id);
-                        updateAppointmentsField("nome_pet", pet.nome);
-                        updateAppointmentsField(
-                          "is_auto_agen",
-                          pet.remarcacao_ativa,
-                        );
-                      },
-                    })
-                  }
+                  onPress={handleAbrirModalPet}
                   goEdit={true}
                   isEditavel={true}
                 />
@@ -196,14 +302,8 @@ export default function NewOrEditAppointment() {
                     (e) => e.servico === appointmentsForm.servico,
                   )}
                   labelExtractor={(item) => item.servico}
-                  onChange={(item) =>
-                    updateAppointmentsField("servico", item.servico)
-                  }
-                  renderItem={(item) => (
-                    <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
-                      {item.servico}
-                    </Text>
-                  )}
+                  onChange={handleChangeServico}
+                  renderItem={renderServicoItem}
                   hasBorderBottom={true}
                   isEditavel={true}
                 />
@@ -213,17 +313,15 @@ export default function NewOrEditAppointment() {
                     DataStringPraNumber(appointmentsForm.data, "/") ??
                       DataStringPraNumber(hoje(), "-"),
                   )}
-                  setItem={(v) => {
-                    updateAppointmentsField("data", DataHifenPraBarra(v));
-                  }}
-                  titleName={"Data do agendamento"}
+                  setItem={handleChangeData}
+                  titleName="Data do agendamento"
                   hasBorderBottom={true}
                   isEditavel={true}
                 />
                 <InputInfo
                   image={require("../../../assets/outros/hora.png")}
                   item={appointmentsForm.hora}
-                  setItem={(v) => updateAppointmentsField("hora", mascarar(v))}
+                  setItem={handleChangeHora}
                   placeHolder="Informe o horário..."
                   titleName="Horário"
                   variasLinhas={false}
@@ -234,9 +332,7 @@ export default function NewOrEditAppointment() {
                 <Toggle
                   image={require("../../../assets/outros/entrega.png")}
                   value={appointmentsForm.entregar_pet}
-                  onChange={(value) =>
-                    updateAppointmentsField("entregar_pet", value)
-                  }
+                  onChange={handleChangeEntregarPet}
                   title="Táxi dog"
                   subtitle="Usará Táxi Dog?"
                   hasBorderBottom={true}
@@ -245,9 +341,7 @@ export default function NewOrEditAppointment() {
                 <InputInfo
                   image={require("../../../assets/nav_bar/artigo.png")}
                   item={appointmentsForm.observacao}
-                  setItem={(item) =>
-                    updateAppointmentsField("observacao", item)
-                  }
+                  setItem={handleChangeObservacao}
                   placeHolder="Uma observação adicional..."
                   titleName="Observações"
                   variasLinhas={true}
@@ -259,9 +353,7 @@ export default function NewOrEditAppointment() {
                     <Toggle
                       image={require("../../../assets/outros/concluido.png")}
                       value={appointmentsForm.concluido}
-                      onChange={(value) =>
-                        updateAppointmentsField("concluido", value)
-                      }
+                      onChange={handleChangeConcluido}
                       title="Status"
                       subtitle="Serviço concluído?"
                       hasBorderBottom={true}
@@ -282,18 +374,10 @@ export default function NewOrEditAppointment() {
                   </>
                 )}
               </View>
-              <View style={s.ctnBtnSalvar}>
-                <TouchableOpacity
-                  style={s.btnSalvar}
-                  onPress={salvarAgendamento}
-                >
-                  <Text style={s.txtSalvar}>
-                    {isEditing ? "Salvar alterações" : "Salvar"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              {BtnSalvar}
             </View>
           </ScrollView>
+
           <ModalSelectList
             isOpen={modalConfig.visivel}
             ehPet={true}
@@ -301,19 +385,15 @@ export default function NewOrEditAppointment() {
             titulo={modalConfig.titulo}
             itemIcon={modalConfig.itemIcon}
             onSelect={modalConfig.aoSelecionar}
-            onClose={() =>
-              setModalConfig((prev) => ({ ...prev, visivel: false }))
-            }
+            onClose={fecharModal}
             page={petsForm.page}
             total={petsForm.total}
-            setPage={(value) => updatePetsField("page", value)}
-            setSearch={(txt) => {
-              updatePetsField("page", 0);
-              updatePetsField("searchTxt", txt);
-            }}
+            setPage={handleSetPage}
+            setSearch={handleSetSearch}
           />
         </>
       )}
+
       {!appointmentSelected && (
         <ScrollView
           contentContainerStyle={s.scrollContent}
@@ -327,9 +407,7 @@ export default function NewOrEditAppointment() {
               <InputInfo
                 image={require("../../../assets/outros/valor.png")}
                 item={appointmentsForm.valor}
-                setItem={(v) =>
-                  updateAppointmentsField("valor", converterValor(v))
-                }
+                setItem={handleChangeValor}
                 placeHolder="Valor do serviço..."
                 titleName="Valor"
                 variasLinhas={false}
@@ -346,34 +424,22 @@ export default function NewOrEditAppointment() {
                   (e) => e.tipo_pgto === appointmentsForm.tipo_pgto,
                 )}
                 labelExtractor={(item) => item.tipo_pgto}
-                onChange={(item) =>
-                  updateAppointmentsField("tipo_pgto", item.tipo_pgto)
-                }
-                renderItem={(item) => (
-                  <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
-                    {item.tipo_pgto}
-                  </Text>
-                )}
+                onChange={handleChangeTipoPgto}
+                renderItem={renderPgtoItem}
                 hasBorderBottom={true}
                 isEditavel={true}
               />
               <Toggle
                 image={require("../../../assets/outros/pagamento.png")}
                 value={appointmentsForm.ta_pago}
-                onChange={(value) => updateAppointmentsField("ta_pago", value)}
+                onChange={handleChangeTaPago}
                 title="Pagamento"
                 subtitle="Cliente Pagou?"
                 hasBorderBottom={false}
                 noEdit={false}
               />
             </View>
-            <View style={s.ctnBtnSalvar}>
-              <TouchableOpacity style={s.btnSalvar} onPress={salvarAgendamento}>
-                <Text style={s.txtSalvar}>
-                  {isEditing ? "Salvar alterações" : "Salvar"}
-                </Text>
-              </TouchableOpacity>
-            </View>
+            {BtnSalvar}
           </View>
         </ScrollView>
       )}
@@ -402,10 +468,6 @@ const styles = (colors: ThemeColors) =>
       alignItems: "center",
     },
     viewDataReq: { width: "100%", height: 28 },
-    viewDataNotReq: {
-      width: "100%",
-      marginTop: 20,
-    },
     inputs: {
       width: "100%",
       borderRadius: 10,
@@ -425,6 +487,9 @@ const styles = (colors: ThemeColors) =>
       paddingHorizontal: 75,
       backgroundColor: colors.PRIMARY_VARIANT,
       borderRadius: 15,
+    },
+    btnSalvarDisabled: {
+      opacity: 0.6,
     },
     txtSalvar: {
       color: colors.BACKGROUND,

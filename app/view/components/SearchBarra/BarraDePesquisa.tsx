@@ -5,7 +5,6 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Text,
 } from "react-native";
 import {
   ThemeColors,
@@ -34,17 +33,22 @@ export default function BarraDePesquisa({
   const [isSelectedFilter, setIsSelectedFilter] = useState(false);
 
   useEffect(() => {
+    if (!hasFilter) {
+      setIsSelectedFilter(false);
+    }
+  }, [hasFilter]);
+
+  useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      if (text) {
-        setSearch(text);
-      }
+      setSearch(text);
     }, 600);
+
     return () => clearTimeout(delayDebounceFn);
   }, [text]);
 
   return (
     <View style={s.container}>
-      {isSelectedFilter ? (
+      {hasFilter && isSelectedFilter ? (
         <FilterPanel
           value={statusFiltro}
           onChange={onStatusFiltroChange ?? (() => {})}
@@ -59,12 +63,7 @@ export default function BarraDePesquisa({
             />
           </TouchableOpacity>
           <TextInput
-            onChangeText={(txt: string) => {
-              setText(txt);
-              if (txt.trim() == "") {
-                setSearch(txt);
-              }
-            }}
+            onChangeText={setText}
             value={text}
             placeholder={placeHolderStr}
             multiline={false}
@@ -110,7 +109,7 @@ const styles = (colors: ThemeColors) =>
     },
     input: {
       minHeight: 30,
-      maxHeight: 100,
+      flex: 1,
       fontSize: 16,
       color: colors.TEXT_PRIMARY,
     },

@@ -35,7 +35,11 @@ export default function Pagination({
       {/* Anterior */}
       <TouchableOpacity
         style={[s.btn, currentPage === 0 && s.btnDisabled]}
-        onPress={() => onPageChange(currentPage - 1)}
+        onPress={() => {
+          if (currentPage > 0) {
+            onPageChange(currentPage - 1);
+          }
+        }}
         disabled={currentPage === 0}
       >
         <Text style={s.arrow}>‹</Text>
@@ -57,7 +61,11 @@ export default function Pagination({
       {/* Próximo */}
       <TouchableOpacity
         style={[s.btn, currentPage === totalPages - 1 && s.btnDisabled]}
-        onPress={() => onPageChange(currentPage + 1)}
+        onPress={() => {
+          if (currentPage < totalPages - 1) {
+            onPageChange(currentPage + 1);
+          }
+        }}
         disabled={currentPage === totalPages - 1}
       >
         <Text style={s.arrow}>›</Text>

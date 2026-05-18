@@ -39,20 +39,18 @@ class PetRepository {
     const offset = page * limit;
 
     return db.getAllAsync<PetWithSpecieRaceAndOwner>(
-      `
-    SELECT 
-      PT.*,
-      SP.nome      as nome_especie,
-      RC.nome_raca as nome_raca,
-      OW.nome      as nome_dono
-    FROM pets     as PT
-    JOIN species  as SP ON PT.especie = SP.id
-    JOIN race     as RC ON PT.raca    = RC.id
-    JOIN owners   as OW ON PT.dono_id = OW.id 
-    WHERE PT.is_ativo = ? 
-    ORDER BY PT.criado_em ${order} 
-    LIMIT ? OFFSET ?
-    `,
+      `SELECT 
+        PT.*,
+        SP.nome      AS nome_especie,
+        RC.nome_raca AS nome_raca,
+        OW.nome      AS nome_dono
+       FROM pets    AS PT
+       JOIN species AS SP ON PT.especie = SP.id
+       JOIN race    AS RC ON PT.raca    = RC.id
+       JOIN owners  AS OW ON PT.dono_id = OW.id
+       WHERE PT.is_ativo = ?
+       ORDER BY PT.criado_em ${order}
+       LIMIT ? OFFSET ?`,
       [ativo, limit, offset],
     );
   }
@@ -69,10 +67,10 @@ class PetRepository {
     const query_normalizada = normalizeForSearch(query);
 
     return db.getAllAsync<Pet>(
-      `SELECT * FROM pets 
-       WHERE nome_normalizado LIKE ? 
+      `SELECT * FROM pets
+       WHERE nome_normalizado LIKE ?
        AND is_ativo = ?
-       ORDER BY nome_normalizado ${order} 
+       ORDER BY nome_normalizado ${order}
        LIMIT ? OFFSET ?`,
       [`%${query_normalizada}%`, ativo, limit, offset],
     );
@@ -90,20 +88,19 @@ class PetRepository {
     const query_normalizada = normalizeForSearch(query);
 
     return db.getAllAsync<PetWithSpecieRaceAndOwner>(
-      `
-     SELECT 
-       PT.*,
-       SP.nome      as nome_especie,
-       RC.nome_raca as nome_raca,
-       OW.nome      as nome_dono
-     FROM pets     as PT
-     JOIN species  as SP ON PT.especie = SP.id
-     JOIN race     as RC ON PT.raca    = RC.id
-     JOIN owners   as OW ON PT.dono_id = OW.id
-     WHERE PT.nome_normalizado LIKE ? 
-     AND PT.is_ativo = ? 
-     ORDER BY PT.nome_normalizado ${order} 
-     LIMIT ? OFFSET ?`,
+      `SELECT
+        PT.*,
+        SP.nome      AS nome_especie,
+        RC.nome_raca AS nome_raca,
+        OW.nome      AS nome_dono
+       FROM pets    AS PT
+       JOIN species AS SP ON PT.especie = SP.id
+       JOIN race    AS RC ON PT.raca    = RC.id
+       JOIN owners  AS OW ON PT.dono_id = OW.id
+       WHERE PT.nome_normalizado LIKE ?
+       AND PT.is_ativo = ?
+       ORDER BY PT.nome_normalizado ${order}
+       LIMIT ? OFFSET ?`,
       [`%${query_normalizada}%`, ativo, limit, offset],
     );
   }
@@ -116,10 +113,24 @@ class PetRepository {
     );
   }
 
-  async countPets(): Promise<number> {
+  // CORRIGIDO: usa nome_normalizado para consistência com as queries de busca
+  async countPets(search?: string, ativo: number = 1): Promise<number> {
     const db = await getDatabase();
+
+    if (search?.trim()) {
+      const query_normalizada = normalizeForSearch(search);
+      const result = await db.getFirstAsync<{ total: number }>(
+        `SELECT COUNT(*) AS total
+         FROM pets
+         WHERE is_ativo = ? AND nome_normalizado LIKE ?`,
+        [ativo, `%${query_normalizada}%`],
+      );
+      return result?.total ?? 0;
+    }
+
     const result = await db.getFirstAsync<{ total: number }>(
-      `SELECT COUNT(*) as total FROM pets WHERE is_ativo = 1`,
+      `SELECT COUNT(*) AS total FROM pets WHERE is_ativo = ?`,
+      [ativo],
     );
     return result?.total ?? 0;
   }
@@ -129,17 +140,8 @@ class PetRepository {
     const nome_normalizado = normalizeForSearch(pet.nome);
     await db.runAsync(
       `INSERT INTO pets (
-        nome,
-        nome_normalizado,
-        especie,
-        porte,
-        raca,
-        observacoes,
-        dono_id,
-        servico_padrao,
-        remarcacao_ativa,
-        pacote_remarcacao,
-        data_inicio_pacote
+        nome, nome_normalizado, especie, porte, raca, observacoes,
+        dono_id, servico_padrao, remarcacao_ativa, pacote_remarcacao, data_inicio_pacote
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         pet.nome,
@@ -162,18 +164,10 @@ class PetRepository {
     const nome_normalizado = normalizeForSearch(pet.nome);
     await db.runAsync(
       `UPDATE pets SET
-        nome = ?,
-        nome_normalizado = ?,
-        especie = ?,
-        porte = ?,
-        raca = ?,
-        observacoes = ?,
-        dono_id = ?,
-        servico_padrao = ?,
-        remarcacao_ativa = ?,
-        pacote_remarcacao = ?,
-        data_inicio_pacote = ?
-      WHERE id = ?`,
+        nome = ?, nome_normalizado = ?, especie = ?, porte = ?, raca = ?,
+        observacoes = ?, dono_id = ?, servico_padrao = ?, remarcacao_ativa = ?,
+        pacote_remarcacao = ?, data_inicio_pacote = ?
+       WHERE id = ?`,
       [
         pet.nome,
         nome_normalizado,
@@ -203,7 +197,7 @@ class PetRepository {
         remarcacao_ativa = ?,
         pacote_remarcacao = ?,
         data_inicio_pacote = ?
-      WHERE id = ?`,
+       WHERE id = ?`,
       [remarcacaoAtiva, pacoteRemarcacao ?? null, dataInicioPacote ?? null, id],
     );
   }

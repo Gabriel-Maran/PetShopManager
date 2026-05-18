@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -8,6 +8,7 @@ import {
   ImageSourcePropType,
   Platform,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 
 import {
@@ -40,22 +41,35 @@ import {
 
 import useFormState from "../../../hooks/useFormState";
 import ItemSelect from "../../components/Cadastro/ItemSelect";
-import AbaInfoPet from "../../components/Cadastro/Tabs/AbaInfoPet";
+import AbaInfoPet, {
+  AbrirModalConfig,
+} from "../../components/Cadastro/Tabs/AbaInfoPet";
 import AbaAgendamentoPet from "../../components/Cadastro/Tabs/AbaAgendamentoPet";
 
-//Transforma em um array com um id e o nome
 const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
   id: key,
   nome: PorteAnimalLabel[key as keyof typeof PorteAnimalLabel],
 }));
 
+const MODAL_INICIAL = {
+  visivel: false,
+  titulo: "",
+  itemIcon: undefined as ImageSourcePropType | undefined,
+  lista: [] as any[],
+  tipoModal: "" as "DONO" | "RACA" | "",
+  aoSelecionar: (_item: any) => {},
+};
+
 export default function NewOrEditPet() {
   const [isCadastroPetSelecte, setIsCadastroPetSelecte] = useState(true);
   const { params, navigate } = useScreen<NewOrEditCadastros>();
-  const [isNewPet, setIsNewPet] = useState(params?.pet?.nome ? false : true);
   const { showError } = useError();
+
+  const [isSalvando, setIsSalvando] = useState(false);
+
   const isViewing = params?.mode === "view";
   const isEditing = params?.mode === "edit";
+  const isNewPet = !params?.pet?.id;
 
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
@@ -82,10 +96,32 @@ export default function NewOrEditPet() {
     dataInicioPacote: params?.pet?.data_inicio_pacote ?? undefined,
   });
 
-  const { racasList, especiesList } = pegarRacasBanco(form.especie);
-  const { owners, page, setPage, setSearchTxt, total } = pegarDonosBanco();
+  // ─── Fonte única de dados: um único hook para raças e espécies ───────────────
+  // racasList, page, setPage, setSearchTxt e total controlam o modal de raças
+  const {
+    racasList,
+    especiesList,
+    page: racaPage,
+    setPage: setRacaPage,
+    setSearchTxt: setRacaSearchTxt,
+    total: racaTotal,
+  } = pegarRacasBanco(form.especie);
 
-  const salvarPet = async () => {
+  const {
+    owners,
+    page: donoPage,
+    setPage: setDonoPage,
+    setSearchTxt: setDonoSearchTxt,
+    total: donoTotal,
+  } = pegarDonosBanco();
+
+  const [modalConfig, setModalConfig] = useState(MODAL_INICIAL);
+
+  // --- Salvar pet ---
+  const salvarPet = useCallback(async () => {
+    if (isSalvando) return;
+    setIsSalvando(true);
+
     const petSalvar = new PetBuilder()
       .withNome(form.nome)
       .withEspecie(form.especie)
@@ -95,11 +131,10 @@ export default function NewOrEditPet() {
       .withObservacoes(form.observacoes)
       .withServicoPadrao(form.servicoPadrao)
       .isRemarcacaoAtiva(form.remarcAtiva ? 1 : 0)
-      .withPacote(form.pacoteRemarcacao ? form.pacoteRemarcacao : undefined)
-      .withInicioPacote(
-        form.dataInicioPacote ? form.dataInicioPacote : undefined,
-      )
+      .withPacote(form.pacoteRemarcacao ?? undefined)
+      .withInicioPacote(form.dataInicioPacote ?? undefined)
       .build();
+
     try {
       if (params?.pet?.id) {
         await petController.updatePet(params.pet.id, petSalvar);
@@ -112,39 +147,83 @@ export default function NewOrEditPet() {
       } as NewOrEditCadastros);
     } catch (erro) {
       showError(erro instanceof Error ? erro.message : "Erro inesperado.");
+    } finally {
+      setIsSalvando(false);
     }
-  };
+  }, [isSalvando, form, params?.pet?.id, navigate, showError]);
 
-  const [modalConfig, setModalConfig] = useState({
-    visivel: false,
-    titulo: "",
-    itemIcon: undefined as ImageSourcePropType | undefined,
-    lista: [] as any[],
-    aoSelecionar: (item: any) => {},
-  });
+  // --- Abre o modal (DONO ou RACA) ---
+  const abrirModal = useCallback(
+    ({
+      titulo,
+      lista,
+      itemIcon,
+      tipoModal,
+      aoSelecionar,
+    }: AbrirModalConfig) => {
+      setModalConfig({
+        visivel: true,
+        titulo,
+        itemIcon,
+        tipoModal,
+        lista: tipoModal === "DONO" ? (owners ?? []) : lista,
+        aoSelecionar: (item) => {
+          aoSelecionar(item);
+          setModalConfig((prev) => ({ ...prev, visivel: false }));
+        },
+      });
+    },
+    [owners],
+  );
 
-  const abrirModal = ({
-    titulo,
-    lista,
-    itemIcon,
-    aoSelecionar,
-  }: {
-    titulo: string;
-    itemIcon?: ImageSourcePropType;
-    lista: any[];
-    aoSelecionar: (item: any) => void;
-  }) => {
-    setModalConfig({
-      visivel: true,
-      titulo: titulo,
-      itemIcon: itemIcon,
-      lista: lista,
-      aoSelecionar: (item) => {
-        aoSelecionar(item);
-        setModalConfig((prev) => ({ ...prev, visivel: false }));
-      },
-    });
-  };
+  const fecharModal = useCallback(() => {
+    setModalConfig((prev) => ({ ...prev, visivel: false }));
+  }, []);
+
+  // --- Sincroniza lista do modal de DONO quando owners mudam (paginação/busca) ---
+  useEffect(() => {
+    if (modalConfig.visivel && modalConfig.tipoModal === "DONO") {
+      setModalConfig((prev) => ({ ...prev, lista: owners ?? [] }));
+    }
+  }, [owners]);
+
+  // --- Sincroniza lista do modal de RACA quando racasList mudam (paginação/busca) ---
+  useEffect(() => {
+    if (modalConfig.visivel && modalConfig.tipoModal === "RACA") {
+      setModalConfig((prev) => ({ ...prev, lista: racasList ?? [] }));
+    }
+  }, [racasList]);
+
+  // --- Busca no modal: server-side para DONO, server-side para RACA também ---
+  const handleSetSearch = useCallback(
+    (txt: string) => {
+      if (modalConfig.tipoModal === "DONO") {
+        setDonoPage(0);
+        setDonoSearchTxt(txt);
+      } else if (modalConfig.tipoModal === "RACA") {
+        setRacaPage(0);
+        setRacaSearchTxt(txt); // dispara o hook → racasList atualiza → useEffect acima sincroniza o modal
+      }
+    },
+    [
+      modalConfig.tipoModal,
+      setDonoPage,
+      setDonoSearchTxt,
+      setRacaPage,
+      setRacaSearchTxt,
+    ],
+  );
+
+  const isDono = modalConfig.tipoModal === "DONO";
+  const isRaca = modalConfig.tipoModal === "RACA";
+
+  const pageModal = isDono ? donoPage : isRaca ? racaPage : 0;
+  const totalModal = isDono
+    ? donoTotal
+    : isRaca
+      ? racaTotal
+      : modalConfig.lista.length;
+  const setPageModal = isDono ? setDonoPage : isRaca ? setRacaPage : () => {};
 
   return (
     <KeyboardAvoidingView
@@ -152,15 +231,11 @@ export default function NewOrEditPet() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <DefaultHeader />
+
       <View style={{ backgroundColor: colors.THIRD_BACKGROUND }}>
         <TitleBar
           returnTo={Screen.Cadastros}
-          params={
-            {
-              type: "PET",
-              mode: "view",
-            } as NewOrEditCadastros
-          }
+          params={{ type: "PET", mode: "view" } as NewOrEditCadastros}
           title={
             isEditing
               ? "Editar Pet"
@@ -200,19 +275,10 @@ export default function NewOrEditPet() {
               isNewPet={isNewPet}
               updateField={updateField as (field: string, value: any) => void}
               portesList={portesList}
-              rList={racasList}
               especiesList={especiesList}
-              abrirModal={(config) =>
-                abrirModal({
-                  ...config,
-                  lista:
-                    config.titulo === "Selecionar Dono"
-                      ? (owners ?? [])
-                      : config.lista,
-                })
-              }
+              racasList={racasList ?? []}
+              abrirModal={abrirModal}
               salvarPet={salvarPet}
-              petToEdit={params?.pet}
             />
           ) : (
             <AbaAgendamentoPet
@@ -222,12 +288,21 @@ export default function NewOrEditPet() {
             />
           )}
         </View>
+
         {!isViewing && (
           <View style={s.ctnBtnSalvar}>
-            <TouchableOpacity style={s.btnSalvar} onPress={salvarPet}>
-              <Text style={s.txtSalvar}>
-                {isEditing ? "Salvar alterações" : "Salvar"}
-              </Text>
+            <TouchableOpacity
+              style={[s.btnSalvar, isSalvando && s.btnSalvarDisabled]}
+              onPress={salvarPet}
+              disabled={isSalvando}
+            >
+              {isSalvando ? (
+                <ActivityIndicator color="#FFF" />
+              ) : (
+                <Text style={s.txtSalvar}>
+                  {isEditing ? "Salvar alterações" : "Salvar"}
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
         )}
@@ -239,18 +314,16 @@ export default function NewOrEditPet() {
         titulo={modalConfig.titulo}
         itemIcon={modalConfig.itemIcon}
         onSelect={modalConfig.aoSelecionar}
-        onClose={() => setModalConfig((prev) => ({ ...prev, visivel: false }))}
-        page={page}
-        total={total}
-        setPage={setPage}
-        setSearch={(txt) => {
-          setPage(0);
-          setSearchTxt(txt);
-        }}
+        onClose={fecharModal}
+        page={pageModal}
+        total={totalModal}
+        setPage={setPageModal}
+        setSearch={handleSetSearch}
       />
     </KeyboardAvoidingView>
   );
 }
+
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     flex: { flex: 1 },
@@ -263,44 +336,28 @@ const styles = (colors: ThemeColors) =>
       padding: 20,
       alignItems: "center",
     },
-    viewDataReq: { width: "100%" },
-    viewDataNotReq: {
-      width: "100%",
-      marginTop: 20,
-    },
-    inputs: {
-      width: "100%",
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: colors.BORDER_LIGHT,
-      backgroundColor: colors.BACKGROUND,
-      overflow: "hidden",
-    },
-    titleDataInfo: {
-      color: colors.PRIMARY_VARIANT,
-      fontWeight: "500",
-      marginBottom: 8,
-    },
-
     escolhaItem: {
       flexDirection: "row",
-      justifyContent: "space-evenly",
-      width: "100%",
-      marginTop: 15,
-      marginBottom: 10,
+      justifyContent: "space-around",
+      paddingVertical: 10,
     },
     ctnBtnSalvar: {
-      margin: "auto",
-      marginBottom: 25,
+      padding: 20,
+      width: "100%",
     },
     btnSalvar: {
-      paddingVertical: 20,
-      paddingHorizontal: 75,
       backgroundColor: colors.PRIMARY_VARIANT,
-      borderRadius: 15,
+      padding: 15,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    btnSalvarDisabled: {
+      opacity: 0.6,
     },
     txtSalvar: {
-      color: colors.BACKGROUND,
-      textAlign: "center",
+      color: "#FFF",
+      fontSize: 16,
+      fontWeight: "bold",
     },
   });

@@ -58,8 +58,8 @@ class PetService {
     return petRepository.getPetsByOwnerId(ownerId);
   }
 
-  countPets() {
-    return petRepository.countPets();
+  countPets(search?: string) {
+    return petRepository.countPets(search);
   }
 
   createPet(pet: Pet) {

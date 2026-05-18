@@ -41,8 +41,8 @@ class OwnerController {
     return ownerService.getAllOwnersPaged(page, limit, order, ativo);
   }
 
-  countOwners(): Promise<number> {
-    return ownerService.countOwners();
+  countOwners(search?: string): Promise<number> {
+    return ownerService.countOwners(search);
   }
 
   async createOwner(owner: Owner): Promise<void> {

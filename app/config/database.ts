@@ -89,9 +89,10 @@ export async function initDatabase(): Promise<void> {
     );
 
     CREATE TABLE IF NOT EXISTS race (
-      id         INTEGER PRIMARY KEY AUTOINCREMENT,
-      especie_id INTEGER NOT NULL,
-      nome_raca  TEXT    NOT NULL,
+      id                            INTEGER PRIMARY KEY AUTOINCREMENT,
+      especie_id                    INTEGER NOT NULL,
+      nome_raca                     TEXT    NOT NULL,
+      nome_raca_normalized  TEXT    NOT NULL,
       FOREIGN KEY (especie_id) REFERENCES species(id) ON DELETE CASCADE,
       UNIQUE (especie_id, nome_raca)
     );    
@@ -221,30 +222,46 @@ export async function initDatabase(): Promise<void> {
       (2, 'GATO'),
       (3, 'OUTRO');
 
-    INSERT OR IGNORE INTO race (especie_id, nome_raca) VALUES
-      (1, 'Vira-lata (SRD)'),
-      (1, 'Shih Tzu'),
-      (1, 'Yorkshire Terrier'),
-      (1, 'Poodle'),
-      (1, 'Spitz Alemão (Lulu)'),
-      (1, 'Bulldog Francês'),
-      (1, 'Pug'),
-      (1, 'Golden Retriever'),
-      (1, 'Labrador Retriever'),
-      (1, 'Pinscher'),
-      (1, 'Pitbull'),
-      (1, 'Border Collie'),
-      (1, 'Basset Hound'),
-      (1, 'Chow Chow'),
-      (2, 'Vira-lata (SRD)'),
-      (2, 'Siamês'),
-      (2, 'Persa'),
-      (2, 'Angorá'),
-      (2, 'Maine Coon'),
-      (2, 'Bengal'),
-      (2, 'Sphynx'),
-      (2, 'Ragdoll'),
-      (3, 'Não se aplica / SRD');
+    INSERT OR IGNORE INTO race (especie_id, nome_raca, nome_raca_normalized) VALUES
+    (1, 'Vira-lata (SRD)', 'vira-lata srd'),
+    (1, 'Shih Tzu', 'shih tzu'),
+    (1, 'Yorkshire Terrier', 'yorkshire terrier'),
+    (1, 'Poodle', 'poodle'),
+    (1, 'Spitz Alemão (Lulu)', 'spitz alemao lulu'),
+    (1, 'Bulldog Francês', 'bulldog frances'),
+    (1, 'Pug', 'pug'),
+    (1, 'Golden Retriever', 'golden retriever'),
+    (1, 'Labrador Retriever', 'labrador retriever'),
+    (1, 'Pinscher', 'pinscher'),
+    (1, 'Pitbull', 'pitbull'),
+    (1, 'Border Collie', 'border collie'),
+    (1, 'Basset Hound', 'basset hound'),
+    (1, 'Chow Chow', 'chow chow'),
+    
+    (1, 'a', 'a'),
+    (1, 'ab', 'ab'),
+    (1, 'ac', 'ac'),
+    (1, 'ad', 'ad'),
+    (1, 'ae', 'ae'),
+    (1, 'af', 'af'),
+    (1, 'ag', 'ag'),
+    (1, 'ah', 'ah'),
+    (1, 'ai', 'ai'),
+    (1, 'aj', 'aj'),
+    (1, 'ak', 'ak'),
+    (1, 'al', 'al'),
+    (1, 'am', 'am'),
+
+    (2, 'Vira-lata (SRD)', 'vira-lata srd'),
+    (2, 'Siamês', 'siames'),
+    (2, 'Persa', 'persa'),
+    (2, 'Angorá', 'angora'),
+    (2, 'Maine Coon', 'maine coon'),
+    (2, 'Bengal', 'bengal'),
+    (2, 'Sphynx', 'sphynx'),
+    (2, 'Ragdoll', 'ragdoll'),
+    (3, 'Não se aplica / SRD', 'nao se aplica srd');
+
   `;
 
   // ── Triggers ──────────────────────────────────────────────────────────────
@@ -384,7 +401,7 @@ export async function initDatabase(): Promise<void> {
         
         -- Recursão: Próximas visitas aplicam o salto dinâmico ao atingir a meta
         SELECT
-          -- NOVA DATA_INT: Se bateu a cota do mês, calcula a primeira ocorrência do dia da semana no mês seguinte
+          -- NOVA DATA_INT
           CAST(strftime('%Y%m%d', CASE 
             WHEN contagem_mes >= NEW.pacote_remarcacao THEN
               date(
@@ -393,7 +410,6 @@ export async function initDatabase(): Promise<void> {
                 '+' || ((dia_semana_base - CAST(strftime('%w', date(substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-01', '+1 month')) AS INTEGER) + 7) % 7) || ' days'
               )
             ELSE
-              -- Se ainda tem saldo no mês, aplica o intervalo normal do pacote (7 ou 14 dias)
               date(
                 substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-' || substr(CAST(data_int AS TEXT), 7, 2),
                 '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
@@ -411,15 +427,21 @@ export async function initDatabase(): Promise<void> {
               )
           END),
           
-          -- NOVA CONTAGEM_MES: Reseta para 1 se pulou de mês, senão incrementa
+          -- NOVA CONTAGEM_MES:
+          --   1. Reseta se atingiu o limite do pacote no mês atual
+          --   2. Reseta se a próxima data caiu em um mês diferente (virada natural de mês)
+          --   3. Caso contrário, incrementa normalmente
           CASE 
             WHEN contagem_mes >= NEW.pacote_remarcacao THEN 1
+            WHEN strftime('%Y%m', date(
+              substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-' || substr(CAST(data_int AS TEXT), 7, 2),
+              '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+            )) != mes_atual THEN 1
             ELSE contagem_mes + 1
           END,
           
           dia_semana_base
         FROM agenda
-        -- Alvo: Avança até a data atual + PERIODO_REMARCACAO
         WHERE data_int < CAST(strftime('%Y%m%d', date('now', '${PERIODO_REMARCACAO}')) AS INTEGER)
       )
       SELECT 
@@ -427,13 +449,11 @@ export async function initDatabase(): Promise<void> {
         NEW.servico_padrao, 
         data_int, 
         0, 
-        -- FIX: Se a data for menor que hoje, grava 0. Se for hoje ou futura, grava 1.
         CASE 
           WHEN data_int < CAST(strftime('%Y%m%d', 'now') AS INTEGER) THEN 0 
           ELSE 1 
         END
       FROM agenda;
-      -- Filtro antigo "WHERE contagem_mes <= pacote" foi removido pois a própria árvore acima controla o fluxo e avança de mês!
   
       -- Salva a última data gerada em ultimo_visita_data_auto (considerando concluido = 0)
       UPDATE pets
@@ -499,17 +519,15 @@ export async function initDatabase(): Promise<void> {
         
         -- Recursão com inteligência de salto de mês
         SELECT
-          -- NOVA DATA_INT: Se estourou a cota do mês, pula pro início do próximo mês e ajusta para o mesmo dia da semana
+          -- NOVA DATA_INT
           CAST(strftime('%Y%m%d', CASE 
             WHEN contagem_mes >= NEW.pacote_remarcacao THEN
-              -- Avança para o dia 1 do próximo mês e adiciona os dias necessários para bater o dia da semana correto
               date(
                 substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-01', 
                 '+1 month', 
                 '+' || ((dia_semana_base - CAST(strftime('%w', date(substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-01', '+1 month')) AS INTEGER) + 7) % 7) || ' days'
               )
             ELSE
-              -- Se ainda está dentro da cota mensal, aplica o intervalo normal (7 ou 14 dias)
               date(
                 substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-' || substr(CAST(data_int AS TEXT), 7, 2),
                 '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
@@ -527,15 +545,21 @@ export async function initDatabase(): Promise<void> {
               )
           END),
           
-          -- NOVA CONTAGEM_MES: Se pulou de mês, reinicia em 1. Caso contrário, soma 1.
+          -- NOVA CONTAGEM_MES:
+          --   1. Reseta se atingiu o limite do pacote no mês atual
+          --   2. Reseta se a próxima data caiu em um mês diferente (virada natural de mês)
+          --   3. Caso contrário, incrementa normalmente
           CASE 
             WHEN contagem_mes >= NEW.pacote_remarcacao THEN 1
+            WHEN strftime('%Y%m', date(
+              substr(CAST(data_int AS TEXT), 1, 4) || '-' || substr(CAST(data_int AS TEXT), 5, 2) || '-' || substr(CAST(data_int AS TEXT), 7, 2),
+              '+' || CASE NEW.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
+            )) != mes_atual THEN 1
             ELSE contagem_mes + 1
           END,
           
           dia_semana_base
         FROM agenda
-        -- Alvo: Gera datas até o limite estipulado
         WHERE data_int < CAST(strftime('%Y%m%d', date('now', '${PERIODO_REMARCACAO}')) AS INTEGER)
       )
       SELECT 
@@ -548,7 +572,6 @@ export async function initDatabase(): Promise<void> {
           ELSE 1 
         END
       FROM agenda
-      -- Removemos o filtro de corte antigo daqui, pois o controle agora é feito direto na linha de cima (na geração)
       WHERE NOT EXISTS (
           SELECT 1 FROM appointments a 
           WHERE a.pet_id = NEW.id 

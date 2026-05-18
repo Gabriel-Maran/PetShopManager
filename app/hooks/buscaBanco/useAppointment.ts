@@ -44,7 +44,10 @@ export function usePetsComEspecieERacaBanco(ativada: boolean): PegarPetsReturn {
     pets: [],
   });
 
+  // Busca a lista de pets — só roda quando o modal está aberto
   useEffect(() => {
+    if (!ativada) return;
+
     petController
       .searchPetsByNamePagedWithSpecieAndRace(
         form.searchTxt,
@@ -54,7 +57,18 @@ export function usePetsComEspecieERacaBanco(ativada: boolean): PegarPetsReturn {
       )
       .then((value) => updateField("pets", value))
       .catch(handleError);
-  }, [form.searchTxt, form.page]);
+  }, [ativada, form.searchTxt, form.page]);
+
+  // Busca o total de pets para a paginação funcionar — era o que faltava
+  // Não depende de `page` pois o total não muda ao trocar de página
+  useEffect(() => {
+    if (!ativada) return;
+
+    petController
+      .countPets(form.searchTxt)
+      .then((value) => updateField("total", value))
+      .catch(handleError);
+  }, [ativada, form.searchTxt]);
 
   return {
     petsForm: form,
@@ -86,7 +100,7 @@ export function useServicos(): ServiceTypeReturn {
       .getAllServiceTypes()
       .then((value) => updateField("servico", value))
       .catch(handleError);
-  }, []);
+  }, []); // ← [] correto, busca apenas uma vez
 
   return {
     servicesForm: form,
@@ -112,12 +126,13 @@ export function useTiposPagamento(): PaymentMethodReturn {
     tipos_pgto: [],
   });
 
+  // CORRIGIDO: estava sem [], re-buscava em todo render
   useEffect(() => {
     paymentMethodRepository
       .getAllPaymentMethod()
       .then((value) => updateField("tipos_pgto", value))
       .catch(handleError);
-  });
+  }, []);
 
   return {
     pgtosForm: form,
@@ -132,10 +147,10 @@ type AppointmentType = {
   servico: string;
   data: string;
   hora: string;
-  entregar_pet: number; // 0 ou 1
-  concluido: number; // 0 ou 1
+  entregar_pet: number;
+  concluido: number;
   observacao: string | null;
-  is_auto_agen: number; // 0 ou 1
+  is_auto_agen: number;
   nome_dono: string;
   especie: string;
   valor: string;
@@ -166,20 +181,14 @@ export function useAgendamentos(): AppointmentTypeReturn {
     entregar_pet: params?.appointment?.entregar_pet ?? 0,
     concluido: params?.appointment?.concluido ?? 0,
     observacao: params?.appointment?.observacao ?? "",
-
-    //Quando não auto gerado, o db já criar isso como false(ou seja, 0), so fica true isso aqui quando é criado na trigger
-    //Minha ideia é não alterar isso, por conta de que, foi criado automatico e se o dono do petshop mudar
-    //deve continuar como auto gerado
-    //Mas é interessante fazer algo visual para mostrar se foi auto gerado ou não
     is_auto_agen: params?.appointment?.is_auto_agen ?? 0,
-    //================================================
     valor: params?.appointment?.valor ?? "",
     tipo_pgto: params?.appointment?.tipo_pgto ?? "",
     ta_pago: params?.appointment?.ta_pago ?? 0,
-    //================================================
     especie: "",
     nome_dono: "",
   });
+
   return {
     appointmentsForm: form,
     updateAppointmentsField: updateField,

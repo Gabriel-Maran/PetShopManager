@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useScreen } from "../../hooks/useScreen";
 import { useError } from "../../hooks/useError";
 
-import { Pet, PetWithSpecieAndRace } from "../../model/Pet";
+import { Pet, PetWithSpecieRaceAndOwner } from "../../model/Pet";
 import { Owner } from "../../model/Owner";
 
 import { ownerController } from "../../controller/OwnerController";
@@ -38,7 +38,7 @@ export default function Cadastros() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [owners, setOwners] = useState<Owner[]>([]);
-  const [pets, setPets] = useState<PetWithSpecieAndRace[]>([]);
+  const [pets, setPets] = useState<PetWithSpecieRaceAndOwner[]>([]);
   const [total, setTotal] = useState(0);
   const [objSelectToDelete, setObjSelectToDelete] = useState<
     Pet | Owner | undefined

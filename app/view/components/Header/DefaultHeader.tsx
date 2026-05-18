@@ -58,7 +58,7 @@ const styles = (colors: ThemeColors) =>
       justifyContent: "center",
     },
     img: {
-      width: 200,
+      width: 160,
       alignSelf: "center",
     },
     btnVoltar: {

@@ -67,8 +67,10 @@ class PetController {
     return petService.getPetsByOwnerId(ownerId);
   }
 
-  countPets(): Promise<number> {
-    return petService.countPets();
+  // ATUALIZADO: aceita search opcional para contar resultados filtrados
+  // Necessário para a paginação do modal de seleção de pet funcionar
+  countPets(search?: string): Promise<number> {
+    return petService.countPets(search);
   }
 
   async createPet(petSalvar: Pet): Promise<void> {
@@ -80,7 +82,7 @@ class PetController {
     ) {
       throw new Error("Nome, espécie, dono e porte são obrigatórios");
     }
-    await ownerController.getOwnerById(petSalvar.dono_id); // valida existência do dono
+    await ownerController.getOwnerById(petSalvar.dono_id);
     await petService.createPet(petSalvar);
   }
 
@@ -94,7 +96,7 @@ class PetController {
       throw new Error("Nome, espécie, dono e porte são obrigatórios");
     }
     await this.getPetById(id);
-    await ownerController.getOwnerById(petSalvar.dono_id); // valida existência do dono
+    await ownerController.getOwnerById(petSalvar.dono_id);
     await petService.updatePet(id, petSalvar);
   }
 

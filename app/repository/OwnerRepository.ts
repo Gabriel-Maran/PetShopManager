@@ -55,8 +55,19 @@ class OwnerRepository {
     );
   }
 
-  async countOwners(): Promise<number> {
+  async countOwners(search?: string): Promise<number> {
     const db = await getDatabase();
+
+    if (search) {
+      const formattedSearch = `%${search.trim()}%`;
+      const result = await db.getFirstAsync<{ total: number }>(
+        `SELECT COUNT(*) as total FROM owners 
+       WHERE is_ativo = 1 AND nome LIKE ?`,
+        [formattedSearch],
+      );
+      return result?.total ?? 0;
+    }
+
     const result = await db.getFirstAsync<{ total: number }>(
       `SELECT COUNT(*) as total FROM owners WHERE is_ativo = 1`,
     );

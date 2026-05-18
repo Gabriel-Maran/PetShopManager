@@ -1,6 +1,6 @@
 await db.execAsync(`
   -- =====================================================
-  -- OWNERS (20)
+  -- OWNERS (TOTAL: 50)
   -- =====================================================
 
   INSERT INTO owners (nome, nome_normalizado, telefone, email, endereco) VALUES
@@ -23,26 +23,46 @@ await db.execAsync(`
   ('Eduardo Nunes', 'eduardo nunes', '(44) 99911-1127', 'eduardo17@email.com', 'Rua Q, 116'),
   ('Bruna Castro', 'bruna castro', '(44) 99911-1128', 'bruna18@email.com', 'Rua R, 117'),
   ('Felipe Cardoso', 'felipe cardoso', '(44) 99911-1129', 'felipe19@email.com', 'Rua S, 118'),
-  ('Tatiane Moraes', 'tatiane moraes', '(44) 99911-1130', 'tatiane20@email.com', 'Rua T, 119');
+  ('Tatiane Moraes', 'tatiane moraes', '(44) 99911-1130', 'tatiane20@email.com', 'Rua T, 119'),
+  ('Ricardo Santos', 'ricardo santos', '(44) 99911-1131', 'ricardo21@email.com', 'Rua U, 120'),
+  ('Camila Pires', 'camila pires', '(44) 99911-1132', 'camila22@email.com', 'Rua V, 121'),
+  ('Daniel Almeida', 'daniel almeida', '(44) 99911-1133', 'daniel23@email.com', 'Rua W, 122'),
+  ('Letícia Fonseca', 'leticia fonseca', '(44) 99911-1134', 'leticia24@email.com', 'Rua X, 123'),
+  ('Gustavo Borges', 'gustavo borges', '(44) 99911-1135', 'gustavo25@email.com', 'Av. Central, 500'),
+  ('Beatriz Ramos', 'beatriz ramos', '(44) 99911-1136', 'beatriz26@email.com', 'Rua Y, 124'),
+  ('Rodrigo Neves', 'rodrigo neves', '(44) 99911-1137', 'rodrigo27@email.com', 'Rua Z, 125'),
+  ('Priscila Cruz', 'priscila cruz', '(44) 99911-1138', 'priscila28@email.com', 'Alameda A, 10'),
+  ('Fabio Teixeira', 'fabio teixeira', '(44) 99911-1139', 'fabio29@email.com', 'Rua das Flores, 45'),
+  ('Renata Vieira', 'renata vieira', '(44) 99911-1140', 'renata30@email.com', 'Av. Brasil, 1200'),
+  ('Guilherme Melo', 'guilherme melo', '(44) 99911-1141', 'guilherme31@email.com', 'Rua Nova, 88'),
+  ('Soraia Toledo', 'soraia toledo', '(44) 99911-1142', 'soraia32@email.com', 'Rua Pinheiro, 23'),
+  ('Marcos Antunes', 'marcos antunes', '(44) 99911-1143', 'marcos33@email.com', 'Av. Paraná, 450'),
+  ('Tatiana Guimarães', 'tatiana guimaraes', '(44) 99911-1144', 'tatiana34@email.com', 'Rua Limoeiro, 12'),
+  ('Alexandre Lopes', 'alexandre lopes', '(44) 99911-1145', 'alexandre35@email.com', 'Rua Principal, 9'),
+  ('Débora Machado', 'debora machado', '(44) 99911-1146', 'debora36@email.com', 'Travessa B, 4'),
+  ('Maurício Nogueira', 'mauricio nogueira', '(44) 99911-1147', 'mauricio37@email.com', 'Rua do Sol, 77'),
+  ('Helena Farias', 'helena farias', '(44) 99911-1148', 'helena38@email.com', 'Av. Getúlio Vargas, 31'),
+  ('Breno Silveira', 'breno silveira', '(44) 99911-1149', 'breno39@email.com', 'Rua da Paz, 99'),
+  ('Mônica Carvalho', 'monica carvalho', '(44) 99911-1150', 'monica40@email.com', 'Rua Ceará, 14'),
+  ('Vitor Rezende', 'vitor rezende', '(44) 99911-1151', 'vitor41@email.com', 'Rua Minas, 55'),
+  ('Sabrina Cunha', 'sabrina cunha', '(44) 99911-1152', 'sabrina42@email.com', 'Av. Tiradentes, 890'),
+  ('Douglas Franco', 'douglas franco', '(44) 99911-1153', 'douglas43@email.com', 'Rua Sergipe, 201'),
+  ('Bianca Frota', 'bianca frota', '(44) 99911-1154', 'bianca44@email.com', 'Rua Goiás, 33'),
+  ('Igor Rocha', 'igor rocha', '(44) 99911-1155', 'igor45@email.com', 'Av. Juscelino, 100'),
+  ('Karina Sales', 'karina sales', '(44) 99911-1156', 'karina46@email.com', 'Rua Pará, 72'),
+  ('Murilo Viana', 'murilo viana', '(44) 99911-1157', 'murilo47@email.com', 'Rua Amazonas, 19'),
+  ('Aline Moraes', 'aline moraes', '(44) 99911-1158', 'aline48@email.com', 'Rua Maranhão, 84'),
+  ('Leonardo Malta', 'leonardo malta', '(44) 99911-1159', 'leonardo49@email.com', 'Av. São Paulo, 610'),
+  ('Clarice Fontes', 'clarice fontes', '(44) 99911-1160', 'clarice50@email.com', 'Rua Bahia, 5');
 
   -- =====================================================
-  -- PETS (20)
+  -- PETS (TOTAL: 50)
   -- =====================================================
 
   INSERT INTO pets (
-    nome,
-    nome_normalizado,
-    especie,
-    porte,
-    raca,
-    observacoes,
-    dono_id,
-    servico_padrao,
-    remarcacao_ativa,
-    pacote_remarcacao,
-    data_inicio_pacote,
-    current_ultima_visita_data,
-    ultimo_visita_data_auto
+    nome, nome_normalizado, especie, porte, raca, observacoes, dono_id,
+    servico_padrao, remarcacao_ativa, pacote_remarcacao, data_inicio_pacote,
+    current_ultima_visita_data, ultimo_visita_data_auto
   ) VALUES
   ('Thor', 'thor', 1, 'Grande', 3, 'Muito ativo', 1, 'Banho e Tosa', 1, 4, 20260501, 20260510, 20260510),
   ('Luna', 'luna', 2, 'Pequeno', 4, 'Assustada', 2, 'Banho', 0, NULL, NULL, 20260502, 20260502),
@@ -63,21 +83,44 @@ await db.execAsync(`
   ('Spike', 'spike', 1, 'Médio', 2, 'Corre muito', 17, 'Tosa Higiênica', 1, 4, 20260410, 20260503, 20260503),
   ('Kiara', 'kiara', 2, 'Pequeno', 4, 'Muito dócil', 18, 'Banho', 0, NULL, NULL, 20260507, 20260507),
   ('Zeus', 'zeus', 1, 'Grande', 3, 'Obediente', 19, 'Banho e Tosa', 1, 2, 20260419, 20260510, 20260510),
-  ('Amora', 'amora', 1, 'Pequeno', 1, 'Filhote', 20, 'Banho', 0, NULL, NULL, 20260508, 20260508);
+  ('Amora', 'amora', 1, 'Pequeno', 1, 'Filhote', 20, 'Banho', 0, NULL, NULL, 20260508, 20260508),
+  ('Apollo', 'apollo', 1, 'Grande', 3, 'Gosta de brincar com bola', 21, 'Banho e Tosa', 1, 4, 20260501, 20260512, 20260512),
+  ('Bela', 'bela', 1, 'Pequeno', 1, 'Medo de outros cães', 22, 'Banho', 0, NULL, NULL, 20260505, 20260505),
+  ('Chico', 'chico', 2, 'Pequeno', 4, 'Dorme muito', 23, 'Banho', 0, NULL, NULL, 20260502, 20260502),
+  ('Cacau', 'cacau', 1, 'Médio', 2, 'Pele sensível usar shampoo neutro', 24, 'Banho', 1, 2, 20260420, 20260511, 20260511),
+  ('Duke', 'duke', 1, 'Grande', 3, 'Puxa muito a guia', 25, 'Tosa Higiênica', 0, NULL, NULL, 20260429, 20260429),
+  ('Frida', 'frida', 1, 'Pequeno', 1, 'Chora ao separar do dono', 26, 'Banho e Tosa', 1, 4, 20260502, 20260513, 20260513),
+  ('Garfield', 'garfield', 2, 'Pequeno', 5, 'Muito gordo e calmo', 27, 'Banho', 0, NULL, NULL, 20260506, 20260506),
+  ('Hunter', 'hunter', 1, 'Grande', 3, 'Cão de guarda dócil', 28, 'Banho e Tosa', 0, NULL, NULL, 20260504, 20260504),
+  ('Jade', 'jade', 2, 'Pequeno', 4, 'Unhas muito compridas', 29, 'Banho', 1, 2, 20260422, 20260510, 20260510),
+  ('Kronos', 'kronos', 1, 'Grande', 3, 'Idoso precisa de paciência', 30, 'Banho', 0, NULL, NULL, 20260507, 20260507),
+  ('Luke', 'luke', 1, 'Médio', 2, 'Tosa na máquina alta', 31, 'Banho e Tosa', 1, 4, 20260415, 20260514, 20260514),
+  ('Mimi', 'mimi', 2, 'Pequeno', 5, 'Gosta de cafuné', 32, 'Banho', 0, NULL, NULL, 20260503, 20260503),
+  ('Nico', 'nico', 1, 'Pequeno', 1, 'Muito rápido e esperto', 33, 'Banho', 0, NULL, NULL, 20260509, 20260509),
+  ('Ozzy', 'ozzy', 1, 'Médio', 2, 'Muito barulhento', 34, 'Tosa Higiênica', 1, 2, 20260428, 20260512, 20260512),
+  ('Pipoca', 'pipoca', 1, 'Pequeno', 1, 'Não gosta que mexam nas patas', 35, 'Banho', 0, NULL, NULL, 20260508, 20260508),
+  ('Rocco', 'rocco', 1, 'Grande', 3, 'Bastante babão', 36, 'Banho e Tosa', 0, NULL, NULL, 20260505, 20260505),
+  ('Sasha', 'sasha', 2, 'Pequeno', 4, 'Tímida esconde no colo', 37, 'Banho', 0, NULL, NULL, 20260501, 20260501),
+  ('Teddy', 'teddy', 1, 'Pequeno', 2, 'Pelo embaraça fácil', 38, 'Banho e Tosa', 1, 4, 20260410, 20260511, 20260511),
+  ('Vicky', 'vicky', 1, 'Pequeno', 1, 'Adora petiscos', 39, 'Banho', 0, NULL, NULL, 20260510, 20260510),
+  ('Zeca', 'zeca', 1, 'Médio', 2, 'Agitado com soprador', 40, 'Banho', 1, 2, 20260426, 20260509, 20260509),
+  ('Bud', 'bud', 1, 'Grande', 3, 'Tranquilo com outros pets', 41, 'Banho', 0, NULL, NULL, 20260504, 20260504),
+  ('Cléo', 'cleo', 2, 'Pequeno', 5, 'Arisca na hora de secar', 42, 'Banho', 0, NULL, NULL, 20260507, 20260507),
+  ('Floquinho', 'floquinho', 1, 'Pequeno', 2, 'Pelo totalmente branco', 43, 'Banho e Tosa', 1, 4, 20260418, 20260513, 20260513),
+  ('Guga', 'guga', 1, 'Médio', 2, 'Adora brincar na água', 44, 'Banho', 0, NULL, NULL, 20260506, 20260506),
+  ('Loki', 'loki', 1, 'Grande', 3, 'Destruidor de brinquedos', 45, 'Tosa Higiênica', 0, NULL, NULL, 20260502, 20260502),
+  ('Maya', 'maya', 1, 'Pequeno', 1, 'Muito dengosa', 46, 'Banho', 1, 2, 20260424, 20260514, 20260514),
+  ('Oliver', 'oliver', 1, 'Médio', 2, 'Tosa tesoura nas pernas', 47, 'Banho e Tosa', 0, NULL, NULL, 20260505, 20260505),
+  ('Princesa', 'princesa', 2, 'Pequeno', 4, 'Calma e silenciosa', 48, 'Banho', 0, NULL, NULL, 20260508, 20260508),
+  ('Simba', 'simba', 1, 'Pequeno', 1, 'Latido muito agudo', 49, 'Banho', 1, 4, 20260412, 20260510, 20260510),
+  ('Urso', 'urso', 1, 'Grande', 3, 'Pelagem densa e grossa', 50, 'Banho e Tosa', 0, NULL, NULL, 20260511, 20260511);
 
   -- =====================================================
-  -- APPOINTMENTS (20)
+  -- APPOINTMENTS (TOTAL: 40)
   -- =====================================================
 
   INSERT INTO appointments (
-    pet_id,
-    servico,
-    data,
-    hora,
-    entregar_pet,
-    concluido,
-    observacao,
-    is_auto_agen
+    pet_id, servico, data, hora, entregar_pet, concluido, observacao, is_auto_agen
   ) VALUES
   (1, 'Banho e Tosa', 20260515, '09:00', 1, 0, 'Perfume suave', 0),
   (2, 'Banho', 20260515, '09:30', 0, 1, 'Tudo ok', 0),
@@ -98,5 +141,25 @@ await db.execAsync(`
   (17, 'Tosa Higiênica', 20260516, '13:00', 1, 1, 'Muito ativo', 1),
   (18, 'Banho', 20260516, '13:30', 0, 0, 'Muito dócil', 0),
   (19, 'Banho e Tosa', 20260516, '14:00', 1, 0, 'Obediente', 1),
-  (20, 'Banho', 20260516, '14:30', 0, 1, 'Filhote', 0);
+  (20, 'Banho', 20260516, '14:30', 0, 1, 'Filhote', 0),
+  (21, 'Banho e Tosa', 20260517, '08:30', 1, 0, 'Perfume de talco', 1),
+  (22, 'Banho', 20260517, '09:00', 0, 1, 'Feito com cuidado', 0),
+  (23, 'Banho', 20260517, '09:30', 1, 0, 'Gato calmo', 0),
+  (24, 'Banho', 20260517, '10:00', 0, 0, 'Xampu hipoalergênico', 1),
+  (25, 'Tosa Higiênica', 20260517, '10:30', 1, 1, 'Limpeza de orelhas ok', 0),
+  (26, 'Banho e Tosa', 20260517, '11:00', 0, 0, 'Chorou um pouco', 1),
+  (27, 'Banho', 20260517, '11:30', 1, 1, 'Nenhum problema', 0),
+  (28, 'Banho e Tosa', 20260517, '13:30', 0, 0, 'Tosa padrão raça', 0),
+  (29, 'Banho', 20260517, '14:00', 1, 0, 'Corte de unhas feito', 1),
+  (30, 'Banho', 20260517, '14:30', 0, 0, 'Cuidado com a coluna', 0),
+  (31, 'Banho e Tosa', 20260518, '08:30', 1, 1, 'Máquina 4', 1),
+  (32, 'Banho', 20260518, '09:00', 0, 0, 'Secagem lenta', 0),
+  (33, 'Banho', 20260518, '09:30', 1, 0, 'Sem nós', 0),
+  (34, 'Tosa Higiênica', 20260518, '10:00', 0, 1, 'Agitado na mesa', 1),
+  (35, 'Banho', 20260518, '10:30', 1, 0, 'Cuidado com as patas', 0),
+  (36, 'Banho e Tosa', 20260518, '11:00', 0, 0, 'Tosa curta', 0),
+  (37, 'Banho', 20260518, '11:30', 1, 1, 'Muito assustada', 0),
+  (38, 'Banho e Tosa', 20260518, '13:30', 0, 0, 'Desembolo de pelo', 1),
+  (39, 'Banho', 20260518, '14:00', 1, 0, 'Ganhou gravata azul', 0),
+  (40, 'Banho', 20260518, '14:30', 0, 1, 'Secador morno', 1);
 `);

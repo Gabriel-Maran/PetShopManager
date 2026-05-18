@@ -8,37 +8,42 @@ import {
 import InputInfo from "../../Cadastro/InputInfo";
 import InputSelect from "../../InputSelect";
 import SelectionField from "../../Cadastro/SelectionField";
-import { Pet } from "../../../../model/Pet";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ownerController } from "../../../../controller/OwnerController";
 import { raceRepository } from "../../../../repository/RaceRepository";
 import ModalCadastroRaca from "../Modal/ModalCreateRacePet";
-import { pegarRacasBanco } from "../../../../hooks/buscaBanco/usePet";
+
+export type TipoModal = "DONO" | "RACA";
+
+export interface AbrirModalConfig {
+  titulo: string;
+  tipoModal: TipoModal;
+  itemIcon?: ImageSourcePropType;
+  lista: any[];
+  aoSelecionar: (item: any) => void;
+}
+
+export interface FormInfoPet {
+  nome: string;
+  especie: number;
+  dono_id: number;
+  dono_nome: string;
+  raca: number;
+  raca_nome: string;
+  observacoes: string;
+  porte: string;
+}
 
 interface AbaInfoPetProps {
   isEditavel?: boolean;
   isNewPet: boolean;
-  form: {
-    nome: string;
-    especie: number;
-    dono_id: number;
-    dono_nome: string;
-    raca: number;
-    raca_nome: string;
-    observacoes: string;
-    porte: string;
-  };
+  form: FormInfoPet;
   updateField: (field: string, value: any) => void;
-  abrirModal: (config: {
-    titulo: string;
-    itemIcon?: ImageSourcePropType;
-    lista: any[];
-    aoSelecionar: (item: any) => void;
-  }) => void;
-  rList: any[];
+  abrirModal: (config: AbrirModalConfig) => void;
   especiesList: any[];
+  // racasList vem do pai — fonte única de verdade, sem hook duplicado
+  racasList: any[];
   portesList: { id: string; nome: string }[];
-  petToEdit?: Pet;
   salvarPet: () => void;
 }
 
@@ -48,18 +53,14 @@ export default function AbaInfoPet({
   form,
   updateField,
   abrirModal,
-  rList,
   especiesList,
+  racasList,
   portesList,
-  petToEdit,
-  salvarPet,
 }: AbaInfoPetProps) {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
 
   const [racaModalAberto, setRacaModalAberto] = useState(false);
-
-  const { racasList } = pegarRacasBanco(form.especie);
 
   // --- Busca nome do dono quando não é novo pet e dono_id muda ---
   useEffect(() => {
@@ -104,11 +105,8 @@ export default function AbaInfoPet({
   // --- Sincroniza porte ao carregar pet existente ---
   useEffect(() => {
     if (isNewPet || !form.porte) return;
-
     const porteEncontrado = portesList.find((item) => item.id === form.porte);
-    if (porteEncontrado) {
-      updateField("porte", porteEncontrado.id);
-    }
+    if (porteEncontrado) updateField("porte", porteEncontrado.id);
   }, [isNewPet]);
 
   // --- Limpa raça ao trocar espécie ---
@@ -116,7 +114,7 @@ export default function AbaInfoPet({
     updateField("raca_nome", "");
   }, [form.especie]);
 
-  // --- Memoização dos itens selecionados para evitar .find() a cada render ---
+  // --- Itens selecionados memoizados ---
   const especieSelecionada = useMemo(
     () => especiesList.find((e) => e.id === form.especie),
     [especiesList, form.especie],
@@ -127,7 +125,7 @@ export default function AbaInfoPet({
     [portesList, form.porte],
   );
 
-  // --- Callbacks memoizados para evitar re-renders desnecessários nos filhos ---
+  // --- Handlers memoizados ---
   const handleSelecionarDono = useCallback(
     (item: any) => {
       updateField("dono_id", item.id);
@@ -144,6 +142,7 @@ export default function AbaInfoPet({
   const handleAbrirModalDono = useCallback(() => {
     abrirModal({
       titulo: "Selecionar Dono",
+      tipoModal: "DONO",
       itemIcon: require("../../../../assets/animais/iconDono.png"),
       lista: [],
       aoSelecionar: handleSelecionarDono,
@@ -163,11 +162,13 @@ export default function AbaInfoPet({
     updateField("raca_nome", "");
   }, [updateField]);
 
+  // racasList vem do pai — sempre atualizada pela paginação/busca do modal
   const handleAbrirModalRaca = useCallback(() => {
     abrirModal({
       titulo: "Selecionar Raça",
+      tipoModal: "RACA",
       itemIcon: require("../../../../assets/animais/iconPata.png"),
-      lista: racasList ?? [],
+      lista: racasList,
       aoSelecionar: handleSelecionarRaca,
     });
   }, [abrirModal, racasList, handleSelecionarRaca]);
@@ -181,13 +182,14 @@ export default function AbaInfoPet({
     [updateField],
   );
 
-  const handleAbrirCadastroRaca = useCallback(() => {
-    setRacaModalAberto(true);
-  }, []);
-
-  const handleFecharCadastroRaca = useCallback(() => {
-    setRacaModalAberto(false);
-  }, []);
+  const handleAbrirCadastroRaca = useCallback(
+    () => setRacaModalAberto(true),
+    [],
+  );
+  const handleFecharCadastroRaca = useCallback(
+    () => setRacaModalAberto(false),
+    [],
+  );
 
   const renderEspecieItem = useCallback(
     (item: any) => (

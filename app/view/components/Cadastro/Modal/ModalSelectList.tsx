@@ -65,7 +65,6 @@ export default function ModalSelectList({
               setSearch={setSearch}
             />
           </View>
-
           <FlatList
             data={items}
             contentContainerStyle={s.listContent}
@@ -81,10 +80,9 @@ export default function ModalSelectList({
                     <Image source={iconSource} style={s.itemIconRow} />
                   )}
                   <Text style={s.itemText}>
-                    {ehPet ? `Nome: `: ""}{item.nome}
-                    {ehPet
-                      ? `${"\n"}Dono(a): ${item.nome_dono}`
-                      : null}
+                    {ehPet ? `Nome: ` : ""}
+                    {item.nome}
+                    {ehPet ? `${"\n"}Dono(a): ${item.nome_dono}` : null}
                   </Text>
                 </TouchableOpacity>
               );
@@ -199,11 +197,11 @@ const styles = (colors: ThemeColors) =>
       height: 30,
       marginRight: 12,
       resizeMode: "contain",
-      alignSelf: "center"
+      alignSelf: "center",
     },
     itemText: {
       fontSize: 16,
       color: colors.TEXT_PRIMARY,
-      alignSelf: "center"
+      alignSelf: "center",
     },
   });

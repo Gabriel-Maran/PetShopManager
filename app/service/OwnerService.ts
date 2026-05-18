@@ -35,8 +35,8 @@ class OwnerService {
       ativo,
     );
   }
-  countOwners() {
-    return ownerRepository.countOwners();
+  countOwners(search?: string) {
+    return ownerRepository.countOwners(search);
   }
 
   createOwner(owner: Owner) {

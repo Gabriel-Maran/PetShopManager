@@ -74,6 +74,8 @@ export default function ModalCadastroRaca({
 
     setLoading(true);
     try {
+      setLoading(true); // Garante que o loading inicia junto com a requisição
+
       const result = await createRaceService({
         especieId: especieSelecionada.id,
         nomeRaca,
@@ -86,8 +88,8 @@ export default function ModalCadastroRaca({
 
       onSuccess(result.id, nomeRaca.trim(), especieSelecionada.id);
       handleClose();
-    } catch {
-      showError("Ocorreu um erro inesperado. Tente novamente.");
+    } catch (e) {
+      showError(e instanceof Error ? e.message : "Ocorreu um erro inesperado.");
     } finally {
       setLoading(false);
     }
