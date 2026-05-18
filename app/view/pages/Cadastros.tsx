@@ -57,10 +57,10 @@ export default function Cadastros() {
   // Contagem total — recalcula ao trocar de aba
   useEffect(() => {
     const count = isOwnerSelected
-      ? ownerController.countOwners()
-      : petController.countPets();
+      ? ownerController.countOwners(search)
+      : petController.countPets(search);
     count.then(setTotal).catch(handleError);
-  }, [isOwnerSelected]);
+  }, [isOwnerSelected, search]);
 
   // Busca — só dispara quando search muda (botão) ou ao trocar página/aba
   useEffect(() => {
