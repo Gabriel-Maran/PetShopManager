@@ -36,6 +36,19 @@ export default function InputInfo({
 }) {
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
+  function formatMoneyValue(text: string) {
+    let formattedText = text.replace(/[^0-9,]/g, "");
+    const parts = formattedText.split(",");
+
+    if (parts.length > 2) {
+      const firstPart = parts[0];
+      const restPart = parts.slice(1).join("");
+
+      formattedText = `${firstPart},${restPart}`;
+    }
+
+    return formattedText;
+  }
   return (
     <InputWrapper
       image={image}
@@ -46,10 +59,16 @@ export default function InputInfo({
         style={s.input}
         placeholder={placeHolder}
         placeholderTextColor={colors.TEXT_PLACEHOLDER}
-        onChangeText={(item) => setItem(item)}
+        onChangeText={(item) => {
+          if (tipoTeclado === "numeric") {
+            const valorAdc = formatMoneyValue(item);
+            setItem(valorAdc);
+            return;
+          }
+          setItem(item);
+        }}
         value={item ?? undefined}
         multiline={variasLinhas}
-        
         editable={digitavel}
         keyboardType={tipoTeclado}
         maxLength={maximoCaracteres}

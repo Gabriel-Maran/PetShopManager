@@ -35,6 +35,7 @@ export interface FormInfoPet {
 }
 
 interface AbaInfoPetProps {
+  visible: boolean;
   isEditavel?: boolean;
   isNewPet: boolean;
   form: FormInfoPet;
@@ -48,6 +49,7 @@ interface AbaInfoPetProps {
 }
 
 export default function AbaInfoPet({
+  visible = true,
   isEditavel = true,
   isNewPet,
   form,
@@ -220,6 +222,10 @@ export default function AbaInfoPet({
   );
 
   const labelExtractorPorte = useCallback((item: any) => item.nome, []);
+
+  if (visible == false) {
+    return;
+  }
 
   return (
     <>

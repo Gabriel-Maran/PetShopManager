@@ -70,6 +70,22 @@ class PetService {
     return petRepository.updatePet(id, pet);
   }
 
+  updateRemarcacao(
+    id: number,
+    remarcacaoAtiva: number,
+    pacoteRemarcacao: number | null,
+    dataInicioPacote: number | null,
+    valorPacote: string | null,
+  ) {
+    return petRepository.updateRemarcacao(
+      id,
+      remarcacaoAtiva,
+      pacoteRemarcacao,
+      dataInicioPacote,
+      valorPacote,
+    );
+  }
+
   deletePet(id: number) {
     return petRepository.deletePet(id);
   }

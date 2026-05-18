@@ -84,6 +84,7 @@ export default function NewOrEditPet() {
     observacoes: params?.pet?.observacoes ?? "",
     servicoPadrao: params?.pet?.servico_padrao ?? TipoServico.Banho,
     remarcAtiva: Boolean(params?.pet?.remarcacao_ativa ?? false),
+    valorPacote: params?.pet?.valor_pacote ?? "",
     porte:
       params?.pet?.porte && params.pet?.porte in PorteAnimal
         ? (params.pet?.porte as PorteAnimal)
@@ -133,6 +134,7 @@ export default function NewOrEditPet() {
       .isRemarcacaoAtiva(form.remarcAtiva ? 1 : 0)
       .withPacote(form.pacoteRemarcacao ?? undefined)
       .withInicioPacote(form.dataInicioPacote ?? undefined)
+      .withValorPacote(form.valorPacote ?? undefined) // Adicionado aqui
       .build();
 
     try {
@@ -268,7 +270,7 @@ export default function NewOrEditPet() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={s.ctnCadastro}>
-          {isCadastroPetSelecte ? (
+          <View style={{ display: isCadastroPetSelecte ? "flex" : "none" }}>
             <AbaInfoPet
               isEditavel={!isViewing}
               form={form}
@@ -279,33 +281,37 @@ export default function NewOrEditPet() {
               racasList={racasList ?? []}
               abrirModal={abrirModal}
               salvarPet={salvarPet}
+              visible={isCadastroPetSelecte}
             />
-          ) : (
+          </View>
+
+          <View style={{ display: !isCadastroPetSelecte ? "flex" : "none" }}>
             <AbaAgendamentoPet
               isEditavel={!isViewing}
               form={form}
               updateField={updateField as (field: string, value: any) => void}
+              visible={!isCadastroPetSelecte}
             />
+          </View>
+          <Text>{form.raca_nome}</Text>
+          {!isViewing && (
+            <View style={s.ctnBtnSalvar}>
+              <TouchableOpacity
+                style={[s.btnSalvar, isSalvando && s.btnSalvarDisabled]}
+                onPress={salvarPet}
+                disabled={isSalvando}
+              >
+                {isSalvando ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <Text style={s.txtSalvar}>
+                    {isEditing ? "Salvar alterações" : "Salvar"}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
           )}
         </View>
-
-        {!isViewing && (
-          <View style={s.ctnBtnSalvar}>
-            <TouchableOpacity
-              style={[s.btnSalvar, isSalvando && s.btnSalvarDisabled]}
-              onPress={salvarPet}
-              disabled={isSalvando}
-            >
-              {isSalvando ? (
-                <ActivityIndicator color="#FFF" />
-              ) : (
-                <Text style={s.txtSalvar}>
-                  {isEditing ? "Salvar alterações" : "Salvar"}
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        )}
       </ScrollView>
 
       <ModalSelectList
@@ -342,22 +348,19 @@ const styles = (colors: ThemeColors) =>
       paddingVertical: 10,
     },
     ctnBtnSalvar: {
-      padding: 20,
-      width: "100%",
+      marginTop: 15,
     },
     btnSalvar: {
+      paddingVertical: 20,
+      paddingHorizontal: 75,
       backgroundColor: colors.PRIMARY_VARIANT,
-      padding: 15,
-      borderRadius: 10,
-      alignItems: "center",
-      justifyContent: "center",
+      borderRadius: 15,
     },
     btnSalvarDisabled: {
       opacity: 0.6,
     },
     txtSalvar: {
-      color: "#FFF",
-      fontSize: 16,
-      fontWeight: "bold",
+      color: colors.BACKGROUND,
+      textAlign: "center",
     },
   });

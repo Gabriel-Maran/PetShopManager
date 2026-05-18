@@ -7,16 +7,15 @@ import {
 } from "../../../Themes/ThemeProvider";
 import InputSelect from "../../InputSelect";
 import Toggle from "../Botões/Toggle";
-import Mascarar from "../../../../utils/mascarar";
 import {
   DataNumberPraStringHifen,
   DataStringPraNumber,
 } from "../../../../utils/formatadores/converterData";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import InputDataPicker from "../Botões/DataPicker/InputDataPicker";
 import { hoje } from "../../../../utils/dataPicker/dataPickerAux";
+import InputInfo from "../InputInfo";
 
-// Correção 1: Filtra apenas os valores numéricos do enum
 const tiposServicoList = Object.values(TipoServico).map((v) => ({
   id: v,
   nome: v,
@@ -34,6 +33,7 @@ const pacotesRemarcacaoList = Object.values(PacoteRemarcacao)
 
 interface AbaAgendamentoPetProps {
   form: {
+    valorPacote: string;
     servicoPadrao: TipoServico;
     remarcAtiva: boolean;
     pacoteRemarcacao?: PacoteRemarcacao;
@@ -41,9 +41,11 @@ interface AbaAgendamentoPetProps {
   };
   updateField: (field: string, value: any) => void;
   isEditavel: boolean;
+  visible: boolean;
 }
 
 export default function AbaAgendamentoPet({
+  visible = true,
   form,
   updateField,
   isEditavel = true,
@@ -51,10 +53,26 @@ export default function AbaAgendamentoPet({
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
 
+  // Controla se é a primeira renderização para não limpar dados ao abrir edição
+  const isMounted = useRef(false);
+
   useEffect(() => {
-    form.pacoteRemarcacao = undefined;
-    form.dataInicioPacote = undefined;
+    // Pula o primeiro render — evita apagar pacoteRemarcacao e dataInicioPacote
+    // carregados do pet existente ao entrar na tela de edição
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
+
+    // Só limpa quando o usuário REALMENTE altera a flag de remarcação
+    updateField("pacoteRemarcacao", undefined);
+    updateField("dataInicioPacote", undefined);
+    updateField("valorPacote", "");
   }, [form.remarcAtiva]);
+
+  if (visible == false) {
+    return;
+  }
 
   return (
     <View style={s.inputs}>
@@ -104,6 +122,17 @@ export default function AbaAgendamentoPet({
             )}
             hasBorderBottom={true}
             isEditavel={isEditavel}
+          />
+          <InputInfo
+            image={require("../../../../assets/outros/valor.png")}
+            item={form.valorPacote}
+            setItem={(item) => updateField("valorPacote", item)}
+            titleName="Valor"
+            variasLinhas={false}
+            tipoTeclado="numeric"
+            maximoCaracteres={7}
+            hasBorderBottom={true}
+            placeHolder="Digite o valor..."
           />
           <InputDataPicker
             image={require("../../../../assets/nav_bar/calendario.png")}

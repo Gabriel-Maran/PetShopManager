@@ -113,7 +113,6 @@ class PetRepository {
     );
   }
 
-  // CORRIGIDO: usa nome_normalizado para consistência com as queries de busca
   async countPets(search?: string, ativo: number = 1): Promise<number> {
     const db = await getDatabase();
 
@@ -141,8 +140,8 @@ class PetRepository {
     await db.runAsync(
       `INSERT INTO pets (
         nome, nome_normalizado, especie, porte, raca, observacoes,
-        dono_id, servico_padrao, remarcacao_ativa, pacote_remarcacao, data_inicio_pacote
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        dono_id, servico_padrao, remarcacao_ativa, pacote_remarcacao, data_inicio_pacote, valor_pacote
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         pet.nome,
         nome_normalizado,
@@ -155,6 +154,7 @@ class PetRepository {
         pet.remarcacao_ativa ?? 0,
         pet.pacote_remarcacao ?? null,
         pet.data_inicio_pacote ?? null,
+        pet.valor_pacote ?? null,
       ],
     );
   }
@@ -166,7 +166,7 @@ class PetRepository {
       `UPDATE pets SET
         nome = ?, nome_normalizado = ?, especie = ?, porte = ?, raca = ?,
         observacoes = ?, dono_id = ?, servico_padrao = ?, remarcacao_ativa = ?,
-        pacote_remarcacao = ?, data_inicio_pacote = ?
+        pacote_remarcacao = ?, data_inicio_pacote = ?, valor_pacote = ?
        WHERE id = ?`,
       [
         pet.nome,
@@ -180,6 +180,7 @@ class PetRepository {
         pet.remarcacao_ativa ?? 0,
         pet.pacote_remarcacao ?? null,
         pet.data_inicio_pacote ?? null,
+        pet.valor_pacote ?? null,
         id,
       ],
     );
@@ -190,15 +191,23 @@ class PetRepository {
     remarcacaoAtiva: number,
     pacoteRemarcacao: number | null,
     dataInicioPacote: number | null,
+    valorPacote: string | null,
   ): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(
       `UPDATE pets SET
         remarcacao_ativa = ?,
         pacote_remarcacao = ?,
-        data_inicio_pacote = ?
+        data_inicio_pacote = ?,
+        valor_pacote = ?
        WHERE id = ?`,
-      [remarcacaoAtiva, pacoteRemarcacao ?? null, dataInicioPacote ?? null, id],
+      [
+        remarcacaoAtiva,
+        pacoteRemarcacao ?? null,
+        dataInicioPacote ?? null,
+        valorPacote ?? null,
+        id,
+      ],
     );
   }
 

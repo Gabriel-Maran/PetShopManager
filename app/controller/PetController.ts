@@ -67,8 +67,6 @@ class PetController {
     return petService.getPetsByOwnerId(ownerId);
   }
 
-  // ATUALIZADO: aceita search opcional para contar resultados filtrados
-  // Necessário para a paginação do modal de seleção de pet funcionar
   countPets(search?: string): Promise<number> {
     return petService.countPets(search);
   }
@@ -98,6 +96,23 @@ class PetController {
     await this.getPetById(id);
     await ownerController.getOwnerById(petSalvar.dono_id);
     await petService.updatePet(id, petSalvar);
+  }
+
+  async updateRemarcacao(
+    id: number,
+    remarcacaoAtiva: number,
+    pacoteRemarcacao: number | null,
+    dataInicioPacote: number | null,
+    valorPacote: string | null,
+  ): Promise<void> {
+    await this.getPetById(id);
+    await petService.updateRemarcacao(
+      id,
+      remarcacaoAtiva,
+      pacoteRemarcacao,
+      dataInicioPacote,
+      valorPacote,
+    );
   }
 
   async deletePet(id: number): Promise<void> {

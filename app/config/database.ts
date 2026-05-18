@@ -125,6 +125,7 @@ export async function initDatabase(): Promise<void> {
       servico_padrao             TEXT    NOT NULL DEFAULT 'Banho',
       remarcacao_ativa           INTEGER NOT NULL DEFAULT 0,
       pacote_remarcacao          INTEGER CHECK (pacote_remarcacao IN (2, 4)),
+      valor_pacote               TEXT DEFAULT '0,00',
       data_inicio_pacote         INTEGER,
       current_ultima_visita_data INTEGER,
       ultimo_visita_data_auto    INTEGER,

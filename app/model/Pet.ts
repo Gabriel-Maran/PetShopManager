@@ -10,6 +10,7 @@ export interface Pet {
   observacoes?: string | null;
   dono_id: number;
   servico_padrao: TipoServico;
+  valor_pacote?: string | null; // Tornou-se opcional/nullable para consistência com o repositório
   remarcacao_ativa: number; // 0 ou 1
   pacote_remarcacao?: PacoteRemarcacao | null; // 2 ou 4 conforme o SQL
   data_inicio_pacote?: number | null; //formato YYYYMMDD
@@ -36,6 +37,7 @@ export class PetBuilder {
       dono_id: 0,
       servico_padrao: TipoServico.BanhoETosa,
       remarcacao_ativa: 0,
+      valor_pacote: null,
       is_ativo: 1,
     };
   }
@@ -75,13 +77,18 @@ export class PetBuilder {
     return this;
   }
 
-  public withPacote(tipo: PacoteRemarcacao | undefined): this {
+  public withPacote(tipo: PacoteRemarcacao | null | undefined): this {
     this.props.pacote_remarcacao = tipo;
     return this;
   }
 
-  public withInicioPacote(dataInicio: number | undefined): this {
+  public withInicioPacote(dataInicio: number | null | undefined): this {
     this.props.data_inicio_pacote = dataInicio;
+    return this;
+  }
+
+  public withValorPacote(valor: string | null | undefined): this {
+    this.props.valor_pacote = valor ?? null;
     return this;
   }
 
