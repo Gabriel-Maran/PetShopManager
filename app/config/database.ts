@@ -238,21 +238,6 @@ export async function initDatabase(): Promise<void> {
     (1, 'Border Collie', 'border collie'),
     (1, 'Basset Hound', 'basset hound'),
     (1, 'Chow Chow', 'chow chow'),
-    
-    (1, 'a', 'a'),
-    (1, 'ab', 'ab'),
-    (1, 'ac', 'ac'),
-    (1, 'ad', 'ad'),
-    (1, 'ae', 'ae'),
-    (1, 'af', 'af'),
-    (1, 'ag', 'ag'),
-    (1, 'ah', 'ah'),
-    (1, 'ai', 'ai'),
-    (1, 'aj', 'aj'),
-    (1, 'ak', 'ak'),
-    (1, 'al', 'al'),
-    (1, 'am', 'am'),
-
     (2, 'Vira-lata (SRD)', 'vira-lata srd'),
     (2, 'Siamês', 'siames'),
     (2, 'Persa', 'persa'),
@@ -283,6 +268,7 @@ export async function initDatabase(): Promise<void> {
   //   1. Se o limite do mês foi atingido, calcula a data saltando para o próximo mês (no mesmo dia da semana)
   //   2. Se ainda há saldo no mês, apenas soma o gap (7 ou 14 dias)
   //   3. Atualiza ultimo_visita_data_auto para o novo MAX
+  //   4. Valor por atendimento = valor_pacote / pacote_remarcacao
   const SQL_TRIGGER_REMARCACAO_AUTOMATICA = `
     CREATE TRIGGER IF NOT EXISTS trg_remarcacao_automatica
     AFTER UPDATE OF concluido ON appointments
@@ -290,7 +276,7 @@ export async function initDatabase(): Promise<void> {
     WHEN NEW.concluido = 1
       AND NEW.is_auto_agen = 1
     BEGIN
-      INSERT INTO appointments (pet_id, servico, data, entregar_pet, observacao, is_auto_agen)
+      INSERT INTO appointments (pet_id, servico, data, entregar_pet, observacao, is_auto_agen, valor)
       SELECT
         NEW.pet_id,
         NEW.servico,
@@ -334,7 +320,11 @@ export async function initDatabase(): Promise<void> {
         END) AS INTEGER),
         NEW.entregar_pet,
         NEW.observacao,
-        1
+        1,
+        -- Valor por atendimento = valor_pacote ÷ pacote_remarcacao
+        replace(printf('%.2f',
+          CAST(replace(p.valor_pacote, ',', '.') AS REAL) / p.pacote_remarcacao
+        ), '.', ',')
       FROM pets p
       WHERE p.id = NEW.pet_id
         AND p.is_ativo = 1
@@ -361,13 +351,14 @@ export async function initDatabase(): Promise<void> {
   //   - Gera agendamentos passados e futuros
   //   - Grava agendamentos ANTERIORES a hoje com is_auto_agen = 0
   //   - Grava agendamentos a partir de HOJE com is_auto_agen = 1
+  //   - Valor por atendimento = valor_pacote ÷ pacote_remarcacao
   const SQL_TRIGGER_PET_REMARCACAO_INSERT = `
     CREATE TRIGGER IF NOT EXISTS trg_pet_remarcacao_insert
     AFTER INSERT ON pets
     FOR EACH ROW
     WHEN NEW.remarcacao_ativa = 1 AND NEW.pacote_remarcacao IS NOT NULL
     BEGIN
-      INSERT INTO appointments (pet_id, servico, data, entregar_pet, is_auto_agen)
+      INSERT INTO appointments (pet_id, servico, data, entregar_pet, is_auto_agen, valor)
       WITH RECURSIVE agenda(data_int, mes_atual, contagem_mes, dia_semana_base) AS (
         -- Base: Primeira visita é EXATAMENTE na data_inicio_pacote selecionada
         SELECT
@@ -453,7 +444,11 @@ export async function initDatabase(): Promise<void> {
         CASE 
           WHEN data_int < CAST(strftime('%Y%m%d', 'now') AS INTEGER) THEN 0 
           ELSE 1 
-        END
+        END,
+        -- Valor por atendimento = valor_pacote ÷ pacote_remarcacao
+        replace(printf('%.2f',
+          CAST(replace(NEW.valor_pacote, ',', '.') AS REAL) / NEW.pacote_remarcacao
+        ), '.', ',')
       FROM agenda;
   
       -- Salva a última data gerada em ultimo_visita_data_auto (considerando concluido = 0)
@@ -485,7 +480,7 @@ export async function initDatabase(): Promise<void> {
         AND is_auto_agen = 1
         AND concluido = 0;
   
-      INSERT INTO appointments (pet_id, servico, data, entregar_pet, is_auto_agen)
+      INSERT INTO appointments (pet_id, servico, data, entregar_pet, is_auto_agen, valor)
       WITH RECURSIVE agenda(data_int, mes_atual, contagem_mes, dia_semana_base) AS (
         -- Base: Primeira visita na data_inicio_pacote
         SELECT
@@ -571,7 +566,11 @@ export async function initDatabase(): Promise<void> {
         CASE 
           WHEN data_int < CAST(strftime('%Y%m%d', 'now') AS INTEGER) THEN 0 
           ELSE 1 
-        END
+        END,
+        -- Valor por atendimento = valor_pacote ÷ pacote_remarcacao
+        replace(printf('%.2f',
+          CAST(replace(NEW.valor_pacote, ',', '.') AS REAL) / NEW.pacote_remarcacao
+        ), '.', ',')
       FROM agenda
       WHERE NOT EXISTS (
           SELECT 1 FROM appointments a 
