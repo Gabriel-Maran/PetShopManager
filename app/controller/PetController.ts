@@ -1,9 +1,89 @@
 import { petService } from "../service/PetService";
-import { ORDER } from "../config/consts";
+import {
+  ORDER,
+  PacoteRemarcacao,
+  PorteAnimal,
+  TipoServico,
+} from "../config/consts";
 import { Pet, PetWithSpecieRaceAndOwner } from "../model/Pet";
 import { ownerController } from "./OwnerController";
 
 class PetController {
+  // ─── Helpers de validação ────────────────────────────────────────────────
+
+  private validatePorte(porte: unknown): void {
+    if (!Object.values(PorteAnimal).includes(porte as PorteAnimal)) {
+      throw new Error(
+        `Porte inválido. Valores aceitos: ${Object.values(PorteAnimal).join(", ")}`,
+      );
+    }
+  }
+
+  private validateServicoPadrao(servico: unknown): void {
+    if (!Object.values(TipoServico).includes(servico as TipoServico)) {
+      throw new Error(
+        `Serviço padrão inválido. Valores aceitos: ${Object.values(TipoServico).join(", ")}`,
+      );
+    }
+  }
+
+  private validateFlag(value: unknown, campo: string): void {
+    if (value !== 0 && value !== 1) {
+      throw new Error(`${campo} deve ser 0 ou 1`);
+    }
+  }
+
+  private validateRemarcacaoFields(pet: Partial<Pet>): void {
+    if (pet.remarcacao_ativa !== 1) return;
+
+    const pacoteValido = Object.values(PacoteRemarcacao).includes(
+      pet.pacote_remarcacao as PacoteRemarcacao,
+    );
+    if (!pacoteValido) {
+      throw new Error(
+        `Pacote de remarcação inválido. Valores aceitos: ${Object.values(PacoteRemarcacao).join(", ")}`,
+      );
+    }
+
+    if (!pet.valor_pacote?.trim()) {
+      throw new Error(
+        "Valor do pacote é obrigatório quando a remarcação está ativa",
+      );
+    }
+
+    if (
+      !pet.data_inicio_pacote ||
+      !/^\d{8}$/.test(String(pet.data_inicio_pacote))
+    ) {
+      console.log(pet.data_inicio_pacote);
+      throw new Error(
+        "Data de início do pacote é obrigatória e deve estar no formato YYYYMMDD",
+      );
+    }
+  }
+
+  private validateBaseFields(pet: Partial<Pet>): void {
+    if (!pet.nome?.trim()) {
+      throw new Error("Nome é obrigatório");
+    }
+
+    if (!pet.especie || pet.especie <= 0) {
+      throw new Error("Espécie é obrigatória e deve ser um valor válido");
+    }
+
+    if (!pet.dono_id || pet.dono_id <= 0) {
+      throw new Error("Dono é obrigatório e deve ser um valor válido");
+    }
+
+    this.validatePorte(pet.porte);
+
+    if (!pet.raca || pet.raca <= 0) {
+      throw new Error("Raça é obrigatória");
+    }
+  }
+
+  // ─── Consultas ───────────────────────────────────────────────────────────
+
   async getPetById(id: number): Promise<Pet> {
     const pet = await petService.getPetById(id);
     if (!pet) throw new Error("Pet não encontrado");
@@ -24,6 +104,7 @@ class PetController {
     order: ORDER,
     ativo: number = 1,
   ): Promise<PetWithSpecieRaceAndOwner[]> {
+    this.validateFlag(ativo, "Filtro ativo");
     return petService.getAllPetsPagedWithSpecieRaceAndOwner(
       page,
       limit,
@@ -51,6 +132,7 @@ class PetController {
     order: ORDER = ORDER.DESC,
     ativo: number = 1,
   ): Promise<PetWithSpecieRaceAndOwner[]> {
+    this.validateFlag(ativo, "Filtro ativo");
     if (!query.trim()) {
       return this.getAllPetsPagedWithSpecieAndRace(page, limit, order, ativo);
     }
@@ -71,28 +153,44 @@ class PetController {
     return petService.countPets(search);
   }
 
+  // ─── Mutações ────────────────────────────────────────────────────────────
+
   async createPet(petSalvar: Pet): Promise<void> {
-    if (
-      !petSalvar.nome?.trim() ||
-      !petSalvar.especie ||
-      !petSalvar.dono_id ||
-      !petSalvar.porte
-    ) {
-      throw new Error("Nome, espécie, dono e porte são obrigatórios");
-    }
+    // Campos base obrigatórios (raca é opcional conforme a interface)
+    this.validateBaseFields(petSalvar);
+
+    // servico_padrao é obrigatório na interface
+    this.validateServicoPadrao(petSalvar.servico_padrao);
+
+    // remarcacao_ativa deve ser 0 ou 1
+    this.validateFlag(petSalvar.remarcacao_ativa, "Remarcação ativa");
+
+    // is_ativo deve ser 0 ou 1
+    this.validateFlag(petSalvar.is_ativo, "Ativo");
+
+    // Campos do pacote de remarcação quando ativo
+    this.validateRemarcacaoFields(petSalvar);
+
     await ownerController.getOwnerById(petSalvar.dono_id);
     await petService.createPet(petSalvar);
   }
 
   async updatePet(id: number, petSalvar: Pet): Promise<void> {
-    if (
-      !petSalvar.nome?.trim() ||
-      !petSalvar.especie ||
-      !petSalvar.dono_id ||
-      !petSalvar.porte
-    ) {
-      throw new Error("Nome, espécie, dono e porte são obrigatórios");
-    }
+    // raca não é obrigatória na atualização (opcional na interface)
+    this.validateBaseFields(petSalvar);
+
+    // servico_padrao é obrigatório na interface
+    this.validateServicoPadrao(petSalvar.servico_padrao);
+
+    // remarcacao_ativa deve ser 0 ou 1
+    this.validateFlag(petSalvar.remarcacao_ativa, "Remarcação ativa");
+
+    // is_ativo deve ser 0 ou 1
+    this.validateFlag(petSalvar.is_ativo, "Ativo");
+
+    // Campos do pacote quando remarcação ativa
+    this.validateRemarcacaoFields(petSalvar);
+
     await this.getPetById(id);
     await ownerController.getOwnerById(petSalvar.dono_id);
     await petService.updatePet(id, petSalvar);
@@ -101,10 +199,20 @@ class PetController {
   async updateRemarcacao(
     id: number,
     remarcacaoAtiva: number,
-    pacoteRemarcacao: number | null,
+    pacoteRemarcacao: PacoteRemarcacao | null,
     dataInicioPacote: number | null,
     valorPacote: string | null,
   ): Promise<void> {
+    this.validateFlag(remarcacaoAtiva, "Remarcação ativa");
+
+    // Reutiliza validateRemarcacaoFields com um objeto parcial
+    this.validateRemarcacaoFields({
+      remarcacao_ativa: remarcacaoAtiva,
+      pacote_remarcacao: pacoteRemarcacao,
+      data_inicio_pacote: dataInicioPacote,
+      valor_pacote: valorPacote,
+    });
+
     await this.getPetById(id);
     await petService.updateRemarcacao(
       id,

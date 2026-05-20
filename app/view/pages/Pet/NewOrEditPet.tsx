@@ -45,6 +45,8 @@ import AbaInfoPet, {
   AbrirModalConfig,
 } from "../../components/Cadastro/Tabs/AbaInfoPet";
 import AbaAgendamentoPet from "../../components/Cadastro/Tabs/AbaAgendamentoPet";
+import { hoje } from "../../../utils/dataPicker/dataPickerAux";
+import { DataStringPraNumber } from "../../../utils/formatadores/converterData";
 
 const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
   id: key,
@@ -94,7 +96,8 @@ export default function NewOrEditPet() {
       params.pet?.pacote_remarcacao in PacoteRemarcacao
         ? (params.pet?.pacote_remarcacao as PacoteRemarcacao)
         : undefined,
-    dataInicioPacote: params?.pet?.data_inicio_pacote ?? undefined,
+    dataInicioPacote:
+      params?.pet?.data_inicio_pacote ?? DataStringPraNumber(hoje(), "-"),
   });
 
   // ─── Fonte única de dados: um único hook para raças e espécies ───────────────
@@ -133,7 +136,9 @@ export default function NewOrEditPet() {
       .withServicoPadrao(form.servicoPadrao)
       .isRemarcacaoAtiva(form.remarcAtiva ? 1 : 0)
       .withPacote(form.pacoteRemarcacao ?? undefined)
-      .withInicioPacote(form.dataInicioPacote ?? undefined)
+      .withInicioPacote(
+        form.dataInicioPacote ?? DataStringPraNumber(hoje(), "-"),
+      )
       .withValorPacote(form.valorPacote ?? undefined) // Adicionado aqui
       .build();
 
@@ -293,7 +298,6 @@ export default function NewOrEditPet() {
               visible={!isCadastroPetSelecte}
             />
           </View>
-          <Text>{form.raca_nome}</Text>
           {!isViewing && (
             <View style={s.ctnBtnSalvar}>
               <TouchableOpacity

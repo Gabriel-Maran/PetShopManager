@@ -18,7 +18,7 @@ export default function InputDataPicker({
 }: {
   isEditavel: boolean;
   image: ImageSourcePropType;
-  item: string | null;
+  item: string | null | undefined;
   setItem: (item: any) => void;
   titleName: string;
   hasBorderBottom?: boolean;
