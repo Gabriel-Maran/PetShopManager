@@ -14,6 +14,7 @@ export interface Pet {
   remarcacao_ativa: number; // 0 ou 1
   pacote_remarcacao?: PacoteRemarcacao | null; // 2 ou 4 conforme o SQL
   data_inicio_pacote?: number | null; //formato YYYYMMDD
+  horario_padrao?: string | null;
   current_ultima_visita_data?: number | null; //formato YYYYMMDD
   ultimo_visita_data_auto?: number | null; //formato YYYYMMDD
   is_ativo: number; // 0 ou 1
@@ -89,6 +90,11 @@ export class PetBuilder {
 
   public withValorPacote(valor: string | null | undefined): this {
     this.props.valor_pacote = valor ?? null;
+    return this;
+  }
+
+  public withHorarioPadrao(valor: string | null | undefined): this {
+    this.props.horario_padrao = valor;
     return this;
   }
 

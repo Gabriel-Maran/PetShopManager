@@ -139,9 +139,20 @@ class PetRepository {
     const nome_normalizado = normalizeForSearch(pet.nome);
     await db.runAsync(
       `INSERT INTO pets (
-        nome, nome_normalizado, especie, porte, raca, observacoes,
-        dono_id, servico_padrao, remarcacao_ativa, pacote_remarcacao, data_inicio_pacote, valor_pacote
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        nome, 
+        nome_normalizado, 
+        especie, 
+        porte, 
+        raca, 
+        observacoes,
+        dono_id, 
+        servico_padrao, 
+        remarcacao_ativa, 
+        pacote_remarcacao, 
+        data_inicio_pacote, 
+        horario_padrao,
+        valor_pacote
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         pet.nome,
         nome_normalizado,
@@ -154,6 +165,7 @@ class PetRepository {
         pet.remarcacao_ativa ?? 0,
         pet.pacote_remarcacao ?? null,
         pet.data_inicio_pacote ?? null,
+        pet.horario_padrao ?? null,
         pet.valor_pacote ?? null,
       ],
     );
@@ -164,9 +176,19 @@ class PetRepository {
     const nome_normalizado = normalizeForSearch(pet.nome);
     await db.runAsync(
       `UPDATE pets SET
-        nome = ?, nome_normalizado = ?, especie = ?, porte = ?, raca = ?,
-        observacoes = ?, dono_id = ?, servico_padrao = ?, remarcacao_ativa = ?,
-        pacote_remarcacao = ?, data_inicio_pacote = ?, valor_pacote = ?
+        nome = ?, 
+        nome_normalizado = ?, 
+        especie = ?, 
+        porte = ?, 
+        raca = ?,
+        observacoes = ?, 
+        dono_id = ?, 
+        servico_padrao = ?, 
+        remarcacao_ativa = ?,
+        pacote_remarcacao = ?, 
+        data_inicio_pacote = ?,
+        horario_padrao = ?,
+        valor_pacote = ?
        WHERE id = ?`,
       [
         pet.nome,
@@ -180,6 +202,7 @@ class PetRepository {
         pet.remarcacao_ativa ?? 0,
         pet.pacote_remarcacao ?? null,
         pet.data_inicio_pacote ?? null,
+        pet.horario_padrao ?? null,
         pet.valor_pacote ?? null,
         id,
       ],

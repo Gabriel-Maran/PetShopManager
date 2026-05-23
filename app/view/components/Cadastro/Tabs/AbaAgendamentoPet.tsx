@@ -1,20 +1,25 @@
 import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef } from "react";
+
 import { PacoteRemarcacao, TipoServico } from "../../../../config/consts";
 import {
   ThemeColors,
   useTheme,
   useThemedStyles,
 } from "../../../Themes/ThemeProvider";
-import InputSelect from "../../InputSelect";
-import Toggle from "../Botões/Toggle";
+
 import {
   DataNumberPraStringHifen,
   DataStringPraNumber,
 } from "../../../../utils/formatadores/converterData";
-import { useEffect, useRef } from "react";
-import InputDataPicker from "../Botões/DataPicker/InputDataPicker";
+import { mascararHorario } from "../../../../utils/mascarar";
 import { hoje } from "../../../../utils/dataPicker/dataPickerAux";
+
+import InputDataPicker from "../Botões/DataPicker/InputDataPicker";
 import InputInfo from "../InputInfo";
+import InputSelect from "../../InputSelect";
+import Toggle from "../Botões/Toggle";
+
 
 const tiposServicoList = Object.values(TipoServico).map((v) => ({
   id: v,
@@ -38,6 +43,7 @@ interface AbaAgendamentoPetProps {
     remarcAtiva: boolean;
     pacoteRemarcacao?: PacoteRemarcacao;
     dataInicioPacote?: number;
+    horario_padrao?: string;
   };
   updateField: (field: string, value: any) => void;
   isEditavel: boolean;
@@ -68,6 +74,7 @@ export default function AbaAgendamentoPet({
     updateField("pacoteRemarcacao", undefined);
     updateField("dataInicioPacote", undefined);
     updateField("valorPacote", "");
+    updateField("horario_padrao", "");
   }, [form.remarcAtiva]);
 
   if (visible == false) {
@@ -131,6 +138,7 @@ export default function AbaAgendamentoPet({
             variasLinhas={false}
             tipoTeclado="numeric"
             maximoCaracteres={7}
+            digitavel={isEditavel}
             hasBorderBottom={true}
             placeHolder="Digite o valor..."
           />
@@ -143,8 +151,20 @@ export default function AbaAgendamentoPet({
               updateField("dataInicioPacote", DataStringPraNumber(v, "-"));
             }}
             titleName={"Data do agendamento"}
-            hasBorderBottom={false}
             isEditavel={isEditavel}
+            hasBorderBottom={true}
+          />
+          <InputInfo
+            image={require("../../../../assets/outros/hora.png")}
+            item={form.horario_padrao || null}
+            setItem={(item) => updateField("horario_padrao", mascararHorario(item))}
+            titleName="Horário Padrão"
+            variasLinhas={false}
+            tipoTeclado="numeric"
+            maximoCaracteres={5}
+            digitavel={isEditavel}
+            hasBorderBottom={false}
+            placeHolder="Digite o horário..."
           />
         </>
       )}

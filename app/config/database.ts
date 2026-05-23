@@ -127,6 +127,7 @@ export async function initDatabase(): Promise<void> {
       pacote_remarcacao          INTEGER CHECK (pacote_remarcacao IN (2, 4)),
       valor_pacote               TEXT DEFAULT '0,00',
       data_inicio_pacote         INTEGER,
+      horario_padrao             TEXT DEFAULT '00:00',
       current_ultima_visita_data INTEGER,
       ultimo_visita_data_auto    INTEGER,
       is_ativo                   INTEGER NOT NULL DEFAULT 1,
@@ -276,7 +277,7 @@ export async function initDatabase(): Promise<void> {
     WHEN NEW.concluido = 1
       AND NEW.is_auto_agen = 1
     BEGIN
-      INSERT INTO appointments (pet_id, servico, data, entregar_pet, observacao, is_auto_agen, valor)
+      INSERT INTO appointments (pet_id, servico, data, hora, entregar_pet, observacao, is_auto_agen, valor)
       SELECT
         NEW.pet_id,
         NEW.servico,
@@ -318,6 +319,7 @@ export async function initDatabase(): Promise<void> {
               '+' || CASE p.pacote_remarcacao WHEN 2 THEN 14 ELSE 7 END || ' days'
             )
         END) AS INTEGER),
+        p.horario_padrao,
         NEW.entregar_pet,
         NEW.observacao,
         1,
@@ -358,7 +360,7 @@ export async function initDatabase(): Promise<void> {
     FOR EACH ROW
     WHEN NEW.remarcacao_ativa = 1 AND NEW.pacote_remarcacao IS NOT NULL
     BEGIN
-      INSERT INTO appointments (pet_id, servico, data, entregar_pet, is_auto_agen, valor)
+      INSERT INTO appointments (pet_id, servico, data, hora, entregar_pet, is_auto_agen, valor)
       WITH RECURSIVE agenda(data_int, mes_atual, contagem_mes, dia_semana_base) AS (
         -- Base: Primeira visita é EXATAMENTE na data_inicio_pacote selecionada
         SELECT
@@ -439,10 +441,17 @@ export async function initDatabase(): Promise<void> {
       SELECT 
         NEW.id, 
         NEW.servico_padrao, 
-        data_int, 
+        data_int,
+        NEW.horario_padrao,
         0, 
         CASE 
-          WHEN data_int < CAST(strftime('%Y%m%d', 'now') AS INTEGER) THEN 0 
+          WHEN 
+              data_int < CAST(strftime('%Y%m%d', 'now') AS INTEGER) 
+              OR (
+                data_int = CAST(strftime('%Y%m%d', 'now', 'localtime') AS INTEGER)
+                AND NEW.horario_padrao < strftime('%H:%M', 'now', 'localtime')
+              )
+          THEN 0 
           ELSE 1 
         END,
         -- Valor por atendimento = valor_pacote ÷ pacote_remarcacao
@@ -480,7 +489,7 @@ export async function initDatabase(): Promise<void> {
         AND is_auto_agen = 1
         AND concluido = 0;
   
-      INSERT INTO appointments (pet_id, servico, data, entregar_pet, is_auto_agen, valor)
+      INSERT INTO appointments (pet_id, servico, data, hora, entregar_pet, is_auto_agen, valor)
       WITH RECURSIVE agenda(data_int, mes_atual, contagem_mes, dia_semana_base) AS (
         -- Base: Primeira visita na data_inicio_pacote
         SELECT
@@ -561,7 +570,8 @@ export async function initDatabase(): Promise<void> {
       SELECT 
         NEW.id, 
         NEW.servico_padrao, 
-        data_int, 
+        data_int,
+        NEW.horario_padrao,
         0, 
         CASE 
           WHEN data_int < CAST(strftime('%Y%m%d', 'now') AS INTEGER) THEN 0 

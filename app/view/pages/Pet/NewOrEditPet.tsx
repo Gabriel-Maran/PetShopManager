@@ -19,34 +19,35 @@ import {
   PorteAnimalLabel,
   NewOrEditCadastros,
 } from "../../../config/consts";
-import { Pet, PetBuilder } from "../../../model/Pet";
+
+import { hoje } from "../../../utils/dataPicker/dataPickerAux";
+import { DataStringPraNumber } from "../../../utils/formatadores/converterData";
+
+import { useError } from "../../../hooks/useError";
+import { useScreen } from "../../../hooks/useScreen";
+import {
+  pegarDonosBanco,
+  pegarRacasBanco,
+} from "../../../hooks/buscaBanco/usePet";
+import useFormState from "../../../hooks/useFormState";
+
 import {
   ThemeColors,
   useTheme,
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
 
-import { useError } from "../../../hooks/useError";
-import { useScreen } from "../../../hooks/useScreen";
+import { PetBuilder } from "../../../model/Pet";
 import { petController } from "../../../controller/PetController";
 
 import TitleBar from "../../components/Cadastro/TitleBar";
 import DefaultHeader from "../../components/Header/DefaultHeader";
 import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
-
-import {
-  pegarDonosBanco,
-  pegarRacasBanco,
-} from "../../../hooks/buscaBanco/usePet";
-
-import useFormState from "../../../hooks/useFormState";
 import ItemSelect from "../../components/Cadastro/ItemSelect";
 import AbaInfoPet, {
   AbrirModalConfig,
 } from "../../components/Cadastro/Tabs/AbaInfoPet";
 import AbaAgendamentoPet from "../../components/Cadastro/Tabs/AbaAgendamentoPet";
-import { hoje } from "../../../utils/dataPicker/dataPickerAux";
-import { DataStringPraNumber } from "../../../utils/formatadores/converterData";
 
 const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
   id: key,
@@ -98,6 +99,7 @@ export default function NewOrEditPet() {
         : undefined,
     dataInicioPacote:
       params?.pet?.data_inicio_pacote ?? DataStringPraNumber(hoje(), "-"),
+    horario_padrao: params?.pet?.horario_padrao ?? "",
   });
 
   // ─── Fonte única de dados: um único hook para raças e espécies ───────────────
@@ -139,6 +141,7 @@ export default function NewOrEditPet() {
       .withInicioPacote(
         form.dataInicioPacote ?? DataStringPraNumber(hoje(), "-"),
       )
+      .withHorarioPadrao(form.horario_padrao || "00:00")
       .withValorPacote(form.valorPacote ?? undefined) // Adicionado aqui
       .build();
 
