@@ -12,6 +12,7 @@ export interface DatePickerInputProps {
   placeholder?: string;
   label?: string;
   onPress: () => void;
+  isEditavel?: boolean;
   error?: string;
 }
 
@@ -21,6 +22,7 @@ export function DatePickerInput({
   placeholder = "Selecione uma data",
   label,
   onPress,
+  isEditavel,
   error,
 }: DatePickerInputProps) {
   const { colors } = useTheme();
@@ -34,6 +36,7 @@ export function DatePickerInput({
         activeOpacity={0.7}
         style={[s.inputRow, error ? s.inputRowError : null]}
         onPress={onPress}
+        disabled={isEditavel}
         accessibilityRole="button"
         accessibilityLabel={label ?? placeholder}
       >

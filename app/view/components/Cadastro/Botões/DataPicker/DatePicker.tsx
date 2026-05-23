@@ -68,6 +68,7 @@ export function DatePicker({
         placeholder={placeholder}
         error={error}
         onPress={handleOpen}
+        isEditavel={!isEditavel}
       />
 
       <DatePickerModal
