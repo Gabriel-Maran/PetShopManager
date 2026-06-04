@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "PetShopManager",
+    "name": "PetShop Manager",
     "slug": "PetShopManager",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./app/assets/default_react/icon.png",
+    "icon": "./app/assets/logo/iconApp.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./app/assets/default_react/splash-icon.png",
+      "image": "./app/assets/logo/splashApp.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./app/assets/default_react/adaptive-icon.png",
+        "foregroundImage": "./app/assets/logo/foregroundImageApp.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -25,11 +25,9 @@
       "package": "com.gabriel98989898.PetShopManager"
     },
     "web": {
-      "favicon": "./app/assets/default_react/favicon.png"
+      "favicon": "./app/assets/logo/iconApp.png"
     },
-    "plugins": [
-      "expo-sqlite"
-    ],
+    "plugins": ["expo-sqlite"],
     "extra": {
       "eas": {
         "projectId": "f2085da0-5287-4f67-b88e-1acfe6b01a28"
