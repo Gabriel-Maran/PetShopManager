@@ -88,7 +88,7 @@ export default function ThemeToggle() {
         <Animated.Image
           source={require("../../assets/color_modes/afternoon.png")}
           style={[
-            StyleSheet.absoluteFillObject,
+            StyleSheet.absoluteFill,
             { opacity: afternoonOpacity },
             { width: 250, height: 100 },
           ]}
@@ -99,7 +99,7 @@ export default function ThemeToggle() {
         <Animated.Image
           source={require("../../assets/color_modes/night.png")}
           style={[
-            StyleSheet.absoluteFillObject,
+            StyleSheet.absoluteFill,
             { opacity: bgFadeAnim },
             { width: 180, height: 100 },
           ]}

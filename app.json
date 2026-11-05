@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./app/assets/logo/iconApp.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
       "image": "./app/assets/logo/splashApp.jpg",
       "resizeMode": "contain",
@@ -20,7 +19,6 @@
         "foregroundImage": "./app/assets/logo/foregroundImageApp.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.gabriel98989898.PetShopManager"
     },

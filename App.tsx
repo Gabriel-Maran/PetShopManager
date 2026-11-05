@@ -124,11 +124,7 @@ function AppInner() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.BACKGROUND }}>
-      <StatusBar
-        backgroundColor={colors.BACKGROUND}
-        barStyle={isDark ? "light-content" : "dark-content"}
-        translucent={false}
-      />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <View style={{ paddingTop: STATUS_BAR_HEIGHT, flex: 1 }}>
         <AppContent />
       </View>
