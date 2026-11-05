@@ -1,6 +1,11 @@
 // ThemeContext.tsx
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { StyleSheet, useColorScheme } from "react-native";
+import {
+  ImageStyle,
+  TextStyle,
+  useColorScheme,
+  ViewStyle,
+} from "react-native";
 import { configsController } from "../../controller/ConfigsController";
 
 //USE: const { colors, isDark, trocarTheme } = useTheme();
@@ -153,7 +158,10 @@ export const useTheme = () => {
   return ctx;
 };
 
-export function useThemedStyles<T extends StyleSheet.NamedStyles<T>>(
+// O React Native 0.88 deixou de exportar StyleSheet.NamedStyles.
+type NamedStyles<T> = { [P in keyof T]: ViewStyle | TextStyle | ImageStyle };
+
+export function useThemedStyles<T extends NamedStyles<T>>(
   factory: (colors: ThemeColors) => T,
 ): T {
   const { colors } = useTheme();

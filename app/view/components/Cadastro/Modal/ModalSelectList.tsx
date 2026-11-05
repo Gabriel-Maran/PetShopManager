@@ -66,7 +66,7 @@ export default function ModalSelectList({
             />
           </View>
           <FlatList
-            data={items}
+            data={items ?? []}
             contentContainerStyle={s.listContent}
             renderItem={({ item }) => {
               const iconSource =
