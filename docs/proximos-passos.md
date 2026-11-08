@@ -39,7 +39,11 @@ Falta, nesta ordem:
    - testar no aparelho as permissões do PR #3, com o roteiro no PR;
    - conferir o tamanho do APK, porque o pacote JavaScript foi de 1,72 MB para 2,7 MB;
    - responder `perguntas-em-aberto.md`.
-4. Parte 1 do plano: prints (MIDIA-1) e README (REPO-2). O script `typecheck` já entrou no PR #5.
+4. Parte 1 do plano:
+   - README (REPO-2), em andamento: a primeira versão traz só o que está confirmado no código;
+   - equipe, "quem fez o quê" e licença entram depois das perguntas 1 a 5;
+   - os prints (MIDIA-1) entram com os dados de exemplo;
+   - o script `typecheck` já entrou no PR #5.
 
 ## Onde paramos no plano
 

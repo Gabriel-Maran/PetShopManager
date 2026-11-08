@@ -4,17 +4,17 @@ Perguntas para o Gabriel, de 2026-11-05. Cada resposta vira uma linha datada em 
 
 ## Equipe e créditos
 
-1. **A equipe é você, João Pedro e Gustavo Grosbelli?** O GitHub mostra três colaboradores: `Gabriel-Maran`, `joaopug` (também como "João Pedro U G") e `Grosbelli12`. O README e o portfólio precisam dos nomes certos.
-2. **Qual foi a sua parte?** O histórico tem 274 commits: 152 das duas contas do João Pedro, 94 seus e 28 do Gustavo. Commit não mede trabalho, então a pergunta é o que cada um fez (banco, telas, relatórios, backup...). O README vai ter "Quem fez o quê", e o site, "Minha parte".
+1. ~~A equipe é você, João Pedro e Gustavo Grosbelli?~~ Respondida em 2026-11-08: sim (ver `decisoes.md`).
+2. ~~Qual foi a sua parte?~~ Respondida em 2026-11-08, para o portfólio. Fica em aberto se o README terá "Quem fez o quê", o que depende do acordo dos três.
 3. **Os parceiros concordam com os `docs/` públicos e com o ruleset no `main`** (PR obrigatório, REPO-4)?
 4. **Qual licença?** MIT é a mais comum em portfólio, mas precisa do acordo dos três. Sem licença, ninguém pode reutilizar o código.
-5. **Qual disciplina e período da Unipar?** Para o README dizer o contexto do projeto acadêmico.
+5. ~~Qual disciplina e período da Unipar?~~ Respondida em 2026-11-08: Desenvolvimento Mobile (ver `decisoes.md`). O período não foi informado.
 
 ## Produto
 
 6. **O app foi usado por algum pet shop de verdade,** ou só na avaliação? O README só conta o que aconteceu.
 7. **Foi testado só no Android?** O `app.json` tem configuração de iOS, mas o `eas.json` só configura Android.
-8. **O app abre no Expo Go atual?** O projeto está no SDK 54, e o Expo Go da loja roda só o SDK mais recente. A resposta muda o "como rodar" do README.
+8. **O app abre no Expo Go atual?** O projeto está no SDK 58, e o Expo Go da loja roda só o SDK mais recente. A resposta muda o "como rodar" do README.
 9. **Estas regras são intencionais?**
    - A agenda automática vai até hoje + 224 dias.
    - Reativar um dono não reativa os pets dele.
@@ -23,8 +23,8 @@ Perguntas para o Gabriel, de 2026-11-05. Cada resposta vira uma linha datada em 
 
 ## Decisões técnicas
 
-10. **Posso rodar o SQL do app num banco SQLite em memória, no Node, para confirmar os bugs prováveis?** Não toca em dado nenhum, mas a sua regra pede autorização para qualquer banco. Uma linha no `CLAUDE.md` deste projeto autorizando um banco de teste isolado resolveria de vez (TEST-1).
-11. **Testes:** começar com `node:test` e `node:sqlite`, que já vêm no Node 24, para regras e triggers? Recomendado: sim. Testes de tela com `jest-expo` ficam para o TEST-3, porque exigem instalação.
+10. ~~Posso rodar o SQL do app num banco SQLite em memória?~~ Respondida em 2026-11-08: sim, só em memória e sem dado real (ver `decisoes.md`).
+11. ~~Testes com `node:test` e `node:sqlite`?~~ Respondida em 2026-11-08: sim, junto com a 10.
 12. **Lint e formatação:** ESLint com a configuração do Expo e Prettier? Exigem instalação (TEST-2).
 13. **Validação:** Zod (uma dependência, mas schemas legíveis e tipos derivados) ou validadores próprios? Recomendado: Zod, se a instalação for aceita (VALID-1).
 14. **Remarcação:** manter nos triggers SQL ou mover para uma função TypeScript testada? Recomendado: TypeScript, deixando nos triggers só a integridade e a cascata (ARQ-2).
@@ -38,5 +38,5 @@ Perguntas para o Gabriel, de 2026-11-05. Cada resposta vira uma linha datada em 
 
 ## Repositório
 
-22. **A descrição nova pode ser aplicada?** Texto proposto no REPO-1. Você aplica nas configurações, ou eu aplico com `gh repo edit` depois do seu aval.
+22. ~~A descrição nova pode ser aplicada?~~ Aplicada em 2026-11-08.
 23. **Quem tira os prints e roda o build do APK?** O build precisa da sua conta Expo, e os prints, do app rodando (MIDIA-1 e BUILD-1).
