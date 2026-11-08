@@ -46,7 +46,7 @@ Falta, nesta ordem:
 5. Parte 1 do plano:
    - README (REPO-2), em andamento: a primeira versão traz só o que está confirmado no código;
    - equipe, "quem fez o quê" e licença entram depois das perguntas 1 a 5;
-   - os prints (MIDIA-1): o Gabriel carrega os dados de exemplo num app limpo e tira os prints;
+   - os prints (MIDIA-1) estão no README desde 2026-11-08: seis telas tiradas pelo Gabriel com os dados de exemplo. Falta, opcional, um relatório com gráfico;
    - o script `typecheck` já entrou no PR #5.
 
 ## Onde paramos no plano
