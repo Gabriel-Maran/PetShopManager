@@ -1,9 +1,11 @@
-// Esquema do banco em SQL puro, sem depender do Expo. O app executa estes comandos no
-// initDatabase (database.ts), e os testes executam os mesmos num SQLite em memória.
+// Esquema do banco em SQL puro, sem depender do Expo. O app aplica a lista MIGRATIONS na abertura
+// (database.ts), e os testes aplicam a mesma lista num SQLite em memória.
+import type { Migration } from "./migrator";
 
 // ─── Período máximo de remarcação automática ──────────────────────────────────
-// Troque o valor conforme necessário:
 //   '+365 days' = 1 ano | '+180 days' = 6 meses | '+30 days' = 1 mês
+// O valor entra no texto dos triggers da versão 1, que não muda mais. Para trocar o período, crie uma
+// migração nova que recrie os triggers com o valor novo.
 export const PERIODO_REMARCACAO = "+224 days";
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -12,9 +14,11 @@ export const PERIODO_REMARCACAO = "+224 days";
 // Pacote 4 → a cada  7 dias (máx. 4 banhos/mês)
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── Pragma ────────────────────────────────────────────────────────────────
+// ── Pragmas da conexão ────────────────────────────────────────────────────
+// Valem só para a conexão aberta e não ficam no arquivo do banco. Por isso são ligados a cada
+// abertura (getDatabase), e não numa migração.
 
-export const SQL_PRAGMA = `
+export const SQL_CONNECTION_PRAGMAS = `
   PRAGMA foreign_keys = ON;
   PRAGMA recursive_triggers = ON;
 `;
@@ -615,18 +619,43 @@ export const SQL_TRIGGER_PET_DESATIVAR_LIMPAR_REMARCACAO = `
   END;
 `;
 
-/** Os comandos do esquema, na ordem em que o initDatabase os executa. */
-export const SCHEMA_STATEMENTS = [
-  SQL_PRAGMA,
-  SQL_CREATE_TABLES,
-  SQL_CREATE_INDEXES,
-  SQL_INSERTS,
-  SQL_TRIGGER_ULTIMA_VISITA,
-  SQL_TRIGGER_REMARCACAO_AUTOMATICA,
-  SQL_TRIGGER_PET_REMARCACAO_INSERT,
-  SQL_TRIGGER_PET_REMARCACAO_ATIVAR,
-  SQL_TRIGGER_PET_REMARCACAO_DESATIVAR,
-  SQL_TRIGGER_OWNER_DESATIVAR_PETS,
-  SQL_TRIGGER_PET_ATIVAR_OWNER,
-  SQL_TRIGGER_PET_DESATIVAR_LIMPAR_REMARCACAO,
+// Antes das migrações, os triggers eram criados com IF NOT EXISTS, então um aparelho pode ter os de
+// uma versão mais antiga do app. A versão 1 apaga e cria de novo, para todo banco na versão 1 ter os
+// mesmos triggers. As tabelas ficam, porque guardam os dados.
+export const SQL_DROP_TRIGGERS_V1 = `
+  DROP TRIGGER IF EXISTS trg_ultima_visita;
+  DROP TRIGGER IF EXISTS trg_remarcacao_automatica;
+  DROP TRIGGER IF EXISTS trg_pet_remarcacao_insert;
+  DROP TRIGGER IF EXISTS trg_pet_remarcacao_ativar;
+  DROP TRIGGER IF EXISTS trg_pet_remarcacao_desativar;
+  DROP TRIGGER IF EXISTS trg_owner_desativar_pets;
+  DROP TRIGGER IF EXISTS trg_pet_ativar_owner;
+  DROP TRIGGER IF EXISTS trg_pet_desativar_limpar_remarcacao;
+`;
+
+// ── Migrações ─────────────────────────────────────────────────────────────
+// Cada item leva o banco uma versão adiante (migrator.ts). Nunca mude uma versão que já foi
+// publicada, nem as constantes que ela usa: a mudança entra como a versão seguinte.
+
+export const MIGRATIONS: readonly Migration[] = [
+  {
+    // O esquema de antes das migrações. Tabelas, índices e dados iniciais usam IF NOT EXISTS e
+    // INSERT OR IGNORE, então a mesma versão cria o banco novo e marca o que já existia sem versão,
+    // sem perder dados.
+    version: 1,
+    statements: [
+      SQL_CREATE_TABLES,
+      SQL_CREATE_INDEXES,
+      SQL_INSERTS,
+      SQL_DROP_TRIGGERS_V1,
+      SQL_TRIGGER_ULTIMA_VISITA,
+      SQL_TRIGGER_REMARCACAO_AUTOMATICA,
+      SQL_TRIGGER_PET_REMARCACAO_INSERT,
+      SQL_TRIGGER_PET_REMARCACAO_ATIVAR,
+      SQL_TRIGGER_PET_REMARCACAO_DESATIVAR,
+      SQL_TRIGGER_OWNER_DESATIVAR_PETS,
+      SQL_TRIGGER_PET_ATIVAR_OWNER,
+      SQL_TRIGGER_PET_DESATIVAR_LIMPAR_REMARCACAO,
+    ],
+  },
 ];

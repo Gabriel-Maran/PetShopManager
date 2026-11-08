@@ -145,3 +145,23 @@ Motivo:
 - Copiar o SQL nos testes deixaria os dois se afastarem com o tempo.
 - O teste prova o bug no próprio código, e a correção fica visível no diff do teste.
 
+**Versão do esquema e migrações (DADOS-1).**
+Decisão:
+- A versão fica no `PRAGMA user_version`. A lista `MIGRATIONS`, em `schema.ts`, tem uma entrada por versão, em sequência a partir de 1. Na abertura do app, o `migrateDatabase` (`migrator.ts`) aplica as pendentes.
+- Todas as pendentes entram numa transação só: o banco chega à última versão ou fica como estava.
+- As chaves estrangeiras ficam desligadas durante as migrações. No fim, o `foreign_key_check` não pode achar mais problemas do que antes.
+- A versão 1 é o esquema de antes, com `IF NOT EXISTS`, e apaga e recria os triggers.
+- Um banco de versão mais nova que o app é recusado com uma mensagem.
+- A falha vai para a tela de erro do `App.tsx` com uma mensagem amigável, e o erro do SQLite fica no `cause`.
+- O `migrator.ts` não usa o Expo e recebe a conexão por uma interface com `execAsync` e `getFirstAsync`, que o `expo-sqlite` já tem. Nos testes, o `node:sqlite` faz esse papel.
+- A lista fica em `schema.ts`, e não num arquivo próprio, porque o Node que roda os testes não resolve import sem extensão. Os arquivos que os testes importam só se ligam por `import type`.
+- Os pragmas `foreign_keys` e `recursive_triggers` saíram do esquema e foram para o `getDatabase`, porque valem por conexão.
+
+Motivo:
+- Com uma transação só, o banco sempre está numa versão inteira, e o teste de falha fica simples.
+- Dentro de uma transação, o `PRAGMA foreign_keys` não tem efeito. Com as chaves ligadas, reconstruir uma tabela, que é o caminho do SQLite para mudar uma coluna (DADOS-2 e DADOS-3), apagaria as filhas pelo `ON DELETE CASCADE`. A comparação com o antes evita que um dado antigo inconsistente impeça o app de abrir.
+- Os aparelhos já têm o banco sem versão. Com `IF NOT EXISTS`, a versão 1 só marca a versão neles, sem perder dados. Os triggers não guardam dados, e recriá-los garante que todo banco na versão 1 tenha os mesmos.
+- O app antigo, aberto num banco já migrado, gravaria dados num esquema que ele não conhece.
+- Antes, um erro na criação do banco ia só para o `console.log`, e o app abria como se tudo estivesse certo (primeiro item do BUG-6).
+- Os testes rodam o mesmo código de migração do app, sem copiar a lógica.
+

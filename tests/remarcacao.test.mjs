@@ -36,8 +36,8 @@ describe("agenda gerada ao cadastrar um pet com pacote", () => {
   let db;
   let ownerId;
 
-  beforeEach(() => {
-    db = createDatabase();
+  beforeEach(async () => {
+    db = await createDatabase();
     ownerId = insertOwner(db);
   });
 
@@ -99,8 +99,8 @@ describe("conclusão de um agendamento automático", () => {
   let db;
   let pet;
 
-  beforeEach(() => {
-    db = createDatabase();
+  beforeEach(async () => {
+    db = await createDatabase();
     pet = insertPet(db, {
       dono_id: insertOwner(db), remarcacao_ativa: 1, pacote_remarcacao: 4,
       data_inicio_pacote: dateInt(3), valor_pacote: "320,00",
@@ -146,8 +146,8 @@ describe("conclusão de um agendamento automático", () => {
 });
 
 describe("edição do pet com pacote", () => {
-  test("BUG-4, confirmado: mudar só a observação refaz a agenda, perde o horário ajustado e duplica as datas passadas", () => {
-    const db = createDatabase();
+  test("BUG-4, confirmado: mudar só a observação refaz a agenda, perde o horário ajustado e duplica as datas passadas", async () => {
+    const db = await createDatabase();
     const pet = insertPet(db, {
       dono_id: insertOwner(db), remarcacao_ativa: 1, pacote_remarcacao: 4,
       data_inicio_pacote: dateInt(-30), valor_pacote: "320,00",
@@ -166,8 +166,8 @@ describe("edição do pet com pacote", () => {
     assert.ok(!agenda.some((a) => a.hora === "15:30"), "o horário ajustado à mão se perdeu");
   });
 
-  test("desligar a remarcação apaga os automáticos pendentes a partir de amanhã", () => {
-    const db = createDatabase();
+  test("desligar a remarcação apaga os automáticos pendentes a partir de amanhã", async () => {
+    const db = await createDatabase();
     const pet = insertPet(db, {
       dono_id: insertOwner(db), remarcacao_ativa: 1, pacote_remarcacao: 2,
       data_inicio_pacote: dateInt(3), valor_pacote: "200,00",

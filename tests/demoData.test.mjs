@@ -28,8 +28,8 @@ const count = (db, sql) => db.prepare(sql).get().total;
 describe("dados de exemplo", () => {
   let db;
 
-  beforeEach(() => {
-    db = createDatabase();
+  beforeEach(async () => {
+    db = await createDatabase();
   });
 
   test("o app novo começa vazio, e depois dos dados deixa de estar", () => {

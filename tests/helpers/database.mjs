@@ -4,15 +4,36 @@
 // Os triggers comparam datas com o relógio do SQLite ('now', em UTC), que não dá para fixar. Por isso
 // as datas dos testes são relativas ao dia de verdade e ficam longe da virada do dia.
 import { DatabaseSync } from "node:sqlite";
-import { SCHEMA_STATEMENTS } from "../../app/config/schema.ts";
+import { MIGRATIONS, SQL_CONNECTION_PRAGMAS } from "../../app/config/schema.ts";
+import { migrateDatabase } from "../../app/config/migrator.ts";
 import { normalizeForSearch } from "../../app/utils/formatadores/normalizaNome.ts";
 import { INSERT_OWNER_SQL } from "../../app/repository/sql/ownersSql.ts";
 import { INSERT_PET_SQL, UPDATE_PET_SQL } from "../../app/repository/sql/petsSql.ts";
 
-/** Banco novo, igual ao da primeira abertura do app. O caminho pode ser uma memória compartilhada. */
-export function createDatabase(path = ":memory:") {
+/** Conexão aberta como o getDatabase do app abre, ainda sem as migrações. */
+export function openConnection(path = ":memory:") {
   const db = new DatabaseSync(path);
-  for (const sql of SCHEMA_STATEMENTS) db.exec(sql);
+  db.exec(SQL_CONNECTION_PRAGMAS);
+  return db;
+}
+
+/** O DatabaseSync com a interface assíncrona do expo-sqlite que o migrateDatabase usa. */
+export function asMigrationDatabase(db) {
+  return {
+    execAsync: async (sql) => {
+      db.exec(sql);
+    },
+    getFirstAsync: async (sql) => db.prepare(sql).get() ?? null,
+  };
+}
+
+/**
+ * Banco novo, igual ao da primeira abertura do app: as mesmas migrações, pelo mesmo código. O caminho
+ * pode ser uma memória compartilhada.
+ */
+export async function createDatabase(path = ":memory:") {
+  const db = openConnection(path);
+  await migrateDatabase(asMigrationDatabase(db), MIGRATIONS);
   return db;
 }
 

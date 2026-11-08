@@ -119,6 +119,8 @@ Confirmado em 2026-11-08 por teste (`tests/remarcacao.test.mjs`): mudar só a ob
 
 ### DADOS-1 · Versão de esquema e migrações
 
+Feito em 2026-11-08: a versão fica no `PRAGMA user_version`, e a lista `MIGRATIONS` (`app/config/schema.ts`) é aplicada pelo `migrateDatabase` (`app/config/migrator.ts`) numa transação só. A versão 1 é o esquema de antes e recria os triggers. São 11 testes em `tests/migracoes.test.mjs`, e o bloco de `DROP` saiu do `database.ts`.
+
 - **Por quê:** o banco é criado com `IF NOT EXISTS` e não tem versão. Um trigger corrigido no código não chega aos aparelhos que já têm o antigo, e o backup importado não diz de qual versão veio. Hoje, mudar o esquema exige colar um bloco de `DROP` no `database.ts`, o que apaga os dados.
 - **O que muda:** a versão fica em `PRAGMA user_version`. Uma lista ordenada de migrações roda numa transação na abertura do app, cada uma subindo uma versão. A versão 1 é o esquema atual, e as correções de trigger viram migrações seguintes. O bloco de `DROP` comentado sai.
 - **Pronto quando:** um banco da versão atual abre na versão nova sem perder dados, coberto por teste, e o `database.ts` não tem mais SQL para colar à mão.
@@ -142,6 +144,8 @@ Achado novo: no campo de horário, um quinto dígito apaga o campo inteiro (`mas
 - **Pronto quando:** total e páginas batem com a lista nos dois filtros e em buscas com e sem acento, com teste.
 
 ### BUG-6 · Erros que somem sem aviso
+
+O primeiro item foi resolvido no DADOS-1, em 2026-11-08: uma falha na abertura do banco agora chega à tela de erro do `App.tsx`.
 
 - **Por quê:**
   - `initDatabase` captura qualquer erro com `console.log` ([`database.ts:687`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/config/database.ts#L687)), e o app abre como se o banco estivesse certo.

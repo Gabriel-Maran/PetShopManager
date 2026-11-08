@@ -20,8 +20,8 @@ describe("cascata entre donos e pets", () => {
   let withPackage;
   let withoutPackage;
 
-  beforeEach(() => {
-    db = createDatabase();
+  beforeEach(async () => {
+    db = await createDatabase();
     ownerId = insertOwner(db);
     withPackage = insertPet(db, {
       nome: "Thor", dono_id: ownerId, remarcacao_ativa: 1, pacote_remarcacao: 4,
