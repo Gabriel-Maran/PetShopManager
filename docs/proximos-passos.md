@@ -1,6 +1,6 @@
 # Próximos passos
 
-Atualizado em 2026-11-08, depois do reset de dev.
+Atualizado em 2026-11-08, depois do BUG-3 e do BUG-4.
 
 ## Em andamento: segurança e configuração do repositório
 
@@ -44,7 +44,7 @@ Falta, nesta ordem:
    - botão em Configurações, que só aparece com o app vazio;
    - testes num SQLite em memória;
    - esquema separado do Expo, o primeiro passo do TEST-1.
-   - Pedido do Gabriel em 2026-11-08, em revisão no PR "Reset de dev": em desenvolvimento, o mesmo cartão vira "Apagar tudo e carregar exemplo" quando o app tem dados.
+   - Pedido do Gabriel em 2026-11-08, no `main` desde o PR #15: em desenvolvimento, o mesmo cartão vira "Apagar tudo e carregar exemplo" quando o app tem dados.
 5. Parte 1 do plano:
    - README (REPO-2), em andamento: a primeira versão traz só o que está confirmado no código;
    - equipe, "quem fez o quê" e licença entram depois das perguntas 1 a 5;
@@ -56,8 +56,8 @@ Falta, nesta ordem:
 - A auditoria do código foi feita sobre o commit `e1d5f2f` do `main`.
 - O plano está em [`plano-de-melhorias.md`](plano-de-melhorias.md), com 35 itens: 9 P0, 16 P1 e 10 P2.
 - A arquitetura de hoje está em [`arquitetura.md`](arquitetura.md), e as respostas do checklist, em [`auditoria.md`](auditoria.md).
-- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes) e #14 (migrações). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
-- Da Parte 1, falta o que depende das perguntas em aberto. A Parte 2 termina com o DADOS-1, e as Partes 3 em diante ainda não começaram.
+- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações) e #15 (reset de dev). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
+- Da Parte 1, falta o que depende das perguntas em aberto. A Parte 2 está completa, a Parte 3 está em andamento, e as Partes 4 em diante ainda não começaram.
 - Falta o Gabriel responder [`perguntas-em-aberto.md`](perguntas-em-aberto.md). Várias partes abaixo dependem dessas respostas.
 
 ## Partes de execução
@@ -86,7 +86,7 @@ Feita em 2026-11-08, falta a validação do Gabriel:
 - TEST-1 no `main` desde o PR #13: 44 testes, com BUG-3, BUG-4 e o ponteiro do BKP-1 confirmados;
 - DADOS-1 no `main` desde o PR #14: `user_version`, a lista `MIGRATIONS` e 11 testes novos, 55 no total.
 
-Depois do merge, a Parte 3 só começa com o aval do Gabriel. As correções do BUG-3 e do BUG-4 entram como a versão 2.
+Validada pelo Gabriel em 2026-11-08, junto com o reset de dev (PR #15).
 
 - TEST-1: escrever os testes de caracterização com `node:test` e `node:sqlite`. O esquema já está separado do Expo (`schema.ts`), e o `npm test` já roda no CI, desde o DEMO-1.
 - Confirmar ou descartar BUG-3, BUG-4 e o problema da restauração do BKP-1.
@@ -96,6 +96,11 @@ Depois do merge, a Parte 3 só começa com o aval do Gabriel. As correções do 
 Pronto quando: `npm test` passa no CI, e cada bug provável está confirmado ou descartado no próprio teste.
 
 ### Parte 3 · Correções do banco (P0 e P1)
+
+Em andamento desde 2026-11-08, com o aval do Gabriel:
+- BUG-3 e BUG-4 em revisão no PR "Triggers da remarcação", como a versão 2 do esquema;
+- depois, o BUG-7;
+- o DADOS-2 espera a resposta da pergunta 15 (datas em texto junto com o dinheiro em centavos).
 
 - BUG-3 e BUG-4: triggers corrigidos por migração.
 - BUG-7: "hoje" num lugar só e triggers com `'localtime'`.

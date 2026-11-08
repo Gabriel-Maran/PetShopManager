@@ -136,10 +136,10 @@ Convenções:
 
 | Trigger | Quando dispara | O que faz |
 | --- | --- | --- |
-| `trg_ultima_visita` | update de `concluido` com valor 1 | grava a data como última visita do pet |
-| `trg_remarcacao_automatica` | update de `concluido` com valor 1 num agendamento automático | cria o próximo agendamento automático do pacote |
+| `trg_ultima_visita` | `concluido` de 0 para 1 (desde a versão 2) | grava a data como última visita do pet |
+| `trg_remarcacao_automatica` | `concluido` de 0 para 1 num agendamento automático (desde a versão 2) | cria o próximo agendamento automático do pacote |
 | `trg_pet_remarcacao_insert` | insert de pet com remarcação | gera a agenda do pacote, da data de início até hoje + 224 dias |
-| `trg_pet_remarcacao_ativar` | update dos campos do pacote ou de `is_ativo`, com remarcação ligada | apaga os automáticos pendentes e gera a agenda de novo |
+| `trg_pet_remarcacao_ativar` | mudança de fato num campo da agenda (pacote ligado, pacote, início, horário, serviço, valor ou `is_ativo`), com remarcação ligada (desde a versão 2) | apaga os automáticos pendentes de hoje em diante e gera de novo só a partir de hoje |
 | `trg_pet_remarcacao_desativar` | remarcação de 1 para 0 | apaga os automáticos pendentes a partir de amanhã |
 | `trg_owner_desativar_pets` | dono desativado | desativa os pets do dono |
 | `trg_pet_ativar_owner` | pet ativado | reativa o dono, se estiver inativo |

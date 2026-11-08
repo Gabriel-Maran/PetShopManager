@@ -179,3 +179,16 @@ Motivo:
 - O `expo-sqlite` conta quantas vezes a conexão foi aberta e se recusa a apagar o arquivo enquanto alguma continua aberta. Em desenvolvimento, cada recarga do app abre a conexão de novo, então apagar o arquivo falharia justamente onde o botão existe. Apagar pelo SQL funciona com a conexão aberta, é testado no SQLite em memória e, se algo falhar, mantém os dados antigos.
 - Na abertura do app, o tema e o `initDatabase` pedem o banco ao mesmo tempo e podiam abrir duas conexões.
 
+**Triggers da remarcação corrigidos (BUG-3 e BUG-4), na versão 2 do esquema.**
+Decisão:
+- A conclusão só conta na passagem de `concluido` de 0 para 1, no `trg_remarcacao_automatica` e no `trg_ultima_visita`.
+- Resposta do Gabriel: ao editar um pet com pacote, a agenda é refeita quando muda qualquer campo que entra nela: ligar o pacote, trocar o pacote, a data de início, o horário, o serviço ou o valor, ou reativar o pet. Nome, observação, raça e os outros campos não mexem na agenda.
+- Ao refazer, só os automáticos pendentes de hoje em diante (`'localtime'`) são apagados e gerados de novo. Os vencidos, os concluídos e os manuais ficam como estão.
+- A versão 2 traz o texto inteiro dos três triggers, com `DROP` e `CREATE`, e não reaproveita as constantes da versão 1. Um script conferiu que só as condições e os filtros mudaram.
+
+Motivo:
+- No SQLite, `AFTER UPDATE OF coluna` dispara sempre que o `UPDATE` cita a coluna, e os formulários regravam todos os campos. Só a comparação entre `OLD` e `NEW` separa uma mudança de verdade.
+- Com o horário, o serviço ou o valor novos, os automáticos futuros que já existem mudam junto, em vez de a agenda ficar com valores misturados.
+- O "hoje" do filtro novo já usa o fuso do aparelho, como o BUG-7 vai fazer em todo o banco.
+- Uma versão publicada não muda. Constantes compartilhadas entre versões convidariam a mudar a versão 1 sem querer.
+
