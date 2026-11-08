@@ -16,27 +16,20 @@ updates:
     commit-message:
       prefix: chore
       include: scope
-    # Cada SDK do Expo fixa a versão destes pacotes. Uma versão minor ou major fora da lista do SDK
-    # quebra o app, então eles só recebem correções (patch). A troca de SDK é feita à mão, com
-    # `npx expo install --fix`. Um pacote novo do SDK (como `expo-camera`) já entra pelo `expo-*`;
-    # um `react-native-*` do SDK precisa ser incluído aqui e no grupo `expo-sdk`.
+    # Cada SDK do Expo fixa a versão exata destes pacotes, e o Expo Go traz as mesmas versões nativas.
+    # O `react` precisa ser idêntico ao renderer do `react-native`: até um patch (19.3.0 → 19.3.1)
+    # quebra o app ao abrir, e o CI não percebe, porque não executa o app. Por isso o Dependabot não
+    # mexe neles, e o SDK, inclusive de patch, é atualizado à mão com `npx expo install --fix`.
+    # Um pacote novo do SDK (como `expo-camera`) já fica de fora pelo `expo-*`; um `react-native-*`
+    # do SDK precisa entrar nesta lista.
     ignore:
       - dependency-name: 'expo'
-        update-types: ['version-update:semver-major', 'version-update:semver-minor']
       - dependency-name: 'expo-*'
-        update-types: ['version-update:semver-major', 'version-update:semver-minor']
       - dependency-name: 'react'
-        update-types: ['version-update:semver-major', 'version-update:semver-minor']
       - dependency-name: 'react-native'
-        update-types: ['version-update:semver-major', 'version-update:semver-minor']
       - dependency-name: '@types/react'
-        update-types: ['version-update:semver-major', 'version-update:semver-minor']
       - dependency-name: 'typescript'
-        update-types: ['version-update:semver-major', 'version-update:semver-minor']
     groups:
-      # As correções do SDK chegam juntas, porque os pacotes do Expo são testados em conjunto.
-      expo-sdk:
-        patterns: ['expo', 'expo-*', 'react', 'react-native', '@types/react', 'typescript']
       # O resto (como o react-native-calendars): versões menores e correções num PR só, e uma
       # versão major em PR próprio.
       minor-and-patch:

@@ -83,3 +83,11 @@ Motivo: o `main` passa a receber só mudanças revisadas e verificadas, sem trav
 Decisão: `expo`, `expo-*`, `react`, `react-native`, `@types/react` e `typescript` só recebem patch, num grupo `expo-sdk`. A troca de SDK é feita à mão, com `npx expo install --fix`. As correções de segurança chegam num PR só.
 Motivo: cada SDK fixa a versão desses pacotes. Uma versão minor ou major fora da lista, sozinha, quebra o app. Pacotes fora do SDK, como o `react-native-calendars`, seguem o grupo de minor e patch.
 
+**O Dependabot não mexe no SDK do Expo** (corrige a decisão anterior, que deixava passar patch).
+Contexto: no primeiro dia, o Dependabot abriu o PR #6 (`expo` 58.0.22 e `react` 19.3.1) e o PR #7 (`expo-sqlite` 58.0.15, fora do grupo do SDK).
+Decisão: `expo`, `expo-*`, `react`, `react-native`, `@types/react` e `typescript` ficam fora do Dependabot, para todo tipo de versão. O SDK, inclusive de patch, é atualizado à mão com `npx expo install --fix`, que escolhe as versões que o `expo` instalado espera. Os PRs #6 e #7 são fechados sem merge.
+Motivo:
+- O React Native exige o `react` idêntico ao renderer dele, então o 19.3.1 quebraria o app ao abrir, e o CI não pega isso, porque não executa o app.
+- O Expo Go traz as versões nativas do SDK.
+- Uma versão de um pacote do SDK sozinha deixa o conjunto fora do que o `expo` espera.
+
