@@ -5,8 +5,7 @@
 // "hoje" dos dados é o dia de verdade, e as checagens valem para qualquer data.
 import { beforeEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { DatabaseSync } from "node:sqlite";
-import { SCHEMA_STATEMENTS } from "../app/config/schema.ts";
+import { createDatabase, dateInt } from "./helpers/database.mjs";
 import {
   buildDemoDataSql,
   COUNT_USER_DATA_SQL,
@@ -15,15 +14,7 @@ import {
 import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
 
 const today = new Date();
-const todayInt =
-  today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-
-/** Banco novo, igual ao da primeira abertura do app. */
-function createDatabase() {
-  const db = new DatabaseSync(":memory:");
-  for (const sql of SCHEMA_STATEMENTS) db.exec(sql);
-  return db;
-}
+const todayInt = dateInt(0);
 
 /** Carrega os dados de exemplo numa transação, como o DemoDataService faz. */
 function loadDemoData(db) {
@@ -118,9 +109,7 @@ describe("dados de exemplo", () => {
     );
     assert.ok(monthsWithVisits >= 5, `concluídos em ${monthsWithVisits} meses`);
 
-    const fortyDaysAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 40);
-    const absentLimit =
-      fortyDaysAgo.getFullYear() * 10000 + (fortyDaysAgo.getMonth() + 1) * 100 + fortyDaysAgo.getDate();
+    const absentLimit = dateInt(-40);
     const absentPets = count(
       db,
       `SELECT COUNT(*) AS total FROM pets WHERE is_ativo = 1 AND current_ultima_visita_data < ${absentLimit}`,
