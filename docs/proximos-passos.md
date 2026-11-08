@@ -1,6 +1,6 @@
 # Próximos passos
 
-Atualizado em 2026-11-08.
+Atualizado em 2026-11-08, depois da configuração do GitHub.
 
 ## Em andamento: segurança e configuração do repositório
 
@@ -20,26 +20,26 @@ Feito:
 - [PR #3](https://github.com/Gabriel-Maran/PetShopManager/pull/3), no `main` desde 2026-11-08: bloqueia no `app.json` as permissões Android sem uso (ficam `INTERNET` e `VIBRATE`) e cria o `.npmrc` com `ignore-scripts`, `save-exact` e `min-release-age=7`.
 - [PR #4](https://github.com/Gabriel-Maran/PetShopManager/pull/4), no `main` desde 2026-11-08: este plano, em `docs/`.
 
-Esperando revisão:
-
-- [PR #5](https://github.com/Gabriel-Maran/PetShopManager/pull/5): `dependabot.yml`, CI e o script `check` (`typecheck` e `export:android`).
-  - O SDK do Expo só recebe patch, num grupo próprio, e as correções de segurança chegam num PR só.
-  - O CI roda no Linux, que pega import com a letra errada.
+- [PR #5](https://github.com/Gabriel-Maran/PetShopManager/pull/5), no `main` desde 2026-11-08: `dependabot.yml`, CI e o script `check` (`typecheck` e `export:android`).
+- 2026-11-08, depois do PR #5, nas configurações do GitHub, como no portfólio:
+  - merge só por squash, com o título do PR;
+  - branch apagada depois do merge;
+  - ruleset `main: CI`: PR obrigatório, sem aprovação mínima, check "Typecheck e pacote Android" verde e atualizado com o `main`, conversas resolvidas e sem bypass;
+  - ruleset `main: histórico`: sem apagar a branch nem force push.
+- O Dependabot leu o `dependabot.yml` sem erro: as rodadas de npm e de actions passaram.
+  - A rodada de segurança falha de propósito: o `zod` só tem correção no 4, e o `@expo/cli` exige o 3 ("Security update not possible"). É o risco aceito em 2026-11-05.
 
 Falta, nesta ordem:
 
-1. Depois do merge do PR #5, nas configurações do GitHub, como no portfólio (aval do Gabriel em 2026-11-08):
-   - merge só por squash e branch apagada depois do merge;
-   - ruleset `main: CI`: PR obrigatório, sem aprovação mínima, check "Typecheck e pacote Android" verde, conversas resolvidas e sem bypass;
-   - ruleset `main: histórico`: sem apagar a branch nem force push.
-
-   Antes disso, o Gabriel avisa os parceiros que o `main` passa a receber só PR.
-2. Conferir em Insights → Dependency graph → Dependabot que o `dependabot.yml` foi lido sem erro.
-3. A partir de 2026-11-10, quando passam da espera de 7 dias, `npm i -E expo@58.0.23 expo-sharing@58.0.22 expo-sqlite@58.0.15`. Numa simulação, sobram 5 alertas moderados (`glob` e `minimatch`), que nem o Expo mais novo corrigiu.
-4. Do Gabriel:
+1. Do Gabriel: avisar os parceiros que o `main` agora só recebe PR, com squash e o CI verde.
+2. A partir de 2026-11-10, quando passam da espera de 7 dias, `npm i -E expo@58.0.23 expo-sharing@58.0.22 expo-sqlite@58.0.15`.
+   - O `@expo/config` novo deixa de usar o `deepmerge`, o que fecha um alerta.
+   - Numa simulação, sobram os alertas moderados de `glob` e `minimatch` e o do `zod`, todos nas ferramentas de build, que nem o Expo mais novo corrigiu.
+3. Do Gabriel:
    - testar no aparelho as permissões do PR #3, com o roteiro no PR;
    - conferir o tamanho do APK, porque o pacote JavaScript foi de 1,72 MB para 2,7 MB;
    - responder `perguntas-em-aberto.md`.
+4. Parte 1 do plano: prints (MIDIA-1) e README (REPO-2). O script `typecheck` já entrou no PR #5.
 
 ## Onde paramos no plano
 
