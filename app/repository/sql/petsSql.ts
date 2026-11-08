@@ -21,7 +21,11 @@ export const INSERT_PET_SQL = `INSERT INTO pets (
         valor_pacote
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-/** Parâmetros: os mesmos do INSERT_PET_SQL, na mesma ordem, mais o id no fim. */
+/**
+ * Parâmetros: os mesmos do INSERT_PET_SQL, na mesma ordem, mais o id no fim. Regrava todos os
+ * campos, mas o trg_pet_remarcacao_ativar só refaz a agenda quando um campo dela muda de fato
+ * (BUG-4, corrigido na versão 2 do esquema).
+ */
 export const UPDATE_PET_SQL = `UPDATE pets SET
         nome = ?, 
         nome_normalizado = ?, 

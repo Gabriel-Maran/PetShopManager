@@ -105,6 +105,8 @@ Feito em 2026-11-08: seis prints em `docs/imagens/`, com os dados de exemplo, co
 
 Confirmado em 2026-11-08 por teste (`tests/remarcacao.test.mjs`): marcar como pago um automático já concluído cria mais um agendamento.
 
+Corrigido em 2026-11-08 na versão 2 do esquema: o `trg_remarcacao_automatica` e o `trg_ultima_visita` só agem na passagem de `concluido` de 0 para 1.
+
 - **Por quê:** o `trg_remarcacao_automatica` ([`database.ts:274`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/config/database.ts#L274)) dispara em `UPDATE OF concluido` sempre que o valor novo é 1. No SQLite, isso vale para todo `UPDATE` que cita a coluna, mesmo sem mudar o valor. O `updateAppointment` sempre cita `concluido`. Então, editar um agendamento automático já concluído (por exemplo, para marcar como pago) deve criar mais um agendamento futuro.
 - **O que muda:** primeiro, um teste que reproduz (TEST-1). Depois, a condição passa a ser `OLD.concluido = 0 AND NEW.concluido = 1`, aplicada por migração (DADOS-1), porque os aparelhos já têm o trigger antigo. O mesmo ajuste vale para o `trg_ultima_visita`.
 - **Pronto quando:** o teste mostra que salvar de novo um concluído não cria agendamento, e que concluir um pendente ainda cria o próximo.
@@ -112,6 +114,8 @@ Confirmado em 2026-11-08 por teste (`tests/remarcacao.test.mjs`): marcar como pa
 ### BUG-4 · Editar pet com pacote refaz a agenda
 
 Confirmado em 2026-11-08 por teste (`tests/remarcacao.test.mjs`): mudar só a observação apaga e gera de novo os automáticos pendentes, perde o horário ajustado à mão e cria outra vez as datas passadas como manuais.
+
+Corrigido em 2026-11-08 na versão 2 do esquema: o `trg_pet_remarcacao_ativar` só refaz a agenda quando muda de fato um campo que entra nela (pacote ligado, pacote, início, horário, serviço, valor ou reativação). Ao refazer, apaga e gera só os automáticos pendentes de hoje em diante.
 
 - **Por quê:** o `trg_pet_remarcacao_ativar` ([`database.ts:477`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/config/database.ts#L477)) dispara quando o `UPDATE` cita os campos do pacote, e o `updatePet` sempre os cita. Então, qualquer edição de um pet com pacote (mudar a observação, por exemplo) apaga os agendamentos automáticos pendentes e gera tudo de novo a partir da data de início. Efeitos esperados: horários ajustados à mão se perdem, e datas passadas não concluídas são criadas outra vez como manuais, duplicadas.
 - **O que muda:** teste que reproduz (TEST-1). Depois, o trigger só refaz a agenda quando um campo do pacote muda de fato (`OLD.campo IS NOT NEW.campo`) e não recria datas que já passaram. Aplicado por migração (DADOS-1).

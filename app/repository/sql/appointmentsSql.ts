@@ -12,7 +12,8 @@ export const INSERT_APPOINTMENT_SQL = `INSERT INTO appointments
 
 /**
  * Parâmetros: pet_id, servico, data, hora, entregar_pet, concluido, observacao, valor, tipo_pgto,
- * ta_pago, id. Cita sempre o concluido, então dispara os triggers de conclusão (ver BUG-3).
+ * ta_pago, id. Cita sempre o concluido, mas os triggers de conclusão só agem quando ele passa de 0
+ * para 1 (BUG-3, corrigido na versão 2 do esquema).
  */
 export const UPDATE_APPOINTMENT_SQL = `UPDATE appointments SET
         pet_id = ?,

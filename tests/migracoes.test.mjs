@@ -112,10 +112,33 @@ describe("migrações do banco", () => {
 
   test("na abertura seguinte, nenhuma migração já aplicada roda de novo", async () => {
     const db = await createDatabase();
-    // Se a versão 1 rodasse de novo, este comando falharia.
-    const alreadyApplied = [{ version: 1, statements: ["SELECT * FROM tabela_que_nao_existe;"] }];
+    // Se alguma versão rodasse de novo, este comando falharia.
+    const alreadyApplied = MIGRATIONS.map(({ version }) => ({
+      version,
+      statements: ["SELECT * FROM tabela_que_nao_existe;"],
+    }));
 
-    assert.equal(await migrate(db, alreadyApplied), 1);
+    assert.equal(await migrate(db, alreadyApplied), LATEST);
+  });
+
+  test("banco na versão 1: sobe para a 2 sem perder dados e com os triggers corrigidos", async () => {
+    const db = openConnection();
+    await migrate(db, MIGRATIONS.slice(0, 1));
+    const { pet } = insertOwnerWithPackagePet(db);
+    const before = Object.fromEntries(
+      ["owners", "pets", "appointments"].map((table) => [table, rows(db, table)]),
+    );
+
+    await migrate(db);
+
+    assert.equal(userVersion(db), LATEST);
+    for (const [table, tableRows] of Object.entries(before)) {
+      assert.deepEqual(rows(db, table), tableRows, `${table} continua igual`);
+    }
+    assert.deepEqual(schemaObjects(db), schemaObjects(await createDatabase()));
+    // Com o trigger da versão 2, editar só a observação não mexe mais na agenda (BUG-4).
+    db.prepare("UPDATE pets SET observacoes = 'Teste' WHERE id = ?").run(pet.id);
+    assert.deepEqual(rows(db, "appointments"), before.appointments);
   });
 
   test("só as migrações pendentes rodam, em ordem", async () => {
