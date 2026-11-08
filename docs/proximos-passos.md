@@ -79,6 +79,10 @@ Pronto quando: `npm run typecheck` passa, um clone novo roda com os comandos do 
 
 ### Parte 2 · Testes do banco e migrações (P0)
 
+Em andamento desde 2026-11-08:
+- TEST-1 feito no PR "Testes de caracterização do banco": 44 testes, com BUG-3, BUG-4 e o ponteiro do BKP-1 confirmados;
+- falta o DADOS-1 (versão do esquema e migrações), que segue numa sessão nova.
+
 - TEST-1: escrever os testes de caracterização com `node:test` e `node:sqlite`. O esquema já está separado do Expo (`schema.ts`), e o `npm test` já roda no CI, desde o DEMO-1.
 - Confirmar ou descartar BUG-3, BUG-4 e o problema da restauração do BKP-1.
 - DADOS-1: `user_version`, lista de migrações e o esquema atual como versão 1.

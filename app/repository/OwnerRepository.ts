@@ -1,5 +1,6 @@
 import { ORDER } from "../config/consts";
 import { getDatabase } from "../config/database";
+import { ACTIVATE_OWNER_SQL, DEACTIVATE_OWNER_SQL, INSERT_OWNER_SQL } from "./sql/ownersSql";
 import { Owner } from "../model/Owner";
 import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
 
@@ -78,7 +79,7 @@ class OwnerRepository {
     const nome_normalizado = normalizeForSearch(owner.nome);
     const db = await getDatabase();
     await db.runAsync(
-      `INSERT INTO owners (nome, nome_normalizado, telefone, email, endereco) VALUES (?, ?, ?, ?, ?)`,
+      INSERT_OWNER_SQL,
       [
         owner.nome,
         nome_normalizado,
@@ -108,12 +109,12 @@ class OwnerRepository {
   async deleteOwner(id: number): Promise<void> {
     const db = await getDatabase();
     // Soft delete: marca como inativo sem remover do banco
-    await db.runAsync(`UPDATE owners SET is_ativo = 0 WHERE id = ?`, [id]);
+    await db.runAsync(DEACTIVATE_OWNER_SQL, [id]);
   }
 
   async activeOwner(id: number): Promise<void> {
     const db = await getDatabase();
-    await db.runAsync(`UPDATE owners SET is_ativo = 1 WHERE id = ?`, [id]);
+    await db.runAsync(ACTIVATE_OWNER_SQL, [id]);
   }
 }
 

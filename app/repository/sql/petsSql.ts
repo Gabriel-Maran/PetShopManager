@@ -1,0 +1,53 @@
+// SQL dos pets sem depender do Expo: o PetRepository e os testes executam os mesmos comandos.
+
+/**
+ * Parâmetros: nome, nome_normalizado, especie, porte, raca, observacoes, dono_id, servico_padrao,
+ * remarcacao_ativa, pacote_remarcacao, data_inicio_pacote, horario_padrao, valor_pacote.
+ * Com remarcação ativa, o trg_pet_remarcacao_insert gera a agenda do pacote.
+ */
+export const INSERT_PET_SQL = `INSERT INTO pets (
+        nome, 
+        nome_normalizado, 
+        especie, 
+        porte, 
+        raca, 
+        observacoes,
+        dono_id, 
+        servico_padrao, 
+        remarcacao_ativa, 
+        pacote_remarcacao, 
+        data_inicio_pacote, 
+        horario_padrao,
+        valor_pacote
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+/** Parâmetros: os mesmos do INSERT_PET_SQL, na mesma ordem, mais o id no fim. */
+export const UPDATE_PET_SQL = `UPDATE pets SET
+        nome = ?, 
+        nome_normalizado = ?, 
+        especie = ?, 
+        porte = ?, 
+        raca = ?,
+        observacoes = ?, 
+        dono_id = ?, 
+        servico_padrao = ?, 
+        remarcacao_ativa = ?,
+        pacote_remarcacao = ?, 
+        data_inicio_pacote = ?,
+        horario_padrao = ?,
+        valor_pacote = ?
+       WHERE id = ?`;
+
+/** Parâmetros: remarcacao_ativa, pacote_remarcacao, data_inicio_pacote, valor_pacote, id. */
+export const UPDATE_PET_REMARCACAO_SQL = `UPDATE pets SET
+        remarcacao_ativa = ?,
+        pacote_remarcacao = ?,
+        data_inicio_pacote = ?,
+        valor_pacote = ?
+       WHERE id = ?`;
+
+/** Parâmetros: id. Exclusão lógica; o trigger limpa o pacote e os automáticos futuros. */
+export const DEACTIVATE_PET_SQL = `UPDATE pets SET is_ativo = 0 WHERE id = ?`;
+
+/** Parâmetros: id. O trigger trg_pet_ativar_owner reativa o dono, se estiver inativo. */
+export const ACTIVATE_PET_SQL = `UPDATE pets SET is_ativo = 1 WHERE id = ?`;

@@ -134,3 +134,14 @@ Motivo:
 - São `.mjs` porque o typecheck de testes em TypeScript precisaria do `@types/node`, uma instalação ainda não autorizada. O Node 24 importa os `.ts` do app direto.
 - O aviso `MODULE_TYPELESS_PACKAGE_JSON` fica desligado no script, porque pôr `"type": "module"` no `package.json` poderia afetar o Metro.
 
+**Testes de caracterização com o SQL do próprio app (TEST-1).**
+Decisão:
+- Os comandos de escrita que os testes usam saíram dos repositories para `app/repository/sql/`, sem o Expo, sem mudar nenhum texto: inserir e editar pet e agendamento, concluir, ligar e desligar o pacote, ativar e desativar donos e pets, e restaurar o backup.
+- Os repositories e o `BackupService` usam as mesmas constantes.
+- Os testes de bug descrevem o comportamento de hoje com o nome "confirmado". A correção, na Parte 3, inverte a checagem.
+- A restauração de backup é testada com um banco em memória compartilhada (`file:...?mode=memory&cache=shared`), anexado como `src`, sem arquivo.
+
+Motivo:
+- Copiar o SQL nos testes deixaria os dois se afastarem com o tempo.
+- O teste prova o bug no próprio código, e a correção fica visível no diff do teste.
+

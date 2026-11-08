@@ -34,6 +34,7 @@ app/
     consts.ts             enums, tipos, telas, imagens da barra e tamanhos
   model/                  interfaces das tabelas e builders
   repository/             SQL de cada tabela
+    sql/                  os comandos de escrita que os testes também usam, sem o Expo (desde 2026-11-08)
   service/                repassa as chamadas ao repository; BackupService exporta e importa o banco
   controller/             validação e regras de entrada; ScreenController guarda a tela atual
   hooks/                  useScreen, useError, useFormState e buscas no banco para os formulários

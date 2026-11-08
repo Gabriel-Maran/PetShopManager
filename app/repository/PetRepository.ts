@@ -1,5 +1,6 @@
 import { ORDER } from "../config/consts";
 import { getDatabase } from "../config/database";
+import { ACTIVATE_PET_SQL, DEACTIVATE_PET_SQL, INSERT_PET_SQL, UPDATE_PET_REMARCACAO_SQL, UPDATE_PET_SQL } from "./sql/petsSql";
 import { Pet, PetWithSpecieRaceAndOwner } from "../model/Pet";
 import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
 
@@ -138,21 +139,7 @@ class PetRepository {
     const db = await getDatabase();
     const nome_normalizado = normalizeForSearch(pet.nome);
     await db.runAsync(
-      `INSERT INTO pets (
-        nome, 
-        nome_normalizado, 
-        especie, 
-        porte, 
-        raca, 
-        observacoes,
-        dono_id, 
-        servico_padrao, 
-        remarcacao_ativa, 
-        pacote_remarcacao, 
-        data_inicio_pacote, 
-        horario_padrao,
-        valor_pacote
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      INSERT_PET_SQL,
       [
         pet.nome,
         nome_normalizado,
@@ -175,21 +162,7 @@ class PetRepository {
     const db = await getDatabase();
     const nome_normalizado = normalizeForSearch(pet.nome);
     await db.runAsync(
-      `UPDATE pets SET
-        nome = ?, 
-        nome_normalizado = ?, 
-        especie = ?, 
-        porte = ?, 
-        raca = ?,
-        observacoes = ?, 
-        dono_id = ?, 
-        servico_padrao = ?, 
-        remarcacao_ativa = ?,
-        pacote_remarcacao = ?, 
-        data_inicio_pacote = ?,
-        horario_padrao = ?,
-        valor_pacote = ?
-       WHERE id = ?`,
+      UPDATE_PET_SQL,
       [
         pet.nome,
         nome_normalizado,
@@ -218,12 +191,7 @@ class PetRepository {
   ): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(
-      `UPDATE pets SET
-        remarcacao_ativa = ?,
-        pacote_remarcacao = ?,
-        data_inicio_pacote = ?,
-        valor_pacote = ?
-       WHERE id = ?`,
+      UPDATE_PET_REMARCACAO_SQL,
       [
         remarcacaoAtiva,
         pacoteRemarcacao ?? null,
@@ -236,12 +204,12 @@ class PetRepository {
 
   async deletePet(id: number): Promise<void> {
     const db = await getDatabase();
-    await db.runAsync(`UPDATE pets SET is_ativo = 0 WHERE id = ?`, [id]);
+    await db.runAsync(DEACTIVATE_PET_SQL, [id]);
   }
 
   async activePet(id: number): Promise<void> {
     const db = await getDatabase();
-    await db.runAsync(`UPDATE pets SET is_ativo = 1 WHERE id = ?`, [id]);
+    await db.runAsync(ACTIVATE_PET_SQL, [id]);
   }
 }
 

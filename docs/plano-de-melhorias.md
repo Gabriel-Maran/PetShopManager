@@ -101,13 +101,17 @@ Feito em 2026-11-08: seis prints em `docs/imagens/`, com os dados de exemplo, co
 - **O que muda:** renomear no Git com `git mv` para `remarcacoes.ts`.
 - **Pronto quando:** um clone novo num sistema que diferencia maiúsculas resolve o import (o CI do TEST-2 passa a garantir isso).
 
-### BUG-3 · Remarcação duplicada ao salvar agendamento concluído (provável)
+### BUG-3 · Remarcação duplicada ao salvar agendamento concluído
+
+Confirmado em 2026-11-08 por teste (`tests/remarcacao.test.mjs`): marcar como pago um automático já concluído cria mais um agendamento.
 
 - **Por quê:** o `trg_remarcacao_automatica` ([`database.ts:274`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/config/database.ts#L274)) dispara em `UPDATE OF concluido` sempre que o valor novo é 1. No SQLite, isso vale para todo `UPDATE` que cita a coluna, mesmo sem mudar o valor. O `updateAppointment` sempre cita `concluido`. Então, editar um agendamento automático já concluído (por exemplo, para marcar como pago) deve criar mais um agendamento futuro.
 - **O que muda:** primeiro, um teste que reproduz (TEST-1). Depois, a condição passa a ser `OLD.concluido = 0 AND NEW.concluido = 1`, aplicada por migração (DADOS-1), porque os aparelhos já têm o trigger antigo. O mesmo ajuste vale para o `trg_ultima_visita`.
 - **Pronto quando:** o teste mostra que salvar de novo um concluído não cria agendamento, e que concluir um pendente ainda cria o próximo.
 
-### BUG-4 · Editar pet com pacote refaz a agenda (provável)
+### BUG-4 · Editar pet com pacote refaz a agenda
+
+Confirmado em 2026-11-08 por teste (`tests/remarcacao.test.mjs`): mudar só a observação apaga e gera de novo os automáticos pendentes, perde o horário ajustado à mão e cria outra vez as datas passadas como manuais.
 
 - **Por quê:** o `trg_pet_remarcacao_ativar` ([`database.ts:477`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/config/database.ts#L477)) dispara quando o `UPDATE` cita os campos do pacote, e o `updatePet` sempre os cita. Então, qualquer edição de um pet com pacote (mudar a observação, por exemplo) apaga os agendamentos automáticos pendentes e gera tudo de novo a partir da data de início. Efeitos esperados: horários ajustados à mão se perdem, e datas passadas não concluídas são criadas outra vez como manuais, duplicadas.
 - **O que muda:** teste que reproduz (TEST-1). Depois, o trigger só refaz a agenda quando um campo do pacote muda de fato (`OLD.campo IS NOT NEW.campo`) e não recria datas que já passaram. Aplicado por migração (DADOS-1).
@@ -120,6 +124,10 @@ Feito em 2026-11-08: seis prints em `docs/imagens/`, com os dados de exemplo, co
 - **Pronto quando:** um banco da versão atual abre na versão nova sem perder dados, coberto por teste, e o `database.ts` não tem mais SQL para colar à mão.
 
 ### TEST-1 · Testes das regras e dos triggers
+
+Feito em 2026-11-08: 44 testes com `node:test` e `node:sqlite`, rodando no CI. Cobrem a agenda dos pacotes 2 e 4, a virada de mês, a conclusão de automático, a edição de pet, a cascata, a restauração de backup e as funções de data, máscara, valor e normalização. Os testes usam o mesmo SQL do app (`app/config/schema.ts` e `app/repository/sql/`). BUG-3, BUG-4 e o ponteiro do BKP-1 ficaram confirmados.
+
+Achado novo: no campo de horário, um quinto dígito apaga o campo inteiro (`mascararHorario("09300")` devolve vazio), em vez de ser ignorado.
 
 - **Por quê:** o projeto não tem nenhum teste. A regra mais importante, a remarcação automática, vive em SQL e não tem verificação. Os bugs prováveis acima só podem ser confirmados assim.
 - **O que muda:** testes com o `node:test` e o `node:sqlite` do Node 24, que não exigem instalar pacotes. Para isso, o SQL do esquema sai do `database.ts` para um módulo sem imports do Expo. Primeiro vêm os testes de caracterização (o comportamento de hoje), depois os das correções. Casos mínimos: agenda gerada para pacote 2 e 4, virada de mês, conclusão de automático, edição de pet, desativação em cascata e as funções de data, máscara e normalização.
@@ -156,6 +164,8 @@ Feito em 2026-11-08: seis prints em `docs/imagens/`, com os dados de exemplo, co
 - **Pronto quando:** testado num aparelho: voltar num formulário pede confirmação, e nas abas principais leva ao calendário.
 
 ### BKP-1 · Backup e restauração confiáveis
+
+Confirmado em 2026-11-08 por teste (`tests/backup.test.mjs`): na restauração, a agenda volta igual à do backup, mas o `ultimo_visita_data_auto` dos pets com pacote é refeito pelo trigger de cadastro, e fica além do último automático pendente. O copiar com `SELECT *` funciona entre bancos da mesma versão: o SQLite pula a coluna gerada `dia_semana`.
 
 - **Por quê:**
   - A importação aceita qualquer arquivo terminado em `.db` e copia com `SELECT *`, que depende da ordem das colunas. Um backup de outra versão falha ou grava dados nas colunas erradas.
