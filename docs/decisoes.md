@@ -105,3 +105,32 @@ Motivo:
 Decisão: os testes podem rodar o SQL do app num SQLite em memória (`node:sqlite`, `:memory:`), criado e descartado pelo próprio teste, sem arquivo e sem dado real. O executor é o `node:test`. A autorização está no `CLAUDE.md` local do Gabriel, fora do Git.
 Motivo: confirmar os bugs prováveis (BUG-3, BUG-4 e BKP-1) e proteger os triggers antes de mexer neles, sem instalar nada e sem risco para dados de verdade.
 
+**Dados de exemplo (DEMO-1), adiantados para a Parte 1** (resposta à pergunta 18).
+Decisão:
+- Um botão "Carregar dados de exemplo" em Configurações, em todos os builds, que só aparece com o app vazio (nenhum dono, pet ou agendamento). Ele pede confirmação, e o service confere de novo dentro da transação.
+- Os dados ficam em `app/config/demoData.ts`:
+  - 21 donos, um deles desativado;
+  - 26 pets, 8 com pacote;
+  - histórico de 180 dias e agendamentos para os próximos dias, com datas relativas a hoje;
+  - telefones fictícios e e-mails em `example.com`.
+- Os pacotes usam o próprio trigger para gerar a agenda.
+- O `inserts.txt` sai, porque estava desatualizado: tinha serviços com outros nomes e um pet de um dono inexistente.
+
+Motivo:
+- Os prints e quem instala o APK precisam ver o app com movimento.
+- Só com o app vazio, os dados de exemplo nunca se misturam com clientes reais.
+
+**Transação na conexão do app.**
+Decisão: o `loadDemoData` usa o `withTransactionAsync`, e não o `withExclusiveTransactionAsync`.
+Motivo: a transação exclusiva abre outra conexão, sem os `PRAGMA foreign_keys` e `recursive_triggers` que o `initDatabase` liga. Os triggers se comportariam diferente do uso normal.
+
+**Esquema separado do Expo e testes em `.mjs`.**
+Decisão:
+- O SQL do esquema foi para `app/config/schema.ts`, sem mudar nenhum comando (conferido comando a comando, ignorando só a indentação). O `initDatabase` executa a lista `SCHEMA_STATEMENTS`.
+- Os testes ficam em `tests/*.test.mjs`, rodam com `npm test` (`node:test` e `node:sqlite`) e entram no `npm run check` e no CI.
+
+Motivo:
+- Os testes rodam o mesmo esquema do app num SQLite em memória, como autorizado.
+- São `.mjs` porque o typecheck de testes em TypeScript precisaria do `@types/node`, uma instalação ainda não autorizada. O Node 24 importa os `.ts` do app direto.
+- O aviso `MODULE_TYPELESS_PACKAGE_JSON` fica desligado no script, porque pôr `"type": "module"` no `package.json` poderia afetar o Metro.
+

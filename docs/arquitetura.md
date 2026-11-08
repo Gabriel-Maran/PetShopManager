@@ -28,9 +28,10 @@ App.tsx                   providers, abertura do banco e troca de telas
 app.json, eas.json        configuração do Expo e perfis de build
 app/
   config/
-    database.ts           conexão, tabelas, índices, dados iniciais e triggers
+    database.ts           conexão e initDatabase, que executa o esquema
+    schema.ts             tabelas, índices, dados iniciais e triggers em SQL puro, sem o Expo (desde 2026-11-08)
+    demoData.ts           dados de exemplo com datas em torno de hoje (desde 2026-11-08)
     consts.ts             enums, tipos, telas, imagens da barra e tamanhos
-    inserts.txt           dados fictícios para colar no database.ts durante o desenvolvimento
   model/                  interfaces das tabelas e builders
   repository/             SQL de cada tabela
   service/                repassa as chamadas ao repository; BackupService exporta e importa o banco

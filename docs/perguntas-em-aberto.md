@@ -31,7 +31,7 @@ Perguntas para o Gabriel, de 2026-11-05. Cada resposta vira uma linha datada em 
 15. **Datas:** migrar de `YYYYMMDD` numérico para texto `YYYY-MM-DD`? Recomendado: sim, junto com a migração do dinheiro, para fazer uma migração grande só (DADOS-3).
 16. **Navegação:** pilha própria com `BackHandler` agora e biblioteca depois, ou React Navigation já? Recomendado: o `BackHandler` agora (BUG-8) e a biblioteca na reorganização (ARQ-3).
 17. **Pasta `app/` vira `src/`?** Evita o conflito com o expo-router e segue o padrão mais comum (ARQ-1).
-18. **Dados de demonstração:** botão "Carregar dados de exemplo" só no build `preview`, ou em todos? (DEMO-1)
+18. ~~Dados de demonstração só no build `preview`, ou em todos?~~ Respondida em 2026-11-08: em todos, mas o botão só aparece com o app vazio (ver `decisoes.md`).
 19. **Tema na primeira abertura:** seguir o tema do sistema? Depois, vale a escolha do usuário (TEMA-1).
 20. **Backup automático do Android:** manter ligado (o Google guarda uma cópia do banco) ou desligar por causa dos dados pessoais? (SEG-1)
 21. **Identificadores em inglês:** renomear tudo, em PRs pequenos, como pede a sua regra? Mexe em quase todos os arquivos dos três autores (NOMES-1).
