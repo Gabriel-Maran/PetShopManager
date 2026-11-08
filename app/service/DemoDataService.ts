@@ -1,9 +1,12 @@
-import { getDatabase } from "../config/database";
+import { getDatabase, recreateAppDatabase } from "../config/database";
 import { buildDemoDataSql, COUNT_USER_DATA_SQL } from "../config/demoData";
 import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
 
 export const DEMO_DATA_NOT_EMPTY_MESSAGE =
   "Os dados de exemplo só podem ser carregados com o app vazio, sem nenhum dono, pet ou agendamento.";
+
+export const RESET_DEV_ONLY_MESSAGE =
+  "Apagar todos os dados só é possível no modo de desenvolvimento.";
 
 export async function isAppEmpty(): Promise<boolean> {
   const db = await getDatabase();
@@ -25,4 +28,17 @@ export async function loadDemoData(today: Date = new Date()): Promise<void> {
     }
     await db.execAsync(buildDemoDataSql({ today, normalize: normalizeForSearch }));
   });
+}
+
+/**
+ * Só no modo de desenvolvimento: apaga todos os dados, recria o banco pelas migrações e carrega os
+ * dados de exemplo. As configurações, como o tema, voltam ao padrão. A checagem fica aqui, e não só
+ * na tela, para nenhum outro caminho apagar os dados de um aparelho de verdade.
+ */
+export async function resetToDemoData(today: Date = new Date()): Promise<void> {
+  if (!__DEV__) {
+    throw new Error(RESET_DEV_ONLY_MESSAGE);
+  }
+  await recreateAppDatabase();
+  await loadDemoData(today);
 }

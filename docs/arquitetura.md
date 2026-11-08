@@ -28,9 +28,9 @@ App.tsx                   providers, abertura do banco e troca de telas
 app.json, eas.json        configuração do Expo e perfis de build
 app/
   config/
-    database.ts           conexão, com WAL e pragmas, e initDatabase, que aplica as migrações
+    database.ts           conexão única, com WAL e pragmas; initDatabase aplica as migrações, e recreateAppDatabase recria o banco
     schema.ts             tabelas, índices, dados iniciais, triggers e a lista de migrações, em SQL puro, sem o Expo (desde 2026-11-08)
-    migrator.ts           aplica as migrações pendentes numa transação, sem o Expo (desde 2026-11-08)
+    migrator.ts           aplica as migrações pendentes numa transação e recria o banco do zero, sem o Expo (desde 2026-11-08)
     demoData.ts           dados de exemplo com datas em torno de hoje (desde 2026-11-08)
     consts.ts             enums, tipos, telas, imagens da barra e tamanhos
   model/                  interfaces das tabelas e builders
@@ -95,7 +95,7 @@ Os formulários usam `useFormState` (um objeto de estado com `updateField`).
 
 ## Banco de dados
 
-Arquivo `petshop.db`, aberto por `getDatabase()` com `journal_mode = WAL`, `foreign_keys` e `recursive_triggers`. Esses dois pragmas valem por conexão, então ficam na abertura, e não no esquema.
+Arquivo `petshop.db` (`DATABASE_NAME`), aberto por `getDatabase()` com `journal_mode = WAL`, `foreign_keys` e `recursive_triggers`. Esses dois pragmas valem por conexão, então ficam na abertura, e não no esquema. O `getDatabase()` guarda a promessa da conexão, para as chamadas simultâneas da abertura do app (o tema e o `initDatabase`) receberem a mesma.
 
 Desde 2026-11-08 (DADOS-1), o esquema tem versão, guardada no `PRAGMA user_version`:
 
@@ -105,6 +105,8 @@ Desde 2026-11-08 (DADOS-1), o esquema tem versão, guardada no `PRAGMA user_vers
 - A versão 1 é o esquema de antes das migrações, com `IF NOT EXISTS`, e recria os triggers. Num banco antigo sem versão, ela só marca a versão e troca os triggers pelos de hoje.
 - Um banco de versão mais nova que o app é recusado.
 - O `migrator.ts` não usa o Expo: os testes rodam o mesmo código com o `node:sqlite`.
+
+Reset de desenvolvimento (desde 2026-11-08): com dados no app e só com `__DEV__`, o cartão de dados de exemplo em Configurações vira "Apagar tudo e carregar exemplo". O `resetToDemoData` (`DemoDataService`) confere o `__DEV__`, chama o `recreateDatabase`, que apaga todas as tabelas e aplica todas as migrações na mesma transação, e depois carrega os dados de exemplo.
 
 ### Tabelas
 

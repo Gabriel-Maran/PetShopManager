@@ -1,6 +1,7 @@
 // Migrações do banco (DADOS-1): o mesmo migrateDatabase do app, num SQLite em memória. Cobrem o
 // banco novo, o banco de antes das migrações, a abertura seguinte, a falha no meio, o banco de uma
-// versão mais nova do app e as chaves estrangeiras.
+// versão mais nova do app e as chaves estrangeiras. No fim, o recreateDatabase, que o reset de
+// desenvolvimento usa para apagar tudo antes de carregar os dados de exemplo.
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -16,12 +17,16 @@ import {
   migrateDatabase,
   migrationFailedMessage,
   NEWER_DATABASE_MESSAGE,
+  recreateDatabase,
 } from "../app/config/migrator.ts";
 import { MIGRATIONS } from "../app/config/schema.ts";
+import { buildDemoDataSql, DEMO_DATA_SUMMARY } from "../app/config/demoData.ts";
+import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
 
 const LATEST = MIGRATIONS.length;
 
 const migrate = (db, migrations = MIGRATIONS) => migrateDatabase(asMigrationDatabase(db), migrations);
+const recreate = (db, migrations = MIGRATIONS) => recreateDatabase(asMigrationDatabase(db), migrations);
 const userVersion = (db) => db.prepare("PRAGMA user_version").get().user_version;
 const foreignKeys = (db) => db.prepare("PRAGMA foreign_keys").get().foreign_keys;
 const count = (db, table) => db.prepare(`SELECT COUNT(*) AS total FROM ${table}`).get().total;
@@ -211,5 +216,49 @@ describe("migrações do banco", () => {
 
     assert.equal(userVersion(db), 0);
     assert.deepEqual(schemaObjects(db), []);
+  });
+});
+
+describe("recriar o banco (reset de desenvolvimento)", () => {
+  test("apaga os dados e deixa o banco igual ao de uma instalação nova", async () => {
+    const db = await createDatabase();
+    insertOwnerWithPackagePet(db);
+    db.exec("UPDATE configs SET is_ativo = 1 WHERE id = 1;");
+    db.exec("CREATE TABLE sobra_de_teste (id INTEGER PRIMARY KEY);");
+
+    assert.equal(await recreate(db), LATEST);
+
+    assert.equal(userVersion(db), LATEST);
+    for (const table of ["owners", "pets", "appointments"]) {
+      assert.equal(count(db, table), 0, `${table} fica vazia`);
+    }
+    assert.deepEqual(schemaObjects(db), schemaObjects(await createDatabase()));
+    assert.equal(db.prepare("SELECT is_ativo FROM configs WHERE id = 1").get().is_ativo, 0);
+    assert.equal(insertOwner(db), 1, "os ids recomeçam do 1");
+    assert.equal(foreignKeys(db), 1);
+  });
+
+  test("depois de recriar, os dados de exemplo carregam como no app vazio", async () => {
+    const db = await createDatabase();
+    insertOwnerWithPackagePet(db);
+
+    await recreate(db);
+    db.exec(buildDemoDataSql({ today: new Date(), normalize: normalizeForSearch }));
+
+    assert.equal(count(db, "owners"), DEMO_DATA_SUMMARY.owners);
+    assert.equal(count(db, "pets"), DEMO_DATA_SUMMARY.pets);
+  });
+
+  test("se uma migração falhar, os dados antigos continuam lá", async () => {
+    const db = await createDatabase();
+    insertOwnerWithPackagePet(db);
+    const migrations = [...MIGRATIONS, nextMigration(["INSERT INTO tabela_que_nao_existe VALUES (1);"])];
+
+    await assert.rejects(recreate(db, migrations), failedAt(LATEST + 1));
+
+    assert.equal(count(db, "owners"), 1);
+    assert.equal(count(db, "pets"), 1);
+    assert.equal(userVersion(db), LATEST);
+    assert.equal(foreignKeys(db), 1);
   });
 });

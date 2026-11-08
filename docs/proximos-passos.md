@@ -1,6 +1,6 @@
 # Próximos passos
 
-Atualizado em 2026-11-08, depois do DADOS-1.
+Atualizado em 2026-11-08, depois do reset de dev.
 
 ## Em andamento: segurança e configuração do repositório
 
@@ -44,7 +44,7 @@ Falta, nesta ordem:
    - botão em Configurações, que só aparece com o app vazio;
    - testes num SQLite em memória;
    - esquema separado do Expo, o primeiro passo do TEST-1.
-   - Pedido do Gabriel em 2026-11-08, depois do DADOS-1 e num PR próprio: em desenvolvimento, um botão que apaga todos os dados e carrega os de exemplo.
+   - Pedido do Gabriel em 2026-11-08, em revisão no PR "Reset de dev": em desenvolvimento, o mesmo cartão vira "Apagar tudo e carregar exemplo" quando o app tem dados.
 5. Parte 1 do plano:
    - README (REPO-2), em andamento: a primeira versão traz só o que está confirmado no código;
    - equipe, "quem fez o quê" e licença entram depois das perguntas 1 a 5;
@@ -56,7 +56,7 @@ Falta, nesta ordem:
 - A auditoria do código foi feita sobre o commit `e1d5f2f` do `main`.
 - O plano está em [`plano-de-melhorias.md`](plano-de-melhorias.md), com 35 itens: 9 P0, 16 P1 e 10 P2.
 - A arquitetura de hoje está em [`arquitetura.md`](arquitetura.md), e as respostas do checklist, em [`auditoria.md`](auditoria.md).
-- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo) e #13 (testes), e muda no DADOS-1. O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
+- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes) e #14 (migrações). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
 - Da Parte 1, falta o que depende das perguntas em aberto. A Parte 2 termina com o DADOS-1, e as Partes 3 em diante ainda não começaram.
 - Falta o Gabriel responder [`perguntas-em-aberto.md`](perguntas-em-aberto.md). Várias partes abaixo dependem dessas respostas.
 
@@ -84,7 +84,7 @@ Pronto quando: `npm run typecheck` passa, um clone novo roda com os comandos do 
 
 Feita em 2026-11-08, falta a validação do Gabriel:
 - TEST-1 no `main` desde o PR #13: 44 testes, com BUG-3, BUG-4 e o ponteiro do BKP-1 confirmados;
-- DADOS-1 em revisão no PR "Versão do esquema e migrações": `user_version`, a lista `MIGRATIONS` e 11 testes novos, 55 no total.
+- DADOS-1 no `main` desde o PR #14: `user_version`, a lista `MIGRATIONS` e 11 testes novos, 55 no total.
 
 Depois do merge, a Parte 3 só começa com o aval do Gabriel. As correções do BUG-3 e do BUG-4 entram como a versão 2.
 

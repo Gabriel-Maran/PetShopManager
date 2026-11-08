@@ -24,6 +24,7 @@ export function asMigrationDatabase(db) {
       db.exec(sql);
     },
     getFirstAsync: async (sql) => db.prepare(sql).get() ?? null,
+    getAllAsync: async (sql) => db.prepare(sql).all(),
   };
 }
 

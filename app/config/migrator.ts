@@ -15,6 +15,7 @@ export interface Migration {
 export interface MigrationDatabase {
   execAsync(sql: string): Promise<void>;
   getFirstAsync<T>(sql: string): Promise<T | null>;
+  getAllAsync<T>(sql: string): Promise<T[]>;
 }
 
 export const NEWER_DATABASE_MESSAGE =
@@ -44,17 +45,29 @@ export async function migrateDatabase(
   const pending = migrations.slice(current);
   if (pending.length === 0) return current;
 
-  // Dentro de uma transação, o PRAGMA foreign_keys não tem efeito. Por isso ele é desligado antes:
-  // assim, reconstruir uma tabela (criar a nova, copiar e apagar a antiga) não dispara o ON DELETE
-  // CASCADE nas tabelas filhas.
-  const foreignKeysWereOn = (await readPragma(db, "foreign_keys")) === 1;
-  await db.execAsync("PRAGMA foreign_keys = OFF;");
-  try {
-    await applyInTransaction(db, pending);
-  } finally {
-    if (foreignKeysWereOn) await db.execAsync("PRAGMA foreign_keys = ON;");
-  }
+  await withForeignKeysOff(db, () =>
+    inTransaction(db, () => applyMigrations(db, pending)),
+  );
   return latest;
+}
+
+/**
+ * Apaga todas as tabelas, com os dados, e cria o banco de novo pelas migrações, como numa
+ * instalação nova. Tudo numa transação só: se algo falhar, os dados antigos continuam lá.
+ * Devolve a versão final.
+ */
+export async function recreateDatabase(
+  db: MigrationDatabase,
+  migrations: readonly Migration[],
+): Promise<number> {
+  assertSequential(migrations);
+  await withForeignKeysOff(db, () =>
+    inTransaction(db, async () => {
+      await dropAllTables(db);
+      await applyMigrations(db, migrations);
+    }),
+  );
+  return migrations.length;
 }
 
 function assertSequential(migrations: readonly Migration[]): void {
@@ -67,22 +80,44 @@ function assertSequential(migrations: readonly Migration[]): void {
   });
 }
 
-async function applyInTransaction(
+// Dentro de uma transação, o PRAGMA foreign_keys não tem efeito. Por isso ele é desligado antes:
+// assim, reconstruir ou apagar uma tabela não dispara o ON DELETE CASCADE nas tabelas filhas.
+async function withForeignKeysOff(
+  db: MigrationDatabase,
+  work: () => Promise<void>,
+): Promise<void> {
+  const foreignKeysWereOn = (await readPragma(db, "foreign_keys")) === 1;
+  await db.execAsync("PRAGMA foreign_keys = OFF;");
+  try {
+    await work();
+  } finally {
+    if (foreignKeysWereOn) await db.execAsync("PRAGMA foreign_keys = ON;");
+  }
+}
+
+async function inTransaction(
+  db: MigrationDatabase,
+  work: () => Promise<void>,
+): Promise<void> {
+  await db.execAsync("BEGIN IMMEDIATE;");
+  try {
+    await work();
+    await db.execAsync("COMMIT;");
+  } catch (error) {
+    await rollbackQuietly(db);
+    throw error;
+  }
+}
+
+async function applyMigrations(
   db: MigrationDatabase,
   pending: readonly Migration[],
 ): Promise<void> {
   // A checagem compara com o que o banco já tinha, para um dado antigo inconsistente não impedir
   // o app de abrir. Só é recusada a migração que quebra uma referência nova.
   const violationsBefore = await countForeignKeyViolations(db);
-  await db.execAsync("BEGIN IMMEDIATE;");
-  try {
-    for (const migration of pending) {
-      await applyMigration(db, migration, violationsBefore);
-    }
-    await db.execAsync("COMMIT;");
-  } catch (error) {
-    await rollbackQuietly(db);
-    throw error;
+  for (const migration of pending) {
+    await applyMigration(db, migration, violationsBefore);
   }
 }
 
@@ -102,6 +137,18 @@ async function applyMigration(
   } catch (cause) {
     throw new Error(migrationFailedMessage(migration.version), { cause });
   }
+}
+
+// Apagar a tabela leva junto os índices e os triggers dela. As tabelas internas do SQLite
+// (sqlite_*) ficam, e a sqlite_sequence perde sozinha a contagem de id das tabelas apagadas.
+async function dropAllTables(db: MigrationDatabase): Promise<void> {
+  const tables = await db.getAllAsync<{ name: string }>(
+    "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%';",
+  );
+  for (const { name } of tables) {
+    await db.execAsync(`DROP TABLE "${name}";`);
+  }
+  await db.execAsync("PRAGMA user_version = 0;");
 }
 
 // Alguns erros, como disco cheio, já fazem o SQLite desfazer a transação sozinho. Nesse caso o

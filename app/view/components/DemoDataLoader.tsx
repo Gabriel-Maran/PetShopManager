@@ -7,7 +7,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { DEMO_DATA_SUMMARY } from "../../config/demoData";
-import { isAppEmpty, loadDemoData } from "../../service/DemoDataService";
+import {
+  isAppEmpty,
+  loadDemoData,
+  resetToDemoData,
+} from "../../service/DemoDataService";
 import {
   ThemeColors,
   useTheme,
@@ -20,14 +24,51 @@ interface DemoDataLoaderProps {
   onLoaded?: () => void;
 }
 
-const CONFIRM_MESSAGE =
-  `Serão criados ${DEMO_DATA_SUMMARY.owners} donos e ${DEMO_DATA_SUMMARY.pets} pets fictícios, ` +
-  `${DEMO_DATA_SUMMARY.packages} deles com pacote, e os agendamentos de cada um. ` +
-  "Os dados ficam no app; para começar do zero depois, limpe os dados do app nas configurações do Android.";
+type DemoAction = "load" | "reset";
 
-/** Carrega os dados de exemplo. Só aparece com o app vazio, para nunca misturar com dados reais. */
+const DEMO_DATA_CONTENT =
+  `${DEMO_DATA_SUMMARY.owners} donos e ${DEMO_DATA_SUMMARY.pets} pets fictícios, ` +
+  `${DEMO_DATA_SUMMARY.packages} deles com pacote, e os agendamentos de cada um.`;
+
+const ACTIONS = {
+  load: {
+    emoji: "🐾",
+    title: "Carregar dados de exemplo",
+    description:
+      "Preenche o app vazio com donos, pets, pacotes e agendamentos fictícios, para conhecer as telas e os relatórios.",
+    confirmMessage:
+      `Serão criados ${DEMO_DATA_CONTENT} ` +
+      "Os dados ficam no app; para começar do zero depois, limpe os dados do app nas configurações do Android.",
+    confirmLabel: "Carregar",
+    destructive: false,
+    run: loadDemoData,
+  },
+  reset: {
+    emoji: "🧹",
+    title: "Apagar tudo e carregar exemplo",
+    description:
+      "Só no modo de desenvolvimento: apaga todos os dados, recria o banco e carrega os dados de exemplo.",
+    confirmMessage:
+      "Isso apaga TODOS os donos, pets e agendamentos e recria o banco do zero, com as configurações no padrão. " +
+      `Depois, serão criados ${DEMO_DATA_CONTENT} Esta ação não pode ser desfeita.`,
+    confirmLabel: "Apagar e carregar",
+    destructive: true,
+    run: resetToDemoData,
+  },
+} as const;
+
+/** Com o app vazio, carregar. Com dados, apagar tudo antes, mas só no modo de desenvolvimento. */
+function availableAction(isEmpty: boolean): DemoAction | null {
+  if (isEmpty) return "load";
+  return __DEV__ ? "reset" : null;
+}
+
+/**
+ * Carrega os dados de exemplo. No APK, só aparece com o app vazio, para nunca misturar com dados
+ * reais. No modo de desenvolvimento, com dados, oferece apagar tudo e carregar de novo.
+ */
 export function DemoDataLoader({ onLoaded }: DemoDataLoaderProps) {
-  const [visible, setVisible] = useState(false);
+  const [action, setAction] = useState<DemoAction | null>(null);
   const [loading, setLoading] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -38,20 +79,20 @@ export function DemoDataLoader({ onLoaded }: DemoDataLoaderProps) {
   useEffect(() => {
     let mounted = true;
     isAppEmpty()
-      .then((empty) => mounted && setVisible(empty))
+      .then((empty) => mounted && setAction(availableAction(empty)))
       // Se a checagem falhar, o botão só não aparece: a função é opcional e o resto da tela segue.
-      .catch(() => mounted && setVisible(false));
+      .catch(() => mounted && setAction(null));
     return () => {
       mounted = false;
     };
   }, []);
 
-  async function runLoad() {
+  async function runAction(current: DemoAction) {
     setConfirmVisible(false);
     setLoading(true);
     try {
-      await loadDemoData();
-      setVisible(false);
+      await ACTIONS[current].run();
+      setAction(availableAction(false));
       onLoaded?.();
     } catch (e: unknown) {
       setErrorMsg(
@@ -64,37 +105,46 @@ export function DemoDataLoader({ onLoaded }: DemoDataLoaderProps) {
     }
   }
 
-  if (!visible) return null;
+  if (!action) return null;
+  const config = ACTIONS[action];
 
   return (
     <View style={s.container}>
       <TouchableOpacity
-        style={s.card}
+        style={[s.card, config.destructive && s.cardDestructive]}
         onPress={() => setConfirmVisible(true)}
         disabled={loading}
         activeOpacity={0.75}
         accessibilityRole="button"
       >
-        <View style={s.cardIcon}>
-          <Text style={s.icon}>🐾</Text>
+        <View
+          style={[s.cardIcon, config.destructive && s.cardIconDestructive]}
+        >
+          <Text style={s.icon}>{config.emoji}</Text>
         </View>
         <View style={s.cardText}>
-          <Text style={s.cardTitle}>Carregar dados de exemplo</Text>
-          <Text style={s.cardDescription}>
-            Preenche o app vazio com donos, pets, pacotes e agendamentos
-            fictícios, para conhecer as telas e os relatórios.
+          <Text
+            style={[s.cardTitle, config.destructive && s.cardTitleDestructive]}
+          >
+            {config.title}
           </Text>
+          <Text style={s.cardDescription}>{config.description}</Text>
         </View>
-        {loading && <ActivityIndicator color={colors.GREEN_COLOR} />}
+        {loading && (
+          <ActivityIndicator
+            color={config.destructive ? colors.RED_COLOR : colors.GREEN_COLOR}
+          />
+        )}
       </TouchableOpacity>
 
       <ConfirmModal
         visible={confirmVisible}
-        emoji="🐾"
-        title="Carregar dados de exemplo"
-        message={CONFIRM_MESSAGE}
-        confirmLabel="Carregar"
-        onConfirm={runLoad}
+        emoji={config.emoji}
+        title={config.title}
+        message={config.confirmMessage}
+        confirmLabel={config.confirmLabel}
+        variant={config.destructive ? "destructive" : "default"}
+        onConfirm={() => runAction(action)}
         onCancel={() => setConfirmVisible(false)}
       />
 
@@ -104,7 +154,8 @@ export function DemoDataLoader({ onLoaded }: DemoDataLoaderProps) {
 }
 
 // ─── Estilos ──────────────────────────────────────────────────────────────────
-// Os mesmos do cartão de exportar, no DatabaseTransfer, logo abaixo na tela.
+// Os mesmos dos cartões do DatabaseTransfer, logo abaixo na tela: carregar como o de exportar, e
+// apagar tudo como o de importar.
 
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
@@ -122,6 +173,10 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.EDITAR_BACKGROUND_COLOR,
       borderColor: colors.EDITAR_BORDER_COLOR,
     },
+    cardDestructive: {
+      backgroundColor: colors.EXCLUIR_BACKGROUND_COLOR,
+      borderColor: colors.EXCLUIR_BORDER_COLOR,
+    },
     cardIcon: {
       width: 44,
       height: 44,
@@ -129,6 +184,9 @@ const styles = (colors: ThemeColors) =>
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: colors.PRIMARY_SOFT,
+    },
+    cardIconDestructive: {
+      backgroundColor: colors.EXCLUIR_BACKGROUND_COLOR,
     },
     icon: {
       fontSize: 22,
@@ -141,6 +199,9 @@ const styles = (colors: ThemeColors) =>
       fontWeight: "600",
       marginBottom: 2,
       color: colors.EDITAR_MAIN_COLOR,
+    },
+    cardTitleDestructive: {
+      color: colors.EXCLUIR_MAIN_COLOR,
     },
     cardDescription: {
       fontSize: 13,
