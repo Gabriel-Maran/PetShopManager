@@ -1,6 +1,6 @@
 # Próximos passos
 
-Atualizado em 2026-11-08, depois da configuração do GitHub.
+Atualizado em 2026-11-08, depois do DADOS-1.
 
 ## Em andamento: segurança e configuração do repositório
 
@@ -33,16 +33,18 @@ Falta, nesta ordem:
 
 1. Do Gabriel: avisar os parceiros que o `main` agora só recebe PR, com squash e o CI verde.
 2. A partir de 2026-11-10, quando passam da espera de 7 dias, `npm i -E expo@58.0.23 expo-sharing@58.0.22 expo-sqlite@58.0.15`.
+   - Em 2026-11-08, um `npm audit fix` no clone já subiu o `@expo/config` para 58.0.10 e o `@expo/fingerprint` para 0.21.8, os dois de 2026-10-31. O `package-lock.json` alterado ficou sem commit no clone e entra no PR do patch.
    - O `@expo/config` novo deixa de usar o `deepmerge`, o que fecha um alerta.
    - Numa simulação, sobram os alertas moderados de `glob` e `minimatch` e o do `zod`, todos nas ferramentas de build, que nem o Expo mais novo corrigiu.
 3. Do Gabriel:
    - testar no aparelho as permissões do PR #3, com o roteiro no PR;
    - conferir o tamanho do APK, porque o pacote JavaScript foi de 1,72 MB para 2,7 MB;
    - responder `perguntas-em-aberto.md`.
-4. DEMO-1 adiantado para a Parte 1, em revisão no PR "Dados de exemplo":
+4. DEMO-1 adiantado para a Parte 1, no `main` desde o PR #11:
    - botão em Configurações, que só aparece com o app vazio;
    - testes num SQLite em memória;
    - esquema separado do Expo, o primeiro passo do TEST-1.
+   - Pedido do Gabriel em 2026-11-08, depois do DADOS-1 e num PR próprio: em desenvolvimento, um botão que apaga todos os dados e carrega os de exemplo.
 5. Parte 1 do plano:
    - README (REPO-2), em andamento: a primeira versão traz só o que está confirmado no código;
    - equipe, "quem fez o quê" e licença entram depois das perguntas 1 a 5;
@@ -54,7 +56,8 @@ Falta, nesta ordem:
 - A auditoria do código foi feita sobre o commit `e1d5f2f` do `main`.
 - O plano está em [`plano-de-melhorias.md`](plano-de-melhorias.md), com 35 itens: 9 P0, 16 P1 e 10 P2.
 - A arquitetura de hoje está em [`arquitetura.md`](arquitetura.md), e as respostas do checklist, em [`auditoria.md`](auditoria.md).
-- O app só mudou nos PRs #1 a #3, de segurança e build. O PR #5 adianta o script `typecheck` da Parte 1 e o CI da Parte 2. As partes abaixo ainda não começaram.
+- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo) e #13 (testes), e muda no DADOS-1. O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
+- Da Parte 1, falta o que depende das perguntas em aberto. A Parte 2 termina com o DADOS-1, e as Partes 3 em diante ainda não começaram.
 - Falta o Gabriel responder [`perguntas-em-aberto.md`](perguntas-em-aberto.md). Várias partes abaixo dependem dessas respostas.
 
 ## Partes de execução
@@ -79,9 +82,11 @@ Pronto quando: `npm run typecheck` passa, um clone novo roda com os comandos do 
 
 ### Parte 2 · Testes do banco e migrações (P0)
 
-Em andamento desde 2026-11-08:
-- TEST-1 feito no PR "Testes de caracterização do banco": 44 testes, com BUG-3, BUG-4 e o ponteiro do BKP-1 confirmados;
-- falta o DADOS-1 (versão do esquema e migrações), que segue numa sessão nova.
+Feita em 2026-11-08, falta a validação do Gabriel:
+- TEST-1 no `main` desde o PR #13: 44 testes, com BUG-3, BUG-4 e o ponteiro do BKP-1 confirmados;
+- DADOS-1 em revisão no PR "Versão do esquema e migrações": `user_version`, a lista `MIGRATIONS` e 11 testes novos, 55 no total.
+
+Depois do merge, a Parte 3 só começa com o aval do Gabriel. As correções do BUG-3 e do BUG-4 entram como a versão 2.
 
 - TEST-1: escrever os testes de caracterização com `node:test` e `node:sqlite`. O esquema já está separado do Expo (`schema.ts`), e o `npm test` já roda no CI, desde o DEMO-1.
 - Confirmar ou descartar BUG-3, BUG-4 e o problema da restauração do BKP-1.

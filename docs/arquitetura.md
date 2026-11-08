@@ -28,8 +28,9 @@ App.tsx                   providers, abertura do banco e troca de telas
 app.json, eas.json        configuração do Expo e perfis de build
 app/
   config/
-    database.ts           conexão e initDatabase, que executa o esquema
-    schema.ts             tabelas, índices, dados iniciais e triggers em SQL puro, sem o Expo (desde 2026-11-08)
+    database.ts           conexão, com WAL e pragmas, e initDatabase, que aplica as migrações
+    schema.ts             tabelas, índices, dados iniciais, triggers e a lista de migrações, em SQL puro, sem o Expo (desde 2026-11-08)
+    migrator.ts           aplica as migrações pendentes numa transação, sem o Expo (desde 2026-11-08)
     demoData.ts           dados de exemplo com datas em torno de hoje (desde 2026-11-08)
     consts.ts             enums, tipos, telas, imagens da barra e tamanhos
   model/                  interfaces das tabelas e builders
@@ -94,7 +95,16 @@ Os formulários usam `useFormState` (um objeto de estado com `updateField`).
 
 ## Banco de dados
 
-Arquivo `petshop.db`, aberto por `getDatabase()` com `journal_mode = WAL`. O `initDatabase()` liga `foreign_keys` e `recursive_triggers` e cria tudo com `IF NOT EXISTS`. Não há versão de esquema nem migração: uma tabela ou trigger que já existe no aparelho não é atualizada. Para mudar o esquema no desenvolvimento, o `database.ts` traz um bloco de `DROP` comentado para colar e rodar.
+Arquivo `petshop.db`, aberto por `getDatabase()` com `journal_mode = WAL`, `foreign_keys` e `recursive_triggers`. Esses dois pragmas valem por conexão, então ficam na abertura, e não no esquema.
+
+Desde 2026-11-08 (DADOS-1), o esquema tem versão, guardada no `PRAGMA user_version`:
+
+- `MIGRATIONS`, em `schema.ts`, tem uma entrada por versão, em sequência a partir de 1. Uma versão publicada não muda mais: a mudança entra como a seguinte.
+- O `initDatabase()` chama o `migrateDatabase()` (`migrator.ts`), que aplica as pendentes numa transação só. Se uma falhar, nada muda, e o erro vai para a tela de erro do `App.tsx`.
+- Durante as migrações, as chaves estrangeiras ficam desligadas, para reconstruir uma tabela sem o `ON DELETE CASCADE` apagar as filhas. No fim, o `foreign_key_check` não pode achar mais problemas que antes.
+- A versão 1 é o esquema de antes das migrações, com `IF NOT EXISTS`, e recria os triggers. Num banco antigo sem versão, ela só marca a versão e troca os triggers pelos de hoje.
+- Um banco de versão mais nova que o app é recusado.
+- O `migrator.ts` não usa o Expo: os testes rodam o mesmo código com o `node:sqlite`.
 
 ### Tabelas
 
