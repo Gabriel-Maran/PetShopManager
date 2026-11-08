@@ -70,3 +70,16 @@ Motivo: sem o arquivo, os parceiros e o build da EAS instalam sem essas proteç�
 Decisão: descrição e tópicos do REPO-1; Dependabot alerts e security updates, secret scanning e push protection.
 Motivo: o repositório é público e está linkado no portfólio. Essas opções não mudam o fluxo dos parceiros. O ruleset no `main` muda, e por isso fica para a configuração completa do GitHub.
 
+**GitHub configurado como o do portfólio.**
+Decisão:
+- `dependabot.yml` semanal, com espera de 7 dias e mensagens `chore(deps)`;
+- CI com `npm run check` no Linux;
+- depois do merge, merge só por squash, branch apagada depois do merge e dois rulesets no `main`: PR obrigatório, CI verde e sem bypass; sem apagar a branch nem force push.
+
+O PR não exige aprovação mínima, como no portfólio.
+Motivo: o `main` passa a receber só mudanças revisadas e verificadas, sem travar o trabalho de quem abre o PR. Com aprovação obrigatória, cada PR esperaria um dos parceiros.
+
+**Dependabot com o SDK do Expo travado no patch.**
+Decisão: `expo`, `expo-*`, `react`, `react-native`, `@types/react` e `typescript` só recebem patch, num grupo `expo-sdk`. A troca de SDK é feita à mão, com `npx expo install --fix`. As correções de segurança chegam num PR só.
+Motivo: cada SDK fixa a versão desses pacotes. Uma versão minor ou major fora da lista, sozinha, quebra o app. Pacotes fora do SDK, como o `react-native-calendars`, seguem o grupo de minor e patch.
+
