@@ -1,4 +1,5 @@
 import { getDatabase } from "../config/database";
+import { CONCLUDE_APPOINTMENT_SQL, INSERT_APPOINTMENT_SQL, UPDATE_APPOINTMENT_SQL } from "./sql/appointmentsSql";
 import { Appointment } from "../model/Appointment";
 import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
 
@@ -102,10 +103,7 @@ class AppointmentRepository {
   async createAppointment(appointment: Appointment): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(
-      `INSERT INTO appointments
-        (pet_id, servico, data, hora, entregar_pet, concluido, observacao, is_auto_agen, valor, tipo_pgto, ta_pago)
-       VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      INSERT_APPOINTMENT_SQL,
       [
         appointment.pet_id,
         appointment.servico,
@@ -125,18 +123,7 @@ class AppointmentRepository {
   async updateAppointment(id: number, appointment: Appointment): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(
-      `UPDATE appointments SET
-        pet_id = ?,
-        servico = ?,
-        data = ?,
-        hora = ?,
-        entregar_pet = ?,
-        concluido = ?,
-        observacao = ?,
-        valor = ?,
-        tipo_pgto = ?,
-        ta_pago = ?
-       WHERE id = ?`,
+      UPDATE_APPOINTMENT_SQL,
       [
         appointment.pet_id,
         appointment.servico,
@@ -156,7 +143,7 @@ class AppointmentRepository {
   // Conclui um agendamento — dispara trg_ultima_visita e trg_remarcacao_automatica
   async concludeAppointment(id: number): Promise<void> {
     const db = await getDatabase();
-    await db.runAsync(`UPDATE appointments SET concluido = 1 WHERE id = ?`, [
+    await db.runAsync(CONCLUDE_APPOINTMENT_SQL, [
       id,
     ]);
   }

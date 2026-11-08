@@ -2,20 +2,15 @@ import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import { getDatabase } from "../config/database";
+import {
+  BACKUP_TABLES,
+  clearTableSql,
+  copyTableSql,
+} from "../repository/sql/backupSql";
 
 const DB_NAME = "petshop.db";
 const DB_PATH = `${FileSystem.documentDirectory}SQLite/${DB_NAME}`;
 const BACKUP_PATH = `${FileSystem.cacheDirectory}${DB_NAME}`;
-
-const TABELAS = [
-  "configs",
-  "service_type",
-  "species",
-  "race",
-  "owners",
-  "pets",
-  "appointments",
-];
 
 // ─── EXPORTAR ────────────────────────────────────────────────────────────────
 
@@ -88,11 +83,9 @@ export async function importDatabase(): Promise<void> {
     await db.execAsync(`PRAGMA foreign_keys = OFF;`);
     await db.execAsync(`BEGIN TRANSACTION;`);
 
-    for (const tabela of TABELAS) {
-      await db.execAsync(`DELETE FROM main.${tabela};`);
-      await db.execAsync(
-        `INSERT INTO main.${tabela} SELECT * FROM src.${tabela};`,
-      );
+    for (const tabela of BACKUP_TABLES) {
+      await db.execAsync(clearTableSql(tabela));
+      await db.execAsync(copyTableSql(tabela));
     }
 
     await db.execAsync(`COMMIT;`);
