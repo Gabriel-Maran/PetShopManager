@@ -165,3 +165,17 @@ Motivo:
 - Antes, um erro na criação do banco ia só para o `console.log`, e o app abria como se tudo estivesse certo (primeiro item do BUG-6).
 - Os testes rodam o mesmo código de migração do app, sem copiar a lógica.
 
+**Reset de desenvolvimento** (pedido do Gabriel).
+Decisão:
+- Com dados no app e só no modo de desenvolvimento (`__DEV__`), o cartão de dados de exemplo em Configurações vira "Apagar tudo e carregar exemplo", em vermelho e com confirmação. No APK, nada muda: o cartão continua aparecendo só com o app vazio.
+- O `resetToDemoData`, no `DemoDataService`, confere o `__DEV__` de novo antes de apagar.
+- O `recreateDatabase` (`migrator.ts`) apaga todas as tabelas e aplica todas as migrações numa transação só, e depois os dados de exemplo entram como no app vazio. As configurações, como o tema, voltam ao padrão.
+- O arquivo do banco não é apagado.
+- O `getDatabase` passou a guardar a promessa da conexão, e o nome `petshop.db` ficou só no `database.ts` (`DATABASE_NAME`), usado também pelo `BackupService`.
+
+Motivo:
+- Testar o app com dados novos sem limpar os dados do app nas configurações do Android.
+- A checagem no service impede que outro caminho apague os dados de um aparelho de verdade.
+- O `expo-sqlite` conta quantas vezes a conexão foi aberta e se recusa a apagar o arquivo enquanto alguma continua aberta. Em desenvolvimento, cada recarga do app abre a conexão de novo, então apagar o arquivo falharia justamente onde o botão existe. Apagar pelo SQL funciona com a conexão aberta, é testado no SQLite em memória e, se algo falhar, mantém os dados antigos.
+- Na abertura do app, o tema e o `initDatabase` pedem o banco ao mesmo tempo e podiam abrir duas conexões.
+

@@ -71,6 +71,8 @@ npm start
 
 Depois, é só ler o QR code com o Expo Go. Com um emulador aberto, `npm run android` abre o app nele.
 
+No modo de desenvolvimento, Configurações tem o botão "Apagar tudo e carregar exemplo", que recria o banco do zero com os dados de exemplo. Ele não existe no APK.
+
 Os testes rodam o esquema do banco e os dados de exemplo num SQLite em memória, com o `node:test` e o `node:sqlite` do Node 24, sem nenhum pacote a mais:
 
 ```bash

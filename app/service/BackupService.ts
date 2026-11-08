@@ -1,16 +1,15 @@
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
-import { getDatabase } from "../config/database";
+import { DATABASE_NAME, getDatabase } from "../config/database";
 import {
   BACKUP_TABLES,
   clearTableSql,
   copyTableSql,
 } from "../repository/sql/backupSql";
 
-const DB_NAME = "petshop.db";
-const DB_PATH = `${FileSystem.documentDirectory}SQLite/${DB_NAME}`;
-const BACKUP_PATH = `${FileSystem.cacheDirectory}${DB_NAME}`;
+const DB_PATH = `${FileSystem.documentDirectory}SQLite/${DATABASE_NAME}`;
+const BACKUP_PATH = `${FileSystem.cacheDirectory}${DATABASE_NAME}`;
 
 // ─── EXPORTAR ────────────────────────────────────────────────────────────────
 
