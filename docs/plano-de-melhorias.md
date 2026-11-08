@@ -83,6 +83,8 @@ O estado e as pendências estão em `proximos-passos.md`, e as decisões, em `de
 
 ### MIDIA-1 · Prints do app
 
+Feito em 2026-11-08: seis prints em `docs/imagens/`, com os dados de exemplo, comprimidos (540 px, cerca de 54 KB cada) e sem metadados, na seção Telas do README. Falta, opcional, um print de relatório com gráfico.
+
 - **Por quê:** o README e o card do portfólio precisam de imagem. Sem ela, ninguém vê o app sem instalar.
 - **O que muda:** de 4 a 6 prints com os dados de exemplo do DEMO-1: calendário com agendamentos, lista de pets, cadastro de pet com pacote, um relatório, o tema escuro e o backup. Ficam em `docs/imagens/`, comprimidos.
 - **Pronto quando:** as imagens estão no repositório, nenhuma mostra dado real, e o README as exibe.

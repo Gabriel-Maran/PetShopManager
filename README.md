@@ -4,6 +4,16 @@ App Android para um pet shop organizar donos, pets e a agenda de banho e tosa, c
 
 Projeto acadêmico da disciplina de Desenvolvimento Mobile, na Unipar.
 
+## Telas
+
+Prints com os dados de exemplo do próprio app.
+
+| Calendário | Pets | Pacote do pet |
+| :---: | :---: | :---: |
+| <img src="docs/imagens/calendario.jpg" width="240" alt="Calendário de novembro com os agendamentos do dia: Thor, Julie e Max"> | <img src="docs/imagens/pets.jpg" width="240" alt="Lista de pets com o dono e a raça de cada um"> | <img src="docs/imagens/pet-pacote.jpg" width="240" alt="Edição do pet Thor, com remarcação automática ativa, pacote mensal de 4 semanas e valor de 320 reais"> |
+| **Relatórios** | **Configurações (escuro)** | **Configurações (claro)** |
+| <img src="docs/imagens/relatorios.jpg" width="240" alt="Lista dos seis relatórios, divididos em operacional, retenção, engajamento e financeiro"> | <img src="docs/imagens/configuracoes-escuro.jpg" width="240" alt="Configurações no tema escuro, com a troca de tema e o backup"> | <img src="docs/imagens/configuracoes-claro.jpg" width="240" alt="Configurações no tema claro, com a troca de tema e o backup"> |
+
 ## Funcionalidades
 
 - **Cadastros de donos e pets:** espécie, raça (dá para criar novas), porte e serviço padrão. Desativar um dono desativa os pets dele, e os cadastros nunca são apagados de verdade.
