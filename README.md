@@ -18,6 +18,7 @@ Projeto acadêmico da disciplina de Desenvolvimento Mobile, na Unipar.
   - pacotes ativos.
 - **Tema claro e escuro.**
 - **Backup por arquivo:** exporta o banco pelo compartilhamento do Android e importa um arquivo `.db`.
+- **Dados de exemplo:** com o app vazio, um toque em Configurações cria donos, pets, pacotes e agendamentos fictícios. Assim o calendário e os relatórios aparecem com movimento.
 
 ## Stack
 
@@ -26,7 +27,8 @@ Projeto acadêmico da disciplina de Desenvolvimento Mobile, na Unipar.
 - `expo-sqlite` para o banco local e `react-native-calendars` para o calendário.
 - `expo-file-system`, `expo-sharing` e `expo-document-picker` para o backup.
 - Build Android pelo EAS: o perfil `preview` gera APK, e o `production` gera AAB.
-- GitHub Actions: typecheck e pacote Android a cada pull request.
+- Testes com `node:test` e `node:sqlite`, sem dependências.
+- GitHub Actions: typecheck, testes e pacote Android a cada pull request.
 
 ## Como funciona por dentro
 
@@ -59,7 +61,13 @@ npm start
 
 Depois, é só ler o QR code com o Expo Go. Com um emulador aberto, `npm run android` abre o app nele.
 
-As mesmas checagens do CI (typecheck e pacote Android) rodam com:
+Os testes rodam o esquema do banco e os dados de exemplo num SQLite em memória, com o `node:test` e o `node:sqlite` do Node 24, sem nenhum pacote a mais:
+
+```bash
+npm test
+```
+
+As mesmas checagens do CI (typecheck, testes e pacote Android) rodam com:
 
 ```bash
 npm run check

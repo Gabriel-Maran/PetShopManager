@@ -7,6 +7,7 @@ import {
 } from "../Themes/ThemeProvider";
 import ThemeToggle from "../components/ThemeToggle";
 import { DatabaseTransfer } from "../components/DatabaseTransfer";
+import { DemoDataLoader } from "../components/DemoDataLoader";
 import { useScreen } from "../../hooks/useScreen";
 import { APP_BAR_HEIGHT, Screen } from "../../config/consts";
 
@@ -35,6 +36,7 @@ export default function Configuracoes() {
         </View>
         <Text style={s.sectionLabel}>Dados</Text>
         <View style={s.card}>
+          <DemoDataLoader onLoaded={() => navigate(Screen.Calendario)} />
           <DatabaseTransfer
             onImportSuccess={() => navigate(Screen.Calendario)}
           />

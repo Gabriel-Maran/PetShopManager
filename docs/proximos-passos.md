@@ -39,10 +39,14 @@ Falta, nesta ordem:
    - testar no aparelho as permissões do PR #3, com o roteiro no PR;
    - conferir o tamanho do APK, porque o pacote JavaScript foi de 1,72 MB para 2,7 MB;
    - responder `perguntas-em-aberto.md`.
-4. Parte 1 do plano:
+4. DEMO-1 adiantado para a Parte 1, em revisão no PR "Dados de exemplo":
+   - botão em Configurações, que só aparece com o app vazio;
+   - testes num SQLite em memória;
+   - esquema separado do Expo, o primeiro passo do TEST-1.
+5. Parte 1 do plano:
    - README (REPO-2), em andamento: a primeira versão traz só o que está confirmado no código;
    - equipe, "quem fez o quê" e licença entram depois das perguntas 1 a 5;
-   - os prints (MIDIA-1) entram com os dados de exemplo;
+   - os prints (MIDIA-1): o Gabriel carrega os dados de exemplo num app limpo e tira os prints;
    - o script `typecheck` já entrou no PR #5.
 
 ## Onde paramos no plano
@@ -75,7 +79,7 @@ Pronto quando: `npm run typecheck` passa, um clone novo roda com os comandos do 
 
 ### Parte 2 · Testes do banco e migrações (P0)
 
-- TEST-1: separar o SQL do esquema da conexão do Expo e escrever os testes de caracterização com `node:test` e `node:sqlite`.
+- TEST-1: escrever os testes de caracterização com `node:test` e `node:sqlite`. O esquema já está separado do Expo (`schema.ts`), e o `npm test` já roda no CI, desde o DEMO-1.
 - Confirmar ou descartar BUG-3, BUG-4 e o problema da restauração do BKP-1.
 - DADOS-1: `user_version`, lista de migrações e o esquema atual como versão 1.
 - Workflow do GitHub Actions com typecheck e testes, que já não exigem instalação.
@@ -103,7 +107,6 @@ Pronto quando: cada caminho de erro tem teste ou foi conferido no aparelho, e os
 
 ### Parte 5 · Demonstração (P1)
 
-- DEMO-1: carregador de dados de exemplo.
 - BUILD-1: APK numa release `v1.0.0`.
 - MIDIA-2: vídeo curto.
 - REPO-2: README completo, com APK, vídeo e "Quem fez o quê".
