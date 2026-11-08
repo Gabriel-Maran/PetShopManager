@@ -91,3 +91,17 @@ Motivo:
 - O Expo Go traz as versões nativas do SDK.
 - Uma versão de um pacote do SDK sozinha deixa o conjunto fora do que o `expo` espera.
 
+**Equipe e contexto do projeto** (respostas às perguntas 1 e 5).
+Decisão:
+- A equipe é Gabriel Maran (`Gabriel-Maran`), João Pedro Uhry Gonçalves (`joaopug`, também "João Pedro U G") e Gustavo Grosbelli (`Grosbelli12`), com as responsabilidades divididas.
+- O projeto é da disciplina de Desenvolvimento Mobile, na Unipar.
+- O README cita a equipe e a disciplina. "Quem fez o quê" só entra no README se os três concordarem.
+
+Motivo:
+- A equipe foi confirmada pelo Gabriel. O nome completo do João Pedro está no post do projeto no LinkedIn.
+- A disciplina foi informada pelo Gabriel. O repositório não a cita, e o post traz só a hashtag `#DesenvolvimentoMobile`.
+
+**Testes num SQLite em memória** (respostas às perguntas 10 e 11).
+Decisão: os testes podem rodar o SQL do app num SQLite em memória (`node:sqlite`, `:memory:`), criado e descartado pelo próprio teste, sem arquivo e sem dado real. O executor é o `node:test`. A autorização está no `CLAUDE.md` local do Gabriel, fora do Git.
+Motivo: confirmar os bugs prováveis (BUG-3, BUG-4 e BKP-1) e proteger os triggers antes de mexer neles, sem instalar nada e sem risco para dados de verdade.
+

@@ -2,7 +2,7 @@
 
 App Android para um pet shop organizar donos, pets e a agenda de banho e tosa, com pacotes que se remarcam sozinhos. Funciona offline: os dados ficam num banco SQLite no próprio aparelho, sem servidor nem login.
 
-Projeto acadêmico da Unipar.
+Projeto acadêmico da disciplina de Desenvolvimento Mobile, na Unipar.
 
 ## Funcionalidades
 
@@ -64,6 +64,14 @@ As mesmas checagens do CI (typecheck e pacote Android) rodam com:
 ```bash
 npm run check
 ```
+
+## Equipe
+
+Feito em equipe, com as responsabilidades divididas:
+
+- [Gabriel Maran](https://github.com/Gabriel-Maran)
+- [João Pedro Uhry Gonçalves](https://github.com/joaopug)
+- [Gustavo Grosbelli](https://github.com/Grosbelli12)
 
 ## Contribuindo
 
