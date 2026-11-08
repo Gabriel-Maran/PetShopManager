@@ -26,13 +26,8 @@ import {
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
 
-import {
-  DataHifenPraBarra,
-  DataNumberPraStringHifen,
-  DataStringPraNumber,
-} from "../../../utils/formatadores/converterData";
+import { brToDb, dbToIso, isoToBr, todayDb } from "../../../utils/datas";
 import { numeroComVirgula, mascararHorario } from "../../../utils/mascarar";
-import { hoje } from "../../../utils/dataPicker/dataPickerAux";
 import {
   abrirModalSelecao,
   ModalConfig,
@@ -101,7 +96,7 @@ export default function NewOrEditAppointment() {
       .withPetId(appointmentsForm.pet_id)
       .withServico(appointmentsForm.servico)
       .withHora(appointmentsForm.hora ?? "00:00")
-      .withData(DataStringPraNumber(appointmentsForm.data, "/"))
+      .withData(brToDb(appointmentsForm.data))
       .withEntregarPet(appointmentsForm.entregar_pet)
       .withObservacao(appointmentsForm.observacao)
       .withValor(appointmentsForm.valor)
@@ -170,7 +165,7 @@ export default function NewOrEditAppointment() {
   );
 
   const handleChangeData = useCallback(
-    (v: string) => updateAppointmentsField("data", DataHifenPraBarra(v)),
+    (v: string) => updateAppointmentsField("data", isoToBr(v)),
     [updateAppointmentsField],
   );
 
@@ -309,9 +304,9 @@ export default function NewOrEditAppointment() {
                 />
                 <InputDataPicker
                   image={require("../../../assets/outros/data.png")}
-                  item={DataNumberPraStringHifen(
-                    DataStringPraNumber(appointmentsForm.data, "/") ??
-                      DataStringPraNumber(hoje(), "-"),
+                  item={dbToIso(
+                    brToDb(appointmentsForm.data) ??
+                      todayDb(),
                   )}
                   setItem={handleChangeData}
                   titleName="Data do agendamento"

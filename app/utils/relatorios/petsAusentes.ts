@@ -1,5 +1,6 @@
 import { getDatabase } from "../../config/database";
 import { BarChartItem } from "../../view/components/Relatorios/BarChart";
+import { todayIso } from "../datas";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -14,9 +15,10 @@ export interface PetAusenteItem extends BarChartItem {
 
 // Converte coluna YYYYMMDD inteiro → 'YYYY-MM-DD' para julianday()
 // COALESCE: se nunca veio (current_ultima_visita_data IS NULL), usa criado_em
+// O primeiro parâmetro é o "hoje" do app, no fuso do aparelho (BUG-7).
 const SQL_DIAS_AUSENTE = `
   MAX(0, CAST(
-    julianday('now') - julianday(printf('%04d-%02d-%02d',
+    julianday(?) - julianday(printf('%04d-%02d-%02d',
       COALESCE(p.current_ultima_visita_data, p.criado_em) / 10000,
       (COALESCE(p.current_ultima_visita_data, p.criado_em) / 100) % 100,
       COALESCE(p.current_ultima_visita_data, p.criado_em) % 100
@@ -53,7 +55,7 @@ async function fetchPetsAusentes(
       AND p.is_ativo = 1
     ORDER BY p.current_ultima_visita_data ASC
     LIMIT ?`,
-    [remarcacaoAtiva, limite],
+    [todayIso(), remarcacaoAtiva, limite],
   );
 
   return rows.map((r) => ({

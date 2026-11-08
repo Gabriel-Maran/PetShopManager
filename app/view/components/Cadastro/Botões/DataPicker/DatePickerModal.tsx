@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { hifen_para_br } from "../../../../../utils/dataPicker/dataPickerAux";
+import { isoToBr } from "../../../../../utils/datas";
 import { DatePickerCalendar } from "./DatePickerCalendarProps";
 
 interface DatePickerModalProps {
@@ -65,7 +65,7 @@ export function DatePickerModal({
           {/* Data selecionada (preview) */}
           {value && (
             <View style={s.preview}>
-              <Text style={s.previewText}>{hifen_para_br(value)}</Text>
+              <Text style={s.previewText}>{isoToBr(value)}</Text>
             </View>
           )}
 

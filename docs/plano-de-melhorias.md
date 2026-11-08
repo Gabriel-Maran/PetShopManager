@@ -161,6 +161,8 @@ O primeiro item foi resolvido no DADOS-1, em 2026-11-08: uma falha na abertura d
 
 ### BUG-7 · Fuso horário misturado nas datas
 
+Parte do app feita em 2026-11-08: o "hoje" e as conversões de data estão em `app/utils/datas.ts`, no fuso do aparelho, e o SQL do app recebe o "hoje" como parâmetro. Há um teste com o relógio às 22h. Os triggers e o `DEFAULT` do `criado_em` mudam na versão 3 do esquema, junto com o DADOS-2 e o DADOS-3.
+
 - **Por quê:** o SQLite usa `'now'` (UTC) em uns lugares e `'now', 'localtime'` em outros, e o app usa o fuso de São Paulo fixo em três lugares. Entre 21h e meia-noite no horário de Brasília, o "hoje" do SQL já é amanhã. Isso afeta a data de cadastro (`criado_em`), se um agendamento de hoje entra como automático ou manual e os dias de ausência.
 - **O que muda:** o "hoje" é calculado num lugar só, no fuso do aparelho, e passado ao SQL como parâmetro. Os triggers e o `DEFAULT` de `criado_em` passam a usar `'localtime'` (por migração).
 - **Pronto quando:** um teste com o relógio às 22h mostra a mesma data no app e no banco.

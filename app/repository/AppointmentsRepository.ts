@@ -2,6 +2,7 @@ import { getDatabase } from "../config/database";
 import { CONCLUDE_APPOINTMENT_SQL, INSERT_APPOINTMENT_SQL, UPDATE_APPOINTMENT_SQL } from "./sql/appointmentsSql";
 import { Appointment } from "../model/Appointment";
 import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
+import { todayDb } from "../utils/datas";
 
 class AppointmentRepository {
   async getAppointmentById(id: number): Promise<Appointment | null> {
@@ -86,16 +87,17 @@ class AppointmentRepository {
     );
   }
 
-  // Retorna agendamentos futuros não concluídos de um pet
+  // Retorna agendamentos de hoje em diante, não concluídos, de um pet. O "hoje" vem do app, no fuso
+  // do aparelho (BUG-7).
   async getPendingAppointmentsByPetId(petId: number): Promise<Appointment[]> {
     const db = await getDatabase();
     return db.getAllAsync<Appointment>(
       `SELECT * FROM appointments
        WHERE pet_id = ?
          AND concluido = 0
-         AND data >= CAST(strftime('%Y%m%d', 'now') AS INTEGER)
+         AND data >= ?
        ORDER BY data ASC`,
-      [petId],
+      [petId, todayDb()],
     );
   }
 
@@ -162,8 +164,8 @@ class AppointmentRepository {
        WHERE pet_id = ?
          AND is_auto_agen = 1
          AND concluido = 0
-         AND data > CAST(strftime('%Y%m%d', 'now') AS INTEGER)`,
-      [petId],
+         AND data > ?`,
+      [petId, todayDb()],
     );
   }
 }

@@ -6,7 +6,7 @@ import {
   useThemedStyles,
 } from "../../../../Themes/ThemeProvider";
 import InputWrapper from "../../InputWrapper";
-import { hoje } from "../../../../../utils/dataPicker/dataPickerAux";
+import { todayIso } from "../../../../../utils/datas";
 
 export default function InputDataPicker({
   isEditavel = true,
@@ -33,7 +33,7 @@ export default function InputDataPicker({
         isEditavel={isEditavel}
         withIcon={false}
         label=""
-        value={item ?? hoje()}
+        value={item ?? todayIso()}
         onChange={setItem}
         minDate="2024-01-01"
       />

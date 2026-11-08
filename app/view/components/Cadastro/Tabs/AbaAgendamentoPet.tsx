@@ -8,12 +8,8 @@ import {
   useThemedStyles,
 } from "../../../Themes/ThemeProvider";
 
-import {
-  DataNumberPraStringHifen,
-  DataStringPraNumber,
-} from "../../../../utils/formatadores/converterData";
+import { dbToIso, isoToDb, todayDb } from "../../../../utils/datas";
 import { mascararHorario } from "../../../../utils/mascarar";
-import { hoje } from "../../../../utils/dataPicker/dataPickerAux";
 
 import InputDataPicker from "../Botões/DataPicker/InputDataPicker";
 import InputInfo from "../InputInfo";
@@ -144,11 +140,11 @@ export default function AbaAgendamentoPet({
           />
           <InputDataPicker
             image={require("../../../../assets/nav_bar/calendario.png")}
-            item={DataNumberPraStringHifen(
-              form.dataInicioPacote ?? DataStringPraNumber(hoje(), "-"),
+            item={dbToIso(
+              form.dataInicioPacote ?? todayDb(),
             )}
             setItem={(v) => {
-              updateField("dataInicioPacote", DataStringPraNumber(v, "-"));
+              updateField("dataInicioPacote", isoToDb(v));
             }}
             titleName={"Data do agendamento"}
             isEditavel={isEditavel}

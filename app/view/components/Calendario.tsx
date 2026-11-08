@@ -12,7 +12,7 @@ import { Appointment } from "../../model/Appointment";
 
 import { appointmentController } from "../../controller/AppointmentsController";
 
-import { DataNumberPraStringHifen } from "../../utils/formatadores/converterData";
+import { dbToIso, todayIso } from "../../utils/datas";
 import { useAgendamentos } from "../contexts/agendamentos";
 
 // Configuração do calendário para português do Brasil
@@ -119,7 +119,7 @@ export default function Calendario() {
   const datasMarcadas = useMemo(() => {
     const marks = datasComAgendamento.reduce(
       (acc, appointment) => {
-        const dataFormatada = DataNumberPraStringHifen(appointment.data);
+        const dataFormatada = dbToIso(appointment.data);
 
         acc[dataFormatada] = {
           marked: true,
@@ -146,9 +146,7 @@ export default function Calendario() {
   ]);
   const s = useThemedStyles(styles);
 
-  const hoje = new Date().toLocaleDateString("en-CA", {
-    timeZone: "America/Sao_Paulo",
-  });
+  const hoje = todayIso();
 
   const isHojeSelecionado = dateSelected === hoje;
 
