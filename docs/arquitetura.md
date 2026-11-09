@@ -40,8 +40,8 @@ app/
   controller/             validação e regras de entrada; ScreenController guarda a tela atual
   hooks/                  useScreen, useError, useFormState e buscas no banco para os formulários
   utils/
-    formatadores/         conversão de datas, número com vírgula e normalização de nome
-    dataPicker/           mais conversões de data e o "hoje"
+    datas.ts              todas as conversões de data e o "hoje" no fuso do aparelho, sem o Expo (desde 2026-11-08)
+    formatadores/         número com vírgula e normalização de nome
     relatorios/           consultas SQL dos seis relatórios
     mascarar.ts           máscara de horário e de valor
     raceSpecieHelper.ts   cria raça nova, com checagem de duplicidade

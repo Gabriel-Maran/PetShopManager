@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { hoje } from "../../../../../utils/dataPicker/dataPickerAux";
+import { todayIso } from "../../../../../utils/datas";
 import { useTheme } from "../../../../Themes/ThemeProvider";
 import { Calendar } from "react-native-calendars";
 
@@ -17,7 +17,7 @@ export function DatePickerCalendar({
   maxDate,
 }: DatePickerCalendarProps) {
   const { colors } = useTheme();
-  const hj = hoje();
+  const hj = todayIso();
 
   const markedDates = useMemo(() => {
     const marks: Record<string, any> = {};

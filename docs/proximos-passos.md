@@ -1,6 +1,6 @@
 # Próximos passos
 
-Atualizado em 2026-11-08, depois do BUG-3 e do BUG-4.
+Atualizado em 2026-11-08, depois da parte do BUG-7 sem migração.
 
 ## Em andamento: segurança e configuração do repositório
 
@@ -98,9 +98,11 @@ Pronto quando: `npm test` passa no CI, e cada bug provável está confirmado ou 
 ### Parte 3 · Correções do banco (P0 e P1)
 
 Em andamento desde 2026-11-08, com o aval do Gabriel:
-- BUG-3 e BUG-4 em revisão no PR "Triggers da remarcação", como a versão 2 do esquema;
-- depois, o BUG-7;
-- o DADOS-2 espera a resposta da pergunta 15 (datas em texto junto com o dinheiro em centavos).
+- BUG-3 e BUG-4 no `main` desde o PR #16, como a versão 2 do esquema;
+- pergunta 15 respondida: o DADOS-2 e o DADOS-3 entram juntos, em três etapas, uma por PR:
+  1. datas do app num lugar só (`app/utils/datas.ts`), com o "hoje" no fuso do aparelho, a parte do BUG-7 sem migração. Em revisão no PR "Hoje no fuso do aparelho";
+  2. dinheiro do app num lugar só, sem migração;
+  3. versão 3 do esquema: centavos, datas em texto, triggers e `DEFAULT` com `'localtime'` (o resto do BUG-7), e a importação de backup de versão anterior. Antes dela, decidir como a sobra de centavos se divide no pacote e o que fazer com um backup antigo.
 
 - BUG-3 e BUG-4: triggers corrigidos por migração.
 - BUG-7: "hoje" num lugar só e triggers com `'localtime'`.

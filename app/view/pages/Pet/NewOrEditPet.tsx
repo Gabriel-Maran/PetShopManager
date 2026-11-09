@@ -20,8 +20,7 @@ import {
   NewOrEditCadastros,
 } from "../../../config/consts";
 
-import { hoje } from "../../../utils/dataPicker/dataPickerAux";
-import { DataStringPraNumber } from "../../../utils/formatadores/converterData";
+import { todayDb } from "../../../utils/datas";
 
 import { useError } from "../../../hooks/useError";
 import { useScreen } from "../../../hooks/useScreen";
@@ -98,7 +97,7 @@ export default function NewOrEditPet() {
         ? (params.pet?.pacote_remarcacao as PacoteRemarcacao)
         : undefined,
     dataInicioPacote:
-      params?.pet?.data_inicio_pacote ?? DataStringPraNumber(hoje(), "-"),
+      params?.pet?.data_inicio_pacote ?? todayDb(),
     horario_padrao: params?.pet?.horario_padrao ?? "",
   });
 
@@ -139,7 +138,7 @@ export default function NewOrEditPet() {
       .isRemarcacaoAtiva(form.remarcAtiva ? 1 : 0)
       .withPacote(form.pacoteRemarcacao ?? undefined)
       .withInicioPacote(
-        form.dataInicioPacote ?? DataStringPraNumber(hoje(), "-"),
+        form.dataInicioPacote ?? todayDb(),
       )
       .withHorarioPadrao(form.horario_padrao || "00:00")
       .withValorPacote(form.valorPacote ?? undefined) // Adicionado aqui

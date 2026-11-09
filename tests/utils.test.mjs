@@ -1,34 +1,64 @@
 // Caracterização das funções de data, máscara, formatação e normalização usadas nas telas.
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { hifen_para_br, hoje, intParaHifen } from "../app/utils/dataPicker/dataPickerAux.ts";
 import {
-  DataHifenPraBarra,
-  DataNumberPraString,
-  DataNumberPraStringHifen,
-  DataStringPraNumber,
-} from "../app/utils/formatadores/converterData.ts";
+  brToDb,
+  dbToBr,
+  dbToIso,
+  isoToBr,
+  isoToDb,
+  todayDb,
+  todayIso,
+} from "../app/utils/datas.ts";
 import { formatValue } from "../app/utils/formatadores/formaterHelper.ts";
 import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
 import { mascararHorario, numeroComVirgula } from "../app/utils/mascarar.ts";
 
+/** Roda o teste com o fuso do processo trocado, como se o aparelho estivesse nesse fuso. */
+function withTimeZone(timeZone, run) {
+  const previous = process.env.TZ;
+  process.env.TZ = timeZone;
+  try {
+    run();
+  } finally {
+    if (previous === undefined) delete process.env.TZ;
+    else process.env.TZ = previous;
+  }
+}
+
 describe("datas", () => {
   test("convertem entre o número do banco e os textos das telas", () => {
-    assert.equal(DataNumberPraString(20261108), "08/11/2026");
-    assert.equal(DataNumberPraStringHifen(20261108), "2026-11-08");
-    assert.equal(intParaHifen(20261108), "2026-11-08");
-    assert.equal(intParaHifen("20261108"), "2026-11-08");
-    assert.equal(hifen_para_br("2026-11-08"), "08/11/2026");
-    assert.equal(DataHifenPraBarra("2026-11-08"), "08/11/2026");
+    assert.equal(dbToBr(20261108), "08/11/2026");
+    assert.equal(dbToIso(20261108), "2026-11-08");
+    assert.equal(isoToBr("2026-11-08"), "08/11/2026");
   });
 
   test("voltam para o número do banco com barra ou com hífen", () => {
-    assert.equal(DataStringPraNumber("08/11/2026", "/"), 20261108);
-    assert.equal(DataStringPraNumber("2026-11-08", "-"), 20261108);
+    assert.equal(brToDb("08/11/2026"), 20261108);
+    assert.equal(isoToDb("2026-11-08"), 20261108);
   });
 
-  test("hoje sai no formato YYYY-MM-DD, pelo fuso de São Paulo", () => {
-    assert.match(hoje(), /^\d{4}-\d{2}-\d{2}$/);
+  test("BUG-7: às 22h em Brasília, hoje ainda é o mesmo dia, e não o de amanhã em UTC", () => {
+    withTimeZone("America/Sao_Paulo", () => {
+      const twentyTwoHours = new Date("2026-11-08T22:30:00-03:00");
+
+      assert.equal(twentyTwoHours.toISOString().slice(0, 10), "2026-11-09", "em UTC já é amanhã");
+      assert.equal(todayIso(twentyTwoHours), "2026-11-08");
+      assert.equal(todayDb(twentyTwoHours), 20261108);
+    });
+  });
+
+  test("hoje segue o fuso do aparelho, não um fuso fixo", () => {
+    const instant = new Date("2026-11-09T02:30:00Z");
+
+    withTimeZone("America/Manaus", () => assert.equal(todayIso(instant), "2026-11-08"));
+    withTimeZone("Europe/Lisbon", () => assert.equal(todayIso(instant), "2026-11-09"));
+  });
+
+  test("dias e meses de um dígito saem com zero à esquerda", () => {
+    withTimeZone("America/Sao_Paulo", () => {
+      assert.equal(todayIso(new Date(2026, 0, 5, 12)), "2026-01-05");
+    });
   });
 });
 

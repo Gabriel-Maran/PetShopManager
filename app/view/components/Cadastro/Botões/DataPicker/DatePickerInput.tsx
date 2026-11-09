@@ -4,7 +4,7 @@ import {
   useTheme,
   useThemedStyles,
 } from "../../../../Themes/ThemeProvider";
-import { hifen_para_br } from "../../../../../utils/dataPicker/dataPickerAux";
+import { isoToBr } from "../../../../../utils/datas";
 
 export interface DatePickerInputProps {
   withIcon?: boolean;
@@ -44,7 +44,7 @@ export function DatePickerInput({
         {withIcon && <Text style={s.icon}>📅</Text>}
 
         <Text style={[s.text, !value && s.placeholder]}>
-          {value ? hifen_para_br(value) : placeholder}
+          {value ? isoToBr(value) : placeholder}
         </Text>
 
         <Text style={s.chevron}>›</Text>

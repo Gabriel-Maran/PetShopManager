@@ -28,7 +28,7 @@ Perguntas para o Gabriel, de 2026-11-05. Cada resposta vira uma linha datada em 
 12. **Lint e formatação:** ESLint com a configuração do Expo e Prettier? Exigem instalação (TEST-2).
 13. **Validação:** Zod (uma dependência, mas schemas legíveis e tipos derivados) ou validadores próprios? Recomendado: Zod, se a instalação for aceita (VALID-1).
 14. **Remarcação:** manter nos triggers SQL ou mover para uma função TypeScript testada? Recomendado: TypeScript, deixando nos triggers só a integridade e a cascata (ARQ-2).
-15. **Datas:** migrar de `YYYYMMDD` numérico para texto `YYYY-MM-DD`? Recomendado: sim, junto com a migração do dinheiro, para fazer uma migração grande só (DADOS-3).
+15. ~~Datas: migrar de `YYYYMMDD` numérico para texto `YYYY-MM-DD`?~~ Respondida em 2026-11-08: sim, na mesma migração do dinheiro em centavos (ver `decisoes.md`).
 16. **Navegação:** pilha própria com `BackHandler` agora e biblioteca depois, ou React Navigation já? Recomendado: o `BackHandler` agora (BUG-8) e a biblioteca na reorganização (ARQ-3).
 17. **Pasta `app/` vira `src/`?** Evita o conflito com o expo-router e segue o padrão mais comum (ARQ-1).
 18. ~~Dados de demonstração só no build `preview`, ou em todos?~~ Respondida em 2026-11-08: em todos, mas o botão só aparece com o app vazio (ver `decisoes.md`).

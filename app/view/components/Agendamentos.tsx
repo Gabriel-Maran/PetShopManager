@@ -15,7 +15,7 @@ import { Screen, APP_BAR_HEIGHT, EspeciesAtendidas } from "../../config/consts";
 
 import { appointmentController } from "../../controller/AppointmentsController";
 
-import { DataStringPraNumber } from "../../utils/formatadores/converterData";
+import { isoToDb } from "../../utils/datas";
 import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
 import { useAgendamentos } from "../contexts/agendamentos";
 
@@ -39,7 +39,7 @@ export default function Agendamentos({
   useEffect(() => {
     const fetch = appointmentController
       .getAppointmentsByDateWithOwnerAndPet(
-        DataStringPraNumber(dateSelected, "-"),
+        isoToDb(dateSelected),
       )
       .then(setAppointments);
     fetch.catch(handleError);

@@ -192,3 +192,9 @@ Motivo:
 - O "hoje" do filtro novo já usa o fuso do aparelho, como o BUG-7 vai fazer em todo o banco.
 - Uma versão publicada não muda. Constantes compartilhadas entre versões convidariam a mudar a versão 1 sem querer.
 
+**Datas em texto junto com o dinheiro em centavos** (resposta à pergunta 15).
+Decisão: o DADOS-2 (dinheiro em centavos) e o DADOS-3 (datas em texto `AAAA-MM-DD`) entram na mesma versão do esquema, junto com a parte do BUG-7 que precisa do banco (triggers e `DEFAULT` com `'localtime'`). Antes dela, duas etapas sem migração: primeiro as datas do app num lugar só, com o "hoje" no fuso do aparelho (BUG-7); depois o dinheiro num lugar só.
+Motivo:
+- Mudar o tipo de uma coluna no SQLite exige reconstruir a tabela, e o `DEFAULT` do `criado_em` também. Com as duas mudanças juntas, cada tabela é reconstruída uma vez só, e os triggers, que fazem conta com as datas, são reescritos uma vez só.
+- Com as conversões num lugar só, a migração do banco muda poucos arquivos do app, e cada etapa fica pequena o bastante para revisar.
+

@@ -8,10 +8,7 @@ import { ServiceType } from "../../model/ServiceType";
 import { serviceTypeRepository } from "../../repository/ServiceTypeRepository";
 import { NewOrEditAppointmentParams } from "../../model/Appointment";
 import { useScreen } from "../useScreen";
-import {
-  DataHifenPraBarra,
-  DataNumberPraString,
-} from "../../utils/formatadores/converterData";
+import { dbToBr, isoToBr } from "../../utils/datas";
 import { PaymentsMethod } from "../../model/PaymentMethod";
 import { paymentMethodRepository } from "../../repository/PaymentsMethodsRepository";
 
@@ -173,9 +170,9 @@ export function useAgendamentos(): AppointmentTypeReturn {
     pet_id: params?.appointment?.pet_id ?? 0,
     servico: params?.appointment?.servico ?? "",
     data: params?.appointment?.data
-      ? DataNumberPraString(params?.appointment?.data)
+      ? dbToBr(params?.appointment?.data)
       : params?.dateSelected
-        ? DataHifenPraBarra(params?.dateSelected)
+        ? isoToBr(params?.dateSelected)
         : "",
     hora: params?.appointment?.hora ?? "",
     entregar_pet: params?.appointment?.entregar_pet ?? 0,

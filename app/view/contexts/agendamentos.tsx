@@ -3,6 +3,7 @@ import {
   Appointment,
   AppointmentsWithOwnerAndPet,
 } from "../../model/Appointment";
+import { todayIso } from "../../utils/datas";
 
 type AgendamentosType = {
   dateSelected: string;
@@ -27,11 +28,7 @@ export function AgendamentosProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [dateSelected, setDateSelected] = useState(
-    new Date().toLocaleDateString("en-CA", {
-      timeZone: "America/Sao_Paulo",
-    }),
-  );
+  const [dateSelected, setDateSelected] = useState(todayIso);
   const [mesSelecionado, setMesSelecionado] = useState<string>("");
   const [datasComAgendamento, setDatasComAgendamento] = useState<Appointment[]>(
     [],
