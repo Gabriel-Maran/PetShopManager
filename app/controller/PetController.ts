@@ -178,14 +178,14 @@ class PetController {
     );
   }
 
-  async deletePet(id: number): Promise<void> {
+  async deactivatePet(id: number): Promise<void> {
     await this.getPetById(id);
-    await petService.deletePet(id);
+    await petService.deactivatePet(id);
   }
 
-  async activePet(id: number): Promise<void> {
+  async activatePet(id: number): Promise<void> {
     await this.getPetById(id);
-    await petService.activePet(id);
+    await petService.activatePet(id);
   }
 }
 

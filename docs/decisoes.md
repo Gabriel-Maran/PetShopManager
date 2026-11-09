@@ -291,3 +291,8 @@ Motivo:
 - A mesma função nos dois comandos é o que garante que o total bate com a lista, e o teste confere nos dois status, com e sem acento.
 - Recarregar custa uma consulta local e evita manter à mão a página e o total.
 - A regra de segurança do Gabriel: entrada validada no servidor e texto do usuário nunca como parte do comando.
+
+**Nomes de desativar adiantados do NOMES-1.**
+Contexto: na varredura do PR #24, o `deleteOwner`, o `deletePet` e o `onConfirmDelete` desativam, e não apagam, e o `activeOwner` e o `activePet` reativam. O Gabriel aprovou trocar os nomes antes do NOMES-1, que é da Parte 7 e envolve os parceiros.
+Decisão: um PR `refactor` só com os identificadores (`deactivate*`, `activate*`, `onDeactivate`, `onActivate`, `onConfirm`) e o que ficou sem uso (o `type` do modal, estilos e um import). Os nomes dos arquivos e a pasta `Botões` ficam para o NOMES-1.
+Motivo: o nome errado leva quem lê a pensar que o registro some. Renomear arquivos mexe em mais imports e combina melhor com o resto do NOMES-1, conversado com os parceiros.

@@ -81,15 +81,15 @@ export default function Cadastros() {
   // Uma falha aparece no modal de erro, e o item fica.
   const deactivate = useAsyncAction(async (itemId: number) => {
     await (isOwnerSelected
-      ? ownerController.deleteOwner(itemId)
-      : petController.deletePet(itemId));
+      ? ownerController.deactivateOwner(itemId)
+      : petController.deactivatePet(itemId));
     reload();
   });
 
   const activate = useAsyncAction(async (itemId: number) => {
     await (isOwnerSelected
-      ? ownerController.activeOwner(itemId)
-      : petController.activePet(itemId));
+      ? ownerController.activateOwner(itemId)
+      : petController.activatePet(itemId));
     reload();
   });
 
@@ -110,7 +110,7 @@ export default function Cadastros() {
       <ModalConfDelete
         message={`Desativando o ${isOwnerSelected ? "dono" : "pet"} ${itemToDeactivate?.nome}`}
         onClose={() => setItemToDeactivate(undefined)}
-        onConfirmDelete={confirmDeactivate}
+        onConfirm={confirmDeactivate}
         visible={itemToDeactivate !== undefined}
       />
 
@@ -158,15 +158,15 @@ export default function Cadastros() {
             <OwnerList
               saoAtivados={isAtivo == 1}
               cadastros={owners.items}
-              onDelete={askToDeactivate}
-              onActive={activate.run}
+              onDeactivate={askToDeactivate}
+              onActivate={activate.run}
             />
           ) : (
             <PetList
               saoAtivados={isAtivo == 1}
               cadastros={pets.items}
-              onDelete={askToDeactivate}
-              onActive={activate.run}
+              onDeactivate={askToDeactivate}
+              onActivate={activate.run}
             />
           )}
         </View>

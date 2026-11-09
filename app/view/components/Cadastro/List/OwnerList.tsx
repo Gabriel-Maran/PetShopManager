@@ -16,13 +16,13 @@ import ButtonAtivar from "../Botões/ButtonAtivar";
 
 export default function OwnerList({
   cadastros,
-  onDelete,
+  onDeactivate,
   saoAtivados,
-  onActive,
+  onActivate,
 }: {
   cadastros: Owner[];
-  onDelete: (itemId: number) => void;
-  onActive: (itemId: number) => void;
+  onDeactivate: (itemId: number) => void;
+  onActivate: (itemId: number) => void;
   saoAtivados: boolean;
 }) {
   const s = useThemedStyles(styles);
@@ -58,9 +58,9 @@ export default function OwnerList({
                 navegarPara={Screen.NewOrEditOwner}
               />
               {saoAtivados ? (
-                <ButtonExcluir itemId={item.id ?? -1} onDelete={onDelete} />
+                <ButtonExcluir itemId={item.id ?? -1} onDeactivate={onDeactivate} />
               ) : (
-                <ButtonAtivar itemId={item.id ?? -1} onActive={onActive} />
+                <ButtonAtivar itemId={item.id ?? -1} onActivate={onActivate} />
               )}
             </View>
           </TouchableOpacity>
@@ -104,15 +104,5 @@ const styles = (colors: ThemeColors) =>
     textSub: {
       fontSize: 12,
       color: colors.TEXT_MUTED,
-    },
-
-    ctnDelete: {
-      alignSelf: "center",
-      justifyContent: "flex-end",
-    },
-
-    iconDelete: {
-      height: 28,
-      width: 28,
     },
   });

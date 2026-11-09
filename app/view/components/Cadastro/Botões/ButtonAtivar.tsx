@@ -2,18 +2,18 @@ import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 
 export default function ButtonAtivar({
-  onActive,
+  onActivate,
   itemId,
 }: {
-  onActive: (itemId: number) => void;
+  onActivate: (itemId: number) => void;
   itemId: number;
 }) {
   const s = useThemedStyles(styles);
   return (
-    <View style={s.ctnReativar}>
-      <TouchableOpacity onPress={() => onActive(itemId)} style={s.btnReativar}>
+    <View style={s.container}>
+      <TouchableOpacity onPress={() => onActivate(itemId)} style={s.button}>
         <Image
-          style={s.iconDelete}
+          style={s.icon}
           source={require("../../../../assets/crud/activate.png")}
         />
       </TouchableOpacity>
@@ -23,11 +23,11 @@ export default function ButtonAtivar({
 
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
-    ctnReativar: {
+    container: {
       alignSelf: "center",
       justifyContent: "flex-end",
     },
-    btnReativar: {
+    button: {
       marginLeft: 10,
       backgroundColor: colors.REATIVAR_BACKGROUND_COLOR,
       padding: 8,
@@ -35,7 +35,7 @@ const styles = (colors: ThemeColors) =>
       borderWidth: 1,
       borderColor: colors.REATIVAR_BORDER_COLOR,
     },
-    iconDelete: {
+    icon: {
       tintColor: colors.REATIVAR_MAIN_COLOR,
       height: 28,
       width: 28,
