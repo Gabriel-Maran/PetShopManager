@@ -1,4 +1,6 @@
 import { PacoteRemarcacao, PorteAnimal, TipoServico } from "../config/consts";
+import type { IsoDate } from "../utils/datas";
+import type { Cents } from "../utils/dinheiro";
 
 export interface Pet {
   id?: number;
@@ -10,15 +12,15 @@ export interface Pet {
   observacoes?: string | null;
   dono_id: number;
   servico_padrao: TipoServico;
-  valor_pacote?: string | null; // Tornou-se opcional/nullable para consistência com o repositório
+  valor_pacote?: Cents | null;
   remarcacao_ativa: number; // 0 ou 1
   pacote_remarcacao?: PacoteRemarcacao | null; // 2 ou 4 conforme o SQL
-  data_inicio_pacote?: number | null; //formato YYYYMMDD
+  data_inicio_pacote?: IsoDate | null;
   horario_padrao?: string | null;
-  current_ultima_visita_data?: number | null; //formato YYYYMMDD
-  ultimo_visita_data_auto?: number | null; //formato YYYYMMDD
+  current_ultima_visita_data?: IsoDate | null;
+  ultimo_visita_data_auto?: IsoDate | null;
   is_ativo: number; // 0 ou 1
-  criado_em?: number;
+  criado_em?: IsoDate;
 }
 
 export type PetWithSpecieRaceAndOwner = Pet & {
@@ -83,12 +85,12 @@ export class PetBuilder {
     return this;
   }
 
-  public withInicioPacote(dataInicio: number | null | undefined): this {
+  public withInicioPacote(dataInicio: IsoDate | null | undefined): this {
     this.props.data_inicio_pacote = dataInicio;
     return this;
   }
 
-  public withValorPacote(valor: string | null | undefined): this {
+  public withValorPacote(valor: Cents | null | undefined): this {
     this.props.valor_pacote = valor ?? null;
     return this;
   }

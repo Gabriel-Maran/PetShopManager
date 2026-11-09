@@ -1,6 +1,6 @@
-// Dinheiro do app num lugar só, sem depender do Expo, para os testes rodarem no Node. Hoje o banco
-// guarda o valor como texto com vírgula ("12,50"); na versão 3 do esquema, passa a guardar centavos
-// inteiros (DADOS-2). As telas e os controllers usam só estas funções, para a troca mudar um lugar só.
+// Dinheiro do app num lugar só, sem depender do Expo, para os testes rodarem no Node. Desde a versão 3
+// do esquema, o banco e os modelos guardam centavos inteiros (DADOS-2); só os campos das telas usam o
+// texto com vírgula ("12,50"). A conversão entre os dois acontece só aqui.
 
 /** Valor em centavos inteiros: 1250 é R$ 12,50. */
 export type Cents = number;
@@ -32,8 +32,23 @@ export function centsToMoney(cents: Cents): string {
   return `${reais},${rest}`;
 }
 
-/** O valor digitado no formato que vai para o banco: "12,5" → "12,50". Vazio ou inválido → null. */
-export function normalizeMoney(text: string | null | undefined): string | null {
+/** Centavos que o banco aceita: inteiro e sem sinal. */
+export function isValidCents(value: unknown): value is Cents {
+  return Number.isSafeInteger(value) && (value as number) >= 0;
+}
+
+/**
+ * O campo de valor de um formulário → centavos. Vazio → null. Fora do formato → erro com a mensagem
+ * para a tela, porque o usuário precisa corrigir o que digitou.
+ */
+export function parseMoneyInput(text: string | null | undefined): Cents | null {
+  if (!text?.trim()) return null;
   const cents = moneyToCents(text);
-  return cents === null ? null : centsToMoney(cents);
+  if (cents === null) throw new Error(INVALID_MONEY_MESSAGE);
+  return cents;
+}
+
+/** Centavos do banco → o texto do campo de valor. Sem valor → campo vazio. */
+export function formatMoneyInput(cents: Cents | null | undefined): string {
+  return cents == null ? "" : centsToMoney(cents);
 }

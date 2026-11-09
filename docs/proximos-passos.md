@@ -1,6 +1,8 @@
 # Próximos passos
 
-Atualizado em 2026-11-08, depois da parte do banco da versão 3 (3a).
+Atualizado em 2026-11-08, depois da parte do app da versão 3 (3b) e da auditoria do repositório público.
+
+> **Atenção:** o PR #19 (a versão 3 do esquema, só com a 3a) entrou no `main` antes da 3b. Até o PR #20 entrar, o app do `main` lê a data como número e o valor como texto. **Não rode o app pelo `main` antes disso**: o banco do aparelho migraria para a versão 3, e as telas quebrariam.
 
 ## Em andamento: segurança e configuração do repositório
 
@@ -28,10 +30,20 @@ Feito:
   - ruleset `main: histórico`: sem apagar a branch nem force push.
 - O Dependabot leu o `dependabot.yml` sem erro: as rodadas de npm e de actions passaram.
   - A rodada de segurança falha de propósito: o `zod` só tem correção no 4, e o `@expo/cli` exige o 3 ("Security update not possible"). É o risco aceito em 2026-11-05.
+- 2026-11-08, auditoria do repositório público, a pedido do Gabriel, nos 324 commits de todas as branches:
+  - nenhuma chave, token, senha ou arquivo de credencial no código nem no histórico; o secret scanning não tem alerta;
+  - o Actions não tem segredo, artefato nem release, e o repositório não tem deploy key nem webhook;
+  - o `CLAUDE.md` e a pasta `.claude/` nunca foram versionados;
+  - o `projectId` e o `owner` da EAS no `app.json` são identificadores públicos, que não dão acesso sem o token;
+  - os dados de exemplo e os prints do README são fictícios, e os prints não têm EXIF;
+  - ponto de atenção: os commits mostram o e-mail pessoal de quem os fez (Gabriel em 127, Gustavo em 28 e João Pedro em 16). Não é segredo, mas é dado pessoal público;
+  - com o aval do Gabriel, no PR #20: o `.gitignore` passou a barrar qualquer `.env` (menos o `.env.example`), o banco e os backups do app (`*.db`, `*.sqlite` e os arquivos do WAL) e os builds (`*.apk` e `*.aab`).
 
 Falta, nesta ordem:
 
-1. Do Gabriel: avisar os parceiros que o `main` agora só recebe PR, com squash e o CI verde.
+1. Do Gabriel:
+   - avisar os parceiros que o `main` agora só recebe PR, com squash e o CI verde;
+   - decidir sobre os e-mails dos commits (ver a auditoria acima). O recomendado é cada um ativar no GitHub "Keep my email addresses private" e "Block command line pushes that expose my email" e usar o e-mail `noreply` no Git. Reescrever o histórico não compensa: exige force push no `main` e quebra os clones, e os e-mails antigos já podem estar em cópias.
 2. A partir de 2026-11-10, quando passam da espera de 7 dias, `npm i -E expo@58.0.23 expo-sharing@58.0.22 expo-sqlite@58.0.15`.
    - Em 2026-11-08, um `npm audit fix` no clone já subiu o `@expo/config` para 58.0.10 e o `@expo/fingerprint` para 0.21.8, os dois de 2026-10-31. O `package-lock.json` alterado ficou sem commit no clone e entra no PR do patch.
    - O `@expo/config` novo deixa de usar o `deepmerge`, o que fecha um alerta.
@@ -57,7 +69,7 @@ Falta, nesta ordem:
 - A auditoria do código foi feita sobre o commit `e1d5f2f` do `main`.
 - O plano está em [`plano-de-melhorias.md`](plano-de-melhorias.md), com 35 itens: 9 P0, 16 P1 e 10 P2.
 - A arquitetura de hoje está em [`arquitetura.md`](arquitetura.md), e as respostas do checklist, em [`auditoria.md`](auditoria.md).
-- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações) e #15 (reset de dev). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
+- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só) e #19 (versão 3 do esquema). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
 - Da Parte 1, falta o que depende das perguntas em aberto. A Parte 2 está completa, a Parte 3 está em andamento, e as Partes 4 em diante ainda não começaram.
 - Falta o Gabriel responder [`perguntas-em-aberto.md`](perguntas-em-aberto.md). Várias partes abaixo dependem dessas respostas.
 
@@ -102,15 +114,16 @@ Em andamento desde 2026-11-08, com o aval do Gabriel:
 - BUG-3 e BUG-4 no `main` desde o PR #16, como a versão 2 do esquema;
 - pergunta 15 respondida: o DADOS-2 e o DADOS-3 entram juntos, em três etapas, uma por PR:
   1. datas do app num lugar só (`app/utils/datas.ts`), com o "hoje" no fuso do aparelho, a parte do BUG-7 sem migração. No `main` desde o PR #17;
-  2. dinheiro do app num lugar só (`app/utils/dinheiro.ts`), sem migração. Em revisão no PR "Dinheiro num lugar só";
-  3. versão 3 do esquema: centavos, datas em texto, triggers e `DEFAULT` com `'localtime'` (o resto do BUG-7), e a importação de backup de versão anterior. Em andamento na branch `feat/centavos-e-datas-iso`, em rascunho no PR "Versão 3 do esquema":
+  2. dinheiro do app num lugar só (`app/utils/dinheiro.ts`), sem migração. No `main` desde o PR #18;
+  3. versão 3 do esquema: centavos, datas em texto, triggers e `DEFAULT` com `'localtime'` (o resto do BUG-7), e a importação de backup de versão anterior, em três partes, um chat por parte:
      - decidido pelo Gabriel em 2026-11-08: os primeiros atendimentos do mês ficam com o centavo a mais; um backup antigo é atualizado pelas migrações antes da cópia; cada versão do esquema fica num arquivo de `app/config/migrations/`;
-     - feito: v1 e v2 separadas em arquivos, sem mudar o texto, com `allowImportingTsExtensions` no `tsconfig` (o Metro aceitou);
-     - feito em 2026-11-08, a parte do banco (3a): a `v3.ts`, os dados de exemplo em centavos e datas em texto, e os testes (94 passando, com a sobra de centavos e a conversão dos valores antigos);
-     - atenção: nesta branch, o app ainda lê data como número e valor como texto. Até a 3b entrar, não rode o app por ela;
-     - falta, um chat por parte:
-       - 3b: o app no formato novo: `datas.ts` e `dinheiro.ts` (a data do banco vira texto e o valor, centavos), modelos, repositories, controllers, telas e relatórios;
-       - 3c: a importação de backup de versão anterior (migrar a cópia antes de restaurar), a revisão final e o PR.
+     - 3a, o banco: a `v3.ts`, os dados de exemplo em centavos e datas em texto, e os testes. No `main` desde o PR #19, que entrou antes da 3b (ver o aviso no topo);
+     - 3b, o app no formato novo. Em revisão no PR #20 (branch `feat/app-no-esquema-v3`), feito em 2026-11-08:
+       - `datas.ts` com o tipo `IsoDate` e `dinheiro.ts` com o `Cents`, o `parseMoneyInput` e o `formatMoneyInput`; saíram as conversões do número `AAAAMMDD`;
+       - modelos, repositories, services, controllers (que validam `isIsoDate` e `isValidCents`), formulários, calendário e relatórios;
+       - o SQL do comparativo mensal e dos pets ausentes foi para `app/repository/sql/relatoriosSql.ts`, com testes;
+       - verificado: typecheck limpo, 105 testes passando e o pacote Android gerado. Falta o Gabriel conferir no aparelho, com o roteiro do PR;
+     - falta a 3c, no próximo chat: importar um backup de versão anterior (migrar a cópia antes de restaurar) e a revisão final da etapa 3. Ponto de partida: `app/service/BackupService.ts`, `app/repository/sql/backupSql.ts` e `tests/backup.test.mjs`.
 
 - BUG-3 e BUG-4: triggers corrigidos por migração.
 - BUG-7: "hoje" num lugar só e triggers com `'localtime'`.

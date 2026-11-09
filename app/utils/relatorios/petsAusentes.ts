@@ -1,6 +1,7 @@
 import { getDatabase } from "../../config/database";
+import { PETS_AUSENTES_SQL } from "../../repository/sql/relatoriosSql";
 import { BarChartItem } from "../../view/components/Relatorios/BarChart";
-import { todayIso } from "../datas";
+import { type IsoDate, todayIso } from "../datas";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -8,23 +9,8 @@ export interface PetAusenteItem extends BarChartItem {
   // x = "NomePet · NomeDono"   y = dias ausente
   petId: number;
   dono_telefone: string;
-  ultima_visita: number | null; // YYYYMMDD ou null (nunca veio)
+  ultima_visita: IsoDate | null; // null: nunca veio
 }
-
-// ─── Helper SQL ───────────────────────────────────────────────────────────────
-
-// Converte coluna YYYYMMDD inteiro → 'YYYY-MM-DD' para julianday()
-// COALESCE: se nunca veio (current_ultima_visita_data IS NULL), usa criado_em
-// O primeiro parâmetro é o "hoje" do app, no fuso do aparelho (BUG-7).
-const SQL_DIAS_AUSENTE = `
-  MAX(0, CAST(
-    julianday(?) - julianday(printf('%04d-%02d-%02d',
-      COALESCE(p.current_ultima_visita_data, p.criado_em) / 10000,
-      (COALESCE(p.current_ultima_visita_data, p.criado_em) / 100) % 100,
-      COALESCE(p.current_ultima_visita_data, p.criado_em) % 100
-    ))
-  AS INTEGER))
-`;
 
 // ─── Privado ──────────────────────────────────────────────────────────────────
 
@@ -34,29 +20,13 @@ async function fetchPetsAusentes(
 ): Promise<PetAusenteItem[]> {
   const db = await getDatabase();
 
-  // Índice usado: idx_pets_ausentes (remarcacao_ativa, is_ativo, current_ultima_visita_data)
-  // ORDER BY no inteiro YYYYMMDD direto → aproveita o índice, zero conversão no sort
   const rows = await db.getAllAsync<{
     pet_id: number;
     label: string;
     dias_ausente: number;
-    ultima_visita: number | null;
+    ultima_visita: IsoDate | null;
     dono_telefone: string;
-  }>(
-    `SELECT
-      p.id                                                    AS pet_id,
-      substr(p.nome, 1, 10) || ' · ' || substr(o.nome, 1, 8)  AS label,
-      ${SQL_DIAS_AUSENTE}                                     AS dias_ausente,
-      p.current_ultima_visita_data                            AS ultima_visita,
-      o.telefone                                              AS dono_telefone
-    FROM pets p
-    JOIN owners o ON o.id = p.dono_id
-    WHERE p.remarcacao_ativa = ?
-      AND p.is_ativo = 1
-    ORDER BY p.current_ultima_visita_data ASC
-    LIMIT ?`,
-    [todayIso(), remarcacaoAtiva, limite],
-  );
+  }>(PETS_AUSENTES_SQL, [todayIso(), remarcacaoAtiva, limite]);
 
   return rows.map((r) => ({
     x: r.label,

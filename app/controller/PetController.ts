@@ -6,13 +6,9 @@ import {
   TipoServico,
 } from "../config/consts";
 import { Pet, PetWithSpecieRaceAndOwner } from "../model/Pet";
-import { moneyToCents, normalizeMoney } from "../utils/dinheiro";
+import { type IsoDate, isIsoDate } from "../utils/datas";
+import { type Cents, INVALID_MONEY_MESSAGE, isValidCents } from "../utils/dinheiro";
 import { ownerController } from "./OwnerController";
-
-// O valor do pacote vai para o banco sempre no mesmo formato ("120,00"). Sem pacote ativo, ele pode
-// estar vazio e fica como veio, porque não entra em nenhuma conta.
-const packageValueToSave = (valor: string | null | undefined): string | null =>
-  normalizeMoney(valor) ?? valor ?? null;
 
 class PetController {
   // ─── Helpers de validação ────────────────────────────────────────────────
@@ -40,6 +36,11 @@ class PetController {
   }
 
   private validateRemarcacaoFields(pet: Partial<Pet>): void {
+    // Sem pacote ativo, o valor pode ficar vazio, mas o que vier precisa ser centavos.
+    if (pet.valor_pacote != null && !isValidCents(pet.valor_pacote)) {
+      throw new Error(INVALID_MONEY_MESSAGE);
+    }
+
     if (pet.remarcacao_ativa !== 1) return;
 
     const pacoteValido = Object.values(PacoteRemarcacao).includes(
@@ -51,19 +52,15 @@ class PetController {
       );
     }
 
-    if (moneyToCents(pet.valor_pacote) === null) {
+    if (pet.valor_pacote == null) {
       throw new Error(
         "Valor do pacote é obrigatório quando a remarcação está ativa, no formato 120,00",
       );
     }
 
-    if (
-      !pet.data_inicio_pacote ||
-      !/^\d{8}$/.test(String(pet.data_inicio_pacote))
-    ) {
-      console.log(pet.data_inicio_pacote);
+    if (!isIsoDate(pet.data_inicio_pacote)) {
       throw new Error(
-        "Data de início do pacote é obrigatória e deve estar no formato YYYYMMDD",
+        "Data de início do pacote é obrigatória. Escolha a data no calendário.",
       );
     }
   }
@@ -178,10 +175,7 @@ class PetController {
     this.validateRemarcacaoFields(petSalvar);
 
     await ownerController.getOwnerById(petSalvar.dono_id);
-    await petService.createPet({
-      ...petSalvar,
-      valor_pacote: packageValueToSave(petSalvar.valor_pacote),
-    });
+    await petService.createPet(petSalvar);
   }
 
   async updatePet(id: number, petSalvar: Pet): Promise<void> {
@@ -202,18 +196,15 @@ class PetController {
 
     await this.getPetById(id);
     await ownerController.getOwnerById(petSalvar.dono_id);
-    await petService.updatePet(id, {
-      ...petSalvar,
-      valor_pacote: packageValueToSave(petSalvar.valor_pacote),
-    });
+    await petService.updatePet(id, petSalvar);
   }
 
   async updateRemarcacao(
     id: number,
     remarcacaoAtiva: number,
     pacoteRemarcacao: PacoteRemarcacao | null,
-    dataInicioPacote: number | null,
-    valorPacote: string | null,
+    dataInicioPacote: IsoDate | null,
+    valorPacote: Cents | null,
   ): Promise<void> {
     this.validateFlag(remarcacaoAtiva, "Remarcação ativa");
 
@@ -231,7 +222,7 @@ class PetController {
       remarcacaoAtiva,
       pacoteRemarcacao,
       dataInicioPacote,
-      packageValueToSave(valorPacote),
+      valorPacote,
     );
   }
 

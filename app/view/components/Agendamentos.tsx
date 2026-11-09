@@ -15,7 +15,7 @@ import { Screen, APP_BAR_HEIGHT, EspeciesAtendidas } from "../../config/consts";
 
 import { appointmentController } from "../../controller/AppointmentsController";
 
-import { isoToDb } from "../../utils/datas";
+import { isoToBr } from "../../utils/datas";
 import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
 import { useAgendamentos } from "../contexts/agendamentos";
 
@@ -38,9 +38,7 @@ export default function Agendamentos({
 
   useEffect(() => {
     const fetch = appointmentController
-      .getAppointmentsByDateWithOwnerAndPet(
-        isoToDb(dateSelected),
-      )
+      .getAppointmentsByDateWithOwnerAndPet(dateSelected)
       .then(setAppointments);
     fetch.catch(handleError);
   }, [dateSelected]);
@@ -60,7 +58,7 @@ export default function Agendamentos({
         <View style={s.titleBlock}>
           <Text style={s.titleLabel}>Agendamentos</Text>
           <Text style={s.titleDate}>
-            {dateSelected.split("-").reverse().join("/")}
+            {isoToBr(dateSelected)}
           </Text>
         </View>
 

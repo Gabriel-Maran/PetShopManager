@@ -8,7 +8,7 @@ import {
   useThemedStyles,
 } from "../../../Themes/ThemeProvider";
 
-import { dbToIso, isoToDb, todayDb } from "../../../../utils/datas";
+import { type IsoDate, todayIso } from "../../../../utils/datas";
 import { mascararHorario } from "../../../../utils/mascarar";
 import { maskMoneyInput } from "../../../../utils/dinheiro";
 
@@ -39,7 +39,7 @@ interface AbaAgendamentoPetProps {
     servicoPadrao: TipoServico;
     remarcAtiva: boolean;
     pacoteRemarcacao?: PacoteRemarcacao;
-    dataInicioPacote?: number;
+    dataInicioPacote?: IsoDate;
     horario_padrao?: string;
   };
   updateField: (field: string, value: any) => void;
@@ -141,12 +141,8 @@ export default function AbaAgendamentoPet({
           />
           <InputDataPicker
             image={require("../../../../assets/nav_bar/calendario.png")}
-            item={dbToIso(
-              form.dataInicioPacote ?? todayDb(),
-            )}
-            setItem={(v) => {
-              updateField("dataInicioPacote", isoToDb(v));
-            }}
+            item={form.dataInicioPacote ?? todayIso()}
+            setItem={(v) => updateField("dataInicioPacote", v)}
             titleName={"Data do agendamento"}
             isEditavel={isEditavel}
             hasBorderBottom={true}

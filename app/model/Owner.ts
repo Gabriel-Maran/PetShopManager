@@ -1,3 +1,5 @@
+import type { IsoDate } from "../utils/datas";
+
 export interface Owner {
   id?: number;
   nome: string;
@@ -5,7 +7,7 @@ export interface Owner {
   email?: string | null;
   endereco?: string | null;
   is_ativo: number; // 0 ou 1
-  criado_em?: number;
+  criado_em?: IsoDate;
 }
 
 export class OwnerBuilder {

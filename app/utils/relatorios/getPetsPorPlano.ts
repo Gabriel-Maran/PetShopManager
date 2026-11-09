@@ -1,5 +1,6 @@
 import { PlanoItem } from "../../config/consts";
 import { getDatabase } from "../../config/database";
+import type { IsoDate } from "../datas";
 import { BarChartItem } from "../../view/components/Relatorios/BarChart";
 
 /**
@@ -39,8 +40,8 @@ export interface PetPlanoDetalhe {
   donoNome: string;
   donoTelefone: string;
   pacote: 2 | 4;
-  dataInicio: number; // YYYYMMDD
-  ultimaVisita: number | null; // YYYYMMDD ou null
+  dataInicio: IsoDate;
+  ultimaVisita: IsoDate | null; // null: nunca veio
 }
 
 /**
@@ -63,8 +64,8 @@ export async function getPetsPorPlano(
     dono_nome: string;
     dono_telefone: string;
     pacote: number;
-    data_inicio: number;
-    ultima_visita: number | null;
+    data_inicio: IsoDate;
+    ultima_visita: IsoDate | null;
   }>(`
     SELECT
       p.id                          AS pet_id,

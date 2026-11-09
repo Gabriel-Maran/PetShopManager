@@ -1,17 +1,20 @@
+import type { IsoDate } from "../utils/datas";
+import type { Cents } from "../utils/dinheiro";
+
 export interface Appointment {
   id?: number;
   pet_id: number;
   servico: string;
   hora: string;
-  data: number;
+  data: IsoDate;
   entregar_pet: number; // 0 ou 1
   concluido: number; // 0 ou 1
   observacao?: string | null;
   is_auto_agen: number; // 0 ou 1
-  valor: string;
+  valor: Cents;
   tipo_pgto: string;
   ta_pago: number;
-  criado_em?: number;
+  criado_em?: IsoDate;
 }
 
 export type AppointmentsWithOwnerAndPet = Appointment & {
@@ -34,11 +37,11 @@ export class AppointmentBuilder {
       pet_id: 0,
       servico: "",
       hora: "00:00",
-      data: 0,
+      data: "",
       entregar_pet: 0,
       concluido: 0,
       is_auto_agen: 0,
-      valor: "0,00",
+      valor: 0,
       tipo_pgto: "",
       ta_pago: 0,
     };
@@ -59,7 +62,7 @@ export class AppointmentBuilder {
     return this;
   }
 
-  public withData(data: number): this {
+  public withData(data: IsoDate): this {
     this.props.data = data;
     return this;
   }
@@ -84,7 +87,7 @@ export class AppointmentBuilder {
     return this;
   }
 
-  public withValor(valor: string): this {
+  public withValor(valor: Cents): this {
     this.props.valor = valor;
     return this;
   }
@@ -99,7 +102,7 @@ export class AppointmentBuilder {
     return this;
   }
 
-  public withCriadoEm(data: number): this {
+  public withCriadoEm(data: IsoDate): this {
     this.props.criado_em = data;
     return this;
   }

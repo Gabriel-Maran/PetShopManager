@@ -1,17 +1,21 @@
 import { Appointment } from "../model/Appointment";
 import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
 import { appointmentsService } from "../service/AppointmentsService";
-import { centsToMoney, INVALID_MONEY_MESSAGE, normalizeMoney } from "../utils/dinheiro";
+import { INVALID_DATE_MESSAGE, type IsoDate, isIsoDate } from "../utils/datas";
+import { INVALID_MONEY_MESSAGE, isValidCents } from "../utils/dinheiro";
 
-/**
- * O valor vai para o banco sempre no mesmo formato ("80,00"). Sem valor, fica 0,00, como o padrão
- * da tabela.
- */
-function appointmentValue(text: string | null | undefined): string {
-  if (!text?.trim()) return centsToMoney(0);
-  const normalized = normalizeMoney(text);
-  if (normalized === null) throw new Error(INVALID_MONEY_MESSAGE);
-  return normalized;
+/** Campos obrigatórios, a data no formato do banco e o valor em centavos. */
+function validateAppointment(appointment: Appointment): void {
+  if (
+    !appointment.pet_id ||
+    !appointment.servico?.trim() ||
+    !appointment.data ||
+    !appointment.hora
+  ) {
+    throw new Error("Dados faltando.");
+  }
+  if (!isIsoDate(appointment.data)) throw new Error(INVALID_DATE_MESSAGE);
+  if (!isValidCents(appointment.valor)) throw new Error(INVALID_MONEY_MESSAGE);
 }
 
 class AppointmentsController {
@@ -21,21 +25,21 @@ class AppointmentsController {
     return appointment;
   }
 
-  getAppointmentsByDate(date: number): Promise<Appointment[]> {
+  getAppointmentsByDate(date: IsoDate): Promise<Appointment[]> {
     return appointmentsService.getAppointmentsByDate(date);
   }
 
   getAppointmentsByDateWithOwnerAndPet(
-    date: number,
+    date: IsoDate,
   ): Promise<AppointmentsWithOwnerAndPet[]> {
     return appointmentsService.getAppointmentsByDateWithOwnerAndPet(date);
   }
 
-  getAppointmentsByDateRange(from: number, to: number): Promise<Appointment[]> {
+  getAppointmentsByDateRange(from: IsoDate, to: IsoDate): Promise<Appointment[]> {
     return appointmentsService.getAppointmentsByDateRange(from, to);
   }
 
-  getAppointmentsByDateRangeNotDone(from: number, to: number): Promise<Appointment[]> {
+  getAppointmentsByDateRangeNotDone(from: IsoDate, to: IsoDate): Promise<Appointment[]> {
     return appointmentsService.getAppointmentsByDateRangeNotDone(from, to);
   }
 
@@ -48,37 +52,14 @@ class AppointmentsController {
   }
 
   async createAppointment(appointment: Appointment): Promise<void> {
-    if (
-      !appointment.pet_id ||
-      !appointment.servico ||
-      !appointment.data ||
-      !appointment.hora ||
-      appointment.servico.trim() === ""
-    ) {
-      throw new Error("Dados faltando.");
-    }
-    await appointmentsService.createAppointment({
-      ...appointment,
-      valor: appointmentValue(appointment.valor),
-    });
+    validateAppointment(appointment);
+    await appointmentsService.createAppointment(appointment);
   }
 
   async updateAppointment(id: number, appointment: Appointment): Promise<void> {
-    if (
-      !id ||
-      !appointment.pet_id ||
-      !appointment.servico ||
-      !appointment.data ||
-      !appointment.hora ||
-      appointment.servico.trim() === ""
-    ) {
-      throw new Error("Dados faltando.");
-    }
-
-    await appointmentsService.updateAppointment(id, {
-      ...appointment,
-      valor: appointmentValue(appointment.valor),
-    });
+    if (!id) throw new Error("Dados faltando.");
+    validateAppointment(appointment);
+    await appointmentsService.updateAppointment(id, appointment);
   }
 
   // Método dedicado para concluir — dispara trg_ultima_visita e trg_remarcacao_automatica

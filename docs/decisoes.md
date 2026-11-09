@@ -223,3 +223,16 @@ Motivo:
 - As máscaras antigas só deixavam dígitos e vírgula, mas uma delas não limitava as casas decimais.
 - Sem a contagem, um id de agendamento apagado poderia voltar a ser usado.
 - Com a v3 grande, a etapa 3 foi dividida em três partes (banco, app, backup e PR), uma por conversa, para cada uma caber inteira no contexto.
+
+**Versão 3 do esquema, parte do app (3b), em 2026-11-08.**
+Decisão:
+- O app usa os formatos do banco direto: o tipo `IsoDate` ("AAAA-MM-DD") em `datas.ts` e o `Cents` (centavos inteiros) em `dinheiro.ts`. Saíram as conversões de e para o número `AAAAMMDD` (`todayDb`, `dbToIso`, `dbToBr`, `isoToDb`, `brToDb`) e o `normalizeMoney`.
+- Os modelos (`Appointment`, `Pet`, `Owner`) têm a data como `IsoDate` e o valor como `Cents`. Os formulários guardam o valor como o texto do campo e a data em ISO, que é o formato do seletor.
+- O texto vira centavos na tela, ao salvar, pelo `parseMoneyInput`: vazio vira nulo, e um valor fora do formato lança o erro com a mensagem para o usuário. A montagem do modelo foi para dentro do `try`, para essa mensagem aparecer no `useError`.
+- Os controllers conferem o resultado: data no formato `AAAA-MM-DD` (`isIsoDate`) e centavos inteiros sem sinal (`isValidCents`). O agendamento sem valor fica com 0. O pacote sem remarcação pode ficar sem valor; com ela, o valor é obrigatório.
+- O SQL dos relatórios que faz conta com data (comparativo mensal e pets ausentes) foi para `app/repository/sql/relatoriosSql.ts`, com testes. O comparativo mensal passou a usar uma consulta só, com o intervalo como parâmetro.
+
+Motivo:
+- Com o banco em ISO, converter para outro formato no app só criaria pontos de erro. O seletor e o calendário já usavam ISO.
+- O usuário digita texto, mas o controller recebe o modelo já tipado. A conversão fica na borda, num util só, e o controller valida o que vai para o banco.
+- Os relatórios montavam a data com `printf` e `substr` sobre o número, e o SQL deles não tinha teste. O cálculo antigo do primeiro mês do comparativo também errava nos dias 29 a 31, porque o `setMonth` passava para o mês seguinte.
