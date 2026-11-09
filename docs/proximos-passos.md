@@ -102,7 +102,10 @@ Em andamento desde 2026-11-08, com o aval do Gabriel:
 - pergunta 15 respondida: o DADOS-2 e o DADOS-3 entram juntos, em três etapas, uma por PR:
   1. datas do app num lugar só (`app/utils/datas.ts`), com o "hoje" no fuso do aparelho, a parte do BUG-7 sem migração. No `main` desde o PR #17;
   2. dinheiro do app num lugar só (`app/utils/dinheiro.ts`), sem migração. Em revisão no PR "Dinheiro num lugar só";
-  3. versão 3 do esquema: centavos, datas em texto, triggers e `DEFAULT` com `'localtime'` (o resto do BUG-7), e a importação de backup de versão anterior. Antes dela, decidir como a sobra de centavos se divide no pacote e o que fazer com um backup antigo.
+  3. versão 3 do esquema: centavos, datas em texto, triggers e `DEFAULT` com `'localtime'` (o resto do BUG-7), e a importação de backup de versão anterior. Em andamento na branch `feat/centavos-e-datas-iso`, sem PR:
+     - decidido pelo Gabriel em 2026-11-08: os primeiros atendimentos do mês ficam com o centavo a mais; um backup antigo é atualizado pelas migrações antes da cópia; cada versão do esquema fica num arquivo de `app/config/migrations/`;
+     - feito: v1 e v2 separadas em arquivos, sem mudar o texto, com `allowImportingTsExtensions` no `tsconfig` (o Metro aceitou);
+     - falta: a `v3.ts` (reconstruir owners, pets e appointments, converter os dados e reescrever os 8 triggers), os tipos de data e valor nos modelos, telas e relatórios, a importação de backup, os dados de exemplo e os testes.
 
 - BUG-3 e BUG-4: triggers corrigidos por migração.
 - BUG-7: "hoje" num lugar só e triggers com `'localtime'`.
