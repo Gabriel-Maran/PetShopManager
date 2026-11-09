@@ -106,12 +106,12 @@ class PetRepository {
     );
   }
 
-  async deletePet(id: number): Promise<void> {
+  async deactivatePet(id: number): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(DEACTIVATE_PET_SQL, [id]);
   }
 
-  async activePet(id: number): Promise<void> {
+  async activatePet(id: number): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(ACTIVATE_PET_SQL, [id]);
   }

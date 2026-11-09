@@ -45,12 +45,12 @@ class PetService {
     );
   }
 
-  deletePet(id: number) {
-    return petRepository.deletePet(id);
+  deactivatePet(id: number) {
+    return petRepository.deactivatePet(id);
   }
 
-  activePet(id: number) {
-    return petRepository.activePet(id);
+  activatePet(id: number) {
+    return petRepository.activatePet(id);
   }
 }
 

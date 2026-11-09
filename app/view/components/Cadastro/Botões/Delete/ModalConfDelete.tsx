@@ -5,22 +5,18 @@ import {
   useThemedStyles,
 } from "../../../../Themes/ThemeProvider";
 
-type TypeDelete = "soft_delete" | "hard_delete";
-
 interface Props {
   message: string | null;
   onClose: () => void;
-  onConfirmDelete: () => void;
+  onConfirm: () => void;
   visible: boolean;
-  type?: TypeDelete;
 }
 
 export default function ModalConfDelete({
   message,
   onClose,
-  onConfirmDelete,
+  onConfirm,
   visible,
-  type = "soft_delete",
 }: Props) {
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
@@ -33,7 +29,7 @@ export default function ModalConfDelete({
 
           <View style={s.messageTop}>
             <Text style={s.title}>
-              Deseja mesmo {type == "soft_delete" ? "desativar" : "excluir"}?
+              Deseja mesmo desativar?
             </Text>
             <Text style={s.message}>{message}</Text>
           </View>
@@ -48,7 +44,7 @@ export default function ModalConfDelete({
 
             <TouchableOpacity
               style={[s.btn, { backgroundColor: colors.EXCLUIR_MAIN_COLOR }]}
-              onPress={onConfirmDelete}
+              onPress={onConfirm}
             >
               <Text style={s.btnTxt}>Desativar</Text>
             </TouchableOpacity>

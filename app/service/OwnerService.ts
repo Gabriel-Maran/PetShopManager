@@ -23,12 +23,12 @@ class OwnerService {
     return ownerRepository.updateOwner(id, owner);
   }
 
-  deleteOwner(id: number) {
-    return ownerRepository.deleteOwner(id);
+  deactivateOwner(id: number) {
+    return ownerRepository.deactivateOwner(id);
   }
 
-  activeOwner(id: number) {
-    return ownerRepository.activeOwner(id);
+  activateOwner(id: number) {
+    return ownerRepository.activateOwner(id);
   }
 }
 

@@ -55,14 +55,14 @@ class OwnerController {
     await ownerService.updateOwner(id, owner);
   }
 
-  async deleteOwner(id: number): Promise<void> {
+  async deactivateOwner(id: number): Promise<void> {
     await this.getOwnerById(id); // valida existência
-    await ownerService.deleteOwner(id);
+    await ownerService.deactivateOwner(id);
   }
 
-  async activeOwner(id: number): Promise<void> {
+  async activateOwner(id: number): Promise<void> {
     await this.getOwnerById(id); // valida existência
-    await ownerService.activeOwner(id);
+    await ownerService.activateOwner(id);
   }
 }
 

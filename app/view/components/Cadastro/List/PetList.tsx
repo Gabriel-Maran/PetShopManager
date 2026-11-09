@@ -21,13 +21,13 @@ import { useScreen } from "../../../../hooks/useScreen";
 
 export default function PetList({
   cadastros,
-  onDelete,
+  onDeactivate,
   saoAtivados,
-  onActive,
+  onActivate,
 }: {
   cadastros: PetWithSpecieRaceAndOwner[];
-  onDelete: (itemId: number) => void;
-  onActive: (itemId: number) => void;
+  onDeactivate: (itemId: number) => void;
+  onActivate: (itemId: number) => void;
   saoAtivados: boolean;
 }) {
   const s = useThemedStyles(styles);
@@ -72,9 +72,9 @@ export default function PetList({
               }
             />
             {saoAtivados ? (
-              <ButtonExcluir itemId={item.id ?? -1} onDelete={onDelete} />
+              <ButtonExcluir itemId={item.id ?? -1} onDeactivate={onDeactivate} />
             ) : (
-              <ButtonAtivar itemId={item.id ?? -1} onActive={onActive} />
+              <ButtonAtivar itemId={item.id ?? -1} onActivate={onActivate} />
             )}
           </TouchableOpacity>
         )}

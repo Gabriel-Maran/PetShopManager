@@ -58,13 +58,12 @@ class OwnerRepository {
     );
   }
 
-  async deleteOwner(id: number): Promise<void> {
+  async deactivateOwner(id: number): Promise<void> {
     const db = await getDatabase();
-    // Soft delete: marca como inativo sem remover do banco
     await db.runAsync(DEACTIVATE_OWNER_SQL, [id]);
   }
 
-  async activeOwner(id: number): Promise<void> {
+  async activateOwner(id: number): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(ACTIVATE_OWNER_SQL, [id]);
   }
