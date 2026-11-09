@@ -236,3 +236,16 @@ Motivo:
 - Com o banco em ISO, converter para outro formato no app só criaria pontos de erro. O seletor e o calendário já usavam ISO.
 - O usuário digita texto, mas o controller recebe o modelo já tipado. A conversão fica na borda, num util só, e o controller valida o que vai para o banco.
 - Os relatórios montavam a data com `printf` e `substr` sobre o número, e o SQL deles não tinha teste. O cálculo antigo do primeiro mês do comparativo também errava nos dias 29 a 31, porque o `setMonth` passava para o mês seguinte.
+
+**Backup de versão anterior (3c), em 2026-11-08.**
+Decisão:
+- A cópia do arquivo importado é aberta numa conexão só dela e passa pelo mesmo `migrateDatabase` do banco do aparelho. Só depois ela é anexada e copiada para o app, como antes.
+- Antes das migrações, a cópia precisa ter as sete tabelas do backup. Um arquivo sem elas, ou que nem abre como banco SQLite, é recusado com uma mensagem só ("não é um backup do PetShop Manager"). Um backup de versão mais nova recebe a mesma mensagem da abertura do app.
+- A atualização e a restauração ficam em `app/config/backupRestore.ts`, sem o Expo, e os testes rodam esse código. O `BackupService` só cuida dos arquivos. A restauração reaproveita o `withForeignKeysOff` e o `inTransaction` do `migrator.ts`, que passaram a ser exportados.
+- O `ATTACH` recebe o caminho como parâmetro, em vez de montar o texto do comando.
+- A cópia temporária e os arquivos que o SQLite cria ao lado dela (`-wal`, `-shm`, `-journal`) são apagados no fim, com qualquer resultado.
+
+Motivo:
+- Migrar a cópia, e não o banco do app, deixa os dados do aparelho intactos se o backup tiver algum problema. É o mesmo código que já migra os aparelhos, com os mesmos testes.
+- Sem a checagem das tabelas, as migrações criariam o esquema vazio num arquivo qualquer, e a importação apagaria os dados do app em vez de falhar como antes.
+- O resto do BKP-1 (integridade, `trusted_schema`, colunas nomeadas e o ponteiro da remarcação) continua na Parte 4.

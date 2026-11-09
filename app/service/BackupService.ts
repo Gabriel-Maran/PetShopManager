@@ -1,15 +1,24 @@
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
-import { DATABASE_NAME, getDatabase } from "../config/database";
 import {
-  BACKUP_TABLES,
-  clearTableSql,
-  copyTableSql,
-} from "../repository/sql/backupSql";
+  DATABASE_NAME,
+  getDatabase,
+  restoreAppDatabase,
+  upgradeBackupFile,
+} from "../config/database";
 
-const DB_PATH = `${FileSystem.documentDirectory}SQLite/${DATABASE_NAME}`;
+// A pasta onde o expo-sqlite abre os bancos pelo nome.
+const SQLITE_DIRECTORY = `${FileSystem.documentDirectory}SQLite/`;
+const DB_PATH = `${SQLITE_DIRECTORY}${DATABASE_NAME}`;
 const BACKUP_PATH = `${FileSystem.cacheDirectory}${DATABASE_NAME}`;
+
+// A cópia do arquivo importado, na pasta dos bancos, para o expo-sqlite conseguir abri-la.
+const IMPORT_NAME = "import_temp.db";
+const IMPORT_PATH = `${SQLITE_DIRECTORY}${IMPORT_NAME}`;
+
+// O banco e os arquivos que o SQLite cria ao lado dele enquanto está aberto.
+const SQLITE_FILE_SUFFIXES = ["", "-wal", "-shm", "-journal"];
 
 // ─── EXPORTAR ────────────────────────────────────────────────────────────────
 
@@ -63,37 +72,21 @@ export async function importDatabase(): Promise<void> {
     throw new Error("Arquivo selecionado não encontrado ou inacessível.");
   }
 
-  // Copia o .db importado para um caminho acessível pelo SQLite
-  const IMPORT_PATH = `${FileSystem.documentDirectory}SQLite/import_temp.db`;
-  const importInfo = await FileSystem.getInfoAsync(IMPORT_PATH);
-  if (importInfo.exists) {
-    await FileSystem.deleteAsync(IMPORT_PATH, { idempotent: true });
-  }
-  await FileSystem.copyAsync({ from: file.uri, to: IMPORT_PATH });
-
-  const db = await getDatabase();
-
-  // ATTACH abre o banco importado como "src" dentro da conexão ativa
-  await db.execAsync(
-    `ATTACH DATABASE '${IMPORT_PATH.replace("file://", "")}' AS src;`,
-  );
-
+  // A cópia é atualizada antes de entrar: um backup de versão anterior chega no formato de hoje, e
+  // um arquivo que não é backup do app, ou que é de uma versão mais nova, é recusado sem mexer nos
+  // dados. Com qualquer resultado, a cópia é apagada.
+  await deleteImportCopy();
   try {
-    await db.execAsync(`PRAGMA foreign_keys = OFF;`);
-    await db.execAsync(`BEGIN TRANSACTION;`);
-
-    for (const tabela of BACKUP_TABLES) {
-      await db.execAsync(clearTableSql(tabela));
-      await db.execAsync(copyTableSql(tabela));
-    }
-
-    await db.execAsync(`COMMIT;`);
-  } catch (e) {
-    await db.execAsync(`ROLLBACK;`);
-    throw e;
+    await FileSystem.copyAsync({ from: file.uri, to: IMPORT_PATH });
+    await upgradeBackupFile(IMPORT_NAME);
+    await restoreAppDatabase(IMPORT_PATH.replace("file://", ""));
   } finally {
-    await db.execAsync(`PRAGMA foreign_keys = ON;`);
-    await db.execAsync(`DETACH DATABASE src;`);
-    await FileSystem.deleteAsync(IMPORT_PATH, { idempotent: true });
+    await deleteImportCopy();
+  }
+}
+
+async function deleteImportCopy(): Promise<void> {
+  for (const suffix of SQLITE_FILE_SUFFIXES) {
+    await FileSystem.deleteAsync(`${IMPORT_PATH}${suffix}`, { idempotent: true });
   }
 }

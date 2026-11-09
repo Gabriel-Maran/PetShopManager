@@ -1,8 +1,12 @@
 # Próximos passos
 
-Atualizado em 2026-11-08, depois da parte do app da versão 3 (3b) e da auditoria do repositório público.
+Atualizado em 2026-11-08, depois da etapa 3c (backup de versão anterior) e da revisão final da etapa 3.
 
-> **Atenção:** o PR #19 (a versão 3 do esquema, só com a 3a) entrou no `main` antes da 3b. Até o PR #20 entrar, o app do `main` lê a data como número e o valor como texto. **Não rode o app pelo `main` antes disso**: o banco do aparelho migraria para a versão 3, e as telas quebrariam.
+> **Para o próximo chat:** a Parte 3 está completa, com a 3c em revisão no PR #21. Falta o Gabriel conferir no aparelho, com o roteiro do PR, e validar a Parte 3. Depois, começa a Parte 4 (ver "Partes de execução").
+>
+> O clone do Gabriel estava no `8004a1a`, atrás do `main`. Antes de testar, `git pull` no `main`: os PRs #18 a #20 não mexem no `package-lock.json` alterado. O app do `main` já lê a versão 3 desde o PR #20.
+>
+> A pasta vazia `.claude/worktrees/dados-1` ficou presa por outro processo (provavelmente um terminal ou o Expo aberto nela). O worktree já foi removido do Git; apague a pasta quando ela soltar.
 
 ## Em andamento: segurança e configuração do repositório
 
@@ -69,8 +73,8 @@ Falta, nesta ordem:
 - A auditoria do código foi feita sobre o commit `e1d5f2f` do `main`.
 - O plano está em [`plano-de-melhorias.md`](plano-de-melhorias.md), com 35 itens: 9 P0, 16 P1 e 10 P2.
 - A arquitetura de hoje está em [`arquitetura.md`](arquitetura.md), e as respostas do checklist, em [`auditoria.md`](auditoria.md).
-- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só) e #19 (versão 3 do esquema). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
-- Da Parte 1, falta o que depende das perguntas em aberto. A Parte 2 está completa, a Parte 3 está em andamento, e as Partes 4 em diante ainda não começaram.
+- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app) e #21 (backup de versão anterior). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
+- Da Parte 1, falta o que depende das perguntas em aberto. As Partes 2 e 3 estão completas (a 3 falta a validação do Gabriel), e as Partes 4 em diante ainda não começaram.
 - Falta o Gabriel responder [`perguntas-em-aberto.md`](perguntas-em-aberto.md). Várias partes abaixo dependem dessas respostas.
 
 ## Partes de execução
@@ -118,18 +122,23 @@ Em andamento desde 2026-11-08, com o aval do Gabriel:
   3. versão 3 do esquema: centavos, datas em texto, triggers e `DEFAULT` com `'localtime'` (o resto do BUG-7), e a importação de backup de versão anterior, em três partes, um chat por parte:
      - decidido pelo Gabriel em 2026-11-08: os primeiros atendimentos do mês ficam com o centavo a mais; um backup antigo é atualizado pelas migrações antes da cópia; cada versão do esquema fica num arquivo de `app/config/migrations/`;
      - 3a, o banco: a `v3.ts`, os dados de exemplo em centavos e datas em texto, e os testes. No `main` desde o PR #19, que entrou antes da 3b (ver o aviso no topo);
-     - 3b, o app no formato novo. Em revisão no PR #20 (branch `feat/app-no-esquema-v3`), feito em 2026-11-08:
+     - 3b, o app no formato novo. No `main` desde o PR #20:
        - `datas.ts` com o tipo `IsoDate` e `dinheiro.ts` com o `Cents`, o `parseMoneyInput` e o `formatMoneyInput`; saíram as conversões do número `AAAAMMDD`;
        - modelos, repositories, services, controllers (que validam `isIsoDate` e `isValidCents`), formulários, calendário e relatórios;
        - o SQL do comparativo mensal e dos pets ausentes foi para `app/repository/sql/relatoriosSql.ts`, com testes;
        - verificado: typecheck limpo, 105 testes passando e o pacote Android gerado. Falta o Gabriel conferir no aparelho, com o roteiro do PR;
-     - falta a 3c, no próximo chat: importar um backup de versão anterior (migrar a cópia antes de restaurar) e a revisão final da etapa 3. Ponto de partida: `app/service/BackupService.ts`, `app/repository/sql/backupSql.ts` e `tests/backup.test.mjs`.
+     - 3c, backup de versão anterior. Em revisão no PR #21 (branch `feat/backup-de-versao-anterior`), feito em 2026-11-08:
+       - a cópia do arquivo importado passa pelas migrações numa conexão só dela, antes de entrar no app (`app/config/backupRestore.ts`, chamado pelo `database.ts`);
+       - um arquivo sem as tabelas do app, corrompido ou de versão mais nova é recusado sem mexer nos dados; a cópia temporária é apagada com qualquer resultado; o `ATTACH` recebe o caminho como parâmetro;
+       - os testes do backup rodam o código do app, com backups da versão 2 e de antes das migrações, e as recusas: 111 testes no total;
+       - verificado: typecheck limpo, 111 testes passando e o pacote Android gerado. Falta o Gabriel conferir no aparelho, com o roteiro do PR;
+     - revisão final da etapa 3, feita em 2026-11-08: nenhum SQL do app monta data com `substr` (só a conversão da v3 e a hora), o relógio passa todo pelo `datas.ts`, e os testes cobrem a soma do pacote igual ao valor, a migração sem perda e o backup antigo. Os "Pronto quando" do BUG-7, DADOS-2 e DADOS-3 estão atendidos.
 
 - BUG-3 e BUG-4: triggers corrigidos por migração.
 - BUG-7: "hoje" num lugar só e triggers com `'localtime'`.
 - DADOS-2: dinheiro em centavos, se a decisão de datas (pergunta 15) não juntar as duas migrações.
 
-Pronto quando: os testes da Parte 2 passam com o comportamento novo, e um banco antigo migra sem perder dados.
+Pronto quando: os testes da Parte 2 passam com o comportamento novo, e um banco antigo migra sem perder dados. Atendido em 2026-11-08, com a 3c.
 
 ### Parte 4 · Telas, erros e validação (P1)
 
@@ -138,9 +147,11 @@ Pronto quando: os testes da Parte 2 passam com o comportamento novo, e um banco 
 - BUG-6: falhas que hoje somem passam a aparecer.
 - BUG-8: `BackHandler`.
 - VALID-1: schema por entidade.
-- BKP-1: importação validada, colunas nomeadas e cópia temporária apagada.
+- BKP-1: importação validada, colunas nomeadas e cópia temporária apagada. A versão, as tabelas e a cópia temporária já entraram na 3c; falta o resto (ver o plano).
 
 Pronto quando: cada caminho de erro tem teste ou foi conferido no aparelho, e os bugs da parte estão fechados.
+
+Para começar, sugerido: ERRO-1 primeiro, porque o BUG-6, o VALID-1 e o BKP-1 usam o módulo de erros. O VALID-1 depende da pergunta 13 (Zod ou validadores próprios), e o BUG-8, da pergunta 16 (navegação). O ERRO-1, o BUG-5, o BUG-6 e o BKP-1 não dependem de pergunta.
 
 ### Parte 5 · Demonstração (P1)
 

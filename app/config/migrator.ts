@@ -82,7 +82,8 @@ function assertSequential(migrations: readonly Migration[]): void {
 
 // Dentro de uma transação, o PRAGMA foreign_keys não tem efeito. Por isso ele é desligado antes:
 // assim, reconstruir ou apagar uma tabela não dispara o ON DELETE CASCADE nas tabelas filhas.
-async function withForeignKeysOff(
+// A restauração de backup (backupRestore.ts) usa o mesmo caminho.
+export async function withForeignKeysOff(
   db: MigrationDatabase,
   work: () => Promise<void>,
 ): Promise<void> {
@@ -95,7 +96,8 @@ async function withForeignKeysOff(
   }
 }
 
-async function inTransaction(
+/** Roda `work` numa transação: se algo falhar, nada do que ele fez fica no banco. */
+export async function inTransaction(
   db: MigrationDatabase,
   work: () => Promise<void>,
 ): Promise<void> {

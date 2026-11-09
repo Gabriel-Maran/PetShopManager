@@ -1,7 +1,7 @@
 // SQL da restauração de backup sem depender do Expo: o BackupService e os testes executam os mesmos
-// comandos. O banco importado fica anexado como "src".
+// comandos (app/config/backupRestore.ts). O banco importado fica anexado como "src".
 
-/** As tabelas restauradas, nesta ordem. */
+/** As tabelas restauradas, nesta ordem. Um arquivo sem todas elas não é backup do app. */
 export const BACKUP_TABLES = [
   "configs",
   "service_type",
@@ -11,6 +11,14 @@ export const BACKUP_TABLES = [
   "pets",
   "appointments",
 ];
+
+/** Os nomes das tabelas de um banco, para conferir se o arquivo é um backup do app. */
+export const LIST_TABLES_SQL = "SELECT name FROM sqlite_master WHERE type = 'table';";
+
+/** Anexa o backup. Parâmetro: o caminho do arquivo, sem o "file://". */
+export const ATTACH_BACKUP_SQL = "ATTACH DATABASE ? AS src;";
+
+export const DETACH_BACKUP_SQL = "DETACH DATABASE src;";
 
 export const clearTableSql = (tabela: string) => `DELETE FROM main.${tabela};`;
 
