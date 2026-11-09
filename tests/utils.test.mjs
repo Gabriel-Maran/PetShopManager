@@ -12,7 +12,13 @@ import {
 } from "../app/utils/datas.ts";
 import { formatValue } from "../app/utils/formatadores/formaterHelper.ts";
 import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
-import { mascararHorario, numeroComVirgula } from "../app/utils/mascarar.ts";
+import { mascararHorario } from "../app/utils/mascarar.ts";
+import {
+  centsToMoney,
+  maskMoneyInput,
+  moneyToCents,
+  normalizeMoney,
+} from "../app/utils/dinheiro.ts";
 
 /** Roda o teste com o fuso do processo trocado, como se o aparelho estivesse nesse fuso. */
 function withTimeZone(timeZone, run) {
@@ -82,19 +88,62 @@ describe("máscara de horário", () => {
   }
 });
 
-describe("valor com vírgula", () => {
+describe("dinheiro: máscara de digitação", () => {
   for (const [entrada, saida] of [
     ["120", "120"],
     ["120,5", "120,5"],
     ["120,567", "120,56"],
     ["1,2,3", "1,23"],
     ["R$ 80,00", "80,00"],
+    [",", ","],
     ["", ""],
   ]) {
     test(`${JSON.stringify(entrada)} vira ${JSON.stringify(saida)}`, () => {
-      assert.equal(numeroComVirgula(entrada), saida);
+      assert.equal(maskMoneyInput(entrada), saida);
     });
   }
+});
+
+describe("dinheiro: centavos", () => {
+  for (const [entrada, centavos] of [
+    ["12,50", 1250],
+    ["12,5", 1250],
+    ["12", 1200],
+    ["0,07", 7],
+    [" 99,99 ", 9999],
+    ["0", 0],
+  ]) {
+    test(`${JSON.stringify(entrada)} vale ${centavos} centavos`, () => {
+      assert.equal(moneyToCents(entrada), centavos);
+    });
+  }
+
+  for (const entrada of ["", "   ", ",", ",50", "12,", "12,345", "1.234,56", "12.50", "-5", "abc", null, undefined]) {
+    test(`${JSON.stringify(entrada)} não é um valor`, () => {
+      assert.equal(moneyToCents(entrada), null);
+    });
+  }
+
+  test("centavos voltam para o texto das telas, sempre com duas casas", () => {
+    assert.equal(centsToMoney(1250), "12,50");
+    assert.equal(centsToMoney(7), "0,07");
+    assert.equal(centsToMoney(0), "0,00");
+    assert.equal(centsToMoney(123456), "1234,56");
+  });
+
+  test("o valor digitado vai para o banco no mesmo formato", () => {
+    assert.equal(normalizeMoney("12,5"), "12,50");
+    assert.equal(normalizeMoney("80"), "80,00");
+    assert.equal(normalizeMoney("80,00"), "80,00");
+    assert.equal(normalizeMoney(","), null);
+    assert.equal(normalizeMoney(""), null);
+  });
+
+  test("ida e volta não muda nenhum valor de 0,00 a 99,99", () => {
+    for (let cents = 0; cents < 10_000; cents++) {
+      assert.equal(moneyToCents(centsToMoney(cents)), cents);
+    }
+  });
 });
 
 describe("números dos gráficos", () => {

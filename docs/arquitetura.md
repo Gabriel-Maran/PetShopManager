@@ -41,6 +41,7 @@ app/
   hooks/                  useScreen, useError, useFormState e buscas no banco para os formulários
   utils/
     datas.ts              todas as conversões de data e o "hoje" no fuso do aparelho, sem o Expo (desde 2026-11-08)
+    dinheiro.ts           máscara de valor, texto ↔ centavos e o formato gravado no banco, sem o Expo (desde 2026-11-08)
     formatadores/         número com vírgula e normalização de nome
     relatorios/           consultas SQL dos seis relatórios
     mascarar.ts           máscara de horário e de valor

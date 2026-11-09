@@ -6,7 +6,13 @@ import {
   TipoServico,
 } from "../config/consts";
 import { Pet, PetWithSpecieRaceAndOwner } from "../model/Pet";
+import { moneyToCents, normalizeMoney } from "../utils/dinheiro";
 import { ownerController } from "./OwnerController";
+
+// O valor do pacote vai para o banco sempre no mesmo formato ("120,00"). Sem pacote ativo, ele pode
+// estar vazio e fica como veio, porque não entra em nenhuma conta.
+const packageValueToSave = (valor: string | null | undefined): string | null =>
+  normalizeMoney(valor) ?? valor ?? null;
 
 class PetController {
   // ─── Helpers de validação ────────────────────────────────────────────────
@@ -45,9 +51,9 @@ class PetController {
       );
     }
 
-    if (!pet.valor_pacote?.trim()) {
+    if (moneyToCents(pet.valor_pacote) === null) {
       throw new Error(
-        "Valor do pacote é obrigatório quando a remarcação está ativa",
+        "Valor do pacote é obrigatório quando a remarcação está ativa, no formato 120,00",
       );
     }
 
@@ -172,7 +178,10 @@ class PetController {
     this.validateRemarcacaoFields(petSalvar);
 
     await ownerController.getOwnerById(petSalvar.dono_id);
-    await petService.createPet(petSalvar);
+    await petService.createPet({
+      ...petSalvar,
+      valor_pacote: packageValueToSave(petSalvar.valor_pacote),
+    });
   }
 
   async updatePet(id: number, petSalvar: Pet): Promise<void> {
@@ -193,7 +202,10 @@ class PetController {
 
     await this.getPetById(id);
     await ownerController.getOwnerById(petSalvar.dono_id);
-    await petService.updatePet(id, petSalvar);
+    await petService.updatePet(id, {
+      ...petSalvar,
+      valor_pacote: packageValueToSave(petSalvar.valor_pacote),
+    });
   }
 
   async updateRemarcacao(
@@ -219,7 +231,7 @@ class PetController {
       remarcacaoAtiva,
       pacoteRemarcacao,
       dataInicioPacote,
-      valorPacote,
+      packageValueToSave(valorPacote),
     );
   }
 

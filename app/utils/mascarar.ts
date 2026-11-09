@@ -25,21 +25,3 @@ export function mascararHorario(txt: string): string {
   }
   return "";
 }
-
-export function numeroComVirgula(txtValor: string) {
-  let valor = txtValor.replace(/[^\d,]/g, "");
-
-  const partes = valor.split(",");
-
-  if (partes.length > 2) {
-    valor = partes[0] + "," + partes.slice(1).join("");
-  }
-
-  const [inteiro, decimal] = valor.split(",");
-
-  if (decimal !== undefined) {
-    return inteiro + "," + decimal.slice(0, 2);
-  }
-
-  return valor;
-}
