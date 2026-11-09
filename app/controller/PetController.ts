@@ -1,6 +1,5 @@
 import { petService } from "../service/PetService";
 import {
-  ORDER,
   PacoteRemarcacao,
   PorteAnimal,
   TipoServico,
@@ -10,6 +9,8 @@ import { type IsoDate, isIsoDate } from "../utils/datas";
 import { type Cents, isValidCents } from "../utils/dinheiro";
 import { AppError } from "../errors/AppError";
 import { MESSAGES } from "../globals/messages";
+import type { NameSearch, Page } from "../model/Search";
+import { validateNameSearch } from "./validateNameSearch";
 import { ownerController } from "./OwnerController";
 
 /** Falha de validação dos dados do pet. */
@@ -96,63 +97,15 @@ class PetController {
     return petService.getAllPets();
   }
 
-  getAllPetsPaged(page: number, limit: number, order: ORDER): Promise<Pet[]> {
-    return petService.getAllPetsPaged(page, limit, order);
-  }
-
-  getAllPetsPagedWithSpecieAndRace(
-    page: number,
-    limit: number,
-    order: ORDER,
-    ativo: number = 1,
-  ): Promise<PetWithSpecieRaceAndOwner[]> {
-    this.validateFlag(ativo, "Filtro ativo");
-    return petService.getAllPetsPagedWithSpecieRaceAndOwner(
-      page,
-      limit,
-      order,
-      ativo,
-    );
-  }
-
-  searchPetsByNamePaged(
-    query: string,
-    page: number,
-    limit: number,
-    order: ORDER = ORDER.DESC,
-  ): Promise<Pet[]> {
-    if (!query.trim()) {
-      return this.getAllPetsPaged(page, limit, order);
-    }
-    return petService.searchPetsByNamePaged(query, page, limit, order);
-  }
-
-  searchPetsByNamePagedWithSpecieAndRace(
-    query: string,
-    page: number,
-    limit: number,
-    order: ORDER = ORDER.DESC,
-    ativo: number = 1,
-  ): Promise<PetWithSpecieRaceAndOwner[]> {
-    this.validateFlag(ativo, "Filtro ativo");
-    if (!query.trim()) {
-      return this.getAllPetsPagedWithSpecieAndRace(page, limit, order, ativo);
-    }
-    return petService.searchPetsByNamePagedWithSpecieRaceAndOwner(
-      query,
-      page,
-      limit,
-      order,
-      ativo,
-    );
+  async searchPetsPage(
+    search: NameSearch,
+  ): Promise<Page<PetWithSpecieRaceAndOwner>> {
+    validateNameSearch(search);
+    return petService.searchPetsPage(search);
   }
 
   getPetsByOwnerId(ownerId: number): Promise<Pet[]> {
     return petService.getPetsByOwnerId(ownerId);
-  }
-
-  countPets(search?: string): Promise<number> {
-    return petService.countPets(search);
   }
 
   // ─── Mutações ────────────────────────────────────────────────────────────

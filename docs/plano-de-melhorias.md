@@ -143,6 +143,8 @@ Achado novo: no campo de horário, um quinto dígito apaga o campo inteiro (`mas
 
 ### BUG-5 · Total errado na paginação de Cadastros
 
+Feito em 2026-11-09, no PR #25: a página e a contagem saem da mesma função (`pagedNameSearch`), com o mesmo FROM e o mesmo filtro, e o repository devolve os dois juntos. Os seletores de dono e de pet usam a mesma busca, e uma resposta atrasada é descartada. Há teste nos dois status, com e sem acento. Falta o Gabriel conferir no aparelho, com o roteiro do PR.
+
 - **Por quê:** em [`Cadastros.tsx:60`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/view/pages/Cadastros.tsx#L60), a contagem ignora o filtro de ativos e inativos e não roda de novo quando ele muda. A contagem de donos busca em `nome` ([`OwnerRepository.ts:65`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/repository/OwnerRepository.ts#L65)), enquanto a lista busca em `nome_normalizado`. Resultado: na aba de inativos, o total é o de ativos; e uma busca por "joao" lista o João, mas conta zero e esconde a paginação.
 - **O que muda:** contagem e lista usam o mesmo filtro (ativo e nome normalizado), de preferência na mesma função do repository.
 - **Pronto quando:** total e páginas batem com a lista nos dois filtros e em buscas com e sem acento, com teste.

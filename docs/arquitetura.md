@@ -35,16 +35,18 @@ app/
     backupRestore.ts      atualiza a cópia de um backup pelas migrações e troca os dados do app pelos dela, sem o Expo (desde 2026-11-08)
     demoData.ts           dados de exemplo com datas em torno de hoje (desde 2026-11-08)
     consts.ts             enums, tipos, telas, imagens da barra e tamanhos
-  model/                  interfaces das tabelas e builders
+  model/                  interfaces das tabelas e builders; Search.ts tem a busca por nome e a página com o total (desde 2026-11-09)
   repository/             SQL de cada tabela
-    sql/                  os comandos de escrita e o SQL dos relatórios com data, que os testes também usam, sem o Expo (desde 2026-11-08)
+    sql/                  os comandos de escrita, o SQL dos relatórios com data e a busca paginada por nome (searchSql.ts), que os testes também usam, sem o Expo (desde 2026-11-08)
+    fetchPage.ts          roda a página e a contagem de uma busca (desde 2026-11-09)
   service/                repassa as chamadas ao repository; BackupService exporta e importa o banco
   controller/             validação e regras de entrada; ScreenController guarda a tela atual
   errors/
     AppError.ts           o AppError (código e mensagem), o texto da tela e o log, sem o Expo (desde 2026-11-09)
   globals/
     messages.ts           as mensagens que o app mostra ao usuário, uma por falha (desde 2026-11-09)
-  hooks/                  useScreen, useError, useAsyncAction, useAsyncData, useFormState e buscas no banco para os formulários
+    limits.ts             limites de entrada, como o tamanho do texto da busca (desde 2026-11-09)
+  hooks/                  useScreen, useError, useAsyncAction, useAsyncData, useSearchPage, useFormState e buscas no banco para os formulários
   utils/
     datas.ts              o tipo IsoDate ("AAAA-MM-DD"), o "hoje" no fuso do aparelho e o texto das telas, sem o Expo (desde 2026-11-08)
     dinheiro.ts           o tipo Cents, a máscara de valor e o campo de texto ↔ centavos, sem o Expo (desde 2026-11-08)
@@ -73,11 +75,11 @@ flowchart LR
   Tema["ThemeProvider"] --> Controllers
 ```
 
-- **Telas e componentes** chamam os controllers, quase sempre dentro de `useEffect`, e passam o erro como veio ao `showError` do `useError`. As ações com carregamento usam o `useAsyncAction`, e os relatórios carregam pelo `useAsyncData`.
+- **Telas e componentes** chamam os controllers, quase sempre dentro de `useEffect`, e passam o erro como veio ao `showError` do `useError`. As ações com carregamento usam o `useAsyncAction`, os relatórios carregam pelo `useAsyncData`, e as buscas paginadas por nome, pelo `useSearchPage`, que descarta a resposta atrasada.
 - **Controllers** validam a entrada (campos obrigatórios, telefone, porte, pacote, data `AAAA-MM-DD` e valor em centavos) e lançam `AppError` com uma mensagem de `globals/messages.ts` para cada falha.
 - **Formulários** guardam o valor como o texto do campo ("80,00") e a data como `AAAA-MM-DD`. Ao salvar, o `parseMoneyInput` converte o texto em centavos, e um valor fora do formato vira a mensagem de erro da tela.
 - **Services** só repassam a chamada ao repository. Não há regra de negócio neles.
-- **Repositories** fazem o SQL com parâmetros `?` e devolvem os registros com `SELECT *`.
+- **Repositories** fazem o SQL com parâmetros `?` e devolvem os registros com `SELECT *`. A busca paginada por nome devolve a página e o total juntos, montados pela mesma função, com o mesmo filtro.
 - **Relatórios** ficam em `utils/relatorios` e consultam o banco direto, sem passar pelas outras camadas.
 - Os hooks `useServicos` e `useTiposPagamento` chamam o repository direto.
 - `config/consts.ts` importa um tipo de `view/` (`BarChartItem`), então a configuração depende da interface.

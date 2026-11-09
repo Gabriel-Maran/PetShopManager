@@ -1,5 +1,5 @@
-import { ORDER } from "../config/consts";
 import { Owner } from "../model/Owner";
+import type { NameSearch } from "../model/Search";
 import { ownerRepository } from "../repository/OwnerRepository";
 
 class OwnerService {
@@ -11,32 +11,8 @@ class OwnerService {
     return ownerRepository.getAllOwners();
   }
 
-  getAllOwnersPaged(
-    page: number,
-    limit: number,
-    order: ORDER,
-    ativo: number = 1,
-  ) {
-    return ownerRepository.getAllOwnersPaged(page, limit, order, ativo);
-  }
-
-  searchOwnersByNamePaged(
-    query: string,
-    page: number,
-    limit: number,
-    order: ORDER,
-    ativo: number = 1,
-  ) {
-    return ownerRepository.searchOwnersByNamePaged(
-      query,
-      page,
-      limit,
-      order,
-      ativo,
-    );
-  }
-  countOwners(search?: string) {
-    return ownerRepository.countOwners(search);
+  searchOwnersPage(search: NameSearch) {
+    return ownerRepository.searchOwnersPage(search);
   }
 
   createOwner(owner: Owner) {

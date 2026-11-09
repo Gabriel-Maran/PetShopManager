@@ -1,7 +1,13 @@
-import { ORDER } from "../config/consts";
 import { getDatabase } from "../config/database";
-import { ACTIVATE_OWNER_SQL, DEACTIVATE_OWNER_SQL, INSERT_OWNER_SQL } from "./sql/ownersSql";
+import {
+  ACTIVATE_OWNER_SQL,
+  DEACTIVATE_OWNER_SQL,
+  INSERT_OWNER_SQL,
+  searchOwnersSql,
+} from "./sql/ownersSql";
+import { fetchPage } from "./fetchPage";
 import { Owner } from "../model/Owner";
+import type { NameSearch, Page } from "../model/Search";
 import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
 
 class OwnerRepository {
@@ -17,62 +23,8 @@ class OwnerRepository {
     );
   }
 
-  async getAllOwnersPaged(
-    page: number = 0,
-    limit: number = 20,
-    order: ORDER = ORDER.ASC,
-    ativo: number = 1,
-  ): Promise<Owner[]> {
-    const db = await getDatabase();
-    const offset = page * limit;
-
-    return db.getAllAsync<Owner>(
-      `SELECT * FROM owners 
-     WHERE is_ativo = ? 
-     ORDER BY criado_em ${order} 
-     LIMIT ? OFFSET ?`,
-      [ativo, limit, offset],
-    );
-  }
-
-  async searchOwnersByNamePaged(
-    query: string,
-    page: number = 0,
-    limit: number = 20,
-    order: ORDER = ORDER.ASC,
-    ativo: number = 1,
-  ): Promise<Owner[]> {
-    const db = await getDatabase();
-    const offset = page * limit;
-    const query_normalizada = normalizeForSearch(query);
-
-    return db.getAllAsync<Owner>(
-      `SELECT * FROM owners 
-    WHERE nome_normalizado LIKE ? 
-    AND is_ativo = ?
-    ORDER BY nome_normalizado ${order} 
-    LIMIT ? OFFSET ?`,
-      [`%${query_normalizada}%`, ativo, limit, offset],
-    );
-  }
-
-  async countOwners(search?: string): Promise<number> {
-    const db = await getDatabase();
-
-    if (search) {
-      const formattedSearch = `%${search.trim()}%`;
-      const result = await db.getFirstAsync<{ total: number }>(
-        `SELECT COUNT(*) as total FROM owners 
-       WHERE is_ativo = 1 AND nome LIKE ?`,
-        [formattedSearch],
-      );
-      return result?.total ?? 0;
-    }
-
-    const result = await db.getFirstAsync<{ total: number }>(
-      `SELECT COUNT(*) as total FROM owners WHERE is_ativo = 1`,
-    );
-    return result?.total ?? 0;
+  searchOwnersPage(search: NameSearch): Promise<Page<Owner>> {
+    return fetchPage<Owner>(searchOwnersSql(search));
   }
 
   async createOwner(owner: Owner): Promise<void> {

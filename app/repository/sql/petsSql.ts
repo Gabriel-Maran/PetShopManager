@@ -1,4 +1,23 @@
 // SQL dos pets sem depender do Expo: o PetRepository e os testes executam os mesmos comandos.
+import { pagedNameSearch, type PagedSql } from "./searchSql.ts";
+import type { NameSearch } from "../../model/Search";
+
+/** A página de pets da busca, com a espécie, a raça e o dono, e o total, com o mesmo filtro. */
+export const searchPetsSql = (search: NameSearch): PagedSql =>
+  pagedNameSearch(
+    {
+      columns: `PT.*,
+        SP.nome      AS nome_especie,
+        RC.nome_raca AS nome_raca,
+        OW.nome      AS nome_dono`,
+      from: `FROM pets    AS PT
+       JOIN species AS SP ON PT.especie = SP.id
+       JOIN race    AS RC ON PT.raca    = RC.id
+       JOIN owners  AS OW ON PT.dono_id = OW.id`,
+      alias: "PT",
+    },
+    search,
+  );
 
 /**
  * Parâmetros: nome, nome_normalizado, especie, porte, raca, observacoes, dono_id, servico_padrao,
