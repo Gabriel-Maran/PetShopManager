@@ -1,6 +1,6 @@
 # Próximos passos
 
-Atualizado em 2026-11-08, depois do dinheiro num lugar só.
+Atualizado em 2026-11-08, depois da parte do banco da versão 3 (3a).
 
 ## Em andamento: segurança e configuração do repositório
 
@@ -36,6 +36,7 @@ Falta, nesta ordem:
    - Em 2026-11-08, um `npm audit fix` no clone já subiu o `@expo/config` para 58.0.10 e o `@expo/fingerprint` para 0.21.8, os dois de 2026-10-31. O `package-lock.json` alterado ficou sem commit no clone e entra no PR do patch.
    - O `@expo/config` novo deixa de usar o `deepmerge`, o que fecha um alerta.
    - Numa simulação, sobram os alertas moderados de `glob` e `minimatch` e o do `zod`, todos nas ferramentas de build, que nem o Expo mais novo corrigiu.
+   - Conferido em 2026-11-08: o GitHub mostra 4 alertas abertos, os mesmos daqui (`zod` alto, `glob` e `minimatch` moderados, `deepmerge` baixo). Todos vêm do `@expo/cli`, do `@expo/config` e do Metro, e nenhum entra no APK. O do `deepmerge` fecha com este patch.
 3. Do Gabriel:
    - testar no aparelho as permissões do PR #3, com o roteiro no PR;
    - conferir o tamanho do APK, porque o pacote JavaScript foi de 1,72 MB para 2,7 MB;
@@ -102,7 +103,14 @@ Em andamento desde 2026-11-08, com o aval do Gabriel:
 - pergunta 15 respondida: o DADOS-2 e o DADOS-3 entram juntos, em três etapas, uma por PR:
   1. datas do app num lugar só (`app/utils/datas.ts`), com o "hoje" no fuso do aparelho, a parte do BUG-7 sem migração. No `main` desde o PR #17;
   2. dinheiro do app num lugar só (`app/utils/dinheiro.ts`), sem migração. Em revisão no PR "Dinheiro num lugar só";
-  3. versão 3 do esquema: centavos, datas em texto, triggers e `DEFAULT` com `'localtime'` (o resto do BUG-7), e a importação de backup de versão anterior. Antes dela, decidir como a sobra de centavos se divide no pacote e o que fazer com um backup antigo.
+  3. versão 3 do esquema: centavos, datas em texto, triggers e `DEFAULT` com `'localtime'` (o resto do BUG-7), e a importação de backup de versão anterior. Em andamento na branch `feat/centavos-e-datas-iso`, em rascunho no PR "Versão 3 do esquema":
+     - decidido pelo Gabriel em 2026-11-08: os primeiros atendimentos do mês ficam com o centavo a mais; um backup antigo é atualizado pelas migrações antes da cópia; cada versão do esquema fica num arquivo de `app/config/migrations/`;
+     - feito: v1 e v2 separadas em arquivos, sem mudar o texto, com `allowImportingTsExtensions` no `tsconfig` (o Metro aceitou);
+     - feito em 2026-11-08, a parte do banco (3a): a `v3.ts`, os dados de exemplo em centavos e datas em texto, e os testes (94 passando, com a sobra de centavos e a conversão dos valores antigos);
+     - atenção: nesta branch, o app ainda lê data como número e valor como texto. Até a 3b entrar, não rode o app por ela;
+     - falta, um chat por parte:
+       - 3b: o app no formato novo: `datas.ts` e `dinheiro.ts` (a data do banco vira texto e o valor, centavos), modelos, repositories, controllers, telas e relatórios;
+       - 3c: a importação de backup de versão anterior (migrar a cópia antes de restaurar), a revisão final e o PR.
 
 - BUG-3 e BUG-4: triggers corrigidos por migração.
 - BUG-7: "hoje" num lugar só e triggers com `'localtime'`.

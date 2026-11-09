@@ -7,10 +7,12 @@ import assert from "node:assert/strict";
 import {
   asMigrationDatabase,
   createDatabase,
-  dateInt,
   insertOwner,
   insertPet,
+  isoDate,
+  legacyDateInt,
   openConnection,
+  toDate,
 } from "./helpers/database.mjs";
 import {
   BROKEN_FOREIGN_KEY_MESSAGE,
@@ -46,18 +48,26 @@ function createLegacyDatabase() {
   return db;
 }
 
+/** Banco novo levado só até a versão pedida, como um aparelho com o app daquela época. */
+async function databaseAt(version) {
+  const db = openConnection();
+  await migrate(db, MIGRATIONS.slice(0, version));
+  return db;
+}
+
+// O pacote no formato de cada época: até a versão 2, data AAAAMMDD e valor em texto com vírgula.
+const PACKAGE = { data_inicio_pacote: isoDate(3), valor_pacote: 20000 };
+const LEGACY_PACKAGE = { data_inicio_pacote: legacyDateInt(3), valor_pacote: "200,00" };
+
 /** Um dono com um pet de pacote, que já gera a agenda automática pelo trigger. */
-function insertOwnerWithPackagePet(db) {
+function insertOwnerWithPackagePet(db, pkg = PACKAGE) {
   const dono_id = insertOwner(db);
-  const pet = insertPet(db, {
-    dono_id,
-    remarcacao_ativa: 1,
-    pacote_remarcacao: 4,
-    data_inicio_pacote: dateInt(3),
-    valor_pacote: "200,00",
-  });
+  const pet = insertPet(db, { dono_id, remarcacao_ativa: 1, pacote_remarcacao: 4, ...pkg });
   return { dono_id, pet };
 }
+
+/** 20261108 → "2026-11-08" */
+const isoFromLegacy = (value) => String(value).replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
 
 /** Confere a mensagem amigável e o motivo de verdade, que fica no cause. */
 const failedAt = (version, causeMessage) => (error) => {
@@ -88,7 +98,7 @@ describe("migrações do banco", () => {
 
   test("banco de antes das migrações: ganha a versão 1 sem perder dados e com os triggers de hoje", async () => {
     const db = createLegacyDatabase();
-    const { dono_id, pet } = insertOwnerWithPackagePet(db);
+    const { dono_id, pet } = insertOwnerWithPackagePet(db, LEGACY_PACKAGE);
     // Um trigger de uma versão antiga do app, que o IF NOT EXISTS nunca atualizaria.
     db.exec(`
       DROP TRIGGER trg_owner_desativar_pets;
@@ -99,13 +109,13 @@ describe("migrações do banco", () => {
     );
     assert.equal(userVersion(db), 0);
 
-    await migrate(db);
+    await migrate(db, MIGRATIONS.slice(0, 1));
 
-    assert.equal(userVersion(db), LATEST);
+    assert.equal(userVersion(db), 1);
     for (const [table, tableRows] of Object.entries(before)) {
       assert.deepEqual(rows(db, table), tableRows, `${table} continua igual`);
     }
-    assert.deepEqual(schemaObjects(db), schemaObjects(await createDatabase()));
+    assert.deepEqual(schemaObjects(db), schemaObjects(await databaseAt(1)));
     db.prepare("UPDATE owners SET is_ativo = 0 WHERE id = ?").run(dono_id);
     assert.equal(db.prepare("SELECT is_ativo FROM pets WHERE id = ?").get(pet.id).is_ativo, 0);
   });
@@ -122,23 +132,80 @@ describe("migrações do banco", () => {
   });
 
   test("banco na versão 1: sobe para a 2 sem perder dados e com os triggers corrigidos", async () => {
-    const db = openConnection();
-    await migrate(db, MIGRATIONS.slice(0, 1));
-    const { pet } = insertOwnerWithPackagePet(db);
+    const db = await databaseAt(1);
+    const { pet } = insertOwnerWithPackagePet(db, LEGACY_PACKAGE);
+    const before = Object.fromEntries(
+      ["owners", "pets", "appointments"].map((table) => [table, rows(db, table)]),
+    );
+
+    await migrate(db, MIGRATIONS.slice(0, 2));
+
+    assert.equal(userVersion(db), 2);
+    for (const [table, tableRows] of Object.entries(before)) {
+      assert.deepEqual(rows(db, table), tableRows, `${table} continua igual`);
+    }
+    assert.deepEqual(schemaObjects(db), schemaObjects(await databaseAt(2)));
+    // Com o trigger da versão 2, editar só a observação não mexe mais na agenda (BUG-4).
+    db.prepare("UPDATE pets SET observacoes = 'Teste' WHERE id = ?").run(pet.id);
+    assert.deepEqual(rows(db, "appointments"), before.appointments);
+  });
+
+  test("banco na versão 2: sobe para a 3 com o dinheiro em centavos e as datas em texto", async () => {
+    const db = await databaseAt(2);
+    const { pet } = insertOwnerWithPackagePet(db, LEGACY_PACKAGE);
+    const semPacote = insertPet(db, { dono_id: pet.dono_id, nome: "Sem pacote", valor_pacote: null });
+    // Valores como as máscaras antigas deixavam gravar, com o que cada um vale em centavos.
+    const legacyValues = [
+      ["12,5", 1250], ["12,", 1200], ["", 0], ["7", 700], ["0,99", 99],
+      ["1234,56", 123456], ["12,505", 1250], ["12.5", 1250],
+    ];
+    const insertLegacy = db.prepare(
+      "INSERT INTO appointments (pet_id, servico, data, valor, concluido) VALUES (?, 'Banho', ?, ?, 1)",
+    );
+    for (const [valor] of legacyValues) insertLegacy.run(semPacote.id, legacyDateInt(-10), valor);
+    db.prepare("UPDATE pets SET current_ultima_visita_data = ? WHERE id = ?").run(legacyDateInt(-10), semPacote.id);
+    // O último agendamento apagado: o id dele não pode voltar depois da troca das tabelas.
+    const deletedId = rows(db, "appointments").at(-1).id;
+    db.prepare("DELETE FROM appointments WHERE id = ?").run(deletedId);
     const before = Object.fromEntries(
       ["owners", "pets", "appointments"].map((table) => [table, rows(db, table)]),
     );
 
     await migrate(db);
 
-    assert.equal(userVersion(db), LATEST);
-    for (const [table, tableRows] of Object.entries(before)) {
-      assert.deepEqual(rows(db, table), tableRows, `${table} continua igual`);
-    }
+    assert.equal(userVersion(db), 3);
     assert.deepEqual(schemaObjects(db), schemaObjects(await createDatabase()));
-    // Com o trigger da versão 2, editar só a observação não mexe mais na agenda (BUG-4).
-    db.prepare("UPDATE pets SET observacoes = 'Teste' WHERE id = ?").run(pet.id);
-    assert.deepEqual(rows(db, "appointments"), before.appointments);
+
+    const centsByText = new Map(legacyValues);
+    const appointments = rows(db, "appointments");
+    assert.equal(appointments.length, before.appointments.length);
+    appointments.forEach((after, index) => {
+      const old = before.appointments[index];
+      assert.deepEqual(
+        { ...after, data: old.data, valor: old.valor, criado_em: old.criado_em, dia_semana: old.dia_semana },
+        { ...old },
+        "as outras colunas não mudam",
+      );
+      assert.equal(after.data, isoFromLegacy(old.data));
+      assert.equal(after.criado_em, isoFromLegacy(old.criado_em));
+      assert.equal(after.dia_semana, toDate(after.data).getDay());
+      const expected = centsByText.get(old.valor) ?? Number(old.valor.replace(",", ""));
+      assert.equal(after.valor, expected, `"${old.valor}" vira ${expected} centavos`);
+    });
+
+    const [withPackage, withoutPackage] = rows(db, "pets");
+    assert.equal(withPackage.valor_pacote, 20000);
+    assert.equal(withPackage.data_inicio_pacote, isoDate(3));
+    assert.equal(withPackage.ultimo_visita_data_auto, isoFromLegacy(before.pets[0].ultimo_visita_data_auto));
+    assert.equal(withoutPackage.valor_pacote, null);
+    assert.equal(withoutPackage.current_ultima_visita_data, isoDate(-10));
+    assert.equal(rows(db, "owners")[0].criado_em, isoFromLegacy(before.owners[0].criado_em));
+
+    const nextId = Number(
+      db.prepare("INSERT INTO appointments (pet_id, servico, data) VALUES (?, 'Banho', ?)").run(pet.id, isoDate(5))
+        .lastInsertRowid,
+    );
+    assert.equal(nextId, deletedId + 1, "a contagem de ids continua de onde parou");
   });
 
   test("só as migrações pendentes rodam, em ordem", async () => {
