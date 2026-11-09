@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 
 import { useScreen } from "../../hooks/useScreen";
 import { useError } from "../../hooks/useError";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
 
-import { Pet, PetWithSpecieRaceAndOwner } from "../../model/Pet";
+import { PetWithSpecieRaceAndOwner } from "../../model/Pet";
 import { Owner } from "../../model/Owner";
 
 import { ownerController } from "../../controller/OwnerController";
@@ -27,6 +28,8 @@ import OwnerList from "../components/Cadastro/List/OwnerList";
 import ModalConfDelete from "../components/Cadastro/Botões/Delete/ModalConfDelete";
 import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
 
+type CadastroItem = Owner | PetWithSpecieRaceAndOwner;
+
 export default function Cadastros() {
   const { navigate, params } = useScreen<NewOrEditCadastros>();
   const { showError } = useError();
@@ -40,8 +43,8 @@ export default function Cadastros() {
   const [owners, setOwners] = useState<Owner[]>([]);
   const [pets, setPets] = useState<PetWithSpecieRaceAndOwner[]>([]);
   const [total, setTotal] = useState(0);
-  const [objSelectToDelete, setObjSelectToDelete] = useState<
-    Pet | Owner | undefined
+  const [itemToDeactivate, setItemToDeactivate] = useState<
+    CadastroItem | undefined
   >();
   const [isAtivo, setIsAtivo] = useState(1);
 
@@ -83,52 +86,49 @@ export default function Cadastros() {
     fetch.catch(showError);
   }, [search, page, isOwnerSelected, isAtivo]);
 
-  function confirmDeletar(itemId: number) {
-    try {
-      if (isOwnerSelected) {
-        ownerController.deleteOwner(itemId);
-        setOwners((prev) => prev.filter((item) => item.id !== itemId));
-      } else {
-        petController.deletePet(itemId);
-        setPets((prev) => prev.filter((item) => item.id !== itemId));
-      }
-    } catch (e) {
-      showError(e);
-    }
-    setObjSelectToDelete(undefined);
-  }
-
-  async function handleDeleteSelected(itemId: number) {
+  /** Tira da aba aberta o item que mudou de status, porque ele passa para o outro filtro. */
+  function removeFromList(itemId: number) {
     if (isOwnerSelected) {
-      const owner = await ownerController.getOwnerById(itemId);
-      setObjSelectToDelete(owner);
-      return;
+      setOwners((prev) => prev.filter((item) => item.id !== itemId));
+    } else {
+      setPets((prev) => prev.filter((item) => item.id !== itemId));
     }
-    const pet = await petController.getPetById(itemId);
-    setObjSelectToDelete(pet);
   }
 
-  function ativarItem(itemId: number) {
-    try {
-      if (isOwnerSelected) {
-        ownerController.activeOwner(itemId);
-        setOwners((prev) => prev.filter((item) => item.id !== itemId));
-      } else {
-        petController.activePet(itemId);
-        setPets((prev) => prev.filter((item) => item.id !== itemId));
-      }
-    } catch (e) {
-      showError(e);
-    }
+  // A lista só muda depois que o banco confirma. Uma falha aparece no modal de erro, e o item fica.
+  const deactivate = useAsyncAction(async (itemId: number) => {
+    await (isOwnerSelected
+      ? ownerController.deleteOwner(itemId)
+      : petController.deletePet(itemId));
+    removeFromList(itemId);
+  });
+
+  const activate = useAsyncAction(async (itemId: number) => {
+    await (isOwnerSelected
+      ? ownerController.activeOwner(itemId)
+      : petController.activePet(itemId));
+    removeFromList(itemId);
+  });
+
+  // O nome do modal vem da própria lista, sem ir ao banco.
+  function askToDeactivate(itemId: number) {
+    const items: CadastroItem[] = isOwnerSelected ? owners : pets;
+    setItemToDeactivate(items.find((item) => item.id === itemId));
+  }
+
+  function confirmDeactivate() {
+    const itemId = itemToDeactivate?.id;
+    setItemToDeactivate(undefined);
+    if (itemId !== undefined) deactivate.run(itemId);
   }
 
   return (
     <>
       <ModalConfDelete
-        message={`Desativando o ${isOwnerSelected ? "dono" : "pet"} ${objSelectToDelete?.nome}`}
-        onClose={() => setObjSelectToDelete(undefined)}
-        onConfirmDelete={() => confirmDeletar(objSelectToDelete?.id ?? 0)}
-        visible={objSelectToDelete != undefined}
+        message={`Desativando o ${isOwnerSelected ? "dono" : "pet"} ${itemToDeactivate?.nome}`}
+        onClose={() => setItemToDeactivate(undefined)}
+        onConfirmDelete={confirmDeactivate}
+        visible={itemToDeactivate !== undefined}
       />
 
       <View style={s.container}>
@@ -174,15 +174,15 @@ export default function Cadastros() {
             <OwnerList
               saoAtivados={isAtivo == 1}
               cadastros={owners}
-              onDelete={handleDeleteSelected}
-              onActive={ativarItem}
+              onDelete={askToDeactivate}
+              onActive={activate.run}
             />
           ) : (
             <PetList
               saoAtivados={isAtivo == 1}
               cadastros={pets}
-              onDelete={handleDeleteSelected}
-              onActive={ativarItem}
+              onDelete={askToDeactivate}
+              onActive={activate.run}
             />
           )}
         </View>
