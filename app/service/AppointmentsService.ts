@@ -1,27 +1,27 @@
 import { Appointment } from "../model/Appointment";
 import { appointmentsRepository } from "../repository/AppointmentsRepository";
+import type { IsoDate } from "../utils/datas";
 
 class AppointmentsService {
   getAppointmentById(id: number) {
     return appointmentsRepository.getAppointmentById(id);
   }
 
-  getAppointmentsByDate(date: number) {
+  getAppointmentsByDate(date: IsoDate) {
     return appointmentsRepository.getAppointmentsByDate(date);
   }
 
-  getAppointmentsByDateWithOwnerAndPet(date: number) {
+  getAppointmentsByDateWithOwnerAndPet(date: IsoDate) {
     return appointmentsRepository.getAppointmentsByDateWithOwnerAndPet(date);
   }
 
-  getAppointmentsByDateRange(from: number, to: number) {
+  getAppointmentsByDateRange(from: IsoDate, to: IsoDate) {
     return appointmentsRepository.getAppointmentsByDateRange(from, to);
   }
 
-   getAppointmentsByDateRangeNotDone(from: number, to: number) {
+  getAppointmentsByDateRangeNotDone(from: IsoDate, to: IsoDate) {
     return appointmentsRepository.getAppointmentsByDateRangeNotDone(from, to);
   }
-
 
   getAppointmentsByPetId(petId: number) {
     return appointmentsRepository.getAppointmentsByPetId(petId);

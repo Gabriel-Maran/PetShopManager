@@ -20,7 +20,8 @@ import {
   NewOrEditCadastros,
 } from "../../../config/consts";
 
-import { todayDb } from "../../../utils/datas";
+import { todayIso } from "../../../utils/datas";
+import { formatMoneyInput, parseMoneyInput } from "../../../utils/dinheiro";
 
 import { useError } from "../../../hooks/useError";
 import { useScreen } from "../../../hooks/useScreen";
@@ -86,7 +87,7 @@ export default function NewOrEditPet() {
     observacoes: params?.pet?.observacoes ?? "",
     servicoPadrao: params?.pet?.servico_padrao ?? TipoServico.Banho,
     remarcAtiva: Boolean(params?.pet?.remarcacao_ativa ?? false),
-    valorPacote: params?.pet?.valor_pacote ?? "",
+    valorPacote: formatMoneyInput(params?.pet?.valor_pacote),
     porte:
       params?.pet?.porte && params.pet?.porte in PorteAnimal
         ? (params.pet?.porte as PorteAnimal)
@@ -96,8 +97,7 @@ export default function NewOrEditPet() {
       params.pet?.pacote_remarcacao in PacoteRemarcacao
         ? (params.pet?.pacote_remarcacao as PacoteRemarcacao)
         : undefined,
-    dataInicioPacote:
-      params?.pet?.data_inicio_pacote ?? todayDb(),
+    dataInicioPacote: params?.pet?.data_inicio_pacote ?? todayIso(),
     horario_padrao: params?.pet?.horario_padrao ?? "",
   });
 
@@ -127,24 +127,23 @@ export default function NewOrEditPet() {
     if (isSalvando) return;
     setIsSalvando(true);
 
-    const petSalvar = new PetBuilder()
-      .withNome(form.nome)
-      .withEspecie(form.especie)
-      .withPorte(form.porte)
-      .forDono(form.dono_id)
-      .withRaca(form.raca)
-      .withObservacoes(form.observacoes)
-      .withServicoPadrao(form.servicoPadrao)
-      .isRemarcacaoAtiva(form.remarcAtiva ? 1 : 0)
-      .withPacote(form.pacoteRemarcacao ?? undefined)
-      .withInicioPacote(
-        form.dataInicioPacote ?? todayDb(),
-      )
-      .withHorarioPadrao(form.horario_padrao || "00:00")
-      .withValorPacote(form.valorPacote ?? undefined) // Adicionado aqui
-      .build();
-
     try {
+      // Dentro do try: um valor digitado fora do formato vira a mensagem de erro da tela.
+      const petSalvar = new PetBuilder()
+        .withNome(form.nome)
+        .withEspecie(form.especie)
+        .withPorte(form.porte)
+        .forDono(form.dono_id)
+        .withRaca(form.raca)
+        .withObservacoes(form.observacoes)
+        .withServicoPadrao(form.servicoPadrao)
+        .isRemarcacaoAtiva(form.remarcAtiva ? 1 : 0)
+        .withPacote(form.pacoteRemarcacao ?? undefined)
+        .withInicioPacote(form.dataInicioPacote ?? todayIso())
+        .withHorarioPadrao(form.horario_padrao || "00:00")
+        .withValorPacote(parseMoneyInput(form.valorPacote))
+        .build();
+
       if (params?.pet?.id) {
         await petController.updatePet(params.pet.id, petSalvar);
       } else {

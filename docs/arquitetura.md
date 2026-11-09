@@ -36,13 +36,13 @@ app/
     consts.ts             enums, tipos, telas, imagens da barra e tamanhos
   model/                  interfaces das tabelas e builders
   repository/             SQL de cada tabela
-    sql/                  os comandos de escrita que os testes também usam, sem o Expo (desde 2026-11-08)
+    sql/                  os comandos de escrita e o SQL dos relatórios com data, que os testes também usam, sem o Expo (desde 2026-11-08)
   service/                repassa as chamadas ao repository; BackupService exporta e importa o banco
   controller/             validação e regras de entrada; ScreenController guarda a tela atual
   hooks/                  useScreen, useError, useFormState e buscas no banco para os formulários
   utils/
-    datas.ts              todas as conversões de data e o "hoje" no fuso do aparelho, sem o Expo (desde 2026-11-08)
-    dinheiro.ts           máscara de valor, texto ↔ centavos e o formato gravado no banco, sem o Expo (desde 2026-11-08)
+    datas.ts              o tipo IsoDate ("AAAA-MM-DD"), o "hoje" no fuso do aparelho e o texto das telas, sem o Expo (desde 2026-11-08)
+    dinheiro.ts           o tipo Cents, a máscara de valor e o campo de texto ↔ centavos, sem o Expo (desde 2026-11-08)
     formatadores/         número com vírgula e normalização de nome
     relatorios/           consultas SQL dos seis relatórios
     mascarar.ts           máscara de horário e de valor
@@ -69,7 +69,8 @@ flowchart LR
 ```
 
 - **Telas e componentes** chamam os controllers, quase sempre dentro de `useEffect`, e mostram o erro pelo `useError`.
-- **Controllers** validam a entrada (campos obrigatórios, telefone, porte, pacote, data `YYYYMMDD`) e lançam `Error` com a mensagem em português.
+- **Controllers** validam a entrada (campos obrigatórios, telefone, porte, pacote, data `AAAA-MM-DD` e valor em centavos) e lançam `Error` com a mensagem em português.
+- **Formulários** guardam o valor como o texto do campo ("80,00") e a data como `AAAA-MM-DD`. Ao salvar, o `parseMoneyInput` converte o texto em centavos, e um valor fora do formato vira a mensagem de erro da tela.
 - **Services** só repassam a chamada ao repository. Não há regra de negócio neles.
 - **Repositories** fazem o SQL com parâmetros `?` e devolvem os registros com `SELECT *`.
 - **Relatórios** ficam em `utils/relatorios` e consultam o banco direto, sem passar pelas outras camadas.
@@ -127,10 +128,10 @@ Reset de desenvolvimento (desde 2026-11-08): com dados no app e só com `__DEV__
 
 Convenções:
 
-- Datas são `INTEGER` no formato `YYYYMMDD`. Para usar as funções de data do SQLite, o SQL monta o texto com `substr` a cada uso.
+- Datas são texto `AAAA-MM-DD` (desde a versão 3). O texto se compara e se ordena como data e entra direto nas funções de data do SQLite. No app, o tipo é o `IsoDate`.
 - Horas são texto `HH:MM`, com `00:00` quando não há horário.
 - Flags são `INTEGER` 0 ou 1, sem `CHECK`.
-- Dinheiro é texto com vírgula (`"0,00"`). O trigger converte para `REAL` para dividir o valor do pacote.
+- Dinheiro é `INTEGER` em centavos (desde a versão 3). No app, o tipo é o `Cents`, e só os campos das telas usam o texto com vírgula.
 - Serviço e forma de pagamento são gravados como texto no agendamento, não como id.
 - Desativar é exclusão lógica (`is_ativo = 0`). Nada é apagado de verdade, exceto agendamentos automáticos pendentes.
 - `appointments.dia_semana` é uma coluna gerada, usada pelo relatório de dias mais movimentados.

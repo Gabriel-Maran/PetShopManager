@@ -1,6 +1,8 @@
 import { ORDER } from "../config/consts";
 import { Pet } from "../model/Pet";
 import { petRepository } from "../repository/PetRepository";
+import type { IsoDate } from "../utils/datas";
+import type { Cents } from "../utils/dinheiro";
 
 class PetService {
   getPetById(id: number) {
@@ -74,8 +76,8 @@ class PetService {
     id: number,
     remarcacaoAtiva: number,
     pacoteRemarcacao: number | null,
-    dataInicioPacote: number | null,
-    valorPacote: string | null,
+    dataInicioPacote: IsoDate | null,
+    valorPacote: Cents | null,
   ) {
     return petRepository.updateRemarcacao(
       id,

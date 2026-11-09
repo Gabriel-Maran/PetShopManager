@@ -12,7 +12,7 @@ import { Appointment } from "../../model/Appointment";
 
 import { appointmentController } from "../../controller/AppointmentsController";
 
-import { dbToIso, todayIso } from "../../utils/datas";
+import { dateToIso, todayIso } from "../../utils/datas";
 import { useAgendamentos } from "../contexts/agendamentos";
 
 // Configuração do calendário para português do Brasil
@@ -88,21 +88,11 @@ export default function Calendario() {
 
   function pegarIntervaloMes() {
     const { mes, ano } = pegarMesEAno();
-    // Pega o mes passado na função e transforma em string
-    // Caso necessário, se for mês de 1 digito (7), adiciona 0 na frente
-    const mesSelecionado = String(mes).padStart(2, "0");
-
-    // Usa um truque sensacional pra pegar o último do dia do mês.
-    // Ele joga o ano, o mes, no dia coloca 0 e depois dá um getDate.
-    // Como o TS grava os meses de 0 a 11, ao colocar o número do mês
-    // atual como calendário, será entendido como o próximo.
-    // E por fim, ao colocar 0, ele irá pegar o último dia do mês anterior.
-    // Isto nos dará o 28, 30 ou 31.
-    const ultimoDia = String(new Date(ano, mes, 0).getDate());
-
+    // No Date, o mês vai de 0 a 11: (ano, mes - 1, 1) é o dia 1 do mês, e o dia 0 do mês seguinte,
+    // (ano, mes, 0), é o último dia dele (28, 29, 30 ou 31).
     return {
-      inicio: Number(`${ano}${mesSelecionado}01`),
-      fim: Number(`${ano}${mesSelecionado}${ultimoDia}`),
+      inicio: dateToIso(new Date(ano, mes - 1, 1)),
+      fim: dateToIso(new Date(ano, mes, 0)),
     };
   }
 
@@ -119,9 +109,7 @@ export default function Calendario() {
   const datasMarcadas = useMemo(() => {
     const marks = datasComAgendamento.reduce(
       (acc, appointment) => {
-        const dataFormatada = dbToIso(appointment.data);
-
-        acc[dataFormatada] = {
+        acc[appointment.data] = {
           marked: true,
           dotColor: colors.PRIMARY_CONTRAST,
         };

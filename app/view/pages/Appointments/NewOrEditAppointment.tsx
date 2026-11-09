@@ -26,9 +26,8 @@ import {
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
 
-import { brToDb, dbToIso, isoToBr, todayDb } from "../../../utils/datas";
 import { mascararHorario } from "../../../utils/mascarar";
-import { maskMoneyInput } from "../../../utils/dinheiro";
+import { maskMoneyInput, parseMoneyInput } from "../../../utils/dinheiro";
 import {
   abrirModalSelecao,
   ModalConfig,
@@ -93,20 +92,21 @@ export default function NewOrEditAppointment() {
     if (isSalvando) return;
     setIsSalvando(true);
 
-    const appointmentSalvar = new AppointmentBuilder()
-      .withPetId(appointmentsForm.pet_id)
-      .withServico(appointmentsForm.servico)
-      .withHora(appointmentsForm.hora ?? "00:00")
-      .withData(brToDb(appointmentsForm.data))
-      .withEntregarPet(appointmentsForm.entregar_pet)
-      .withObservacao(appointmentsForm.observacao)
-      .withValor(appointmentsForm.valor)
-      .withTipoPgto(appointmentsForm.tipo_pgto)
-      .isTaPago(appointmentsForm.ta_pago)
-      .isConcluido(appointmentsForm.concluido)
-      .build();
-
     try {
+      // Dentro do try: um valor digitado fora do formato vira a mensagem de erro da tela.
+      const appointmentSalvar = new AppointmentBuilder()
+        .withPetId(appointmentsForm.pet_id)
+        .withServico(appointmentsForm.servico)
+        .withHora(appointmentsForm.hora ?? "00:00")
+        .withData(appointmentsForm.data)
+        .withEntregarPet(appointmentsForm.entregar_pet)
+        .withObservacao(appointmentsForm.observacao)
+        .withValor(parseMoneyInput(appointmentsForm.valor) ?? 0)
+        .withTipoPgto(appointmentsForm.tipo_pgto)
+        .isTaPago(appointmentsForm.ta_pago)
+        .isConcluido(appointmentsForm.concluido)
+        .build();
+
       if (isEditing) {
         await appointmentController.updateAppointment(
           params!.appointment?.id!,
@@ -166,7 +166,7 @@ export default function NewOrEditAppointment() {
   );
 
   const handleChangeData = useCallback(
-    (v: string) => updateAppointmentsField("data", isoToBr(v)),
+    (v: string) => updateAppointmentsField("data", v),
     [updateAppointmentsField],
   );
 
@@ -305,10 +305,7 @@ export default function NewOrEditAppointment() {
                 />
                 <InputDataPicker
                   image={require("../../../assets/outros/data.png")}
-                  item={dbToIso(
-                    brToDb(appointmentsForm.data) ??
-                      todayDb(),
-                  )}
+                  item={appointmentsForm.data}
                   setItem={handleChangeData}
                   titleName="Data do agendamento"
                   hasBorderBottom={true}

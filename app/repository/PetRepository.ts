@@ -3,6 +3,8 @@ import { getDatabase } from "../config/database";
 import { ACTIVATE_PET_SQL, DEACTIVATE_PET_SQL, INSERT_PET_SQL, UPDATE_PET_REMARCACAO_SQL, UPDATE_PET_SQL } from "./sql/petsSql";
 import { Pet, PetWithSpecieRaceAndOwner } from "../model/Pet";
 import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
+import type { IsoDate } from "../utils/datas";
+import type { Cents } from "../utils/dinheiro";
 
 class PetRepository {
   async getPetById(id: number): Promise<Pet | null> {
@@ -186,8 +188,8 @@ class PetRepository {
     id: number,
     remarcacaoAtiva: number,
     pacoteRemarcacao: number | null,
-    dataInicioPacote: number | null,
-    valorPacote: string | null,
+    dataInicioPacote: IsoDate | null,
+    valorPacote: Cents | null,
   ): Promise<void> {
     const db = await getDatabase();
     await db.runAsync(

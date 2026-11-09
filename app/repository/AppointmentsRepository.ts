@@ -2,7 +2,7 @@ import { getDatabase } from "../config/database";
 import { CONCLUDE_APPOINTMENT_SQL, INSERT_APPOINTMENT_SQL, UPDATE_APPOINTMENT_SQL } from "./sql/appointmentsSql";
 import { Appointment } from "../model/Appointment";
 import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
-import { todayDb } from "../utils/datas";
+import { type IsoDate, todayIso } from "../utils/datas";
 
 class AppointmentRepository {
   async getAppointmentById(id: number): Promise<Appointment | null> {
@@ -13,8 +13,8 @@ class AppointmentRepository {
     );
   }
 
-  // Retorna todos os agendamentos de uma data específica (formato YYYYMMDD)
-  async getAppointmentsByDate(date: number): Promise<Appointment[]> {
+  // Retorna todos os agendamentos de uma data específica
+  async getAppointmentsByDate(date: IsoDate): Promise<Appointment[]> {
     const db = await getDatabase();
     return db.getAllAsync<Appointment>(
       `SELECT 
@@ -27,7 +27,7 @@ class AppointmentRepository {
   }
 
   async getAppointmentsByDateWithOwnerAndPet(
-    date: number,
+    date: IsoDate,
   ): Promise<AppointmentsWithOwnerAndPet[]> {
     const db = await getDatabase();
     return db.getAllAsync<AppointmentsWithOwnerAndPet>(
@@ -50,8 +50,8 @@ class AppointmentRepository {
 
   // Retorna agendamentos de um intervalo de datas (útil para tela de calendário)
   async getAppointmentsByDateRange(
-    from: number,
-    to: number,
+    from: IsoDate,
+    to: IsoDate,
   ): Promise<Appointment[]> {
     const db = await getDatabase();
     return db.getAllAsync<Appointment>(
@@ -62,8 +62,8 @@ class AppointmentRepository {
 
   // Retorna agendamentos de um intervalo de datas que não estão concluídos
   async getAppointmentsByDateRangeNotDone(
-    from: number,
-    to: number,
+    from: IsoDate,
+    to: IsoDate,
   ): Promise<Appointment[]> {
     const db = await getDatabase();
     return db.getAllAsync<Appointment>(
@@ -97,7 +97,7 @@ class AppointmentRepository {
          AND concluido = 0
          AND data >= ?
        ORDER BY data ASC`,
-      [petId, todayDb()],
+      [petId, todayIso()],
     );
   }
 
@@ -165,7 +165,7 @@ class AppointmentRepository {
          AND is_auto_agen = 1
          AND concluido = 0
          AND data > ?`,
-      [petId, todayDb()],
+      [petId, todayIso()],
     );
   }
 }

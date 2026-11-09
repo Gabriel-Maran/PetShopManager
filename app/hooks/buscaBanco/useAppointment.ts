@@ -8,7 +8,8 @@ import { ServiceType } from "../../model/ServiceType";
 import { serviceTypeRepository } from "../../repository/ServiceTypeRepository";
 import { NewOrEditAppointmentParams } from "../../model/Appointment";
 import { useScreen } from "../useScreen";
-import { dbToBr, isoToBr } from "../../utils/datas";
+import { type IsoDate, todayIso } from "../../utils/datas";
+import { formatMoneyInput } from "../../utils/dinheiro";
 import { PaymentsMethod } from "../../model/PaymentMethod";
 import { paymentMethodRepository } from "../../repository/PaymentsMethodsRepository";
 
@@ -142,7 +143,7 @@ type AppointmentType = {
   nome_pet: string;
   pet_id: number;
   servico: string;
-  data: string;
+  data: IsoDate;
   hora: string;
   entregar_pet: number;
   concluido: number;
@@ -150,7 +151,7 @@ type AppointmentType = {
   is_auto_agen: number;
   nome_dono: string;
   especie: string;
-  valor: string;
+  valor: string; // o texto do campo, como "80,00"; vira centavos ao salvar
   tipo_pgto: string;
   ta_pago: number;
 };
@@ -169,17 +170,13 @@ export function useAgendamentos(): AppointmentTypeReturn {
     nome_pet: params?.appointment?.nome_pet ?? "",
     pet_id: params?.appointment?.pet_id ?? 0,
     servico: params?.appointment?.servico ?? "",
-    data: params?.appointment?.data
-      ? dbToBr(params?.appointment?.data)
-      : params?.dateSelected
-        ? isoToBr(params?.dateSelected)
-        : "",
+    data: params?.appointment?.data ?? params?.dateSelected ?? todayIso(),
     hora: params?.appointment?.hora ?? "",
     entregar_pet: params?.appointment?.entregar_pet ?? 0,
     concluido: params?.appointment?.concluido ?? 0,
     observacao: params?.appointment?.observacao ?? "",
     is_auto_agen: params?.appointment?.is_auto_agen ?? 0,
-    valor: params?.appointment?.valor ?? "",
+    valor: formatMoneyInput(params?.appointment?.valor),
     tipo_pgto: params?.appointment?.tipo_pgto ?? "",
     ta_pago: params?.appointment?.ta_pago ?? 0,
     especie: "",

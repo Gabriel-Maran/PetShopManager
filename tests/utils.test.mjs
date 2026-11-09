@@ -1,23 +1,18 @@
 // Caracterização das funções de data, máscara, formatação e normalização usadas nas telas.
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import {
-  brToDb,
-  dbToBr,
-  dbToIso,
-  isoToBr,
-  isoToDb,
-  todayDb,
-  todayIso,
-} from "../app/utils/datas.ts";
+import { dateToIso, isIsoDate, isoToBr, todayIso } from "../app/utils/datas.ts";
 import { formatValue } from "../app/utils/formatadores/formaterHelper.ts";
 import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
 import { mascararHorario } from "../app/utils/mascarar.ts";
 import {
   centsToMoney,
+  formatMoneyInput,
+  INVALID_MONEY_MESSAGE,
+  isValidCents,
   maskMoneyInput,
   moneyToCents,
-  normalizeMoney,
+  parseMoneyInput,
 } from "../app/utils/dinheiro.ts";
 
 /** Roda o teste com o fuso do processo trocado, como se o aparelho estivesse nesse fuso. */
@@ -33,15 +28,23 @@ function withTimeZone(timeZone, run) {
 }
 
 describe("datas", () => {
-  test("convertem entre o número do banco e os textos das telas", () => {
-    assert.equal(dbToBr(20261108), "08/11/2026");
-    assert.equal(dbToIso(20261108), "2026-11-08");
+  test("o texto do banco vira o texto das telas", () => {
     assert.equal(isoToBr("2026-11-08"), "08/11/2026");
   });
 
-  test("voltam para o número do banco com barra ou com hífen", () => {
-    assert.equal(brToDb("08/11/2026"), 20261108);
-    assert.equal(isoToDb("2026-11-08"), 20261108);
+  test("um Date vira o dia dele no fuso do aparelho", () => {
+    withTimeZone("America/Sao_Paulo", () => {
+      assert.equal(dateToIso(new Date(2026, 1, 28, 23, 59)), "2026-02-28");
+      // O dia 0 do mês seguinte é o último dia do mês, como o calendário usa.
+      assert.equal(dateToIso(new Date(2028, 2, 0)), "2028-02-29");
+    });
+  });
+
+  test("só AAAA-MM-DD passa como data do banco", () => {
+    assert.equal(isIsoDate("2026-11-08"), true);
+    for (const entrada of ["", "08/11/2026", "20261108", 20261108, "2026-11-8", " 2026-11-08", null, undefined]) {
+      assert.equal(isIsoDate(entrada), false, JSON.stringify(entrada));
+    }
   });
 
   test("BUG-7: às 22h em Brasília, hoje ainda é o mesmo dia, e não o de amanhã em UTC", () => {
@@ -50,7 +53,6 @@ describe("datas", () => {
 
       assert.equal(twentyTwoHours.toISOString().slice(0, 10), "2026-11-09", "em UTC já é amanhã");
       assert.equal(todayIso(twentyTwoHours), "2026-11-08");
-      assert.equal(todayDb(twentyTwoHours), 20261108);
     });
   });
 
@@ -131,17 +133,43 @@ describe("dinheiro: centavos", () => {
     assert.equal(centsToMoney(123456), "1234,56");
   });
 
-  test("o valor digitado vai para o banco no mesmo formato", () => {
-    assert.equal(normalizeMoney("12,5"), "12,50");
-    assert.equal(normalizeMoney("80"), "80,00");
-    assert.equal(normalizeMoney("80,00"), "80,00");
-    assert.equal(normalizeMoney(","), null);
-    assert.equal(normalizeMoney(""), null);
-  });
-
   test("ida e volta não muda nenhum valor de 0,00 a 99,99", () => {
     for (let cents = 0; cents < 10_000; cents++) {
       assert.equal(moneyToCents(centsToMoney(cents)), cents);
+    }
+  });
+});
+
+describe("dinheiro: campos dos formulários", () => {
+  test("o valor digitado vira centavos para o banco", () => {
+    assert.equal(parseMoneyInput("12,5"), 1250);
+    assert.equal(parseMoneyInput("80"), 8000);
+    assert.equal(parseMoneyInput("0,00"), 0);
+  });
+
+  test("campo vazio fica sem valor", () => {
+    for (const entrada of ["", "   ", null, undefined]) {
+      assert.equal(parseMoneyInput(entrada), null, JSON.stringify(entrada));
+    }
+  });
+
+  test("valor fora do formato vira a mensagem para o usuário", () => {
+    for (const entrada of [",", "12,", "12,345", "-5", "abc"]) {
+      assert.throws(() => parseMoneyInput(entrada), { message: INVALID_MONEY_MESSAGE }, JSON.stringify(entrada));
+    }
+  });
+
+  test("os centavos do banco voltam para o campo com duas casas, e sem valor o campo fica vazio", () => {
+    assert.equal(formatMoneyInput(1250), "12,50");
+    assert.equal(formatMoneyInput(0), "0,00");
+    assert.equal(formatMoneyInput(null), "");
+    assert.equal(formatMoneyInput(undefined), "");
+  });
+
+  test("os controllers só aceitam centavos inteiros e sem sinal", () => {
+    for (const valor of [0, 1, 1250, 10_000_000]) assert.equal(isValidCents(valor), true, String(valor));
+    for (const valor of [-1, 12.5, Number.NaN, Number.POSITIVE_INFINITY, "1250", null, undefined]) {
+      assert.equal(isValidCents(valor), false, String(valor));
     }
   });
 });

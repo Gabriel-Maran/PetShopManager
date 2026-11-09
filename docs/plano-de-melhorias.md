@@ -161,7 +161,7 @@ O primeiro item foi resolvido no DADOS-1, em 2026-11-08: uma falha na abertura d
 
 ### BUG-7 · Fuso horário misturado nas datas
 
-Parte do app feita em 2026-11-08: o "hoje" e as conversões de data estão em `app/utils/datas.ts`, no fuso do aparelho, e o SQL do app recebe o "hoje" como parâmetro. Há um teste com o relógio às 22h. Os triggers e o `DEFAULT` do `criado_em` mudam na versão 3 do esquema, junto com o DADOS-2 e o DADOS-3.
+Parte do app feita em 2026-11-08: o "hoje" e as conversões de data estão em `app/utils/datas.ts`, no fuso do aparelho, e o SQL do app recebe o "hoje" como parâmetro. Há um teste com o relógio às 22h. Os triggers e o `DEFAULT` do `criado_em` passaram a usar `'localtime'` na versão 3 do esquema (PR #19), e o app passou a ler o formato novo na etapa 3b.
 
 - **Por quê:** o SQLite usa `'now'` (UTC) em uns lugares e `'now', 'localtime'` em outros, e o app usa o fuso de São Paulo fixo em três lugares. Entre 21h e meia-noite no horário de Brasília, o "hoje" do SQL já é amanhã. Isso afeta a data de cadastro (`criado_em`), se um agendamento de hoje entra como automático ou manual e os dias de ausência.
 - **O que muda:** o "hoje" é calculado num lugar só, no fuso do aparelho, e passado ao SQL como parâmetro. Os triggers e o `DEFAULT` de `criado_em` passam a usar `'localtime'` (por migração).
@@ -199,7 +199,7 @@ Confirmado em 2026-11-08 por teste (`tests/backup.test.mjs`): na restauração, 
 
 ### DADOS-2 · Dinheiro em centavos inteiros
 
-Preparado em 2026-11-08, sem migração: a máscara, a conversão para centavos e o formato gravado no banco estão em `app/utils/dinheiro.ts`. Os controllers recusam valor inválido e gravam sempre com duas casas ("80,00"). As colunas mudam na versão 3 do esquema, junto com o DADOS-3.
+Preparado em 2026-11-08, sem migração: a máscara e a conversão para centavos estão em `app/utils/dinheiro.ts`. As colunas viraram centavos na versão 3 do esquema (PR #19), com a sobra da divisão do pacote nos primeiros atendimentos do mês. Na etapa 3b, os modelos passaram a usar centavos, e o texto com vírgula ficou só nos campos das telas. Falta a etapa 3c: importar um backup de versão anterior.
 
 - **Por quê:** valores são texto com vírgula (`"12,50"`), e o trigger divide o valor do pacote em `REAL`. Com um pacote de 99,99 em 4 vezes, cada atendimento vira 25,00 e a soma dá 100,00.
 - **O que muda:** colunas `INTEGER` em centavos, com migração dos dados (DADOS-1), e a divisão do pacote distribui a sobra de centavos. A conversão para "12,50" acontece só na tela, num util.
@@ -294,6 +294,8 @@ Os itens de arquitetura (ARQ-1, ARQ-2, DADOS-3 e NOMES-1) mudam muitos arquivos 
 - **Pronto quando:** voltar funciona por histórico em todas as telas, e os parâmetros de cada tela têm tipo.
 
 ### DADOS-3 · Datas em texto ISO
+
+Adiantado para a Parte 3 em 2026-11-08, junto com o DADOS-2: as datas viraram texto na versão 3 do esquema (PR #19), e o app passou a usar o mesmo texto na etapa 3b, sem conversor de formato. Falta a etapa 3c: importar um backup de versão anterior.
 
 - **Por quê:** guardar datas como `INTEGER YYYYMMDD` obriga o SQL a montar o texto com `substr` a cada uso, e o app tem quatro conversores de formato.
 - **O que muda:** colunas de data em texto `YYYY-MM-DD`, que o SQLite entende direto e que continua ordenando certo. Migração dos dados (DADOS-1).
