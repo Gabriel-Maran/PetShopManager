@@ -284,8 +284,8 @@ Decisão:
 - Uma função (`pagedNameSearch`) monta a página e a contagem com o mesmo FROM, os mesmos JOINs e o mesmo filtro, e o repository devolve `{ items, total }`. As buscas e contagens antigas saíram.
 - O hook `useSearchPage` faz a busca nas três telas que pagina por nome. Só a resposta mais recente entra na tela.
 - Depois de desativar ou reativar, Cadastros busca a mesma página de novo, em vez de tirar o item da lista na hora (revê o que foi decidido no BUG-6): o próximo item sobe e o total fica certo.
-- O id desempata a ordem; `%` e `_` digitados são texto (`ESCAPE`); a ordem do ORDER BY, que entra no texto do SQL, só aceita `ASC` e `DESC`; o texto da busca vai até 100 caracteres.
-- A ordem continua a de antes: sem texto, os mais novos primeiro; com texto, pelo nome, na mesma direção.
+- O id desempata a ordem; `%` e `_` digitados são texto (`ESCAPE`); o texto da busca vai até 100 caracteres.
+- Da varredura, aprovado pelo Gabriel: sem texto, os mais novos primeiro; com texto, em ordem alfabética (antes saía de Z a A). A ordem deixou de ser parâmetro, porque as três telas pediam a mesma, e assim nada vindo da tela entra no texto do SQL. A aba ou o modal que fecha limpa a lista, para não reabrir com a da última vez.
 
 Motivo:
 - A mesma função nos dois comandos é o que garante que o total bate com a lista, e o teste confere nos dois status, com e sem acento.

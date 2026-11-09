@@ -3,7 +3,7 @@ import { useError } from "../useError";
 import useFormState from "../useFormState";
 import { useSearchPage } from "../useSearchPage";
 import { petController } from "../../controller/PetController";
-import { LIMIT_ITEM_PAGE, ORDER } from "../../config/consts";
+import { LIMIT_ITEM_PAGE } from "../../config/consts";
 import { PetWithSpecieRaceAndOwner } from "../../model/Pet";
 import { ServiceType } from "../../model/ServiceType";
 import { serviceTypeRepository } from "../../repository/ServiceTypeRepository";
@@ -48,7 +48,6 @@ export function usePetsComEspecieERacaBanco(ativada: boolean): PegarPetsReturn {
         ativo: 1,
         page: form.page,
         limit: LIMIT_ITEM_PAGE,
-        order: ORDER.DESC,
       }),
     [form.searchTxt, form.page],
     ativada,

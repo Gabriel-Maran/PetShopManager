@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { speciesController } from "../../controller/SpeciesController";
 import { ownerController } from "../../controller/OwnerController";
-import { LIMIT_ITEM_PAGE, ORDER } from "../../config/consts";
+import { LIMIT_ITEM_PAGE } from "../../config/consts";
 import { Owner } from "../../model/Owner";
 import { Species } from "../../repository/SpeciesRepository";
 import { useError } from "../useError";
@@ -89,7 +89,6 @@ export function pegarDonosBanco(): {
         ativo: 1,
         page,
         limit: LIMIT_ITEM_PAGE,
-        order: ORDER.DESC,
       }),
     [searchTxt, page],
   );

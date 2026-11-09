@@ -2,11 +2,13 @@
 
 Atualizado em 2026-11-09, depois do BUG-5, a terceira etapa da Parte 4.
 
-> **Para o próximo chat:** o BUG-5 (lista e total da busca com o mesmo filtro) está em revisão no PR #25, branch `fix/contagem-de-cadastros`, no worktree `.claude/worktrees/acoes-de-cadastros` (o nome da pasta ficou da etapa anterior). Se o Gabriel aprovar algo da varredura, entra nessa mesma branch. Depois do merge, a próxima etapa é renomear as ações de desativar (ver "Parte 4" em "Partes de execução"). Os roteiros para conferir no aparelho estão nos PRs #22 (ERRO-1), #24 (BUG-6) e #25 (BUG-5).
+> **Para o próximo chat:** o BUG-5 entrou no `main` pelo PR #25, em 2026-11-09. Os dois ajustes aprovados da varredura dele (busca com texto de A a Z e aba fechada sem lista antiga) estão em revisão no PR #26, branch `fix/ordem-da-busca`, no worktree `.claude/worktrees/acoes-de-cadastros` (o nome da pasta ficou da etapa do BUG-6). Depois do merge, a próxima etapa é renomear as ações de desativar (ver "Parte 4" em "Partes de execução"). Os roteiros para conferir no aparelho estão nos PRs #22 (ERRO-1), #24 (BUG-6) e #25 (BUG-5).
 >
 > O BUG-6 entrou no `main` pelo PR #24, o ERRO-1 pelo #22 e a importação cancelada pelo #23, todos em 2026-11-09. A Parte 3 foi aceita com o merge do PR #21, em 2026-11-08.
 >
-> O clone do Gabriel estava no `8004a1a`, atrás do `main`. Antes de testar, `git pull` no `main`: os PRs #18 a #25 não mexem no `package-lock.json` alterado.
+> A branch remota `fix/contagem-de-cadastros` voltou por engano depois do merge do PR #25, com um commit que já está no PR #26. O Gabriel pode apagá-la no GitHub.
+>
+> O clone do Gabriel estava no `8004a1a`, atrás do `main`. Antes de testar, `git pull` no `main`: os PRs #18 a #26 não mexem no `package-lock.json` alterado.
 >
 > Limpeza de 2026-11-09: saíram os worktrees `backup-3c` (PR #21) e `erros-centralizados` (PRs #22 e #23), e a pasta vazia `dados-1`. As branches locais ficaram. A pasta vazia `.claude/worktrees/erros-centralizados` continua presa por outro processo; apague quando ela soltar.
 
@@ -75,7 +77,7 @@ Falta, nesta ordem:
 - A auditoria do código foi feita sobre o commit `e1d5f2f` do `main`.
 - O plano está em [`plano-de-melhorias.md`](plano-de-melhorias.md), com 35 itens: 9 P0, 16 P1 e 10 P2.
 - A arquitetura de hoje está em [`arquitetura.md`](arquitetura.md), e as respostas do checklist, em [`auditoria.md`](auditoria.md).
-- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só), #23 (importação cancelada), #24 (ações de Cadastros) e #25 (busca com o mesmo filtro, em revisão). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
+- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só), #23 (importação cancelada), #24 (ações de Cadastros), #25 (busca com o mesmo filtro) e #26 (ordem da busca, em revisão). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
 - Da Parte 1, falta o que depende das perguntas em aberto. As Partes 2 e 3 estão completas e aceitas. A Parte 4 começou em 2026-11-09, com o ERRO-1, o BUG-6 e o BUG-5, e as Partes 5 em diante ainda não começaram.
 - Falta o Gabriel responder [`perguntas-em-aberto.md`](perguntas-em-aberto.md). Várias partes abaixo dependem dessas respostas.
 
@@ -156,12 +158,13 @@ Em andamento desde 2026-11-09, uma etapa por PR e um chat por etapa:
    - desativar e reativar em Cadastros passam pelo `useAsyncAction`: o item só sai da lista depois que o banco confirma, e a falha aparece no modal de erro;
    - o nome do modal de desativar vem da própria lista. Saiu a busca no banco do `handleDeleteSelected`, que podia falhar sem aviso;
    - verificado: typecheck limpo, 123 testes passando e o pacote Android gerado. Sem teste novo, porque a tela não roda no Node (os testes de componentes são o TEST-3). O roteiro para conferir no aparelho, com a falha simulada, está no PR #24.
-3. BUG-5, em revisão no PR #25 (branch `fix/contagem-de-cadastros`), feito em 2026-11-09, com as duas primeiras sugestões da varredura do PR #24, aprovadas pelo Gabriel:
+3. BUG-5, no `main` desde o PR #25, em 2026-11-09, com as duas primeiras sugestões da varredura do PR #24, aprovadas pelo Gabriel:
    - `pagedNameSearch` (`app/repository/sql/searchSql.ts`) monta a página e a contagem com o mesmo FROM e o mesmo filtro (status e `nome_normalizado`). O repository devolve `{ items, total }` (`searchOwnersPage` e `searchPetsPage`), e saíram as buscas e contagens antigas;
    - o hook `useSearchPage` descarta a resposta atrasada e recarrega a página depois de uma ação. Vale para Cadastros e para os seletores de dono (cadastro de pet) e de pet (agendamento);
    - Cadastros recarrega depois de desativar ou reativar, volta à página 1 ao trocar o status e volta uma página se a última esvaziar;
    - o id desempata a ordem; `%` e `_` na busca são texto; o `validateNameSearch` confere status, página, limite e o texto até 100 caracteres (`app/globals/limits.ts`);
-   - verificado: typecheck limpo, 137 testes passando (14 novos, em `tests/busca.test.mjs`) e o pacote Android gerado. O roteiro para conferir no aparelho está no PR #25.
+   - da varredura do PR #25, aprovado pelo Gabriel, no PR #26 (branch `fix/ordem-da-busca`, em revisão): com texto, a busca sai em ordem alfabética (antes, de Z a A); sem texto, os mais novos primeiro. A ordem deixou de ser parâmetro, e nada do usuário entra no texto do SQL. A aba ou o modal que fecha limpa a lista, para não reabrir com a da última vez;
+   - verificado: typecheck limpo, 136 testes passando (13 novos, em `tests/busca.test.mjs`) e o pacote Android gerado. O roteiro para conferir no aparelho está no PR #25.
 4. Próxima: renomear as ações de desativar, a terceira sugestão da varredura do PR #24, aprovada pelo Gabriel em 2026-11-09. O `deleteOwner` e o `deletePet` (controller, service e repository) e o `onConfirmDelete` do `ModalConfDelete` desativam, e não apagam. Um PR `refactor` só com os nomes. É um pedaço do NOMES-1, adiantado.
 5. Depois: o resto do BKP-1. Não depende de pergunta.
 6. O VALID-1 espera a pergunta 13 (Zod ou validadores próprios), e o BUG-8, a pergunta 16 (navegação).

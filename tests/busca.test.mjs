@@ -12,7 +12,7 @@ import { MESSAGES } from "../app/globals/messages.ts";
 import { AppError } from "../app/errors/AppError.ts";
 
 /** A busca como a tela monta, com o que o teste quiser trocar. */
-const nameSearch = (fields = {}) => ({ query: "", ativo: 1, page: 0, limit: 20, order: "DESC", ...fields });
+const nameSearch = (fields = {}) => ({ query: "", ativo: 1, page: 0, limit: 20, ...fields });
 
 /** Roda a página e a contagem como o fetchPage do app. */
 function runPage(db, { list, count }) {
@@ -62,14 +62,14 @@ describe("busca de donos", () => {
     assert.equal(both.items.length, 2);
   });
 
-  test("sem texto, os mais novos vêm primeiro; com texto, a ordem é a do nome", () => {
-    for (const nome of ["Bruna", "Ana", "Carla"]) insertOwner(db, { nome });
+  test("sem texto, os mais novos vêm primeiro; com texto, a ordem é alfabética, sem olhar o acento", () => {
+    for (const nome of ["Bruna", "Ângela", "Carla", "Ana"]) insertOwner(db, { nome });
 
     const recent = runPage(db, searchOwnersSql(nameSearch()));
-    assert.deepEqual(names(recent), ["Carla", "Ana", "Bruna"]);
+    assert.deepEqual(names(recent), ["Ana", "Carla", "Ângela", "Bruna"]);
 
-    const byName = runPage(db, searchOwnersSql(nameSearch({ query: "a", order: "ASC" })));
-    assert.deepEqual(names(byName), ["Ana", "Bruna", "Carla"]);
+    const byName = runPage(db, searchOwnersSql(nameSearch({ query: "a" })));
+    assert.deepEqual(names(byName), ["Ana", "Ângela", "Bruna", "Carla"]);
   });
 
   test("as páginas não repetem nem pulam ninguém, mesmo com a mesma data de cadastro", () => {
@@ -104,12 +104,6 @@ describe("busca de donos", () => {
 
     assert.deepEqual(page, { items: [], total: 0 });
     assert.equal(db.prepare("SELECT COUNT(*) AS total FROM owners").get().total, 1);
-  });
-
-  test("uma ordem fora de ASC e DESC é recusada antes de virar SQL", () => {
-    for (const order of ["DESC; DROP TABLE owners", "asc", "", undefined]) {
-      assert.throws(() => searchOwnersSql(nameSearch({ order })), /Ordem de busca inválida/, String(order));
-    }
   });
 });
 
