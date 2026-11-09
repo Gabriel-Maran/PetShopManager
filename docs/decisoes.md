@@ -240,7 +240,7 @@ Motivo:
 **Backup de versão anterior (3c), em 2026-11-08.**
 Decisão:
 - A cópia do arquivo importado é aberta numa conexão só dela e passa pelo mesmo `migrateDatabase` do banco do aparelho. Só depois ela é anexada e copiada para o app, como antes.
-- Antes das migrações, a cópia precisa ter as sete tabelas do backup. Um arquivo sem elas, ou que nem abre como banco SQLite, é recusado com uma mensagem só ("não é um backup do PetShop Manager"). Um backup de versão mais nova recebe a mesma mensagem da abertura do app.
+- Antes das migrações, a cópia precisa ter as sete tabelas do backup. Um arquivo sem elas, ou que nem abre como banco SQLite, é recusado com uma mensagem só ("não é um backup do PetShop Manager"). Um backup de versão mais nova tem mensagem própria ("Este backup é de uma versão mais nova do app"), porque a da abertura do app fala dos dados do aparelho.
 - A atualização e a restauração ficam em `app/config/backupRestore.ts`, sem o Expo, e os testes rodam esse código. O `BackupService` só cuida dos arquivos. A restauração reaproveita o `withForeignKeysOff` e o `inTransaction` do `migrator.ts`, que passaram a ser exportados.
 - O `ATTACH` recebe o caminho como parâmetro, em vez de montar o texto do comando.
 - A cópia temporária e os arquivos que o SQLite cria ao lado dela (`-wal`, `-shm`, `-journal`) são apagados no fim, com qualquer resultado.

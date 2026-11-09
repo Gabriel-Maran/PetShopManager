@@ -5,6 +5,7 @@
 import {
   inTransaction,
   migrateDatabase,
+  readUserVersion,
   withForeignKeysOff,
   type Migration,
   type MigrationDatabase,
@@ -20,6 +21,9 @@ import {
 
 export const NOT_A_BACKUP_MESSAGE =
   "Este arquivo não é um backup do PetShop Manager. Escolha um arquivo exportado pelo app.";
+
+export const NEWER_BACKUP_MESSAGE =
+  "Este backup é de uma versão mais nova do app. Atualize o app para importá-lo.";
 
 /** A conexão do app na restauração: a das migrações, mais um comando com parâmetros. */
 export interface RestoreDatabase extends MigrationDatabase {
@@ -40,6 +44,11 @@ export async function upgradeBackup(
   const tables = await listTables(backup);
   if (!BACKUP_TABLES.every((table) => tables.has(table))) {
     throw new Error(NOT_A_BACKUP_MESSAGE);
+  }
+  // O migrateDatabase também recusa, mas com a mensagem da abertura do app, que fala dos dados do
+  // aparelho, e não do arquivo escolhido.
+  if ((await readUserVersion(backup)) > migrations.length) {
+    throw new Error(NEWER_BACKUP_MESSAGE);
   }
   return migrateDatabase(backup, migrations);
 }

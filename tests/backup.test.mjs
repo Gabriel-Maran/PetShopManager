@@ -17,8 +17,8 @@ import {
 import { buildDemoDataSql } from "../app/config/demoData.ts";
 import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
 import { MIGRATIONS } from "../app/config/schema.ts";
-import { NEWER_DATABASE_MESSAGE } from "../app/config/migrator.ts";
 import {
+  NEWER_BACKUP_MESSAGE,
   NOT_A_BACKUP_MESSAGE,
   restoreBackup,
   upgradeBackup,
@@ -166,7 +166,7 @@ describe("backup de versão anterior", () => {
     const app = await appWithData();
     const before = rows(app, "owners");
 
-    await assert.rejects(importBackup(app, { uri, backup }), { message: NEWER_DATABASE_MESSAGE });
+    await assert.rejects(importBackup(app, { uri, backup }), { message: NEWER_BACKUP_MESSAGE });
 
     assert.deepEqual(rows(app, "owners"), before);
     assert.equal(userVersion(backup), LATEST + 1, "a cópia não é mexida");
