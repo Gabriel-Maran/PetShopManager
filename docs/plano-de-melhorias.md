@@ -188,6 +188,7 @@ Confirmado em 2026-11-08 por teste (`tests/backup.test.mjs`): na restauração, 
 
 - **Por quê:** parte da entrada é validada, parte não. O horário aceita "9" (sem minutos), a data só é checada por ser número, o valor pode ficar vazio, o e-mail não tem formato conferido e os textos não levam `trim` em todo lugar. O salvamento do dono não protege contra toque duplo, ao contrário dos de pet e agendamento.
 - **O que muda:** um schema por entidade (dono, pet, agendamento, raça) com os formatos (`HH:MM`, data real, valor, e-mail, telefone), `trim` e tamanho máximo, usado pelo serviço antes de gravar. As mensagens ficam em `globals` (ver ERRO-1). A escolha entre Zod e validadores próprios está em `perguntas-em-aberto.md`.
+- **Anotado em 2026-11-08, depois da versão 3 do esquema:** as colunas novas não conferem o formato. Avaliar um `CHECK` no banco, como `data = date(data)` nas datas e `valor >= 0` nos centavos, numa versão nova do esquema. Antes, a migração precisa tratar o dado antigo que não passaria na regra, para o app não travar ao abrir. A v3 deixou o `CHECK` de fora por isso.
 - **Pronto quando:** cada regra tem teste com entrada válida, inválida e nos limites.
 
 ### ERRO-1 · Tratamento de erros centralizado
