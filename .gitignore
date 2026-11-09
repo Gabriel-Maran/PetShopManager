@@ -31,7 +31,22 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
+# Qualquer .env fica fora; só o modelo, sem valores reais, entra no Git.
+.env
+.env.*
+!.env.example
+
+# Banco e backups do app: podem ter dados reais de clientes.
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Builds do app: vão para as releases, não para o código.
+*.apk
+*.aab
 
 # typescript
 *.tsbuildinfo

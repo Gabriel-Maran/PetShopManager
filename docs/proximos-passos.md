@@ -36,7 +36,8 @@ Feito:
   - o `CLAUDE.md` e a pasta `.claude/` nunca foram versionados;
   - o `projectId` e o `owner` da EAS no `app.json` são identificadores públicos, que não dão acesso sem o token;
   - os dados de exemplo e os prints do README são fictícios, e os prints não têm EXIF;
-  - ponto de atenção: os commits mostram o e-mail pessoal de quem os fez (Gabriel em 127, Gustavo em 28 e João Pedro em 16). Não é segredo, mas é dado pessoal público.
+  - ponto de atenção: os commits mostram o e-mail pessoal de quem os fez (Gabriel em 127, Gustavo em 28 e João Pedro em 16). Não é segredo, mas é dado pessoal público;
+  - com o aval do Gabriel, no PR #20: o `.gitignore` passou a barrar qualquer `.env` (menos o `.env.example`), o banco e os backups do app (`*.db`, `*.sqlite` e os arquivos do WAL) e os builds (`*.apk` e `*.aab`).
 
 Falta, nesta ordem:
 
