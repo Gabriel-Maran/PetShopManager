@@ -151,7 +151,9 @@ Achado novo: no campo de horário, um quinto dígito apaga o campo inteiro (`mas
 
 O primeiro item foi resolvido no DADOS-1, em 2026-11-08: uma falha na abertura do banco agora chega à tela de erro do `App.tsx`.
 
-Conferido no ERRO-1, em 2026-11-09: o `console.log` da validação do pet já não existe, e as buscas do dono e da raça na aba do pet, que só iam para o `console.error`, passaram a mostrar a falha. Falta o resto: as ações de Cadastros sem `await` e o `handleDeleteSelected`.
+Conferido no ERRO-1, em 2026-11-09: o `console.log` da validação do pet já não existe, e as buscas do dono e da raça na aba do pet, que só iam para o `console.error`, passaram a mostrar a falha.
+
+O resto foi feito em 2026-11-09, no PR #24: desativar e reativar em Cadastros passam pelo `useAsyncAction`, e o item só sai da lista depois que o banco confirma. O `handleDeleteSelected` deixou de ir ao banco: o nome do modal vem da própria lista. Falta o Gabriel conferir no aparelho, com o roteiro do PR.
 
 - **Por quê:**
   - `initDatabase` captura qualquer erro com `console.log` ([`database.ts:687`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/config/database.ts#L687)), e o app abre como se o banco estivesse certo.

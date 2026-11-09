@@ -266,3 +266,14 @@ Motivo:
 - A regra de segurança do Gabriel: a tela não mostra SQL, nome de tabela nem detalhe interno, que ficam no log.
 - Um módulo só cria, registra e trata os erros, e a mensagem de cada falha fica num lugar só, em `globals`.
 - Os relatórios chamavam o `showError` durante o render. Pela leitura do código, o modal voltava a abrir a cada vez que era fechado (provável).
+
+**Ações de Cadastros esperam o banco (BUG-6).**
+Contexto: desativar e reativar chamavam o controller sem `await`, e o item saía da lista mesmo com falha. O modal de desativar buscava o registro no banco só para mostrar o nome, sem tratar erro.
+Decisão:
+- Desativar e reativar usam o `useAsyncAction`, como as outras ações do app. O item sai da lista só depois que o banco confirma.
+- O nome do modal vem da lista que a tela já tem. A existência do registro continua conferida pelo controller, na hora de desativar.
+- A lista tira o item na hora, sem recarregar. O total da paginação fica para o BUG-5, que junta contagem e lista.
+
+Motivo:
+- Uma busca a menos é um caminho de falha a menos, e a resposta do controller (`NOT_FOUND`) já cobre o registro que sumiu.
+- Recarregar a lista inteira mudaria a página que o usuário está vendo, e a contagem certa depende do BUG-5.

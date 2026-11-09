@@ -1,14 +1,14 @@
 # Próximos passos
 
-Atualizado em 2026-11-09, depois do ERRO-1, a primeira etapa da Parte 4.
+Atualizado em 2026-11-09, depois do BUG-6, a segunda etapa da Parte 4.
 
-> **Para o próximo chat:** a Parte 4 começou. O ERRO-1 (erros num lugar só) entrou no `main` pelo PR #22, em 2026-11-09, e a correção da importação cancelada está em revisão no PR #23, branch `fix/importacao-cancelada`. A próxima etapa é o BUG-6 (ver "Parte 4" em "Partes de execução"). O roteiro para conferir o ERRO-1 no aparelho está no PR #22.
+> **Para o próximo chat:** o BUG-6 (desativar e reativar em Cadastros esperam o banco) está em revisão no PR #24, branch `fix/acoes-de-cadastros`, no worktree `.claude/worktrees/acoes-de-cadastros`. Se o Gabriel aprovar a varredura, os ajustes entram nessa mesma branch. Depois do merge, a próxima etapa é o BUG-5 (ver "Parte 4" em "Partes de execução"). Os roteiros para conferir no aparelho estão nos PRs #22 (ERRO-1) e #24 (BUG-6).
 >
-> A Parte 3 foi aceita pelo Gabriel com o merge do PR #21, em 2026-11-08.
+> O ERRO-1 entrou no `main` pelo PR #22, e a importação cancelada, pelo PR #23, os dois em 2026-11-09. A Parte 3 foi aceita com o merge do PR #21, em 2026-11-08.
 >
-> O clone do Gabriel estava no `8004a1a`, atrás do `main`. Antes de testar, `git pull` no `main`: os PRs #18 a #22 não mexem no `package-lock.json` alterado.
+> O clone do Gabriel estava no `8004a1a`, atrás do `main`. Antes de testar, `git pull` no `main`: os PRs #18 a #24 não mexem no `package-lock.json` alterado.
 >
-> Limpeza de 2026-11-09: o worktree `backup-3c`, do PR #21, foi removido (a branch local ficou). A pasta vazia `.claude/worktrees/dados-1` continua presa por outro processo (provavelmente um terminal ou o Expo aberto nela); apague quando ela soltar.
+> Limpeza de 2026-11-09: saíram os worktrees `backup-3c` (PR #21) e `erros-centralizados` (PRs #22 e #23), e a pasta vazia `dados-1`. As branches locais ficaram. A pasta vazia `.claude/worktrees/erros-centralizados` continua presa por outro processo; apague quando ela soltar.
 
 ## Em andamento: segurança e configuração do repositório
 
@@ -75,8 +75,8 @@ Falta, nesta ordem:
 - A auditoria do código foi feita sobre o commit `e1d5f2f` do `main`.
 - O plano está em [`plano-de-melhorias.md`](plano-de-melhorias.md), com 35 itens: 9 P0, 16 P1 e 10 P2.
 - A arquitetura de hoje está em [`arquitetura.md`](arquitetura.md), e as respostas do checklist, em [`auditoria.md`](auditoria.md).
-- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só) e #23 (importação cancelada, em revisão). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
-- Da Parte 1, falta o que depende das perguntas em aberto. As Partes 2 e 3 estão completas e aceitas. A Parte 4 começou em 2026-11-09, com o ERRO-1, e as Partes 5 em diante ainda não começaram.
+- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só), #23 (importação cancelada) e #24 (ações de Cadastros, em revisão). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
+- Da Parte 1, falta o que depende das perguntas em aberto. As Partes 2 e 3 estão completas e aceitas. A Parte 4 começou em 2026-11-09, com o ERRO-1 e o BUG-6, e as Partes 5 em diante ainda não começaram.
 - Falta o Gabriel responder [`perguntas-em-aberto.md`](perguntas-em-aberto.md). Várias partes abaixo dependem dessas respostas.
 
 ## Partes de execução
@@ -152,9 +152,13 @@ Em andamento desde 2026-11-09, uma etapa por PR e um chat por etapa:
    - o backup, os dados de exemplo e o cadastro de raça usam o `ErrorProvider`; saiu o `handleError` copiado em 8 arquivos;
    - da varredura, aprovado pelo Gabriel, no PR #23: cancelar a escolha do arquivo na importação não leva mais ao calendário, porque o `importDatabase` devolve se importou;
    - verificado: typecheck limpo, 123 testes passando (12 novos, em `tests/erros.test.mjs`) e o pacote Android gerado. O roteiro para conferir no aparelho está no PR #22.
-2. Próxima, sugerida: BUG-6, as ações de Cadastros sem `await` e o `handleDeleteSelected`, já com o `useAsyncAction`. Não depende de pergunta.
-3. Depois: BUG-5 (contagem com o mesmo filtro da lista) e o resto do BKP-1. Também não dependem de pergunta.
-4. O VALID-1 espera a pergunta 13 (Zod ou validadores próprios), e o BUG-8, a pergunta 16 (navegação).
+2. BUG-6, em revisão no PR #24 (branch `fix/acoes-de-cadastros`), feito em 2026-11-09:
+   - desativar e reativar em Cadastros passam pelo `useAsyncAction`: o item só sai da lista depois que o banco confirma, e a falha aparece no modal de erro;
+   - o nome do modal de desativar vem da própria lista. Saiu a busca no banco do `handleDeleteSelected`, que podia falhar sem aviso;
+   - verificado: typecheck limpo, 123 testes passando e o pacote Android gerado. Sem teste novo, porque a tela não roda no Node (os testes de componentes são o TEST-3). O roteiro para conferir no aparelho, com a falha simulada, está no PR #24.
+3. Próxima, sugerida: BUG-5 (contagem com o mesmo filtro da lista). Inclui atualizar o total depois de desativar ou reativar, que hoje fica parado. Não depende de pergunta.
+4. Depois: o resto do BKP-1. Também não depende de pergunta.
+5. O VALID-1 espera a pergunta 13 (Zod ou validadores próprios), e o BUG-8, a pergunta 16 (navegação).
 
 - ERRO-1: módulo de erros, mensagens em `globals` e hook de ação assíncrona.
 - BUG-5: contagem com o mesmo filtro da lista.
