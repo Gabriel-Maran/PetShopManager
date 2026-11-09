@@ -1,8 +1,9 @@
-import { ORDER } from "../config/consts";
 import { Owner, OwnerBuilder } from "../model/Owner";
+import type { NameSearch, Page } from "../model/Search";
 import { ownerService } from "../service/OwnerService";
 import { AppError } from "../errors/AppError";
 import { MESSAGES } from "../globals/messages";
+import { validateNameSearch } from "./validateNameSearch";
 
 /** Nome e telefone obrigatórios, e o telefone com DDD. Cada falha tem a sua mensagem. */
 function validateOwner(owner: Owner): void {
@@ -38,36 +39,9 @@ class OwnerController {
     return ownerService.getAllOwners();
   }
 
-  searchOwnersByNamePaged(
-    query: string,
-    page: number,
-    limit: number,
-    order: ORDER = ORDER.DESC,
-    ativo: number = 1,
-  ): Promise<Owner[]> {
-    if (!query.trim()) {
-      return this.getAllOwnersPaged(page, limit, order, ativo);
-    }
-    return ownerService.searchOwnersByNamePaged(
-      query,
-      page,
-      limit,
-      order,
-      ativo,
-    );
-  }
-
-  getAllOwnersPaged(
-    page: number,
-    limit: number,
-    order: ORDER = ORDER.DESC,
-    ativo: number = 1,
-  ): Promise<Owner[]> {
-    return ownerService.getAllOwnersPaged(page, limit, order, ativo);
-  }
-
-  countOwners(search?: string): Promise<number> {
-    return ownerService.countOwners(search);
+  async searchOwnersPage(search: NameSearch): Promise<Page<Owner>> {
+    validateNameSearch(search);
+    return ownerService.searchOwnersPage(search);
   }
 
   async createOwner(owner: Owner): Promise<void> {

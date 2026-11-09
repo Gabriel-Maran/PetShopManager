@@ -2,11 +2,12 @@ import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useState, useEffect } from "react";
 
 import { useScreen } from "../../hooks/useScreen";
-import { useError } from "../../hooks/useError";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { useSearchPage } from "../../hooks/useSearchPage";
 
 import { PetWithSpecieRaceAndOwner } from "../../model/Pet";
 import { Owner } from "../../model/Owner";
+import type { NameSearch } from "../../model/Search";
 
 import { ownerController } from "../../controller/OwnerController";
 import { petController } from "../../controller/PetController";
@@ -32,7 +33,6 @@ type CadastroItem = Owner | PetWithSpecieRaceAndOwner;
 
 export default function Cadastros() {
   const { navigate, params } = useScreen<NewOrEditCadastros>();
-  const { showError } = useError();
 
   const s = useThemedStyles(styles);
 
@@ -40,9 +40,6 @@ export default function Cadastros() {
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
-  const [owners, setOwners] = useState<Owner[]>([]);
-  const [pets, setPets] = useState<PetWithSpecieRaceAndOwner[]>([]);
-  const [total, setTotal] = useState(0);
   const [itemToDeactivate, setItemToDeactivate] = useState<
     CadastroItem | undefined
   >();
@@ -54,65 +51,53 @@ export default function Cadastros() {
     setPage(0);
   };
 
-  // Contagem total — recalcula ao trocar de aba
+  const nameSearch: NameSearch = {
+    query: search,
+    ativo: isAtivo,
+    page,
+    limit: LIMIT_ITEM_PAGE,
+    order: ORDER.DESC,
+  };
+  const searchDeps = [search, page, isAtivo];
+
+  // A lista e o total vêm da mesma busca. Só a aba aberta busca, e uma resposta atrasada é descartada.
+  const owners = useSearchPage(
+    () => ownerController.searchOwnersPage(nameSearch),
+    searchDeps,
+    isOwnerSelected,
+  );
+  const pets = useSearchPage(
+    () => petController.searchPetsPage(nameSearch),
+    searchDeps,
+    !isOwnerSelected,
+  );
+  const { total, reload } = isOwnerSelected ? owners : pets;
+
+  // Depois de desativar o último item da última página, volta para a página anterior.
   useEffect(() => {
-    const count = isOwnerSelected
-      ? ownerController.countOwners(search)
-      : petController.countPets(search);
-    count.then(setTotal).catch(showError);
-  }, [isOwnerSelected, search]);
+    const lastPage = Math.max(0, Math.ceil(total / LIMIT_ITEM_PAGE) - 1);
+    if (page > lastPage) setPage(lastPage);
+  }, [total]);
 
-  // Busca — só dispara quando search muda (botão) ou ao trocar página/aba
-  useEffect(() => {
-    const fetch = isOwnerSelected
-      ? ownerController
-          .searchOwnersByNamePaged(
-            search,
-            page,
-            LIMIT_ITEM_PAGE,
-            ORDER.DESC,
-            isAtivo,
-          )
-          .then(setOwners)
-      : petController
-          .searchPetsByNamePagedWithSpecieAndRace(
-            search,
-            page,
-            LIMIT_ITEM_PAGE,
-            ORDER.DESC,
-            isAtivo,
-          )
-          .then(setPets);
-    fetch.catch(showError);
-  }, [search, page, isOwnerSelected, isAtivo]);
-
-  /** Tira da aba aberta o item que mudou de status, porque ele passa para o outro filtro. */
-  function removeFromList(itemId: number) {
-    if (isOwnerSelected) {
-      setOwners((prev) => prev.filter((item) => item.id !== itemId));
-    } else {
-      setPets((prev) => prev.filter((item) => item.id !== itemId));
-    }
-  }
-
-  // A lista só muda depois que o banco confirma. Uma falha aparece no modal de erro, e o item fica.
+  // A lista só muda depois que o banco confirma, e a busca de novo traz a página e o total certos.
+  // Uma falha aparece no modal de erro, e o item fica.
   const deactivate = useAsyncAction(async (itemId: number) => {
     await (isOwnerSelected
       ? ownerController.deleteOwner(itemId)
       : petController.deletePet(itemId));
-    removeFromList(itemId);
+    reload();
   });
 
   const activate = useAsyncAction(async (itemId: number) => {
     await (isOwnerSelected
       ? ownerController.activeOwner(itemId)
       : petController.activePet(itemId));
-    removeFromList(itemId);
+    reload();
   });
 
   // O nome do modal vem da própria lista, sem ir ao banco.
   function askToDeactivate(itemId: number) {
-    const items: CadastroItem[] = isOwnerSelected ? owners : pets;
+    const items: CadastroItem[] = isOwnerSelected ? owners.items : pets.items;
     setItemToDeactivate(items.find((item) => item.id === itemId));
   }
 
@@ -142,6 +127,7 @@ export default function Cadastros() {
           }}
           hasFilter={true}
           onStatusFiltroChange={(item: number) => {
+            setPage(0);
             setIsAtivo(item);
           }}
           statusFiltro={isAtivo ? "ativo" : "inativo"}
@@ -173,14 +159,14 @@ export default function Cadastros() {
           {isOwnerSelected ? (
             <OwnerList
               saoAtivados={isAtivo == 1}
-              cadastros={owners}
+              cadastros={owners.items}
               onDelete={askToDeactivate}
               onActive={activate.run}
             />
           ) : (
             <PetList
               saoAtivados={isAtivo == 1}
-              cadastros={pets}
+              cadastros={pets.items}
               onDelete={askToDeactivate}
               onActive={activate.run}
             />

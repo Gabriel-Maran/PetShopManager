@@ -1,5 +1,5 @@
-import { ORDER } from "../config/consts";
 import { Pet } from "../model/Pet";
+import type { NameSearch } from "../model/Search";
 import { petRepository } from "../repository/PetRepository";
 import type { IsoDate } from "../utils/datas";
 import type { Cents } from "../utils/dinheiro";
@@ -13,55 +13,12 @@ class PetService {
     return petRepository.getAllPets();
   }
 
-  getAllPetsPaged(page: number, limit: number, order: ORDER) {
-    return petRepository.getAllPetsPaged(page, limit, order);
-  }
-
-  getAllPetsPagedWithSpecieRaceAndOwner(
-    page: number,
-    limit: number,
-    order: ORDER,
-    ativo: number = 1,
-  ) {
-    return petRepository.getAllPetsPagedWithSpecieRaceAndOwner(
-      page,
-      limit,
-      order,
-      ativo,
-    );
-  }
-
-  searchPetsByNamePaged(
-    query: string,
-    page: number,
-    limit: number,
-    order: ORDER,
-  ) {
-    return petRepository.searchPetsByNamePaged(query, page, limit, order);
-  }
-
-  searchPetsByNamePagedWithSpecieRaceAndOwner(
-    query: string,
-    page: number,
-    limit: number,
-    order: ORDER,
-    ativo: number = 1,
-  ) {
-    return petRepository.searchPetsByNamePagedWithSpecieRaceAndOwner(
-      query,
-      page,
-      limit,
-      order,
-      ativo,
-    );
+  searchPetsPage(search: NameSearch) {
+    return petRepository.searchPetsPage(search);
   }
 
   getPetsByOwnerId(ownerId: number) {
     return petRepository.getPetsByOwnerId(ownerId);
-  }
-
-  countPets(search?: string) {
-    return petRepository.countPets(search);
   }
 
   createPet(pet: Pet) {

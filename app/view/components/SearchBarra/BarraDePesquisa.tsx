@@ -13,6 +13,7 @@ import {
 } from "../../Themes/ThemeProvider";
 import { StatusFiltro } from "../../../config/consts";
 import FilterPanel from "./FilterPanel";
+import { MAX_SEARCH_LENGTH } from "../../../globals/limits";
 
 export default function BarraDePesquisa({
   placeHolderStr,
@@ -66,6 +67,7 @@ export default function BarraDePesquisa({
             onChangeText={setText}
             value={text}
             placeholder={placeHolderStr}
+            maxLength={MAX_SEARCH_LENGTH}
             multiline={false}
             style={s.input}
             placeholderTextColor={colors.TEXT_PRIMARY}

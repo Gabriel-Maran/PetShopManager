@@ -5,6 +5,7 @@ import { LIMIT_ITEM_PAGE, ORDER } from "../../config/consts";
 import { Owner } from "../../model/Owner";
 import { Species } from "../../repository/SpeciesRepository";
 import { useError } from "../useError";
+import { useSearchPage } from "../useSearchPage";
 export function pegarRacasBanco(formEspecieId: number): {
   especiesList: Species[];
   racasList: Species[];
@@ -77,26 +78,21 @@ export function pegarDonosBanco(): {
   setSearchTxt: (stxt: string) => void;
   total: number;
 } {
-  const { showError } = useError();
-
-  const [owners, setOwners] = useState<Owner[]>([]);
   const [page, setPage] = useState<number>(0);
-  const [total, setTotal] = useState<number>(0);
   const [searchTxt, setSearchTxt] = useState<string>("");
-  useEffect(() => {
-    ownerController
-      .searchOwnersByNamePaged(searchTxt, page, LIMIT_ITEM_PAGE, ORDER.DESC)
-      .then(setOwners)
-      .catch(showError);
-  }, [searchTxt, page]);
 
-  useEffect(() => {
-    ownerController.countOwners(searchTxt).then(setTotal).catch(showError);
-  }, [searchTxt]);
-
-  useEffect(() => {
-    ownerController.countOwners().then(setTotal).catch(showError);
-  }, []);
+  // A lista e o total vêm da mesma busca, e uma resposta atrasada é descartada.
+  const { items: owners, total } = useSearchPage(
+    () =>
+      ownerController.searchOwnersPage({
+        query: searchTxt,
+        ativo: 1,
+        page,
+        limit: LIMIT_ITEM_PAGE,
+        order: ORDER.DESC,
+      }),
+    [searchTxt, page],
+  );
 
   return {
     owners,

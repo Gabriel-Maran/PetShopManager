@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useError } from "../useError";
 import useFormState from "../useFormState";
+import { useSearchPage } from "../useSearchPage";
 import { petController } from "../../controller/PetController";
 import { LIMIT_ITEM_PAGE, ORDER } from "../../config/consts";
 import { PetWithSpecieRaceAndOwner } from "../../model/Pet";
@@ -15,59 +16,46 @@ import { paymentMethodRepository } from "../../repository/PaymentsMethodsReposit
 
 //========================================================================//
 
-type PetsForm = {
+type PetsSearchForm = {
   page: number;
-  total: number;
   searchTxt: string;
+};
+
+type PetsForm = PetsSearchForm & {
+  total: number;
   pets: PetWithSpecieRaceAndOwner[];
 };
 
 type PegarPetsReturn = {
   petsForm: PetsForm;
-  updatePetsField: <K extends keyof PetsForm>(
+  updatePetsField: <K extends keyof PetsSearchForm>(
     field: K,
-    value: PetsForm[K],
+    value: PetsSearchForm[K],
   ) => void;
 };
 
 export function usePetsComEspecieERacaBanco(ativada: boolean): PegarPetsReturn {
-  const { showError } = useError();
-
-  const { form, updateField } = useFormState<PetsForm>({
+  const { form, updateField } = useFormState<PetsSearchForm>({
     page: 0,
-    total: 0,
     searchTxt: "",
-    pets: [],
   });
 
-  // Busca a lista de pets — só roda quando o modal está aberto
-  useEffect(() => {
-    if (!ativada) return;
-
-    petController
-      .searchPetsByNamePagedWithSpecieAndRace(
-        form.searchTxt,
-        form.page,
-        LIMIT_ITEM_PAGE,
-        ORDER.DESC,
-      )
-      .then((value) => updateField("pets", value))
-      .catch(showError);
-  }, [ativada, form.searchTxt, form.page]);
-
-  // Busca o total de pets para a paginação funcionar — era o que faltava
-  // Não depende de `page` pois o total não muda ao trocar de página
-  useEffect(() => {
-    if (!ativada) return;
-
-    petController
-      .countPets(form.searchTxt)
-      .then((value) => updateField("total", value))
-      .catch(showError);
-  }, [ativada, form.searchTxt]);
+  // A lista e o total vêm da mesma busca, só com o modal aberto, e uma resposta atrasada é descartada.
+  const { items: pets, total } = useSearchPage(
+    () =>
+      petController.searchPetsPage({
+        query: form.searchTxt,
+        ativo: 1,
+        page: form.page,
+        limit: LIMIT_ITEM_PAGE,
+        order: ORDER.DESC,
+      }),
+    [form.searchTxt, form.page],
+    ativada,
+  );
 
   return {
-    petsForm: form,
+    petsForm: { ...form, pets, total },
     updatePetsField: updateField,
   };
 }

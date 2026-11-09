@@ -20,6 +20,11 @@ export const MESSAGES = {
   /** Campo de sim ou não guardado como número no banco. */
   invalidFlag: (field: string) => `${field} deve ser 0 ou 1.`,
 
+  search: {
+    tooLong: (max: number) => `A busca pode ter até ${max} caracteres.`,
+    invalidPage: "Página inválida. Volte para a primeira página e tente de novo.",
+  },
+
   owner: {
     notFound: "Dono não encontrado.",
     nameRequired: "Informe o nome do dono.",
