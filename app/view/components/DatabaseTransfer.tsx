@@ -27,8 +27,7 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
 
   const exportAction = useAsyncAction(exportDatabase);
   const importAction = useAsyncAction(async () => {
-    await importDatabase();
-    onImportSuccess?.();
+    if (await importDatabase()) onImportSuccess?.();
   });
   const loading = exportAction.isRunning || importAction.isRunning;
 

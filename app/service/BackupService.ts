@@ -55,13 +55,14 @@ export async function exportDatabase(): Promise<void> {
 
 // ─── IMPORTAR ────────────────────────────────────────────────────────────────
 
-export async function importDatabase(): Promise<void> {
+/** Devolve se importou: com a escolha do arquivo cancelada, nada muda e a tela fica onde está. */
+export async function importDatabase(): Promise<boolean> {
   const result = await DocumentPicker.getDocumentAsync({
     type: "*/*",
     copyToCacheDirectory: true,
   });
 
-  if (result.canceled) return;
+  if (result.canceled) return false;
 
   const file = result.assets[0];
 
@@ -85,6 +86,7 @@ export async function importDatabase(): Promise<void> {
   } finally {
     await deleteImportCopy();
   }
+  return true;
 }
 
 async function deleteImportCopy(): Promise<void> {
