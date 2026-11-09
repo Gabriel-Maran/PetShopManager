@@ -10,6 +10,7 @@ import {
 
 import { dbToIso, isoToDb, todayDb } from "../../../../utils/datas";
 import { mascararHorario } from "../../../../utils/mascarar";
+import { maskMoneyInput } from "../../../../utils/dinheiro";
 
 import InputDataPicker from "../Botões/DataPicker/InputDataPicker";
 import InputInfo from "../InputInfo";
@@ -129,7 +130,7 @@ export default function AbaAgendamentoPet({
           <InputInfo
             image={require("../../../../assets/outros/valor.png")}
             item={form.valorPacote}
-            setItem={(item) => updateField("valorPacote", item)}
+            setItem={(item) => updateField("valorPacote", maskMoneyInput(item))}
             titleName="Valor"
             variasLinhas={false}
             tipoTeclado="numeric"

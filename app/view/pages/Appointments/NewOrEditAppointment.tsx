@@ -27,7 +27,8 @@ import {
 } from "../../Themes/ThemeProvider";
 
 import { brToDb, dbToIso, isoToBr, todayDb } from "../../../utils/datas";
-import { numeroComVirgula, mascararHorario } from "../../../utils/mascarar";
+import { mascararHorario } from "../../../utils/mascarar";
+import { maskMoneyInput } from "../../../utils/dinheiro";
 import {
   abrirModalSelecao,
   ModalConfig,
@@ -190,7 +191,7 @@ export default function NewOrEditAppointment() {
   );
 
   const handleChangeValor = useCallback(
-    (v: string) => updateAppointmentsField("valor", numeroComVirgula(v)),
+    (v: string) => updateAppointmentsField("valor", maskMoneyInput(v)),
     [updateAppointmentsField],
   );
 

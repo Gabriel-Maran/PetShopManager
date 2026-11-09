@@ -198,3 +198,14 @@ Motivo:
 - Mudar o tipo de uma coluna no SQLite exige reconstruir a tabela, e o `DEFAULT` do `criado_em` também. Com as duas mudanças juntas, cada tabela é reconstruída uma vez só, e os triggers, que fazem conta com as datas, são reescritos uma vez só.
 - Com as conversões num lugar só, a migração do banco muda poucos arquivos do app, e cada etapa fica pequena o bastante para revisar.
 
+**Dinheiro num lugar só (etapa 2 do DADOS-2 e DADOS-3).**
+Decisão:
+- `app/utils/dinheiro.ts` tem a máscara de digitação, a conversão entre o texto e os centavos e o formato gravado no banco.
+- O `InputInfo` deixou de aplicar a máscara de valor em todo campo com teclado numérico. Cada campo de valor usa a máscara no próprio `setItem`, como o horário e o telefone já faziam.
+- Os controllers gravam o valor sempre com duas casas ("12,5" vira "12,50") e recusam um valor fora do formato, como só uma vírgula. O agendamento sem valor fica com "0,00", o padrão da tabela. O valor do pacote é obrigatório e precisa ser válido com a remarcação ligada; sem ela, fica como veio.
+- O valor do pacote agora aceita até duas casas na digitação, como o do agendamento.
+
+Motivo:
+- O campo genérico decidia pelo tipo de teclado que o texto era dinheiro, inclusive no horário.
+- Com os valores novos sempre no mesmo formato, a migração para centavos tem menos variações para tratar. Ela ainda converte os valores antigos como estiverem.
+

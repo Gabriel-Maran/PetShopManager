@@ -198,6 +198,8 @@ Confirmado em 2026-11-08 por teste (`tests/backup.test.mjs`): na restauração, 
 
 ### DADOS-2 · Dinheiro em centavos inteiros
 
+Preparado em 2026-11-08, sem migração: a máscara, a conversão para centavos e o formato gravado no banco estão em `app/utils/dinheiro.ts`. Os controllers recusam valor inválido e gravam sempre com duas casas ("80,00"). As colunas mudam na versão 3 do esquema, junto com o DADOS-3.
+
 - **Por quê:** valores são texto com vírgula (`"12,50"`), e o trigger divide o valor do pacote em `REAL`. Com um pacote de 99,99 em 4 vezes, cada atendimento vira 25,00 e a soma dá 100,00.
 - **O que muda:** colunas `INTEGER` em centavos, com migração dos dados (DADOS-1), e a divisão do pacote distribui a sobra de centavos. A conversão para "12,50" acontece só na tela, num util.
 - **Pronto quando:** a soma dos atendimentos é igual ao valor do pacote em todos os testes, e os valores antigos são migrados sem perda.

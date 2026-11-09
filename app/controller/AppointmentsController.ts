@@ -1,6 +1,18 @@
 import { Appointment } from "../model/Appointment";
 import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
 import { appointmentsService } from "../service/AppointmentsService";
+import { centsToMoney, INVALID_MONEY_MESSAGE, normalizeMoney } from "../utils/dinheiro";
+
+/**
+ * O valor vai para o banco sempre no mesmo formato ("80,00"). Sem valor, fica 0,00, como o padrão
+ * da tabela.
+ */
+function appointmentValue(text: string | null | undefined): string {
+  if (!text?.trim()) return centsToMoney(0);
+  const normalized = normalizeMoney(text);
+  if (normalized === null) throw new Error(INVALID_MONEY_MESSAGE);
+  return normalized;
+}
 
 class AppointmentsController {
   async getAppointmentById(id: number): Promise<Appointment> {
@@ -45,7 +57,10 @@ class AppointmentsController {
     ) {
       throw new Error("Dados faltando.");
     }
-    await appointmentsService.createAppointment(appointment);
+    await appointmentsService.createAppointment({
+      ...appointment,
+      valor: appointmentValue(appointment.valor),
+    });
   }
 
   async updateAppointment(id: number, appointment: Appointment): Promise<void> {
@@ -60,7 +75,10 @@ class AppointmentsController {
       throw new Error("Dados faltando.");
     }
 
-    await appointmentsService.updateAppointment(id, appointment);
+    await appointmentsService.updateAppointment(id, {
+      ...appointment,
+      valor: appointmentValue(appointment.valor),
+    });
   }
 
   // Método dedicado para concluir — dispara trg_ultima_visita e trg_remarcacao_automatica
