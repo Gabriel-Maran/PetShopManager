@@ -277,3 +277,17 @@ Decisão:
 Motivo:
 - Uma busca a menos é um caminho de falha a menos, e a resposta do controller (`NOT_FOUND`) já cobre o registro que sumiu.
 - Recarregar a lista inteira mudaria a página que o usuário está vendo, e a contagem certa depende do BUG-5.
+
+**Lista e total da busca com o mesmo filtro (BUG-5).**
+Contexto: a lista e a contagem de Cadastros eram consultas separadas, escritas à mão. A dos donos contava em `nome`, com acento, e só os ativos. Os seletores de dono e de pet repetiam o par lista mais contagem, e uma busca antiga podia chegar depois da nova e tomar o lugar dela.
+Decisão:
+- Uma função (`pagedNameSearch`) monta a página e a contagem com o mesmo FROM, os mesmos JOINs e o mesmo filtro, e o repository devolve `{ items, total }`. As buscas e contagens antigas saíram.
+- O hook `useSearchPage` faz a busca nas três telas que pagina por nome. Só a resposta mais recente entra na tela.
+- Depois de desativar ou reativar, Cadastros busca a mesma página de novo, em vez de tirar o item da lista na hora (revê o que foi decidido no BUG-6): o próximo item sobe e o total fica certo.
+- O id desempata a ordem; `%` e `_` digitados são texto (`ESCAPE`); a ordem do ORDER BY, que entra no texto do SQL, só aceita `ASC` e `DESC`; o texto da busca vai até 100 caracteres.
+- A ordem continua a de antes: sem texto, os mais novos primeiro; com texto, pelo nome, na mesma direção.
+
+Motivo:
+- A mesma função nos dois comandos é o que garante que o total bate com a lista, e o teste confere nos dois status, com e sem acento.
+- Recarregar custa uma consulta local e evita manter à mão a página e o total.
+- A regra de segurança do Gabriel: entrada validada no servidor e texto do usuário nunca como parte do comando.
