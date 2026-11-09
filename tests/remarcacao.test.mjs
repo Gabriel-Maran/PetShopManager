@@ -5,10 +5,11 @@ import assert from "node:assert/strict";
 import {
   appointmentsOf,
   createDatabase,
-  dateInt,
   daysBetween,
   insertOwner,
   insertPet,
+  isoDate,
+  monthOf,
   pendingAutoOf,
   petRow,
   toDate,
@@ -20,7 +21,14 @@ import {
 } from "../app/repository/sql/appointmentsSql.ts";
 import { UPDATE_PET_REMARCACAO_SQL } from "../app/repository/sql/petsSql.ts";
 
-const monthOf = (data) => Math.floor(data / 100);
+/** Os automáticos agrupados por mês, na ordem das datas. */
+function autoByMonth(agenda) {
+  const months = new Map();
+  for (const a of agenda.filter((item) => item.is_auto_agen === 1)) {
+    months.set(monthOf(a.data), [...(months.get(monthOf(a.data)) ?? []), a]);
+  }
+  return [...months.values()];
+}
 
 /** Salva o formulário de um agendamento como o app faz, mudando só os campos passados. */
 function saveAppointment(db, appointment, changes) {
@@ -41,11 +49,11 @@ describe("agenda gerada ao cadastrar um pet com pacote", () => {
   });
 
   for (const [pacote, gap, valor, porAtendimento] of [
-    [2, 14, "200,00", "100,00"],
-    [4, 7, "320,00", "80,00"],
+    [2, 14, 20000, 10000],
+    [4, 7, 32000, 8000],
   ]) {
     test(`pacote ${pacote}: a cada ${gap} dias, até ${pacote} por mês, no mesmo dia da semana`, () => {
-      const inicio = dateInt(3);
+      const inicio = isoDate(3);
       const pet = insertPet(db, {
         dono_id: ownerId, remarcacao_ativa: 1, pacote_remarcacao: pacote,
         data_inicio_pacote: inicio, horario_padrao: "09:30", valor_pacote: valor,
@@ -71,7 +79,7 @@ describe("agenda gerada ao cadastrar um pet com pacote", () => {
 
       // A agenda vai até cerca de 224 dias (PERIODO_REMARCACAO); um salto de mês pode passar um pouco.
       const last = agenda.at(-1).data;
-      assert.ok(last > dateInt(200) && last < dateInt(224 + 35), `última data: ${last}`);
+      assert.ok(last > isoDate(200) && last < isoDate(224 + 35), `última data: ${last}`);
       assert.equal(petRow(db, pet.id).ultimo_visita_data_auto, last);
     });
   }
@@ -79,12 +87,49 @@ describe("agenda gerada ao cadastrar um pet com pacote", () => {
   test("com início no passado, as datas que já passaram entram como manuais pendentes", () => {
     const pet = insertPet(db, {
       dono_id: ownerId, remarcacao_ativa: 1, pacote_remarcacao: 4,
-      data_inicio_pacote: dateInt(-30), valor_pacote: "320,00",
+      data_inicio_pacote: isoDate(-30), valor_pacote: 32000,
     });
-    const past = appointmentsOf(db, pet.id).filter((a) => a.data < dateInt(-1));
+    const past = appointmentsOf(db, pet.id).filter((a) => a.data < isoDate(-1));
 
     assert.ok(past.length >= 3, `${past.length} datas passadas`);
     assert.ok(past.every((a) => a.is_auto_agen === 0 && a.concluido === 0));
+  });
+
+  for (const [pacote, valor, comSobra, semSobra] of [
+    [4, 10003, 2501, 2500],
+    [2, 20001, 10001, 10000],
+  ]) {
+    test(`pacote ${pacote} de ${valor} centavos: a sobra da divisão fica com os primeiros do mês`, () => {
+      const pet = insertPet(db, {
+        dono_id: ownerId, remarcacao_ativa: 1, pacote_remarcacao: pacote,
+        data_inicio_pacote: isoDate(3), valor_pacote: valor,
+      });
+      const sobra = valor % pacote;
+
+      for (const month of autoByMonth(appointmentsOf(db, pet.id))) {
+        month.forEach((a, index) => {
+          assert.equal(a.valor, index < sobra ? comSobra : semSobra, `${a.data}, ${index + 1}º do mês`);
+        });
+        if (month.length === pacote) {
+          assert.equal(month.reduce((total, a) => total + a.valor, 0), valor, "o mês cheio soma o pacote");
+        }
+      }
+    });
+  }
+
+  test("o dia da semana calculado pelo banco é o da data", () => {
+    const pet = insertPet(db, {
+      dono_id: ownerId, remarcacao_ativa: 1, pacote_remarcacao: 4, data_inicio_pacote: isoDate(3),
+    });
+
+    assert.ok(appointmentsOf(db, pet.id).every((a) => a.dia_semana === toDate(a.data).getDay()));
+  });
+
+  test("o cadastro novo grava o dia de hoje do aparelho, em texto", () => {
+    const pet = insertPet(db, { dono_id: ownerId });
+
+    assert.equal(petRow(db, pet.id).criado_em, isoDate(0));
+    assert.equal(db.prepare("SELECT criado_em FROM owners WHERE id = ?").get(ownerId).criado_em, isoDate(0));
   });
 
   test("sem pacote, o cadastro não gera agenda", () => {
@@ -102,7 +147,7 @@ describe("conclusão de um agendamento automático", () => {
     db = await createDatabase();
     pet = insertPet(db, {
       dono_id: insertOwner(db), remarcacao_ativa: 1, pacote_remarcacao: 4,
-      data_inicio_pacote: dateInt(3), valor_pacote: "320,00",
+      data_inicio_pacote: isoDate(3), valor_pacote: 32000,
     });
   });
 
@@ -120,6 +165,18 @@ describe("conclusão de um agendamento automático", () => {
     assert.equal(newest.is_auto_agen, 1);
     assert.equal(petRow(db, pet.id).current_ultima_visita_data, first.data);
     assert.equal(petRow(db, pet.id).ultimo_visita_data_auto, newest.data);
+  });
+
+  test("o próximo criado pela conclusão leva a sobra de centavos se for um dos primeiros do mês", () => {
+    updatePet(db, { ...pet, valor_pacote: 10003 });
+    const [first] = pendingAutoOf(db, pet.id);
+
+    db.prepare(CONCLUDE_APPOINTMENT_SQL).run(first.id);
+
+    const agenda = appointmentsOf(db, pet.id);
+    const newest = agenda.at(-1);
+    const position = agenda.filter((a) => a.is_auto_agen === 1 && monthOf(a.data) === monthOf(newest.data)).length;
+    assert.equal(newest.valor, position <= 10003 % 4 ? 2501 : 2500, `${newest.data}, ${position}º do mês`);
   });
 
   test("salvar um automático pendente, sem concluir, não cria nada", () => {
@@ -168,17 +225,17 @@ describe("edição do pet com pacote", () => {
     db = await createDatabase();
     pet = insertPet(db, {
       dono_id: insertOwner(db), remarcacao_ativa: 1, pacote_remarcacao: 4,
-      data_inicio_pacote: dateInt(-30), horario_padrao: "10:00", valor_pacote: "320,00",
+      data_inicio_pacote: isoDate(-30), horario_padrao: "10:00", valor_pacote: 32000,
     });
-    [nextAuto] = pendingAutoOf(db, pet.id).filter((a) => a.data > dateInt(1));
+    [nextAuto] = pendingAutoOf(db, pet.id).filter((a) => a.data > isoDate(1));
     saveAppointment(db, nextAuto, { hora: "15:30" });
     db.prepare(
       "INSERT INTO appointments (pet_id, servico, data, hora, is_auto_agen) VALUES (?, 'Banho', ?, '10:00', 1)",
-    ).run(pet.id, dateInt(-5));
+    ).run(pet.id, isoDate(-5));
   });
 
-  const pastOf = (petId) => appointmentsOf(db, petId).filter((a) => a.data < dateInt(-1));
-  const futureAutoOf = (petId) => pendingAutoOf(db, petId).filter((a) => a.data > dateInt(1));
+  const pastOf = (petId) => appointmentsOf(db, petId).filter((a) => a.data < isoDate(-1));
+  const futureAutoOf = (petId) => pendingAutoOf(db, petId).filter((a) => a.data > isoDate(1));
 
   test("BUG-4, corrigido: mudar só a observação não mexe na agenda", () => {
     const agendaBefore = appointmentsOf(db, pet.id);
@@ -193,7 +250,7 @@ describe("edição do pet com pacote", () => {
   for (const [campo, mudanca, confere] of [
     ["o horário", { horario_padrao: "16:00" }, (a) => a.hora === "16:00"],
     ["o serviço", { servico_padrao: "Banho e Tosa" }, (a) => a.servico === "Banho e Tosa"],
-    ["o valor", { valor_pacote: "400,00" }, (a) => a.valor === "100,00"],
+    ["o valor", { valor_pacote: 40000 }, (a) => a.valor === 10000],
   ]) {
     test(`trocar ${campo} refaz os automáticos de hoje em diante e mantém o que já passou`, () => {
       const pastBefore = pastOf(pet.id);
@@ -209,11 +266,11 @@ describe("edição do pet com pacote", () => {
   }
 
   test("trocar o pacote de 4 para 2 refaz os futuros a cada 14 dias", () => {
-    updatePet(db, { ...pet, pacote_remarcacao: 2, valor_pacote: "200,00" });
+    updatePet(db, { ...pet, pacote_remarcacao: 2, valor_pacote: 20000 });
 
     const future = futureAutoOf(pet.id);
     assert.ok(future.length >= 2);
-    assert.ok(future.every((a) => a.valor === "100,00"));
+    assert.ok(future.every((a) => a.valor === 10000));
     for (let i = 1; i < future.length; i++) {
       if (monthOf(future[i].data) === monthOf(future[i - 1].data)) {
         assert.equal(daysBetween(future[i - 1].data, future[i].data), 14);
@@ -227,11 +284,11 @@ describe("desligar a remarcação", () => {
     const db = await createDatabase();
     const pet = insertPet(db, {
       dono_id: insertOwner(db), remarcacao_ativa: 1, pacote_remarcacao: 2,
-      data_inicio_pacote: dateInt(3), valor_pacote: "200,00",
+      data_inicio_pacote: isoDate(3), valor_pacote: 20000,
     });
 
     db.prepare(UPDATE_PET_REMARCACAO_SQL).run(0, null, null, null, pet.id);
 
-    assert.equal(pendingAutoOf(db, pet.id).filter((a) => a.data > dateInt(1)).length, 0);
+    assert.equal(pendingAutoOf(db, pet.id).filter((a) => a.data > isoDate(1)).length, 0);
   });
 });

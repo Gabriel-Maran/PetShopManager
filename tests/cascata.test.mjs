@@ -3,9 +3,9 @@ import { beforeEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
 import {
   createDatabase,
-  dateInt,
   insertOwner,
   insertPet,
+  isoDate,
   pendingAutoOf,
   petRow,
 } from "./helpers/database.mjs";
@@ -25,7 +25,7 @@ describe("cascata entre donos e pets", () => {
     ownerId = insertOwner(db);
     withPackage = insertPet(db, {
       nome: "Thor", dono_id: ownerId, remarcacao_ativa: 1, pacote_remarcacao: 4,
-      data_inicio_pacote: dateInt(3), valor_pacote: "320,00",
+      data_inicio_pacote: isoDate(3), valor_pacote: 32000,
     });
     withoutPackage = insertPet(db, { nome: "Mel", dono_id: ownerId });
   });
@@ -44,14 +44,14 @@ describe("cascata entre donos e pets", () => {
     assert.equal(pet.remarcacao_ativa, 0);
     assert.equal(pet.data_inicio_pacote, null);
     assert.equal(pet.ultimo_visita_data_auto, null);
-    assert.equal(pendingAutoOf(db, withPackage.id).filter((a) => a.data > dateInt(1)).length, 0);
+    assert.equal(pendingAutoOf(db, withPackage.id).filter((a) => a.data > isoDate(1)).length, 0);
   });
 
   test("desativar o dono também limpa o pacote dos pets, pelos triggers em cadeia", () => {
     db.prepare(DEACTIVATE_OWNER_SQL).run(ownerId);
 
     assert.equal(petRow(db, withPackage.id).remarcacao_ativa, 0);
-    assert.equal(pendingAutoOf(db, withPackage.id).filter((a) => a.data > dateInt(1)).length, 0);
+    assert.equal(pendingAutoOf(db, withPackage.id).filter((a) => a.data > isoDate(1)).length, 0);
   });
 
   test("reativar um pet reativa o dono, e o pacote continua desligado", () => {

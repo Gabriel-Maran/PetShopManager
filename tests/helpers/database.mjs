@@ -1,12 +1,13 @@
 // Apoio dos testes do banco: cria o esquema real do app num SQLite em memória e grava com os mesmos
 // comandos SQL dos repositories (app/repository/sql). Nada é gravado em disco.
 //
-// Os triggers comparam datas com o relógio do SQLite ('now', em UTC), que não dá para fixar. Por isso
-// as datas dos testes são relativas ao dia de verdade e ficam longe da virada do dia.
+// Os triggers comparam datas com o relógio do SQLite ('now', no fuso local), que não dá para fixar. Por
+// isso as datas dos testes são relativas ao dia de verdade e ficam longe da virada do dia.
 import { DatabaseSync } from "node:sqlite";
 import { MIGRATIONS, SQL_CONNECTION_PRAGMAS } from "../../app/config/schema.ts";
 import { migrateDatabase } from "../../app/config/migrator.ts";
 import { normalizeForSearch } from "../../app/utils/formatadores/normalizaNome.ts";
+import { todayIso } from "../../app/utils/datas.ts";
 import { INSERT_OWNER_SQL } from "../../app/repository/sql/ownersSql.ts";
 import { INSERT_PET_SQL, UPDATE_PET_SQL } from "../../app/repository/sql/petsSql.ts";
 
@@ -38,18 +39,26 @@ export async function createDatabase(path = ":memory:") {
   return db;
 }
 
-/** Data no formato do banco (YYYYMMDD), a tantos dias de hoje, pelo calendário local. */
-export function dateInt(offsetDays = 0) {
+/** Data a tantos dias de hoje, pelo calendário local. */
+function daysFromToday(offsetDays) {
   const now = new Date();
-  const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offsetDays);
-  return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate() + offsetDays);
 }
 
-/** YYYYMMDD → Date local, para comparar dias da semana e intervalos. */
-export function toDate(value) {
-  const text = String(value);
-  return new Date(Number(text.slice(0, 4)), Number(text.slice(4, 6)) - 1, Number(text.slice(6, 8)));
+/** Data no formato do banco desde a versão 3 ("AAAA-MM-DD"), a tantos dias de hoje. */
+export const isoDate = (offsetDays = 0) => todayIso(daysFromToday(offsetDays));
+
+/** Data no formato das versões 1 e 2 (o número AAAAMMDD), para montar um banco antigo. */
+export const legacyDateInt = (offsetDays = 0) => Number(isoDate(offsetDays).replaceAll("-", ""));
+
+/** "AAAA-MM-DD" → Date local, para comparar dias da semana e intervalos. */
+export function toDate(iso) {
+  const [year, month, day] = iso.split("-").map(Number);
+  return new Date(year, month - 1, day);
 }
+
+/** "AAAA-MM-DD" → "AAAA-MM" */
+export const monthOf = (iso) => iso.slice(0, 7);
 
 export const daysBetween = (from, to) => Math.round((toDate(to) - toDate(from)) / 86_400_000);
 
@@ -69,7 +78,7 @@ const DEFAULT_PET = {
   pacote_remarcacao: null,
   data_inicio_pacote: null,
   horario_padrao: "10:00",
-  valor_pacote: "0,00",
+  valor_pacote: 0, // centavos
 };
 
 // Os parâmetros na ordem do INSERT_PET_SQL e do UPDATE_PET_SQL, como o PetRepository monta.

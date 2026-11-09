@@ -209,3 +209,17 @@ Motivo:
 - O campo genérico decidia pelo tipo de teclado que o texto era dinheiro, inclusive no horário.
 - Com os valores novos sempre no mesmo formato, a migração para centavos tem menos variações para tratar. Ela ainda converte os valores antigos como estiverem.
 
+**Versão 3 do esquema, parte do banco (etapa 3 do DADOS-2 e DADOS-3), em 2026-11-08.**
+Decisão:
+- Cada tabela é trocada pelos passos que o SQLite indica: criar a nova, copiar convertendo, apagar a antiga e renomear. Os triggers saem antes e voltam depois, na ordem de criação da versão 2.
+- Datas: o número `AAAAMMDD` vira `'AAAA-MM-DD'`. O que não tiver 8 dígitos fica como está, em vez de travar a migração.
+- Dinheiro: o texto vira centavos pela conta no próprio texto, sem ponto flutuante. Vazio vira 0, o ponto conta como vírgula, e o que passar de duas casas é descartado. O valor do pacote nulo continua nulo.
+- A contagem de ids (`sqlite_sequence`) passa para a tabela nova.
+- A sobra da divisão do pacote vai para os primeiros atendimentos do mês. Na agenda gerada, a posição vem da própria sequência; no próximo criado pela conclusão, da quantidade de automáticos que o mês já tem.
+- A v3 traz o texto inteiro do que cria, como a v2. Só o período da remarcação vem da v1.
+
+Motivo:
+- Uma migração que falha impede o app de abrir. Um dado estranho mantido é melhor que um app travado.
+- As máscaras antigas só deixavam dígitos e vírgula, mas uma delas não limitava as casas decimais.
+- Sem a contagem, um id de agendamento apagado poderia voltar a ser usado.
+- Com a v3 grande, a etapa 3 foi dividida em três partes (banco, app, backup e PR), uma por conversa, para cada uma caber inteira no contexto.

@@ -5,7 +5,7 @@
 // "hoje" dos dados é o dia de verdade, e as checagens valem para qualquer data.
 import { beforeEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { createDatabase, dateInt } from "./helpers/database.mjs";
+import { createDatabase, isoDate } from "./helpers/database.mjs";
 import {
   buildDemoDataSql,
   COUNT_USER_DATA_SQL,
@@ -14,7 +14,7 @@ import {
 import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
 
 const today = new Date();
-const todayInt = dateInt(0);
+const todayDate = `'${isoDate(0)}'`;
 
 /** Carrega os dados de exemplo numa transação, como o DemoDataService faz. */
 function loadDemoData(db) {
@@ -78,11 +78,11 @@ describe("dados de exemplo", () => {
     loadDemoData(db);
 
     assert.equal(
-      count(db, `SELECT COUNT(*) AS total FROM appointments WHERE concluido = 0 AND data < ${todayInt}`),
+      count(db, `SELECT COUNT(*) AS total FROM appointments WHERE concluido = 0 AND data < ${todayDate}`),
       0,
     );
     assert.equal(
-      count(db, `SELECT COUNT(*) AS total FROM appointments WHERE concluido = 1 AND data > ${todayInt}`),
+      count(db, `SELECT COUNT(*) AS total FROM appointments WHERE concluido = 1 AND data > ${todayDate}`),
       0,
     );
   });
@@ -105,11 +105,11 @@ describe("dados de exemplo", () => {
 
     const monthsWithVisits = count(
       db,
-      "SELECT COUNT(DISTINCT substr(CAST(data AS TEXT), 1, 6)) AS total FROM appointments WHERE concluido = 1",
+      "SELECT COUNT(DISTINCT strftime('%Y-%m', data)) AS total FROM appointments WHERE concluido = 1",
     );
     assert.ok(monthsWithVisits >= 5, `concluídos em ${monthsWithVisits} meses`);
 
-    const absentLimit = dateInt(-40);
+    const absentLimit = `'${isoDate(-40)}'`;
     const absentPets = count(
       db,
       `SELECT COUNT(*) AS total FROM pets WHERE is_ativo = 1 AND current_ultima_visita_data < ${absentLimit}`,

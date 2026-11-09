@@ -1,6 +1,6 @@
 # Próximos passos
 
-Atualizado em 2026-11-08, depois do dinheiro num lugar só.
+Atualizado em 2026-11-08, depois da parte do banco da versão 3 (3a).
 
 ## Em andamento: segurança e configuração do repositório
 
@@ -105,7 +105,11 @@ Em andamento desde 2026-11-08, com o aval do Gabriel:
   3. versão 3 do esquema: centavos, datas em texto, triggers e `DEFAULT` com `'localtime'` (o resto do BUG-7), e a importação de backup de versão anterior. Em andamento na branch `feat/centavos-e-datas-iso`, sem PR:
      - decidido pelo Gabriel em 2026-11-08: os primeiros atendimentos do mês ficam com o centavo a mais; um backup antigo é atualizado pelas migrações antes da cópia; cada versão do esquema fica num arquivo de `app/config/migrations/`;
      - feito: v1 e v2 separadas em arquivos, sem mudar o texto, com `allowImportingTsExtensions` no `tsconfig` (o Metro aceitou);
-     - falta: a `v3.ts` (reconstruir owners, pets e appointments, converter os dados e reescrever os 8 triggers), os tipos de data e valor nos modelos, telas e relatórios, a importação de backup, os dados de exemplo e os testes.
+     - feito em 2026-11-08, a parte do banco (3a): a `v3.ts`, os dados de exemplo em centavos e datas em texto, e os testes (94 passando, com a sobra de centavos e a conversão dos valores antigos);
+     - atenção: nesta branch, o app ainda lê data como número e valor como texto. Até a 3b entrar, não rode o app por ela;
+     - falta, um chat por parte:
+       - 3b: o app no formato novo: `datas.ts` e `dinheiro.ts` (a data do banco vira texto e o valor, centavos), modelos, repositories, controllers, telas e relatórios;
+       - 3c: a importação de backup de versão anterior (migrar a cópia antes de restaurar), a revisão final e o PR.
 
 - BUG-3 e BUG-4: triggers corrigidos por migração.
 - BUG-7: "hoje" num lugar só e triggers com `'localtime'`.

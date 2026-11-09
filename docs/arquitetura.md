@@ -29,7 +29,8 @@ app.json, eas.json        configuração do Expo e perfis de build
 app/
   config/
     database.ts           conexão única, com WAL e pragmas; initDatabase aplica as migrações, e recreateAppDatabase recria o banco
-    schema.ts             tabelas, índices, dados iniciais, triggers e a lista de migrações, em SQL puro, sem o Expo (desde 2026-11-08)
+    schema.ts             pragmas da conexão e a lista de migrações, sem o Expo (desde 2026-11-08)
+    migrations/           uma versão do esquema por arquivo (v1.ts, v2.ts, v3.ts), em SQL puro
     migrator.ts           aplica as migrações pendentes numa transação e recria o banco do zero, sem o Expo (desde 2026-11-08)
     demoData.ts           dados de exemplo com datas em torno de hoje (desde 2026-11-08)
     consts.ts             enums, tipos, telas, imagens da barra e tamanhos
@@ -104,6 +105,8 @@ Desde 2026-11-08 (DADOS-1), o esquema tem versão, guardada no `PRAGMA user_vers
 - O `initDatabase()` chama o `migrateDatabase()` (`migrator.ts`), que aplica as pendentes numa transação só. Se uma falhar, nada muda, e o erro vai para a tela de erro do `App.tsx`.
 - Durante as migrações, as chaves estrangeiras ficam desligadas, para reconstruir uma tabela sem o `ON DELETE CASCADE` apagar as filhas. No fim, o `foreign_key_check` não pode achar mais problemas que antes.
 - A versão 1 é o esquema de antes das migrações, com `IF NOT EXISTS`, e recria os triggers. Num banco antigo sem versão, ela só marca a versão e troca os triggers pelos de hoje.
+- A versão 2 corrige os triggers da remarcação (BUG-3 e BUG-4).
+- A versão 3 reconstrói `owners`, `pets` e `appointments`: dinheiro em centavos (`INTEGER`), datas em texto `AAAA-MM-DD` e o relógio dos triggers e do `criado_em` no fuso do aparelho (`'localtime'`). Os dados antigos são convertidos na cópia, e a contagem de ids continua de onde parou.
 - Um banco de versão mais nova que o app é recusado.
 - O `migrator.ts` não usa o Expo: os testes rodam o mesmo código com o `node:sqlite`.
 

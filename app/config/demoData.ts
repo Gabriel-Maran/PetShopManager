@@ -16,7 +16,8 @@ interface DemoOwner {
 
 interface DemoPackage {
   visitsPerMonth: 2 | 4;
-  price: string;
+  /** Valor do pacote em centavos. */
+  price: number;
   startDaysAgo: number;
   time: string;
 }
@@ -71,14 +72,14 @@ const DEMO_OWNERS: DemoOwner[] = [
 
 const DEMO_PETS: DemoPet[] = [
   // Pets com pacote: o trigger gera a agenda, passada e futura.
-  { name: "Thor", species: "CAO", race: "Labrador Retriever", size: "GRANDE", owner: 0, service: "Banho e Tosa", notes: "Muito ativo", pkg: { visitsPerMonth: 4, price: "320,00", startDaysAgo: 42, time: "08:00" } },
-  { name: "Mel", species: "CAO", race: "Vira-lata (SRD)", size: "PEQUENO", owner: 2, service: "Banho", notes: "Dócil", pkg: { visitsPerMonth: 2, price: "160,00", startDaysAgo: 56, time: "09:00" } },
-  { name: "Max", species: "CAO", race: "Poodle", size: "MEDIO", owner: 5, service: "Banho e Tosa", notes: "Late bastante", pkg: { visitsPerMonth: 4, price: "280,00", startDaysAgo: 35, time: "10:00" } },
-  { name: "Toby", species: "CAO", race: "Shih Tzu", size: "MEDIO", owner: 8, service: "Banho e Tosa", notes: "Muito energético", pkg: { visitsPerMonth: 2, price: "200,00", startDaysAgo: 49, time: "14:00" } },
-  { name: "Julie", species: "CAO", race: "Yorkshire Terrier", size: "PEQUENO", owner: 11, service: "Banho", notes: "Sensível ao secador", pkg: { visitsPerMonth: 4, price: "240,00", startDaysAgo: 28, time: "09:30" } },
-  { name: "Rex", species: "CAO", race: "Golden Retriever", size: "GRANDE", owner: 13, service: "Banho e Tosa", notes: "Muito forte", pkg: { visitsPerMonth: 2, price: "360,00", startDaysAgo: 63, time: "15:00" } },
-  { name: "Teddy", species: "CAO", race: "Spitz Alemão (Lulu)", size: "PEQUENO", owner: 16, service: "Banho e Tosa", notes: "Pelo embaraça fácil", pkg: { visitsPerMonth: 4, price: "240,00", startDaysAgo: 21, time: "11:00" } },
-  { name: "Zeus", species: "CAO", race: "Border Collie", size: "GRANDE", owner: 18, service: "Banho e Higiênica", notes: "Obediente", pkg: { visitsPerMonth: 2, price: "380,00", startDaysAgo: 70, time: "16:00" } },
+  { name: "Thor", species: "CAO", race: "Labrador Retriever", size: "GRANDE", owner: 0, service: "Banho e Tosa", notes: "Muito ativo", pkg: { visitsPerMonth: 4, price: 32000, startDaysAgo: 42, time: "08:00" } },
+  { name: "Mel", species: "CAO", race: "Vira-lata (SRD)", size: "PEQUENO", owner: 2, service: "Banho", notes: "Dócil", pkg: { visitsPerMonth: 2, price: 16000, startDaysAgo: 56, time: "09:00" } },
+  { name: "Max", species: "CAO", race: "Poodle", size: "MEDIO", owner: 5, service: "Banho e Tosa", notes: "Late bastante", pkg: { visitsPerMonth: 4, price: 28000, startDaysAgo: 35, time: "10:00" } },
+  { name: "Toby", species: "CAO", race: "Shih Tzu", size: "MEDIO", owner: 8, service: "Banho e Tosa", notes: "Muito energético", pkg: { visitsPerMonth: 2, price: 20000, startDaysAgo: 49, time: "14:00" } },
+  { name: "Julie", species: "CAO", race: "Yorkshire Terrier", size: "PEQUENO", owner: 11, service: "Banho", notes: "Sensível ao secador", pkg: { visitsPerMonth: 4, price: 24000, startDaysAgo: 28, time: "09:30" } },
+  { name: "Rex", species: "CAO", race: "Golden Retriever", size: "GRANDE", owner: 13, service: "Banho e Tosa", notes: "Muito forte", pkg: { visitsPerMonth: 2, price: 36000, startDaysAgo: 63, time: "15:00" } },
+  { name: "Teddy", species: "CAO", race: "Spitz Alemão (Lulu)", size: "PEQUENO", owner: 16, service: "Banho e Tosa", notes: "Pelo embaraça fácil", pkg: { visitsPerMonth: 4, price: 24000, startDaysAgo: 21, time: "11:00" } },
+  { name: "Zeus", species: "CAO", race: "Border Collie", size: "GRANDE", owner: 18, service: "Banho e Higiênica", notes: "Obediente", pkg: { visitsPerMonth: 2, price: 38000, startDaysAgo: 70, time: "16:00" } },
 
   // Pets sem pacote: histórico de visitas a cada everyDays, a última há lastVisitDaysAgo dias.
   // Os que estão há mais de 40 dias sem vir aparecem no relatório de pets ausentes.
@@ -122,10 +123,11 @@ const DEMO_UPCOMING: DemoVisit[] = [
 /** Até quantos dias para trás o histórico dos pets sem pacote começa. */
 const HISTORY_DAYS = 180;
 
-const SERVICE_PRICE: Record<ServiceName, string> = {
-  Banho: "60,00",
-  "Banho e Tosa": "95,00",
-  "Banho e Higiênica": "75,00",
+// Preço de cada serviço, em centavos.
+const SERVICE_PRICE: Record<ServiceName, number> = {
+  Banho: 6000,
+  "Banho e Tosa": 9500,
+  "Banho e Higiênica": 7500,
 };
 
 // Os nomes de payment_methods, que o agendamento grava como texto.
@@ -157,7 +159,7 @@ interface DemoDataOptions {
 
 /** Monta o SQL que preenche o app vazio. Roda numa transação só, dentro do DemoDataService. */
 export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string {
-  const todayInt = toDateInt(today);
+  const todayDate = text(toIsoDate(today));
   const nowTime = `${pad(today.getHours())}:${pad(today.getMinutes())}`;
   const phoneOf = (ownerIndex: number) => `(44) 99911-${1111 + ownerIndex}`;
   const ownerId = (ownerIndex: number) => `(SELECT id FROM owners WHERE telefone = ${text(phoneOf(ownerIndex))})`;
@@ -176,8 +178,8 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
       remarcacao_ativa, pacote_remarcacao, valor_pacote, data_inicio_pacote, horario_padrao, is_ativo)
       VALUES (${text(pet.name)}, ${text(normalize(pet.name))}, ${speciesId}, ${text(pet.size)}, ${raceId},
       ${text(pet.notes)}, ${ownerId(pet.owner)}, ${text(pet.service)}, ${flag(Boolean(pkg))},
-      ${pkg ? pkg.visitsPerMonth : "NULL"}, ${text(pkg ? pkg.price : "0,00")},
-      ${pkg ? toDateInt(addDays(today, -pkg.startDaysAgo)) : "NULL"}, ${text(pkg ? pkg.time : "00:00")},
+      ${pkg ? pkg.visitsPerMonth : "NULL"}, ${pkg ? pkg.price : 0},
+      ${pkg ? text(toIsoDate(addDays(today, -pkg.startDaysAgo))) : "NULL"}, ${text(pkg ? pkg.time : "00:00")},
       ${flag(pet.active !== false)});`;
   });
 
@@ -186,7 +188,7 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
   const appointment = (pet: DemoPet, date: Date, time: string, done: boolean, taxiDog: boolean) => {
     const payment = done ? PAYMENT_METHODS[paymentIndex++ % PAYMENT_METHODS.length] : "";
     appointments.push(
-      `(${petId(pet.name)}, ${text(pet.service)}, ${toDateInt(date)}, ${text(time)}, ${flag(taxiDog)}, ${flag(done)}, NULL, 0, ${text(SERVICE_PRICE[pet.service])}, ${text(payment)}, ${flag(done)})`,
+      `(${petId(pet.name)}, ${text(pet.service)}, ${text(toIsoDate(date))}, ${text(time)}, ${flag(taxiDog)}, ${flag(done)}, NULL, 0, ${SERVICE_PRICE[pet.service]}, ${text(payment)}, ${flag(done)})`,
     );
   };
 
@@ -223,7 +225,7 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
     UPDATE appointments
     SET concluido = 1, ta_pago = 1,
         tipo_pgto = CASE id % 4 WHEN 0 THEN 'PIX' WHEN 1 THEN 'Cartão de Débito' WHEN 2 THEN 'Dinheiro' ELSE 'Cartão de Crédito' END
-    WHERE concluido = 0 AND is_auto_agen = 0 AND data < ${todayInt};
+    WHERE concluido = 0 AND is_auto_agen = 0 AND data < ${todayDate};
 
     -- A última visita de cada pet é a data do último atendimento concluído.
     UPDATE pets
@@ -246,9 +248,9 @@ function pad(value: number): string {
   return String(value).padStart(2, "0");
 }
 
-/** Data no formato do banco (YYYYMMDD), pelo calendário do aparelho. */
-function toDateInt(date: Date): number {
-  return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+/** Data no formato do banco ("AAAA-MM-DD"), pelo calendário do aparelho. */
+function toIsoDate(date: Date): string {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 function addDays(date: Date, days: number): Date {
