@@ -2,7 +2,7 @@
 
 Atualizado em 2026-11-09, depois do ERRO-1, a primeira etapa da Parte 4.
 
-> **Para o próximo chat:** a Parte 4 começou. O ERRO-1 (erros num lugar só) está em revisão no PR #22, branch `feat/erros-centralizados`. Falta o Gabriel conferir no aparelho, com o roteiro do PR, e aceitar. Depois, a próxima etapa é o BUG-6 (ver "Parte 4" em "Partes de execução").
+> **Para o próximo chat:** a Parte 4 começou. O ERRO-1 (erros num lugar só) entrou no `main` pelo PR #22, em 2026-11-09, e a correção da importação cancelada está em revisão no PR #23, branch `fix/importacao-cancelada`. A próxima etapa é o BUG-6 (ver "Parte 4" em "Partes de execução"). O roteiro para conferir o ERRO-1 no aparelho está no PR #22.
 >
 > A Parte 3 foi aceita pelo Gabriel com o merge do PR #21, em 2026-11-08.
 >
@@ -75,7 +75,7 @@ Falta, nesta ordem:
 - A auditoria do código foi feita sobre o commit `e1d5f2f` do `main`.
 - O plano está em [`plano-de-melhorias.md`](plano-de-melhorias.md), com 35 itens: 9 P0, 16 P1 e 10 P2.
 - A arquitetura de hoje está em [`arquitetura.md`](arquitetura.md), e as respostas do checklist, em [`auditoria.md`](auditoria.md).
-- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior) e #22 (erros num lugar só, em revisão). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
+- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só) e #23 (importação cancelada, em revisão). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
 - Da Parte 1, falta o que depende das perguntas em aberto. As Partes 2 e 3 estão completas e aceitas. A Parte 4 começou em 2026-11-09, com o ERRO-1, e as Partes 5 em diante ainda não começaram.
 - Falta o Gabriel responder [`perguntas-em-aberto.md`](perguntas-em-aberto.md). Várias partes abaixo dependem dessas respostas.
 
@@ -145,12 +145,13 @@ Pronto quando: os testes da Parte 2 passam com o comportamento novo, e um banco 
 ### Parte 4 · Telas, erros e validação (P1)
 
 Em andamento desde 2026-11-09, uma etapa por PR e um chat por etapa:
-1. ERRO-1, em revisão no PR #22 (branch `feat/erros-centralizados`):
+1. ERRO-1, no `main` desde o PR #22:
    - `app/errors/AppError.ts`: o `AppError` (código e mensagem), o `toUserMessage` (só o `AppError` mostra a própria mensagem; o resto vira "Algo deu errado. Tente de novo.") e o `logError`;
    - `app/globals/messages.ts`: as mensagens do app, uma por falha. O dono separa nome, telefone vazio e telefone inválido; o agendamento separa pet, serviço, data, horário e valor;
    - o `showError` recebe o erro como veio. Os hooks `useAsyncAction` (salvar, importar, carregar o exemplo, cadastrar raça, com a trava do toque duplo) e `useAsyncData` (os seis relatórios) ligam o carregamento e o modal;
    - o backup, os dados de exemplo e o cadastro de raça usam o `ErrorProvider`; saiu o `handleError` copiado em 8 arquivos;
-   - verificado: typecheck limpo, 123 testes passando (12 novos, em `tests/erros.test.mjs`) e o pacote Android gerado. Falta o Gabriel conferir no aparelho, com o roteiro do PR.
+   - da varredura, aprovado pelo Gabriel, no PR #23: cancelar a escolha do arquivo na importação não leva mais ao calendário, porque o `importDatabase` devolve se importou;
+   - verificado: typecheck limpo, 123 testes passando (12 novos, em `tests/erros.test.mjs`) e o pacote Android gerado. O roteiro para conferir no aparelho está no PR #22.
 2. Próxima, sugerida: BUG-6, as ações de Cadastros sem `await` e o `handleDeleteSelected`, já com o `useAsyncAction`. Não depende de pergunta.
 3. Depois: BUG-5 (contagem com o mesmo filtro da lista) e o resto do BKP-1. Também não dependem de pergunta.
 4. O VALID-1 espera a pergunta 13 (Zod ou validadores próprios), e o BUG-8, a pergunta 16 (navegação).
