@@ -5,38 +5,30 @@ import {
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
 import BarChart from "../../components/Relatorios/BarChart";
-import { useEffect, useState } from "react";
-import { PlanoItem, Screen } from "../../../config/consts";
+import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
 
-import { useError } from "../../../hooks/useError";
+import { useAsyncData } from "../../../hooks/useAsyncData";
 import {
   getPetsPorPlano,
   getPlanosAtivos,
-  PetPlanoDetalhe,
 } from "../../../utils/relatorios/getPetsPorPlano";
 
 export default function PlanosAtivos() {
-  const [planos, setPlanos] = useState<PlanoItem[]>([]);
-  const [quinzenal, setQuinzenal] = useState<PetPlanoDetalhe[]>([]);
-  const [semanal, setSemanal] = useState<PetPlanoDetalhe[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { showError } = useError();
+  const { data, loading } = useAsyncData(() =>
+    Promise.all([getPlanosAtivos(), getPetsPorPlano(2), getPetsPorPlano(4)]),
+  );
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
-  useEffect(() => {
-    Promise.all([getPlanosAtivos(), getPetsPorPlano(2), getPetsPorPlano(4)])
-      .then(([p, q, s]) => {
-        setPlanos(p);
-        setQuinzenal(q);
-        setSemanal(s);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+  const titleBar = (
+    <TitleBar
+      returnTo={Screen.Relatorios}
+      title="Planos Ativos"
+      subtitle="Quinzenal e semanal"
+    />
+  );
 
   if (loading) {
     return (
@@ -46,18 +38,12 @@ export default function PlanosAtivos() {
     );
   }
 
-  if (error) {
-    showError(error);
-    return (
-      <View style={s.loader}>
-        <TitleBar
-          returnTo={Screen.Relatorios}
-          title="Planos Ativos"
-          subtitle="Quinzenal e semanal"
-        />
-      </View>
-    );
+  // Sem os dados, a falha já apareceu no modal de erro: fica só o título, para voltar.
+  if (!data) {
+    return <View style={s.loader}>{titleBar}</View>;
   }
+
+  const [planos, quinzenal, semanal] = data;
 
   return (
     <View style={s.mainContainer}>

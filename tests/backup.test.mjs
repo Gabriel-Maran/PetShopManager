@@ -18,11 +18,11 @@ import { buildDemoDataSql } from "../app/config/demoData.ts";
 import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
 import { MIGRATIONS } from "../app/config/schema.ts";
 import {
-  NEWER_BACKUP_MESSAGE,
-  NOT_A_BACKUP_MESSAGE,
   restoreBackup,
   upgradeBackup,
 } from "../app/config/backupRestore.ts";
+import { MESSAGES } from "../app/globals/messages.ts";
+import { AppError } from "../app/errors/AppError.ts";
 
 const LATEST = MIGRATIONS.length;
 
@@ -166,7 +166,7 @@ describe("backup de versão anterior", () => {
     const app = await appWithData();
     const before = rows(app, "owners");
 
-    await assert.rejects(importBackup(app, { uri, backup }), { message: NEWER_BACKUP_MESSAGE });
+    await assert.rejects(importBackup(app, { uri, backup }), { name: "AppError", code: "INVALID_BACKUP", message: MESSAGES.backup.newerVersion });
 
     assert.deepEqual(rows(app, "owners"), before);
     assert.equal(userVersion(backup), LATEST + 1, "a cópia não é mexida");
@@ -180,7 +180,7 @@ describe("backup de versão anterior", () => {
     const app = await appWithData();
     const before = rows(app, "owners");
 
-    await assert.rejects(importBackup(app, { uri, backup }), { message: NOT_A_BACKUP_MESSAGE });
+    await assert.rejects(importBackup(app, { uri, backup }), { name: "AppError", code: "INVALID_BACKUP", message: MESSAGES.backup.notABackup });
 
     assert.deepEqual(rows(app, "owners"), before);
     const tables = backup.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all();
@@ -202,7 +202,9 @@ describe("backup de versão anterior", () => {
     };
 
     await assert.rejects(upgradeBackup(notADatabase, MIGRATIONS), (error) => {
-      assert.equal(error.message, NOT_A_BACKUP_MESSAGE);
+      assert.ok(error instanceof AppError);
+      assert.equal(error.code, "INVALID_BACKUP");
+      assert.equal(error.message, MESSAGES.backup.notABackup);
       assert.equal(error.cause, sqliteError, "o motivo de verdade fica no cause");
       return true;
     });

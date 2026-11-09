@@ -8,12 +8,13 @@ import { mascararHorario } from "../app/utils/mascarar.ts";
 import {
   centsToMoney,
   formatMoneyInput,
-  INVALID_MONEY_MESSAGE,
   isValidCents,
   maskMoneyInput,
   moneyToCents,
   parseMoneyInput,
 } from "../app/utils/dinheiro.ts";
+import { MESSAGES } from "../app/globals/messages.ts";
+import { AppError } from "../app/errors/AppError.ts";
 
 /** Roda o teste com o fuso do processo trocado, como se o aparelho estivesse nesse fuso. */
 function withTimeZone(timeZone, run) {
@@ -155,7 +156,11 @@ describe("dinheiro: campos dos formulários", () => {
 
   test("valor fora do formato vira a mensagem para o usuário", () => {
     for (const entrada of [",", "12,", "12,345", "-5", "abc"]) {
-      assert.throws(() => parseMoneyInput(entrada), { message: INVALID_MONEY_MESSAGE }, JSON.stringify(entrada));
+      assert.throws(
+        () => parseMoneyInput(entrada),
+        (error) => error instanceof AppError && error.code === "VALIDATION" && error.message === MESSAGES.money.invalid,
+        JSON.stringify(entrada),
+      );
     }
   });
 

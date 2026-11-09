@@ -17,7 +17,7 @@ import {
   useTheme,
   useThemedStyles,
 } from "../Themes/ThemeProvider";
-import ErrorModal from "./Error/ErrorModal";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
 import ConfirmModal from "./ConfirmModal";
 
 interface DemoDataLoaderProps {
@@ -69,9 +69,7 @@ function availableAction(isEmpty: boolean): DemoAction | null {
  */
 export function DemoDataLoader({ onLoaded }: DemoDataLoaderProps) {
   const [action, setAction] = useState<DemoAction | null>(null);
-  const [loading, setLoading] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
@@ -87,22 +85,17 @@ export function DemoDataLoader({ onLoaded }: DemoDataLoaderProps) {
     };
   }, []);
 
-  async function runAction(current: DemoAction) {
-    setConfirmVisible(false);
-    setLoading(true);
-    try {
+  const { run, isRunning: loading } = useAsyncAction(
+    async (current: DemoAction) => {
       await ACTIONS[current].run();
       setAction(availableAction(false));
       onLoaded?.();
-    } catch (e: unknown) {
-      setErrorMsg(
-        e instanceof Error
-          ? e.message
-          : "Erro desconhecido ao carregar os dados de exemplo.",
-      );
-    } finally {
-      setLoading(false);
-    }
+    },
+  );
+
+  function runAction(current: DemoAction) {
+    setConfirmVisible(false);
+    run(current);
   }
 
   if (!action) return null;
@@ -147,8 +140,6 @@ export function DemoDataLoader({ onLoaded }: DemoDataLoaderProps) {
         onConfirm={() => runAction(action)}
         onCancel={() => setConfirmVisible(false)}
       />
-
-      <ErrorModal message={errorMsg} onClose={() => setErrorMsg(null)} />
     </View>
   );
 }

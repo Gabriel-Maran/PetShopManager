@@ -1,38 +1,30 @@
-import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
 import { useTheme } from "../../Themes/ThemeProvider";
 import BarChart from "../../components/Relatorios/BarChart";
-import { PetAusenteItem } from "../../../utils/relatorios/petsAusentes";
 import {
   petsAusentesComRemarcacao,
   petsAusentesSemRemarcacao,
 } from "../../../utils/relatorios/petsAusentes";
 import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
-import { useError } from "../../../hooks/useError";
+import { useAsyncData } from "../../../hooks/useAsyncData";
 
 export default function PetsAusentes() {
-  const [petsSemRemarc, setPetsSemRemarc] = useState<PetAusenteItem[]>([]);
-  const [petsComRemarc, setPetsComRemarc] = useState<PetAusenteItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { showError } = useError();
+  const { data, loading } = useAsyncData(() =>
+    Promise.all([petsAusentesSemRemarcacao(), petsAusentesComRemarcacao()]),
+  );
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
-  useEffect(() => {
-    // Promise.all garante que setLoading(false) só ocorre quando AMBAS terminam,
-    // e um único catch captura qualquer falha das duas
-    Promise.all([petsAusentesSemRemarcacao(), petsAusentesComRemarcacao()])
-      .then(([semRemarc, comRemarc]) => {
-        setPetsSemRemarc(semRemarc);
-        setPetsComRemarc(comRemarc);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+  const titleBar = (
+    <TitleBar
+      returnTo={Screen.Relatorios}
+      title="Pets Ausentes"
+      subtitle="Pets há mais tempo sem visita"
+    />
+  );
 
   if (loading) {
     return (
@@ -42,26 +34,16 @@ export default function PetsAusentes() {
     );
   }
 
-  if (error) {
-    showError(error);
-    return (
-      <View style={s.loader}>
-        <TitleBar
-          returnTo={Screen.Relatorios}
-          title="Pets Ausentes"
-          subtitle="Pets há mais tempo sem visita"
-        />
-      </View>
-    );
+  // Sem os dados, a falha já apareceu no modal de erro: fica só o título, para voltar.
+  if (!data) {
+    return <View style={s.loader}>{titleBar}</View>;
   }
+
+  const [petsSemRemarc, petsComRemarc] = data;
 
   return (
     <View style={s.mainContainer}>
-      <TitleBar
-        returnTo={Screen.Relatorios}
-        title="Pets Ausentes"
-        subtitle="Pets há mais tempo sem visita"
-      />
+      {titleBar}
       <ScrollView
         contentContainerStyle={s.scrollContent}
         showsVerticalScrollIndicator={false}

@@ -64,8 +64,6 @@ LocaleConfig.defaultLocale = "pt-br";
 export default function Calendario() {
   const { colors } = useTheme();
   const { showError } = useError();
-  const handleError = (e: unknown) =>
-    showError(e instanceof Error ? e.message : "Erro inesperado.");
 
   const {
     dateSelected,
@@ -102,7 +100,7 @@ export default function Calendario() {
       .getAppointmentsByDateRange(inicio, fim)
       //.getAppointmentsByDateRangeNotDone(inicio, fim)
       .then(setDatasComAgendamento)
-      .catch(handleError);
+      .catch(showError);
   }, [mesSelecionado, dateSelected]);
 
   // useMemo pra guardar as datas

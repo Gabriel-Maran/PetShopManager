@@ -4,8 +4,7 @@ import {
   useTheme,
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
-import BarChart, { BarChartItem } from "../../components/Relatorios/BarChart";
-import { useEffect, useState } from "react";
+import BarChart from "../../components/Relatorios/BarChart";
 
 import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
@@ -13,28 +12,23 @@ import {
   autoVsManuaisAgendados,
   autoVsManuaisConcluidos,
 } from "../../../utils/relatorios/origemDados";
-import { useError } from "../../../hooks/useError";
+import { useAsyncData } from "../../../hooks/useAsyncData";
 
 export default function OrigemAgendamentos() {
-  const [dataOrigemAgen, setDataOrigemAgen] = useState<BarChartItem[]>([]);
-  const [dataOrigemConcl, setDataOrigemConcl] = useState<BarChartItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { showError } = useError();
+  const { data, loading } = useAsyncData(() =>
+    Promise.all([autoVsManuaisConcluidos(), autoVsManuaisAgendados()]),
+  );
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
-  useEffect(() => {
-    setLoading(true);
-    autoVsManuaisConcluidos()
-      .then(setDataOrigemConcl)
-      .catch((e) => setError(e.message));
-    autoVsManuaisAgendados()
-      .then(setDataOrigemAgen)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+  const titleBar = (
+    <TitleBar
+      returnTo={Screen.Relatorios}
+      title="Origem dos Agendamentos"
+      subtitle="Canais automáticos e manuais"
+    />
+  );
 
   if (loading) {
     return (
@@ -44,26 +38,16 @@ export default function OrigemAgendamentos() {
     );
   }
 
-  if (error) {
-    showError(error);
-    return (
-      <View style={s.loader}>
-        <TitleBar
-          returnTo={Screen.Relatorios}
-          title="Origem dos Agendamentos"
-          subtitle="Canais automáticos e manuais"
-        />
-      </View>
-    );
+  // Sem os dados, a falha já apareceu no modal de erro: fica só o título, para voltar.
+  if (!data) {
+    return <View style={s.loader}>{titleBar}</View>;
   }
+
+  const [dataOrigemConcl, dataOrigemAgen] = data;
 
   return (
     <View style={s.mainContainer}>
-      <TitleBar
-        returnTo={Screen.Relatorios}
-        title="Origem dos Agendamentos"
-        subtitle="Canais automáticos e manuais"
-      />
+      {titleBar}
       <ScrollView
         contentContainerStyle={s.scrollContent}
         showsVerticalScrollIndicator={false}

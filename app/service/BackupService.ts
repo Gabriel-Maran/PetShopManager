@@ -7,6 +7,8 @@ import {
   restoreAppDatabase,
   upgradeBackupFile,
 } from "../config/database";
+import { AppError } from "../errors/AppError";
+import { MESSAGES } from "../globals/messages";
 
 // A pasta onde o expo-sqlite abre os bancos pelo nome.
 const SQLITE_DIRECTORY = `${FileSystem.documentDirectory}SQLite/`;
@@ -29,12 +31,12 @@ export async function exportDatabase(): Promise<void> {
 
   const dbInfo = await FileSystem.getInfoAsync(DB_PATH);
   if (!dbInfo.exists) {
-    throw new Error("Banco de dados não encontrado.");
+    throw new AppError("UNAVAILABLE", MESSAGES.backup.databaseNotFound);
   }
 
   const canShare = await Sharing.isAvailableAsync();
   if (!canShare) {
-    throw new Error("Compartilhamento não disponível neste dispositivo.");
+    throw new AppError("UNAVAILABLE", MESSAGES.backup.sharingUnavailable);
   }
 
   const backupInfo = await FileSystem.getInfoAsync(BACKUP_PATH);
@@ -64,12 +66,12 @@ export async function importDatabase(): Promise<void> {
   const file = result.assets[0];
 
   if (!file.name.endsWith(".db")) {
-    throw new Error("Arquivo inválido. Selecione um arquivo .db válido.");
+    throw new AppError("INVALID_BACKUP", MESSAGES.backup.wrongExtension);
   }
 
   const sourceInfo = await FileSystem.getInfoAsync(file.uri);
   if (!sourceInfo.exists) {
-    throw new Error("Arquivo selecionado não encontrado ou inacessível.");
+    throw new AppError("INVALID_BACKUP", MESSAGES.backup.fileNotFound);
   }
 
   // A cópia é atualizada antes de entrar: um backup de versão anterior chega no formato de hoje, e

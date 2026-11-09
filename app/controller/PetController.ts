@@ -7,38 +7,41 @@ import {
 } from "../config/consts";
 import { Pet, PetWithSpecieRaceAndOwner } from "../model/Pet";
 import { type IsoDate, isIsoDate } from "../utils/datas";
-import { type Cents, INVALID_MONEY_MESSAGE, isValidCents } from "../utils/dinheiro";
+import { type Cents, isValidCents } from "../utils/dinheiro";
+import { AppError } from "../errors/AppError";
+import { MESSAGES } from "../globals/messages";
 import { ownerController } from "./OwnerController";
+
+/** Falha de validação dos dados do pet. */
+const invalid = (message: string) => new AppError("VALIDATION", message);
 
 class PetController {
   // ─── Helpers de validação ────────────────────────────────────────────────
 
   private validatePorte(porte: unknown): void {
     if (!Object.values(PorteAnimal).includes(porte as PorteAnimal)) {
-      throw new Error(
-        `Porte inválido. Valores aceitos: ${Object.values(PorteAnimal).join(", ")}`,
-      );
+      throw invalid(MESSAGES.invalidOption("Porte", Object.values(PorteAnimal)));
     }
   }
 
   private validateServicoPadrao(servico: unknown): void {
     if (!Object.values(TipoServico).includes(servico as TipoServico)) {
-      throw new Error(
-        `Serviço padrão inválido. Valores aceitos: ${Object.values(TipoServico).join(", ")}`,
+      throw invalid(
+        MESSAGES.invalidOption("Serviço padrão", Object.values(TipoServico)),
       );
     }
   }
 
   private validateFlag(value: unknown, campo: string): void {
     if (value !== 0 && value !== 1) {
-      throw new Error(`${campo} deve ser 0 ou 1`);
+      throw invalid(MESSAGES.invalidFlag(campo));
     }
   }
 
   private validateRemarcacaoFields(pet: Partial<Pet>): void {
     // Sem pacote ativo, o valor pode ficar vazio, mas o que vier precisa ser centavos.
     if (pet.valor_pacote != null && !isValidCents(pet.valor_pacote)) {
-      throw new Error(INVALID_MONEY_MESSAGE);
+      throw invalid(MESSAGES.money.invalid);
     }
 
     if (pet.remarcacao_ativa !== 1) return;
@@ -47,41 +50,37 @@ class PetController {
       pet.pacote_remarcacao as PacoteRemarcacao,
     );
     if (!pacoteValido) {
-      throw new Error(
-        `Pacote de remarcação inválido. Valores aceitos: ${Object.values(PacoteRemarcacao).join(", ")}`,
+      throw invalid(
+        MESSAGES.invalidOption("Pacote de remarcação", Object.values(PacoteRemarcacao)),
       );
     }
 
     if (pet.valor_pacote == null) {
-      throw new Error(
-        "Valor do pacote é obrigatório quando a remarcação está ativa, no formato 120,00",
-      );
+      throw invalid(MESSAGES.pet.packageValueRequired);
     }
 
     if (!isIsoDate(pet.data_inicio_pacote)) {
-      throw new Error(
-        "Data de início do pacote é obrigatória. Escolha a data no calendário.",
-      );
+      throw invalid(MESSAGES.pet.packageStartRequired);
     }
   }
 
   private validateBaseFields(pet: Partial<Pet>): void {
     if (!pet.nome?.trim()) {
-      throw new Error("Nome é obrigatório");
+      throw invalid(MESSAGES.pet.nameRequired);
     }
 
     if (!pet.especie || pet.especie <= 0) {
-      throw new Error("Espécie é obrigatória e deve ser um valor válido");
+      throw invalid(MESSAGES.pet.speciesRequired);
     }
 
     if (!pet.dono_id || pet.dono_id <= 0) {
-      throw new Error("Dono é obrigatório e deve ser um valor válido");
+      throw invalid(MESSAGES.pet.ownerRequired);
     }
 
     this.validatePorte(pet.porte);
 
     if (!pet.raca || pet.raca <= 0) {
-      throw new Error("Raça é obrigatória");
+      throw invalid(MESSAGES.pet.breedRequired);
     }
   }
 
@@ -89,7 +88,7 @@ class PetController {
 
   async getPetById(id: number): Promise<Pet> {
     const pet = await petService.getPetById(id);
-    if (!pet) throw new Error("Pet não encontrado");
+    if (!pet) throw new AppError("NOT_FOUND", MESSAGES.pet.notFound);
     return pet;
   }
 

@@ -249,3 +249,20 @@ Motivo:
 - Migrar a cópia, e não o banco do app, deixa os dados do aparelho intactos se o backup tiver algum problema. É o mesmo código que já migra os aparelhos, com os mesmos testes.
 - Sem a checagem das tabelas, as migrações criariam o esquema vazio num arquivo qualquer, e a importação apagaria os dados do app em vez de falhar como antes.
 - O resto do BKP-1 (integridade, `trusted_schema`, colunas nomeadas e o ponteiro da remarcação) continua na Parte 4.
+
+## 2026-11-09
+
+**Erros num lugar só (ERRO-1).**
+Contexto: o mesmo `handleError` estava copiado em 8 arquivos, a conversão `e instanceof Error ? e.message : ...` aparecia 12 vezes, o backup e os dados de exemplo tinham o próprio modal, e a mensagem de qualquer erro, inclusive do SQLite, chegava à tela.
+Decisão:
+- A falha prevista é um `AppError` (`app/errors/AppError.ts`), com um código e uma mensagem de `app/globals/messages.ts`. Só ela aparece na tela. Qualquer outro erro mostra "Algo deu errado. Tente de novo." e vai inteiro para o log, pelo `logError`.
+- O `showError` recebe o erro como veio, e não o texto: nenhuma tela monta a mensagem.
+- Dois hooks: o `useAsyncAction`, para as ações com carregamento (salvar, importar, carregar o exemplo), com a trava do toque duplo; e o `useAsyncData`, para os dados que uma tela carrega ao abrir, como os relatórios.
+- Cada falha de validação tem a sua frase. O dono separa nome, telefone vazio e telefone inválido; o agendamento separa pet, serviço, data, horário e valor. Um teste garante que nenhuma mensagem se repete.
+- A validação da raça (espécie e nome) saiu do modal e foi para o `createRaceService`, que lança `AppError` em vez de devolver `{ success, error }`.
+- As validações continuam nos controllers. O schema por entidade é o VALID-1, que depende da pergunta 13 (Zod ou validadores próprios).
+
+Motivo:
+- A regra de segurança do Gabriel: a tela não mostra SQL, nome de tabela nem detalhe interno, que ficam no log.
+- Um módulo só cria, registra e trata os erros, e a mensagem de cada falha fica num lugar só, em `globals`.
+- Os relatórios chamavam o `showError` durante o render. Pela leitura do código, o modal voltava a abrir a cada vez que era fechado (provável).

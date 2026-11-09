@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   ThemeColors,
   useTheme,
@@ -7,26 +6,23 @@ import {
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
-import BarChart, { BarChartItem } from "../../components/Relatorios/BarChart";
-import { useError } from "../../../hooks/useError";
+import BarChart from "../../components/Relatorios/BarChart";
+import { useAsyncData } from "../../../hooks/useAsyncData";
 import { comparativoRemarcacao } from "../../../utils/relatorios/remarcacoes";
 
 export default function RemarcacoesIntervals() {
-  const [petsRemarc, setPetsRemarc] = useState<BarChartItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { showError } = useError();
+  const { data, loading } = useAsyncData(comparativoRemarcacao);
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
-  useEffect(() => {
-    setLoading(true);
-    comparativoRemarcacao()
-      .then((dados) => setPetsRemarc(dados))
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+  const titleBar = (
+    <TitleBar
+      returnTo={Screen.Relatorios}
+      title="Remarcações Pets"
+      subtitle="Remarcação automática ativa e inativa"
+    />
+  );
 
   if (loading) {
     return (
@@ -36,33 +32,21 @@ export default function RemarcacoesIntervals() {
     );
   }
 
-  if (error) {
-    showError(error);
-    return (
-      <View style={s.loader}>
-        <TitleBar
-          returnTo={Screen.Relatorios}
-          title="Remarcações Pets"
-          subtitle="Remarcação automática ativa e inativa"
-        />
-      </View>
-    );
+  // Sem os dados, a falha já apareceu no modal de erro: fica só o título, para voltar.
+  if (!data) {
+    return <View style={s.loader}>{titleBar}</View>;
   }
 
   return (
     <View style={s.mainContainer}>
-      <TitleBar
-        returnTo={Screen.Relatorios}
-        title="Remarcações Pets"
-        subtitle="Remarcação automática ativa e inativa"
-      />
+      {titleBar}
       <ScrollView
         contentContainerStyle={s.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={s.card}>
           <BarChart
-            data={petsRemarc}
+            data={data}
             title="Remarcação ativa vs inativa"
             suffix="pets"
             invertLabelY={true}

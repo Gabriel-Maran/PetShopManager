@@ -23,7 +23,7 @@ import {
 import { todayIso } from "../../../utils/datas";
 import { formatMoneyInput, parseMoneyInput } from "../../../utils/dinheiro";
 
-import { useError } from "../../../hooks/useError";
+import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import { useScreen } from "../../../hooks/useScreen";
 import {
   pegarDonosBanco,
@@ -66,9 +66,6 @@ const MODAL_INICIAL = {
 export default function NewOrEditPet() {
   const [isCadastroPetSelecte, setIsCadastroPetSelecte] = useState(true);
   const { params, navigate } = useScreen<NewOrEditCadastros>();
-  const { showError } = useError();
-
-  const [isSalvando, setIsSalvando] = useState(false);
 
   const isViewing = params?.mode === "view";
   const isEditing = params?.mode === "edit";
@@ -123,12 +120,9 @@ export default function NewOrEditPet() {
   const [modalConfig, setModalConfig] = useState(MODAL_INICIAL);
 
   // --- Salvar pet ---
-  const salvarPet = useCallback(async () => {
-    if (isSalvando) return;
-    setIsSalvando(true);
-
-    try {
-      // Dentro do try: um valor digitado fora do formato vira a mensagem de erro da tela.
+  // Dentro da ação: um valor digitado fora do formato vira a mensagem de erro da tela.
+  const { run: salvarPet, isRunning: isSalvando } = useAsyncAction(
+    async () => {
       const petSalvar = new PetBuilder()
         .withNome(form.nome)
         .withEspecie(form.especie)
@@ -153,12 +147,8 @@ export default function NewOrEditPet() {
         type: "PET",
         mode: "view",
       } as NewOrEditCadastros);
-    } catch (erro) {
-      showError(erro instanceof Error ? erro.message : "Erro inesperado.");
-    } finally {
-      setIsSalvando(false);
-    }
-  }, [isSalvando, form, params?.pet?.id, navigate, showError]);
+    },
+  );
 
   // --- Abre o modal (DONO ou RACA) ---
   const abrirModal = useCallback(

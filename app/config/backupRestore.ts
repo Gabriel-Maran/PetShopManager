@@ -18,12 +18,8 @@ import {
   DETACH_BACKUP_SQL,
   LIST_TABLES_SQL,
 } from "../repository/sql/backupSql.ts";
-
-export const NOT_A_BACKUP_MESSAGE =
-  "Este arquivo não é um backup do PetShop Manager. Escolha um arquivo exportado pelo app.";
-
-export const NEWER_BACKUP_MESSAGE =
-  "Este backup é de uma versão mais nova do app. Atualize o app para importá-lo.";
+import { AppError } from "../errors/AppError.ts";
+import { MESSAGES } from "../globals/messages.ts";
 
 /** A conexão do app na restauração: a das migrações, mais um comando com parâmetros. */
 export interface RestoreDatabase extends MigrationDatabase {
@@ -43,12 +39,12 @@ export async function upgradeBackup(
   // apagaria os dados do app.
   const tables = await listTables(backup);
   if (!BACKUP_TABLES.every((table) => tables.has(table))) {
-    throw new Error(NOT_A_BACKUP_MESSAGE);
+    throw new AppError("INVALID_BACKUP", MESSAGES.backup.notABackup);
   }
   // O migrateDatabase também recusa, mas com a mensagem da abertura do app, que fala dos dados do
   // aparelho, e não do arquivo escolhido.
   if ((await readUserVersion(backup)) > migrations.length) {
-    throw new Error(NEWER_BACKUP_MESSAGE);
+    throw new AppError("INVALID_BACKUP", MESSAGES.backup.newerVersion);
   }
   return migrateDatabase(backup, migrations);
 }
@@ -59,7 +55,7 @@ async function listTables(backup: MigrationDatabase): Promise<Set<string>> {
     return new Set(rows.map(({ name }) => name));
   } catch (cause) {
     // Um arquivo que não é banco SQLite, ou que está corrompido, já falha nesta primeira leitura.
-    throw new Error(NOT_A_BACKUP_MESSAGE, { cause });
+    throw new AppError("INVALID_BACKUP", MESSAGES.backup.notABackup, { cause });
   }
 }
 

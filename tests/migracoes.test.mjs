@@ -17,12 +17,11 @@ import {
   toDate,
 } from "./helpers/database.mjs";
 import {
-  BROKEN_FOREIGN_KEY_MESSAGE,
   migrateDatabase,
-  migrationFailedMessage,
-  NEWER_DATABASE_MESSAGE,
   recreateDatabase,
 } from "../app/config/migrator.ts";
+import { MESSAGES } from "../app/globals/messages.ts";
+import { AppError } from "../app/errors/AppError.ts";
 import { MIGRATIONS } from "../app/config/schema.ts";
 import { buildDemoDataSql, DEMO_DATA_SUMMARY } from "../app/config/demoData.ts";
 import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
@@ -59,7 +58,9 @@ const isoFromLegacy = (value) => String(value).replace(/^(\d{4})(\d{2})(\d{2})$/
 
 /** Confere a mensagem amigável e o motivo de verdade, que fica no cause. */
 const failedAt = (version, causeMessage) => (error) => {
-  assert.equal(error.message, migrationFailedMessage(version));
+  assert.ok(error instanceof AppError);
+  assert.equal(error.code, "DATABASE");
+  assert.equal(error.message, MESSAGES.database.migrationFailed(version));
   if (causeMessage) assert.equal(error.cause.message, causeMessage);
   return true;
 };
@@ -231,7 +232,7 @@ describe("migrações do banco", () => {
     db.exec(`PRAGMA user_version = ${LATEST + 5};`);
     const schemaBefore = schemaObjects(db);
 
-    await assert.rejects(migrate(db), { message: NEWER_DATABASE_MESSAGE });
+    await assert.rejects(migrate(db), { name: "AppError", code: "DATABASE", message: MESSAGES.database.newerVersion });
 
     assert.equal(userVersion(db), LATEST + 5);
     assert.deepEqual(schemaObjects(db), schemaBefore);
@@ -272,7 +273,7 @@ describe("migrações do banco", () => {
     // Com as chaves estrangeiras desligadas, apagar o dono não leva os pets junto.
     const migrations = [...MIGRATIONS, nextMigration(["DELETE FROM owners;"])];
 
-    await assert.rejects(migrate(db, migrations), failedAt(LATEST + 1, BROKEN_FOREIGN_KEY_MESSAGE));
+    await assert.rejects(migrate(db, migrations), failedAt(LATEST + 1, MESSAGES.database.brokenForeignKey));
 
     assert.equal(count(db, "owners"), 1);
     assert.equal(userVersion(db), LATEST);

@@ -7,6 +7,7 @@ import {
   ViewStyle,
 } from "react-native";
 import { configsController } from "../../controller/ConfigsController";
+import { logError } from "../../errors/AppError";
 
 //USE: const { colors, isDark, trocarTheme } = useTheme();
 //USE: const s = useThemedStyles(styles);
@@ -129,9 +130,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           setIsDark(item.is_ativo === 1);
         }
       })
-      .catch((err) => {
-        console.warn("Erro ao carregar tema:", err);
-      })
+      // Sem o tema salvo, o app abre no claro; o ErrorProvider fica dentro deste provider.
+      .catch((error) => logError(error, "tema"))
       .finally(() => {
         setTemaCarregado(true); // sempre libera, mesmo se der erro
       });

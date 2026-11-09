@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useState } from "react";
 
-import { useError } from "../../../hooks/useError";
+import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import { useScreen } from "../../../hooks/useScreen";
 
 import { NewOrEditCadastros, Screen } from "../../../config/consts";
@@ -34,7 +34,6 @@ const maskPhone = (v: string) => {
 
 export default function NewOrEditOwner() {
   const { params, navigate } = useScreen<NewOrEditCadastros>();
-  const { showError } = useError();
 
   const s = useThemedStyles(styles);
 
@@ -46,14 +45,14 @@ export default function NewOrEditOwner() {
   const [email, setEmail] = useState(params?.owner?.email ?? "");
   const [endereco, setEndereco] = useState(params?.owner?.endereco ?? "");
 
-  const salvarDono = async () => {
-    const ownerSalvar: Owner = new OwnerBuilder()
-      .withNome(nome)
-      .withTelefone(telefone)
-      .withEmail(email)
-      .withEndereco(endereco)
-      .build();
-    try {
+  const { run: salvarDono, isRunning: isSalvando } = useAsyncAction(
+    async () => {
+      const ownerSalvar: Owner = new OwnerBuilder()
+        .withNome(nome)
+        .withTelefone(telefone)
+        .withEmail(email)
+        .withEndereco(endereco)
+        .build();
       if (isEditing) {
         await ownerController.updateOwner(params!.owner?.id!, ownerSalvar);
       } else {
@@ -63,10 +62,8 @@ export default function NewOrEditOwner() {
         type: "DONO",
         mode: "view",
       } as NewOrEditCadastros);
-    } catch (erro) {
-      showError(erro instanceof Error ? erro.message : "Erro inesperado.");
-    }
-  };
+    },
+  );
 
   return (
     <KeyboardAvoidingView
@@ -154,7 +151,11 @@ export default function NewOrEditOwner() {
           </View>
           {!isViewing && (
             <View style={s.ctnBtnSalvar}>
-              <TouchableOpacity style={s.btnSalvar} onPress={salvarDono}>
+              <TouchableOpacity
+                style={s.btnSalvar}
+                onPress={salvarDono}
+                disabled={isSalvando}
+              >
                 <Text style={s.txtSalvar}>
                   {isEditing ? "Salvar alterações" : "Salvar"}
                 </Text>

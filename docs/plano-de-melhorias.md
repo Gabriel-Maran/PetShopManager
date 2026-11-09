@@ -151,6 +151,8 @@ Achado novo: no campo de horário, um quinto dígito apaga o campo inteiro (`mas
 
 O primeiro item foi resolvido no DADOS-1, em 2026-11-08: uma falha na abertura do banco agora chega à tela de erro do `App.tsx`.
 
+Conferido no ERRO-1, em 2026-11-09: o `console.log` da validação do pet já não existe, e as buscas do dono e da raça na aba do pet, que só iam para o `console.error`, passaram a mostrar a falha. Falta o resto: as ações de Cadastros sem `await` e o `handleDeleteSelected`.
+
 - **Por quê:**
   - `initDatabase` captura qualquer erro com `console.log` ([`database.ts:687`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/config/database.ts#L687)), e o app abre como se o banco estivesse certo.
   - Em Cadastros, desativar e reativar chamam o controller sem `await` ([`Cadastros.tsx:92`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/view/pages/Cadastros.tsx#L92)). O `try` não pega a falha, e o item sai da lista mesmo se der erro.
@@ -194,6 +196,8 @@ Adiantado na etapa 3c, em 2026-11-08: a cópia do backup passa pelas migrações
 - **Pronto quando:** cada regra tem teste com entrada válida, inválida e nos limites.
 
 ### ERRO-1 · Tratamento de erros centralizado
+
+Feito em 2026-11-09: o `AppError`, o `toUserMessage` e o `logError` ficam em `app/errors/AppError.ts`, e as mensagens, em `app/globals/messages.ts`, uma por falha. O `showError` recebe o erro como veio, e os hooks `useAsyncAction` e `useAsyncData` ligam o carregamento e o modal de erro. O backup, os dados de exemplo e o cadastro de raça passaram a usar o `ErrorProvider`. Um erro que não é `AppError` mostra a mensagem genérica, e o detalhe vai só para o log. Os relatórios deixaram de chamar o `showError` durante o render: pela leitura do código, o modal voltava a abrir a cada vez que era fechado (provável).
 
 - **Por quê:** o mesmo `handleError` foi copiado em 8 arquivos, e a conversão `e instanceof Error ? e.message : ...` aparece 12 vezes. O `DatabaseTransfer` tem o próprio modal de erro. As mensagens ficam espalhadas pelos controllers, e uma delas diz "Nome e telefone são obrigatórios" também quando o telefone só é inválido.
 - **O que muda:** um módulo de erros com um `AppError` (código e mensagem), as mensagens em `globals/messages`, uma função que converte qualquer erro em texto para o usuário e um hook (por exemplo, `useAsyncAction`) que já liga o carregamento e o `showError`. O backup passa a usar o `ErrorProvider`.

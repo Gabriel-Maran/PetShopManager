@@ -1,35 +1,32 @@
 import { raceRepository } from "../repository/RaceRepository";
+import { AppError } from "../errors/AppError";
+import { MESSAGES } from "../globals/messages";
 
 interface CreateRaceParams {
   especieId: number;
   nomeRaca: string;
 }
 
-interface CreateRaceResult {
-  success: boolean;
-  id?: number;
-  error?: string;
-}
-
 /**
- * Cria uma nova raça com validação de duplicidade por espécie.
+ * Cria uma nova raça com validação de duplicidade por espécie e devolve o id dela.
  * Normaliza o nome antes de comparar (trim + lowercase).
  */
 export async function createRaceService({
   especieId,
   nomeRaca,
-}: CreateRaceParams): Promise<CreateRaceResult> {
+}: CreateRaceParams): Promise<number> {
+  if (!especieId || especieId <= 0) {
+    throw new AppError("VALIDATION", MESSAGES.breed.speciesRequired);
+  }
+
   const normalizedName = nomeRaca.trim();
 
   if (!normalizedName) {
-    return { success: false, error: "O nome da raça é obrigatório." };
+    throw new AppError("VALIDATION", MESSAGES.breed.nameRequired);
   }
 
   if (normalizedName.length < 2) {
-    return {
-      success: false,
-      error: "O nome da raça deve ter pelo menos 2 caracteres.",
-    };
+    throw new AppError("VALIDATION", MESSAGES.breed.nameTooShort);
   }
 
   const existing = await raceRepository.findRaceByNome(normalizedName);
@@ -41,13 +38,8 @@ export async function createRaceService({
   );
 
   if (isDuplicate) {
-    return {
-      success: false,
-      error: "Já existe uma raça com este nome para esta espécie.",
-    };
+    throw new AppError("CONFLICT", MESSAGES.breed.duplicate);
   }
 
-  const id = await raceRepository.createRace(especieId, normalizedName);
-
-  return { success: true, id };
+  return raceRepository.createRace(especieId, normalizedName);
 }

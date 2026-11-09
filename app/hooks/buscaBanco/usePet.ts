@@ -15,8 +15,6 @@ export function pegarRacasBanco(formEspecieId: number): {
   total: number;
 } {
   const { showError } = useError();
-  const handleError = (e: unknown) =>
-    showError(e instanceof Error ? e.message : "Erro inesperado.");
 
   const [especiesList, setEspeciesList] = useState<Species[]>([]);
   const [racasList, setRacasList] = useState<Species[]>([]);
@@ -26,45 +24,33 @@ export function pegarRacasBanco(formEspecieId: number): {
 
   // 1. Busca todas as espécies (executa apenas uma vez no load)
   useEffect(() => {
-    try {
-      speciesController
-        .searchSpecies()
-        .then(setEspeciesList)
-        .catch(handleError);
-    } catch (e) {
-      handleError(e);
-    }
+    speciesController
+      .searchSpecies()
+      .then(setEspeciesList)
+      .catch(showError);
   }, []);
 
   // 2. Busca as raças paginadas/filtradas (executa quando muda a espécie, página ou texto)
   useEffect(() => {
-    try {
-      if (formEspecieId) {
-        speciesController
-          .searchBreed(formEspecieId, page, searchTxt)
-          .then(setRacasList)
-          .catch(handleError);
-      } else {
-        setRacasList([]);
-      }
-    } catch (e) {
-      handleError(e);
+    if (formEspecieId) {
+      speciesController
+        .searchBreed(formEspecieId, page, searchTxt)
+        .then(setRacasList)
+        .catch(showError);
+    } else {
+      setRacasList([]);
     }
   }, [formEspecieId, page, searchTxt]);
 
   // 3. Conta o total de raças para a paginação (executa quando muda a espécie ou texto)
   useEffect(() => {
-    try {
-      if (formEspecieId) {
-        speciesController
-          .countBreeds(formEspecieId, searchTxt)
-          .then(setTotal)
-          .catch(handleError);
-      } else {
-        setTotal(0);
-      }
-    } catch (e) {
-      handleError(e);
+    if (formEspecieId) {
+      speciesController
+        .countBreeds(formEspecieId, searchTxt)
+        .then(setTotal)
+        .catch(showError);
+    } else {
+      setTotal(0);
     }
   }, [formEspecieId, searchTxt]);
 
@@ -92,30 +78,24 @@ export function pegarDonosBanco(): {
   total: number;
 } {
   const { showError } = useError();
-  const handleError = (e: unknown) =>
-    showError(e instanceof Error ? e.message : "Erro inesperado.");
 
   const [owners, setOwners] = useState<Owner[]>([]);
   const [page, setPage] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
   const [searchTxt, setSearchTxt] = useState<string>("");
   useEffect(() => {
-    try {
-      ownerController
-        .searchOwnersByNamePaged(searchTxt, page, LIMIT_ITEM_PAGE, ORDER.DESC)
-        .then(setOwners)
-        .catch(handleError);
-    } catch (e) {
-      handleError(e);
-    }
+    ownerController
+      .searchOwnersByNamePaged(searchTxt, page, LIMIT_ITEM_PAGE, ORDER.DESC)
+      .then(setOwners)
+      .catch(showError);
   }, [searchTxt, page]);
 
   useEffect(() => {
-    ownerController.countOwners(searchTxt).then(setTotal).catch(handleError);
+    ownerController.countOwners(searchTxt).then(setTotal).catch(showError);
   }, [searchTxt]);
 
   useEffect(() => {
-    ownerController.countOwners().then(setTotal).catch(handleError);
+    ownerController.countOwners().then(setTotal).catch(showError);
   }, []);
 
   return {

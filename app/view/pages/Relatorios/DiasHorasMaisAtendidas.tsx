@@ -4,8 +4,7 @@ import {
   useTheme,
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
-import BarChart, { BarChartItem } from "../../components/Relatorios/BarChart";
-import { useEffect, useState } from "react";
+import BarChart from "../../components/Relatorios/BarChart";
 
 import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
@@ -13,31 +12,23 @@ import {
   getDiasMaisAtendidos,
   getHorasMaisAtendidas,
 } from "../../../utils/relatorios/datasSearcher";
-import { useError } from "../../../hooks/useError";
+import { useAsyncData } from "../../../hooks/useAsyncData";
 
 export default function DiasHorasMaisAtendidas() {
-  const [data, setData] = useState<BarChartItem[]>([]);
-  const [hora, setHora] = useState<BarChartItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { showError } = useError();
+  const { data, loading } = useAsyncData(() =>
+    Promise.all([getDiasMaisAtendidos(), getHorasMaisAtendidas()]),
+  );
 
-  const { colors } = useTheme(); // Pega as cores para o ActivityIndicator
+  const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
-  useEffect(() => {
-    getDiasMaisAtendidos()
-      .then(setData)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    getHorasMaisAtendidas()
-      .then(setHora)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+  const titleBar = (
+    <TitleBar
+      returnTo={Screen.Relatorios}
+      title="Frequência de Atendimento"
+      subtitle="Análise de picos de horários e dias"
+    />
+  );
 
   if (loading) {
     return (
@@ -47,27 +38,17 @@ export default function DiasHorasMaisAtendidas() {
     );
   }
 
-  if (error) {
-    showError(error);
-    return (
-      <View style={s.loader}>
-        <TitleBar
-          returnTo={Screen.Relatorios}
-          title="Origem dos Agendamentos"
-          subtitle="Canais automáticos e manuais"
-        />
-      </View>
-    );
+  // Sem os dados, a falha já apareceu no modal de erro: fica só o título, para voltar.
+  if (!data) {
+    return <View style={s.loader}>{titleBar}</View>;
   }
+
+  const [dias, horas] = data;
 
   return (
     <>
       <View style={s.mainContainer}>
-        <TitleBar
-          returnTo={Screen.Relatorios}
-          title="Frequência de Atendimento"
-          subtitle="Análise de picos de horários e dias"
-        />
+        {titleBar}
 
         <ScrollView
           contentContainerStyle={s.scrollContent}
@@ -75,7 +56,7 @@ export default function DiasHorasMaisAtendidas() {
         >
           <View style={s.card}>
             <BarChart
-              data={data}
+              data={dias}
               title="Dias mais atendidos"
               suffix="atend."
               invertLabelY={true}
@@ -84,7 +65,7 @@ export default function DiasHorasMaisAtendidas() {
 
           <View style={s.card}>
             <BarChart
-              data={hora}
+              data={horas}
               title="Horas mais atendidas"
               suffix="atend."
               invertLabelY={true}

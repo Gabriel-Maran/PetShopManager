@@ -8,6 +8,8 @@ import {
 import { useEffect, useState, ReactNode } from "react";
 
 import { initDatabase } from "./app/config/database";
+import { logError, toUserMessage } from "./app/errors/AppError";
+import { MESSAGES } from "./app/globals/messages";
 import {
   RelatorioParams,
   RelatorioType,
@@ -103,13 +105,16 @@ function AppInner() {
   useEffect(() => {
     initDatabase()
       .then(() => setReady(true))
-      .catch((e) => setError(e.message));
+      .catch((e: unknown) => {
+        logError(e, "abertura do banco");
+        setError(toUserMessage(e, MESSAGES.database.openFailed));
+      });
   }, []);
 
   if (error) {
     return (
       <View style={s.container}>
-        <Text style={s.errorTxt}>Erro ao iniciar banco: {error}</Text>
+        <Text style={s.errorTxt}>{error}</Text>
       </View>
     );
   }

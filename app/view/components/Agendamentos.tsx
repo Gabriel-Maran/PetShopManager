@@ -33,14 +33,11 @@ export default function Agendamentos({
   const s = useThemedStyles(styles);
   const { dateSelected, appointments, setAppointments } = useAgendamentos();
 
-  const handleError = (e: unknown) =>
-    showError(e instanceof Error ? e.message : "Erro inesperado.");
-
   useEffect(() => {
     const fetch = appointmentController
       .getAppointmentsByDateWithOwnerAndPet(dateSelected)
       .then(setAppointments);
-    fetch.catch(handleError);
+    fetch.catch(showError);
   }, [dateSelected]);
 
   return (
