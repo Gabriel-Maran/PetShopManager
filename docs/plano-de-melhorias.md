@@ -161,7 +161,7 @@ O primeiro item foi resolvido no DADOS-1, em 2026-11-08: uma falha na abertura d
 
 ### BUG-7 · Fuso horário misturado nas datas
 
-Parte do app feita em 2026-11-08: o "hoje" e as conversões de data estão em `app/utils/datas.ts`, no fuso do aparelho, e o SQL do app recebe o "hoje" como parâmetro. Há um teste com o relógio às 22h. Os triggers e o `DEFAULT` do `criado_em` passaram a usar `'localtime'` na versão 3 do esquema (PR #19), e o app passou a ler o formato novo na etapa 3b.
+Parte do app feita em 2026-11-08: o "hoje" e as conversões de data estão em `app/utils/datas.ts`, no fuso do aparelho, e o SQL do app recebe o "hoje" como parâmetro. Há um teste com o relógio às 22h. Os triggers e o `DEFAULT` do `criado_em` passaram a usar `'localtime'` na versão 3 do esquema (PR #19), e o app passou a ler o formato novo na etapa 3b (PR #20).
 
 - **Por quê:** o SQLite usa `'now'` (UTC) em uns lugares e `'now', 'localtime'` em outros, e o app usa o fuso de São Paulo fixo em três lugares. Entre 21h e meia-noite no horário de Brasília, o "hoje" do SQL já é amanhã. Isso afeta a data de cadastro (`criado_em`), se um agendamento de hoje entra como automático ou manual e os dias de ausência.
 - **O que muda:** o "hoje" é calculado num lugar só, no fuso do aparelho, e passado ao SQL como parâmetro. Os triggers e o `DEFAULT` de `criado_em` passam a usar `'localtime'` (por migração).
@@ -176,6 +176,8 @@ Parte do app feita em 2026-11-08: o "hoje" e as conversões de data estão em `a
 ### BKP-1 · Backup e restauração confiáveis
 
 Confirmado em 2026-11-08 por teste (`tests/backup.test.mjs`): na restauração, a agenda volta igual à do backup, mas o `ultimo_visita_data_auto` dos pets com pacote é refeito pelo trigger de cadastro, e fica além do último automático pendente. O copiar com `SELECT *` funciona entre bancos da mesma versão: o SQLite pula a coluna gerada `dia_semana`.
+
+Adiantado na etapa 3c, em 2026-11-08: a cópia do backup passa pelas migrações antes de entrar, então os dois bancos ficam na mesma versão. Um arquivo sem as tabelas do app, corrompido ou de versão mais nova é recusado sem mexer nos dados, e a cópia temporária é apagada com qualquer resultado. Falta o resto do "O que muda": `integrity_check`, `trusted_schema`, colunas nomeadas, triggers sem efeito na restauração, a cópia exportada no cache e o nome com a data.
 
 - **Por quê:**
   - A importação aceita qualquer arquivo terminado em `.db` e copia com `SELECT *`, que depende da ordem das colunas. Um backup de outra versão falha ou grava dados nas colunas erradas.
@@ -199,7 +201,7 @@ Confirmado em 2026-11-08 por teste (`tests/backup.test.mjs`): na restauração, 
 
 ### DADOS-2 · Dinheiro em centavos inteiros
 
-Preparado em 2026-11-08, sem migração: a máscara e a conversão para centavos estão em `app/utils/dinheiro.ts`. As colunas viraram centavos na versão 3 do esquema (PR #19), com a sobra da divisão do pacote nos primeiros atendimentos do mês. Na etapa 3b, os modelos passaram a usar centavos, e o texto com vírgula ficou só nos campos das telas. Falta a etapa 3c: importar um backup de versão anterior.
+Preparado em 2026-11-08, sem migração: a máscara e a conversão para centavos estão em `app/utils/dinheiro.ts`. As colunas viraram centavos na versão 3 do esquema (PR #19), com a sobra da divisão do pacote nos primeiros atendimentos do mês. Na etapa 3b (PR #20), os modelos passaram a usar centavos, e o texto com vírgula ficou só nos campos das telas. Na etapa 3c, um backup de versão anterior passa pelas migrações antes de entrar.
 
 - **Por quê:** valores são texto com vírgula (`"12,50"`), e o trigger divide o valor do pacote em `REAL`. Com um pacote de 99,99 em 4 vezes, cada atendimento vira 25,00 e a soma dá 100,00.
 - **O que muda:** colunas `INTEGER` em centavos, com migração dos dados (DADOS-1), e a divisão do pacote distribui a sobra de centavos. A conversão para "12,50" acontece só na tela, num util.
@@ -295,7 +297,7 @@ Os itens de arquitetura (ARQ-1, ARQ-2, DADOS-3 e NOMES-1) mudam muitos arquivos 
 
 ### DADOS-3 · Datas em texto ISO
 
-Adiantado para a Parte 3 em 2026-11-08, junto com o DADOS-2: as datas viraram texto na versão 3 do esquema (PR #19), e o app passou a usar o mesmo texto na etapa 3b, sem conversor de formato. Falta a etapa 3c: importar um backup de versão anterior.
+Adiantado para a Parte 3 em 2026-11-08, junto com o DADOS-2: as datas viraram texto na versão 3 do esquema (PR #19), e o app passou a usar o mesmo texto na etapa 3b (PR #20), sem conversor de formato. Na etapa 3c, um backup de versão anterior passa pelas migrações antes de entrar.
 
 - **Por quê:** guardar datas como `INTEGER YYYYMMDD` obriga o SQL a montar o texto com `substr` a cada uso, e o app tem quatro conversores de formato.
 - **O que muda:** colunas de data em texto `YYYY-MM-DD`, que o SQLite entende direto e que continua ordenando certo. Migração dos dados (DADOS-1).

@@ -18,7 +18,7 @@ export function openConnection(path = ":memory:") {
   return db;
 }
 
-/** O DatabaseSync com a interface assíncrona do expo-sqlite que o migrateDatabase usa. */
+/** O DatabaseSync com a interface assíncrona do expo-sqlite que as migrações e a restauração usam. */
 export function asMigrationDatabase(db) {
   return {
     execAsync: async (sql) => {
@@ -26,16 +26,27 @@ export function asMigrationDatabase(db) {
     },
     getFirstAsync: async (sql) => db.prepare(sql).get() ?? null,
     getAllAsync: async (sql) => db.prepare(sql).all(),
+    runAsync: async (sql, ...params) => db.prepare(sql).run(...params),
   };
 }
 
 /**
- * Banco novo, igual ao da primeira abertura do app: as mesmas migrações, pelo mesmo código. O caminho
- * pode ser uma memória compartilhada.
+ * Banco novo levado só até a versão pedida, como um aparelho com o app daquela época. O caminho pode
+ * ser uma memória compartilhada, para outra conexão anexar o banco como um backup.
  */
-export async function createDatabase(path = ":memory:") {
+export async function databaseAt(version, path = ":memory:") {
   const db = openConnection(path);
-  await migrateDatabase(asMigrationDatabase(db), MIGRATIONS);
+  await migrateDatabase(asMigrationDatabase(db), MIGRATIONS.slice(0, version));
+  return db;
+}
+
+/** Banco novo, igual ao da primeira abertura do app: as mesmas migrações, pelo mesmo código. */
+export const createDatabase = (path = ":memory:") => databaseAt(MIGRATIONS.length, path);
+
+/** Banco como o app criava antes das migrações: o mesmo SQL da versão 1, sem marcar a versão. */
+export function createLegacyDatabase(path = ":memory:") {
+  const db = openConnection(path);
+  for (const sql of MIGRATIONS[0].statements) db.exec(sql);
   return db;
 }
 

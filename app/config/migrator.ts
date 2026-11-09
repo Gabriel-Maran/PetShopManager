@@ -36,7 +36,7 @@ export async function migrateDatabase(
   migrations: readonly Migration[],
 ): Promise<number> {
   assertSequential(migrations);
-  const current = await readPragma(db, "user_version");
+  const current = await readUserVersion(db);
   const latest = migrations.length;
   if (current > latest) {
     throw new Error(NEWER_DATABASE_MESSAGE);
@@ -82,7 +82,8 @@ function assertSequential(migrations: readonly Migration[]): void {
 
 // Dentro de uma transação, o PRAGMA foreign_keys não tem efeito. Por isso ele é desligado antes:
 // assim, reconstruir ou apagar uma tabela não dispara o ON DELETE CASCADE nas tabelas filhas.
-async function withForeignKeysOff(
+// A restauração de backup (backupRestore.ts) usa o mesmo caminho.
+export async function withForeignKeysOff(
   db: MigrationDatabase,
   work: () => Promise<void>,
 ): Promise<void> {
@@ -95,7 +96,8 @@ async function withForeignKeysOff(
   }
 }
 
-async function inTransaction(
+/** Roda `work` numa transação: se algo falhar, nada do que ele fez fica no banco. */
+export async function inTransaction(
   db: MigrationDatabase,
   work: () => Promise<void>,
 ): Promise<void> {
@@ -160,6 +162,10 @@ async function rollbackQuietly(db: MigrationDatabase): Promise<void> {
     // Sem transação aberta, não há o que desfazer.
   }
 }
+
+/** A versão do esquema gravada no arquivo do banco. Um banco de antes das migrações tem 0. */
+export const readUserVersion = (db: MigrationDatabase): Promise<number> =>
+  readPragma(db, "user_version");
 
 async function readPragma(
   db: MigrationDatabase,

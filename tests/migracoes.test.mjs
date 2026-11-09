@@ -7,6 +7,8 @@ import assert from "node:assert/strict";
 import {
   asMigrationDatabase,
   createDatabase,
+  createLegacyDatabase,
+  databaseAt,
   insertOwner,
   insertPet,
   isoDate,
@@ -40,20 +42,6 @@ const schemaObjects = (db) =>
 
 /** Uma migração a mais depois das do app, só para o teste. */
 const nextMigration = (statements, offset = 1) => ({ version: LATEST + offset, statements });
-
-/** Banco como o app criava antes das migrações: o mesmo SQL da versão 1, sem marcar a versão. */
-function createLegacyDatabase() {
-  const db = openConnection();
-  for (const sql of MIGRATIONS[0].statements) db.exec(sql);
-  return db;
-}
-
-/** Banco novo levado só até a versão pedida, como um aparelho com o app daquela época. */
-async function databaseAt(version) {
-  const db = openConnection();
-  await migrate(db, MIGRATIONS.slice(0, version));
-  return db;
-}
 
 // O pacote no formato de cada época: até a versão 2, data AAAAMMDD e valor em texto com vírgula.
 const PACKAGE = { data_inicio_pacote: isoDate(3), valor_pacote: 20000 };

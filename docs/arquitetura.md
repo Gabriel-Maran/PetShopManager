@@ -28,10 +28,11 @@ App.tsx                   providers, abertura do banco e troca de telas
 app.json, eas.json        configuração do Expo e perfis de build
 app/
   config/
-    database.ts           conexão única, com WAL e pragmas; initDatabase aplica as migrações, e recreateAppDatabase recria o banco
+    database.ts           conexão única, com WAL e pragmas; initDatabase aplica as migrações, recreateAppDatabase recria o banco, e upgradeBackupFile e restoreAppDatabase importam um backup
     schema.ts             pragmas da conexão e a lista de migrações, sem o Expo (desde 2026-11-08)
     migrations/           uma versão do esquema por arquivo (v1.ts, v2.ts, v3.ts), em SQL puro
     migrator.ts           aplica as migrações pendentes numa transação e recria o banco do zero, sem o Expo (desde 2026-11-08)
+    backupRestore.ts      atualiza a cópia de um backup pelas migrações e troca os dados do app pelos dela, sem o Expo (desde 2026-11-08)
     demoData.ts           dados de exemplo com datas em torno de hoje (desde 2026-11-08)
     consts.ts             enums, tipos, telas, imagens da barra e tamanhos
   model/                  interfaces das tabelas e builders
@@ -180,7 +181,8 @@ Os gráficos são um componente próprio (`BarChart`), sem biblioteca.
 Fica em Configurações (`DatabaseTransfer` e `BackupService`):
 
 - **Exportar:** consolida o WAL, copia o `petshop.db` para o cache e abre o compartilhamento do sistema.
-- **Importar:** o usuário escolhe um arquivo `.db`. O app anexa o arquivo com `ATTACH`, e numa transação apaga e copia sete tabelas, com as chaves estrangeiras desligadas. Não confere a versão nem a estrutura do arquivo.
+- **Importar:** o usuário escolhe um arquivo `.db`, que é copiado para a pasta dos bancos do app. Desde 2026-11-08 (etapa 3c), a cópia é aberta numa conexão só dela e passa pelas mesmas migrações do banco do aparelho (`backupRestore.ts`): um backup de versão anterior chega no formato de hoje, e um arquivo sem as sete tabelas do app, corrompido ou de versão mais nova é recusado antes de mexer nos dados. Depois, o app anexa a cópia com `ATTACH` e, numa transação, apaga e copia as sete tabelas, com as chaves estrangeiras desligadas. A cópia e os arquivos do SQLite ao lado dela são apagados no fim, com qualquer resultado.
+- Ainda não confere a integridade do arquivo nem desliga o `trusted_schema`, e a cópia usa `SELECT *` (ver BKP-1).
 
 ## Tema e estilo
 

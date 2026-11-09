@@ -1,4 +1,5 @@
 import * as SQLite from "expo-sqlite";
+import { restoreBackup, upgradeBackup } from "./backupRestore";
 import { migrateDatabase, recreateDatabase } from "./migrator";
 import { MIGRATIONS, SQL_CONNECTION_PRAGMAS } from "./schema";
 
@@ -37,4 +38,23 @@ export async function initDatabase(): Promise<void> {
 /** Apaga todos os dados e recria o banco pelas migrações, como numa instalação nova. */
 export async function recreateAppDatabase(): Promise<void> {
   await recreateDatabase(await getDatabase(), MIGRATIONS);
+}
+
+/**
+ * Leva um backup copiado para a pasta SQLite do app até a última versão do esquema, numa conexão
+ * só dele, aberta como a do app. A conexão é fechada no fim, para o arquivo poder ser anexado.
+ */
+export async function upgradeBackupFile(fileName: string): Promise<void> {
+  const backup = await SQLite.openDatabaseAsync(fileName);
+  try {
+    await backup.execAsync(SQL_CONNECTION_PRAGMAS);
+    await upgradeBackup(backup, MIGRATIONS);
+  } finally {
+    await backup.closeAsync();
+  }
+}
+
+/** Troca os dados do app pelos do backup que o upgradeBackupFile já atualizou. */
+export async function restoreAppDatabase(backupPath: string): Promise<void> {
+  await restoreBackup(await getDatabase(), backupPath);
 }
