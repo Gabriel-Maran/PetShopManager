@@ -12,50 +12,29 @@ import {
   useTheme,
   useThemedStyles,
 } from "../Themes/ThemeProvider";
-import ErrorModal from "./Error/ErrorModal";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
 import ConfirmModal from "./ConfirmModal";
-
-type Action = "export" | "import";
 
 interface DatabaseTransferProps {
   onImportSuccess?: () => void;
 }
 
 export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
-  const [loading, setLoading] = useState(false);
-  const [loadingAction, setLoadingAction] = useState<Action | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
-  async function runExport() {
-    setLoading(true);
-    setLoadingAction("export");
-    try {
-      await exportDatabase();
-    } catch (e: any) {
-      setErrorMsg(e?.message ?? "Erro desconhecido ao exportar.");
-    } finally {
-      setLoading(false);
-      setLoadingAction(null);
-    }
-  }
+  const exportAction = useAsyncAction(exportDatabase);
+  const importAction = useAsyncAction(async () => {
+    await importDatabase();
+    onImportSuccess?.();
+  });
+  const loading = exportAction.isRunning || importAction.isRunning;
 
-  async function runImport() {
+  function runImport() {
     setConfirmVisible(false);
-    setLoading(true);
-    setLoadingAction("import");
-    try {
-      await importDatabase();
-      onImportSuccess?.();
-    } catch (e: any) {
-      setErrorMsg(e?.message ?? "Erro desconhecido ao importar.");
-    } finally {
-      setLoading(false);
-      setLoadingAction(null);
-    }
+    importAction.run();
   }
 
   return (
@@ -69,7 +48,7 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
 
       <TouchableOpacity
         style={[s.card, s.cardExport]}
-        onPress={runExport}
+        onPress={() => exportAction.run()}
         disabled={loading}
         activeOpacity={0.75}
       >
@@ -82,7 +61,7 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
             Salva o banco de dados atual e abre o compartilhamento do sistema.
           </Text>
         </View>
-        {loading && loadingAction === "export" && (
+        {exportAction.isRunning && (
           <ActivityIndicator color={colors.GREEN_COLOR} />
         )}
       </TouchableOpacity>
@@ -102,7 +81,7 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
             Seleciona um arquivo .db e substitui os dados atuais.
           </Text>
         </View>
-        {loading && loadingAction === "import" && (
+        {importAction.isRunning && (
           <ActivityIndicator color={colors.RED_COLOR} />
         )}
       </TouchableOpacity>
@@ -125,8 +104,6 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
         onConfirm={runImport}
         onCancel={() => setConfirmVisible(false)}
       />
-
-      <ErrorModal message={errorMsg} onClose={() => setErrorMsg(null)} />
     </View>
   );
 }

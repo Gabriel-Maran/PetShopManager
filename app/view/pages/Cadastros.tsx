@@ -45,9 +45,6 @@ export default function Cadastros() {
   >();
   const [isAtivo, setIsAtivo] = useState(1);
 
-  const handleError = (e: unknown) =>
-    showError(e instanceof Error ? e.message : "Erro inesperado.");
-
   const handleTabChange = (value: boolean) => {
     setIsOwnerSelected(value);
     setSearch("");
@@ -59,7 +56,7 @@ export default function Cadastros() {
     const count = isOwnerSelected
       ? ownerController.countOwners(search)
       : petController.countPets(search);
-    count.then(setTotal).catch(handleError);
+    count.then(setTotal).catch(showError);
   }, [isOwnerSelected, search]);
 
   // Busca — só dispara quando search muda (botão) ou ao trocar página/aba
@@ -83,7 +80,7 @@ export default function Cadastros() {
             isAtivo,
           )
           .then(setPets);
-    fetch.catch(handleError);
+    fetch.catch(showError);
   }, [search, page, isOwnerSelected, isAtivo]);
 
   function confirmDeletar(itemId: number) {
@@ -96,7 +93,7 @@ export default function Cadastros() {
         setPets((prev) => prev.filter((item) => item.id !== itemId));
       }
     } catch (e) {
-      handleError(e);
+      showError(e);
     }
     setObjSelectToDelete(undefined);
   }
@@ -121,7 +118,7 @@ export default function Cadastros() {
         setPets((prev) => prev.filter((item) => item.id !== itemId));
       }
     } catch (e) {
-      handleError(e);
+      showError(e);
     }
   }
 

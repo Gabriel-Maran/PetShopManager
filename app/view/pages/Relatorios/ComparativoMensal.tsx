@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   ThemeColors,
   useTheme,
@@ -8,32 +7,27 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import BarChart from "../../components/Relatorios/BarChart";
-import { useError } from "../../../hooks/useError";
+import { useAsyncData } from "../../../hooks/useAsyncData";
 import {
-  ComparativoMensalItem,
   getComparativoMensal,
   getComparativoMensalAgendados,
 } from "../../../utils/relatorios/comparativoMensal";
 
 export default function ComparativoMensal() {
-  const [realizados, setRealizados] = useState<ComparativoMensalItem[]>([]);
-  const [agendados, setAgendados] = useState<ComparativoMensalItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { showError } = useError();
+  const { data, loading } = useAsyncData(() =>
+    Promise.all([getComparativoMensal(), getComparativoMensalAgendados()]),
+  );
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
-  useEffect(() => {
-    Promise.all([getComparativoMensal(), getComparativoMensalAgendados()])
-      .then(([real, agen]) => {
-        setRealizados(real);
-        setAgendados(agen);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+  const titleBar = (
+    <TitleBar
+      returnTo={Screen.Relatorios}
+      title="Comparativo Mensal"
+      subtitle="Últimos 12 meses"
+    />
+  );
 
   if (loading) {
     return (
@@ -43,26 +37,16 @@ export default function ComparativoMensal() {
     );
   }
 
-  if (error) {
-    showError(error);
-    return (
-      <View style={s.loader}>
-        <TitleBar
-          returnTo={Screen.Relatorios}
-          title="Comparativo Mensal"
-          subtitle="Últimos 12 meses"
-        />
-      </View>
-    );
+  // Sem os dados, a falha já apareceu no modal de erro: fica só o título, para voltar.
+  if (!data) {
+    return <View style={s.loader}>{titleBar}</View>;
   }
+
+  const [realizados, agendados] = data;
 
   return (
     <View style={s.mainContainer}>
-      <TitleBar
-        returnTo={Screen.Relatorios}
-        title="Comparativo Mensal"
-        subtitle="Últimos 12 meses"
-      />
+      {titleBar}
       <ScrollView
         contentContainerStyle={s.scrollContent}
         showsVerticalScrollIndicator={false}

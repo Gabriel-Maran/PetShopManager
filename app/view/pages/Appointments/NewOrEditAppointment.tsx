@@ -11,7 +11,7 @@ import {
 import { useState, useEffect, useCallback } from "react";
 import { EspeciesAtendidas, Screen } from "../../../config/consts";
 import { useScreen } from "../../../hooks/useScreen";
-import { useError } from "../../../hooks/useError";
+import { useAsyncAction } from "../../../hooks/useAsyncAction";
 
 import {
   useAgendamentos,
@@ -60,14 +60,12 @@ const MODAL_INICIAL: ModalConfig = {
 
 export default function NewOrEditAppointment() {
   const { params, navigate } = useScreen<NewOrEditAppointmentParams>();
-  const { showError } = useError();
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
   const isEditing = Boolean(params?.appointment?.id);
 
-  const [isSalvando, setIsSalvando] = useState(false);
   const [appointmentSelected, setAppointmentSelected] = useState(true);
   const [modalConfig, setModalConfig] = useState<ModalConfig>(MODAL_INICIAL);
 
@@ -87,13 +85,10 @@ export default function NewOrEditAppointment() {
     }
   }, [petsForm.pets]);
 
-  // --- Salvar agendamento com proteção contra duplo clique ---
-  const salvarAgendamento = useCallback(async () => {
-    if (isSalvando) return;
-    setIsSalvando(true);
-
-    try {
-      // Dentro do try: um valor digitado fora do formato vira a mensagem de erro da tela.
+  // --- Salvar agendamento, com proteção contra duplo clique ---
+  // Dentro da ação: um valor digitado fora do formato vira a mensagem de erro da tela.
+  const { run: salvarAgendamento, isRunning: isSalvando } = useAsyncAction(
+    async () => {
       const appointmentSalvar = new AppointmentBuilder()
         .withPetId(appointmentsForm.pet_id)
         .withServico(appointmentsForm.servico)
@@ -116,12 +111,8 @@ export default function NewOrEditAppointment() {
         await appointmentController.createAppointment(appointmentSalvar);
       }
       navigate(Screen.Calendario);
-    } catch (erro) {
-      showError(erro instanceof Error ? erro.message : "Erro inesperado.");
-    } finally {
-      setIsSalvando(false);
-    }
-  }, [isSalvando, appointmentsForm, isEditing, params, navigate, showError]);
+    },
+  );
 
   const fecharModal = useCallback(() => {
     setModalConfig((prev) => ({ ...prev, visivel: false }));

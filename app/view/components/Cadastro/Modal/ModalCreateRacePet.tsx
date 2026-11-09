@@ -16,7 +16,7 @@ import {
   useTheme,
   useThemedStyles,
 } from "../../../Themes/ThemeProvider";
-import { useError } from "../../../../hooks/useError";
+import { useAsyncAction } from "../../../../hooks/useAsyncAction";
 import { createRaceService } from "../../../../utils/raceSpecieHelper";
 import InputSelect from "../../InputSelect";
 import { EspeciesAtendidasLabel } from "../../../../config/consts";
@@ -43,17 +43,14 @@ export default function ModalCadastroRaca({
   especieIcone,
 }: ModalCadastroRacaProps) {
   const s = useThemedStyles(styles);
-  const { showError } = useError();
   const [nomeRaca, setNomeRaca] = useState("");
   const [especieSelecionada, setEspecieSelecionada] = useState<Especie | null>(
     null,
   );
-  const [loading, setLoading] = useState(false);
 
   function resetForm() {
     setNomeRaca("");
     setEspecieSelecionada(null);
-    setLoading(false);
   }
 
   function handleClose() {
@@ -61,39 +58,13 @@ export default function ModalCadastroRaca({
     onClose();
   }
 
-  async function handleSubmit() {
-    if (!especieSelecionada) {
-      showError("Selecione a espécie do animal.");
-      return;
-    }
-
-    if (!nomeRaca.trim()) {
-      showError("Informe o nome da raça.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      setLoading(true); // Garante que o loading inicia junto com a requisição
-
-      const result = await createRaceService({
-        especieId: especieSelecionada.id,
-        nomeRaca,
-      });
-
-      if (!result.success || result.id === undefined) {
-        showError(result.error ?? "Erro ao cadastrar raça.");
-        return;
-      }
-
-      onSuccess(result.id, nomeRaca.trim(), especieSelecionada.id);
-      handleClose();
-    } catch (e) {
-      showError(e instanceof Error ? e.message : "Ocorreu um erro inesperado.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  // A validação da espécie e do nome fica no createRaceService, com as mensagens de cada falha.
+  const { run: handleSubmit, isRunning: loading } = useAsyncAction(async () => {
+    const especieId = especieSelecionada?.id ?? 0;
+    const id = await createRaceService({ especieId, nomeRaca });
+    onSuccess(id, nomeRaca.trim(), especieId);
+    handleClose();
+  });
 
   const { colors } = useTheme();
 

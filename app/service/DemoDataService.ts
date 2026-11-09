@@ -1,12 +1,8 @@
 import { getDatabase, recreateAppDatabase } from "../config/database";
 import { buildDemoDataSql, COUNT_USER_DATA_SQL } from "../config/demoData";
 import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
-
-export const DEMO_DATA_NOT_EMPTY_MESSAGE =
-  "Os dados de exemplo só podem ser carregados com o app vazio, sem nenhum dono, pet ou agendamento.";
-
-export const RESET_DEV_ONLY_MESSAGE =
-  "Apagar todos os dados só é possível no modo de desenvolvimento.";
+import { AppError } from "../errors/AppError";
+import { MESSAGES } from "../globals/messages";
 
 export async function isAppEmpty(): Promise<boolean> {
   const db = await getDatabase();
@@ -24,7 +20,7 @@ export async function loadDemoData(today: Date = new Date()): Promise<void> {
     // Confere de novo dentro da transação, para nunca misturar com dados de verdade.
     const row = await db.getFirstAsync<{ total: number }>(COUNT_USER_DATA_SQL);
     if ((row?.total ?? 0) > 0) {
-      throw new Error(DEMO_DATA_NOT_EMPTY_MESSAGE);
+      throw new AppError("CONFLICT", MESSAGES.demoData.notEmpty);
     }
     await db.execAsync(buildDemoDataSql({ today, normalize: normalizeForSearch }));
   });
@@ -37,7 +33,7 @@ export async function loadDemoData(today: Date = new Date()): Promise<void> {
  */
 export async function resetToDemoData(today: Date = new Date()): Promise<void> {
   if (!__DEV__) {
-    throw new Error(RESET_DEV_ONLY_MESSAGE);
+    throw new AppError("UNAVAILABLE", MESSAGES.demoData.resetDevOnly);
   }
   await recreateAppDatabase();
   await loadDemoData(today);

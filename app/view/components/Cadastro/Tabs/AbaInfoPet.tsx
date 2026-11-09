@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ownerController } from "../../../../controller/OwnerController";
 import { raceRepository } from "../../../../repository/RaceRepository";
 import ModalCadastroRaca from "../Modal/ModalCreateRacePet";
+import { useError } from "../../../../hooks/useError";
 
 export type TipoModal = "DONO" | "RACA";
 
@@ -61,6 +62,7 @@ export default function AbaInfoPet({
 }: AbaInfoPetProps) {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
+  const { showError } = useError();
 
   const [racaModalAberto, setRacaModalAberto] = useState(false);
 
@@ -77,7 +79,7 @@ export default function AbaInfoPet({
           updateField("dono_nome", resultado.nome);
         }
       })
-      .catch((error) => console.error("Erro ao buscar dono:", error));
+      .catch(showError);
 
     return () => {
       cancelled = true;
@@ -97,7 +99,7 @@ export default function AbaInfoPet({
           updateField("raca_nome", resultado.nome_raca);
         }
       })
-      .catch((error) => console.error("Erro ao buscar raça:", error));
+      .catch(showError);
 
     return () => {
       cancelled = true;

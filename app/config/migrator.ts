@@ -1,5 +1,8 @@
 // Migrações do banco sem depender do Expo: o app (database.ts) e os testes rodam este mesmo código.
 // A versão do esquema fica no PRAGMA user_version, que o SQLite guarda no próprio arquivo do banco.
+// Os imports levam a extensão .ts porque o Node dos testes exige.
+import { AppError } from "../errors/AppError.ts";
+import { MESSAGES } from "../globals/messages.ts";
 
 /**
  * Uma versão do esquema. As versões seguem em sequência a partir de 1. Uma migração que já chegou
@@ -18,15 +21,6 @@ export interface MigrationDatabase {
   getAllAsync<T>(sql: string): Promise<T[]>;
 }
 
-export const NEWER_DATABASE_MESSAGE =
-  "Estes dados são de uma versão mais nova do app. Atualize o app para abri-los.";
-
-export const BROKEN_FOREIGN_KEY_MESSAGE =
-  "A migração deixou registros apontando para outros que não existem.";
-
-export const migrationFailedMessage = (version: number) =>
-  `A atualização do banco para a versão ${version} falhou, e nenhum dado foi alterado.`;
-
 /**
  * Leva o banco até a última versão da lista numa transação só: ou todas as migrações pendentes
  * entram, ou nada muda. Devolve a versão final.
@@ -39,7 +33,7 @@ export async function migrateDatabase(
   const current = await readUserVersion(db);
   const latest = migrations.length;
   if (current > latest) {
-    throw new Error(NEWER_DATABASE_MESSAGE);
+    throw new AppError("DATABASE", MESSAGES.database.newerVersion);
   }
 
   const pending = migrations.slice(current);
@@ -133,11 +127,11 @@ async function applyMigration(
       await db.execAsync(sql);
     }
     if ((await countForeignKeyViolations(db)) > violationsBefore) {
-      throw new Error(BROKEN_FOREIGN_KEY_MESSAGE);
+      throw new AppError("DATABASE", MESSAGES.database.brokenForeignKey);
     }
     await db.execAsync(`PRAGMA user_version = ${migration.version};`);
   } catch (cause) {
-    throw new Error(migrationFailedMessage(migration.version), { cause });
+    throw new AppError("DATABASE", MESSAGES.database.migrationFailed(migration.version), { cause });
   }
 }
 

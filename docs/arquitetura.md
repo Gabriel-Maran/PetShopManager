@@ -40,7 +40,11 @@ app/
     sql/                  os comandos de escrita e o SQL dos relatórios com data, que os testes também usam, sem o Expo (desde 2026-11-08)
   service/                repassa as chamadas ao repository; BackupService exporta e importa o banco
   controller/             validação e regras de entrada; ScreenController guarda a tela atual
-  hooks/                  useScreen, useError, useFormState e buscas no banco para os formulários
+  errors/
+    AppError.ts           o AppError (código e mensagem), o texto da tela e o log, sem o Expo (desde 2026-11-09)
+  globals/
+    messages.ts           as mensagens que o app mostra ao usuário, uma por falha (desde 2026-11-09)
+  hooks/                  useScreen, useError, useAsyncAction, useAsyncData, useFormState e buscas no banco para os formulários
   utils/
     datas.ts              o tipo IsoDate ("AAAA-MM-DD"), o "hoje" no fuso do aparelho e o texto das telas, sem o Expo (desde 2026-11-08)
     dinheiro.ts           o tipo Cents, a máscara de valor e o campo de texto ↔ centavos, sem o Expo (desde 2026-11-08)
@@ -69,8 +73,8 @@ flowchart LR
   Tema["ThemeProvider"] --> Controllers
 ```
 
-- **Telas e componentes** chamam os controllers, quase sempre dentro de `useEffect`, e mostram o erro pelo `useError`.
-- **Controllers** validam a entrada (campos obrigatórios, telefone, porte, pacote, data `AAAA-MM-DD` e valor em centavos) e lançam `Error` com a mensagem em português.
+- **Telas e componentes** chamam os controllers, quase sempre dentro de `useEffect`, e passam o erro como veio ao `showError` do `useError`. As ações com carregamento usam o `useAsyncAction`, e os relatórios carregam pelo `useAsyncData`.
+- **Controllers** validam a entrada (campos obrigatórios, telefone, porte, pacote, data `AAAA-MM-DD` e valor em centavos) e lançam `AppError` com uma mensagem de `globals/messages.ts` para cada falha.
 - **Formulários** guardam o valor como o texto do campo ("80,00") e a data como `AAAA-MM-DD`. Ao salvar, o `parseMoneyInput` converte o texto em centavos, e um valor fora do formato vira a mensagem de erro da tela.
 - **Services** só repassam a chamada ao repository. Não há regra de negócio neles.
 - **Repositories** fazem o SQL com parâmetros `?` e devolvem os registros com `SELECT *`.
@@ -92,7 +96,7 @@ Não usa biblioteca de navegação. O `ScreenController` é um singleton que gua
 Três contextos do React:
 
 - **Tema:** `isDark` vem da tabela `configs` (registro 1, "Modo Escuro"). O tema não segue o do sistema.
-- **Erro:** `showError(mensagem)` abre um modal único.
+- **Erro:** `showError(erro)` abre um modal único, com o texto do `toUserMessage` (ver "Erros").
 - **Agendamentos:** data e mês selecionados no calendário e a lista do dia.
 
 Os formulários usam `useFormState` (um objeto de estado com `updateField`).
@@ -190,10 +194,15 @@ As cores ficam em `view/Themes/ThemeProvider.tsx`, num objeto `light` e outro `d
 
 ## Erros
 
-- Controllers lançam `Error` com a mensagem para o usuário.
-- As telas pegam o erro e chamam `showError`, com o mesmo `handleError` copiado em cada lugar.
-- O `DatabaseTransfer` tem o próprio modal de erro.
-- Falhas na criação do banco só vão para o `console.log`.
+Desde 2026-11-09 (ERRO-1), num lugar só, em `app/errors/AppError.ts`:
+
+- **Criar:** a falha prevista é um `AppError`, com um código (`VALIDATION`, `NOT_FOUND`, `CONFLICT`, `INVALID_BACKUP`, `DATABASE` ou `UNAVAILABLE`) e uma mensagem de `app/globals/messages.ts`. O motivo de verdade, quando há, fica no `cause`.
+- **Mostrar:** o `toUserMessage` devolve a mensagem do `AppError`. Qualquer outro erro (um bug, o SQLite, o Expo) vira "Algo deu errado. Tente de novo.", para a tela não mostrar SQL nem detalhe interno.
+- **Registrar:** o `logError` manda para o log o erro inesperado inteiro e o `AppError` com `cause`. A falha de validação é prevista e não vai para o log.
+- **Nas telas:** o `showError` do `ErrorProvider` recebe o erro como veio e faz as duas coisas. O `useAsyncAction` liga o carregamento, barra o toque duplo e mostra a falha; o `useAsyncData` carrega os dados de uma tela ao abrir e mostra a falha uma vez só.
+- O backup, os dados de exemplo e o cadastro de raça usam o mesmo modal das outras telas.
+- A falha na abertura do banco aparece na tela de erro do `App.tsx`, com a mensagem do `AppError` ou a de "não foi possível abrir os dados do app".
+- Os erros de programação (migração fora de ordem, hook fora do provider) continuam como `Error`, porque não são do usuário.
 
 ## Build e release
 

@@ -1,27 +1,37 @@
 import { Appointment } from "../model/Appointment";
 import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
 import { appointmentsService } from "../service/AppointmentsService";
-import { INVALID_DATE_MESSAGE, type IsoDate, isIsoDate } from "../utils/datas";
-import { INVALID_MONEY_MESSAGE, isValidCents } from "../utils/dinheiro";
+import { type IsoDate, isIsoDate } from "../utils/datas";
+import { isValidCents } from "../utils/dinheiro";
+import { AppError } from "../errors/AppError";
+import { MESSAGES } from "../globals/messages";
 
-/** Campos obrigatórios, a data no formato do banco e o valor em centavos. */
+/**
+ * Campos obrigatórios, a data no formato do banco e o valor em centavos. Cada falha tem a sua
+ * mensagem.
+ */
 function validateAppointment(appointment: Appointment): void {
-  if (
-    !appointment.pet_id ||
-    !appointment.servico?.trim() ||
-    !appointment.data ||
-    !appointment.hora
-  ) {
-    throw new Error("Dados faltando.");
+  if (!appointment.pet_id) {
+    throw new AppError("VALIDATION", MESSAGES.appointment.petRequired);
   }
-  if (!isIsoDate(appointment.data)) throw new Error(INVALID_DATE_MESSAGE);
-  if (!isValidCents(appointment.valor)) throw new Error(INVALID_MONEY_MESSAGE);
+  if (!appointment.servico?.trim()) {
+    throw new AppError("VALIDATION", MESSAGES.appointment.serviceRequired);
+  }
+  if (!isIsoDate(appointment.data)) {
+    throw new AppError("VALIDATION", MESSAGES.date.invalid);
+  }
+  if (!appointment.hora) {
+    throw new AppError("VALIDATION", MESSAGES.appointment.timeRequired);
+  }
+  if (!isValidCents(appointment.valor)) {
+    throw new AppError("VALIDATION", MESSAGES.money.invalid);
+  }
 }
 
 class AppointmentsController {
   async getAppointmentById(id: number): Promise<Appointment> {
     const appointment = await appointmentsService.getAppointmentById(id);
-    if (!appointment) throw new Error("Agendamento não encontrado.");
+    if (!appointment) throw new AppError("NOT_FOUND", MESSAGES.appointment.notFound);
     return appointment;
   }
 
@@ -57,7 +67,7 @@ class AppointmentsController {
   }
 
   async updateAppointment(id: number, appointment: Appointment): Promise<void> {
-    if (!id) throw new Error("Dados faltando.");
+    if (!id) throw new AppError("NOT_FOUND", MESSAGES.appointment.notFound);
     validateAppointment(appointment);
     await appointmentsService.updateAppointment(id, appointment);
   }

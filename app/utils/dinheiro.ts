@@ -1,11 +1,12 @@
 // Dinheiro do app num lugar só, sem depender do Expo, para os testes rodarem no Node. Desde a versão 3
 // do esquema, o banco e os modelos guardam centavos inteiros (DADOS-2); só os campos das telas usam o
-// texto com vírgula ("12,50"). A conversão entre os dois acontece só aqui.
+// texto com vírgula ("12,50"). A conversão entre os dois acontece só aqui. Os imports levam a extensão
+// .ts porque o Node dos testes exige.
+import { AppError } from "../errors/AppError.ts";
+import { MESSAGES } from "../globals/messages.ts";
 
 /** Valor em centavos inteiros: 1250 é R$ 12,50. */
 export type Cents = number;
-
-export const INVALID_MONEY_MESSAGE = "Valor inválido. Use só números e vírgula, como 120,00.";
 
 // Reais, e depois da vírgula uma ou duas casas.
 const MONEY_TEXT = /^(\d+)(?:,(\d{1,2}))?$/;
@@ -44,7 +45,7 @@ export function isValidCents(value: unknown): value is Cents {
 export function parseMoneyInput(text: string | null | undefined): Cents | null {
   if (!text?.trim()) return null;
   const cents = moneyToCents(text);
-  if (cents === null) throw new Error(INVALID_MONEY_MESSAGE);
+  if (cents === null) throw new AppError("VALIDATION", MESSAGES.money.invalid);
   return cents;
 }
 

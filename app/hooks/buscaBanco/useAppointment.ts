@@ -32,8 +32,6 @@ type PegarPetsReturn = {
 
 export function usePetsComEspecieERacaBanco(ativada: boolean): PegarPetsReturn {
   const { showError } = useError();
-  const handleError = (e: unknown) =>
-    showError(e instanceof Error ? e.message : "Erro inesperado.");
 
   const { form, updateField } = useFormState<PetsForm>({
     page: 0,
@@ -54,7 +52,7 @@ export function usePetsComEspecieERacaBanco(ativada: boolean): PegarPetsReturn {
         ORDER.DESC,
       )
       .then((value) => updateField("pets", value))
-      .catch(handleError);
+      .catch(showError);
   }, [ativada, form.searchTxt, form.page]);
 
   // Busca o total de pets para a paginação funcionar — era o que faltava
@@ -65,7 +63,7 @@ export function usePetsComEspecieERacaBanco(ativada: boolean): PegarPetsReturn {
     petController
       .countPets(form.searchTxt)
       .then((value) => updateField("total", value))
-      .catch(handleError);
+      .catch(showError);
   }, [ativada, form.searchTxt]);
 
   return {
@@ -86,8 +84,6 @@ type ServiceTypeReturn = {
 
 export function useServicos(): ServiceTypeReturn {
   const { showError } = useError();
-  const handleError = (e: unknown) =>
-    showError(e instanceof Error ? e.message : "Erro inesperado.");
 
   const { form, updateField } = useFormState<ServicesForm>({
     servico: [],
@@ -97,7 +93,7 @@ export function useServicos(): ServiceTypeReturn {
     serviceTypeRepository
       .getAllServiceTypes()
       .then((value) => updateField("servico", value))
-      .catch(handleError);
+      .catch(showError);
   }, []); // ← [] correto, busca apenas uma vez
 
   return {
@@ -117,8 +113,6 @@ type PaymentMethodReturn = {
 
 export function useTiposPagamento(): PaymentMethodReturn {
   const { showError } = useError();
-  const handleError = (e: unknown) =>
-    showError(e instanceof Error ? e.message : "Erro inesperado.");
 
   const { form, updateField } = useFormState<PaymentMethodType>({
     tipos_pgto: [],
@@ -129,7 +123,7 @@ export function useTiposPagamento(): PaymentMethodReturn {
     paymentMethodRepository
       .getAllPaymentMethod()
       .then((value) => updateField("tipos_pgto", value))
-      .catch(handleError);
+      .catch(showError);
   }, []);
 
   return {
