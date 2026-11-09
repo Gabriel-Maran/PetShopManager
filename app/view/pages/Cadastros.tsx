@@ -16,7 +16,6 @@ import {
   APP_BAR_HEIGHT,
   LIMIT_ITEM_PAGE,
   NewOrEditCadastros,
-  ORDER,
   Screen,
 } from "../../config/consts";
 
@@ -56,7 +55,6 @@ export default function Cadastros() {
     ativo: isAtivo,
     page,
     limit: LIMIT_ITEM_PAGE,
-    order: ORDER.DESC,
   };
   const searchDeps = [search, page, isAtivo];
 

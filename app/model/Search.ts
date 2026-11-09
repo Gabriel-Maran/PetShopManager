@@ -1,8 +1,9 @@
-import type { ORDER } from "../config/consts";
-
-/** Uma busca por nome, como a de Cadastros e a dos seletores de dono e de pet. */
+/**
+ * Uma busca por nome, como a de Cadastros e a dos seletores de dono e de pet. Sem texto, a lista sai
+ * com os mais novos primeiro; com texto, em ordem alfabética.
+ */
 export interface NameSearch {
-  /** O texto digitado. Vazio lista todos, pela data de cadastro. */
+  /** O texto digitado. Vazio lista todos. */
   query: string;
   /** 1 lista os ativos; 0, os inativos. */
   ativo: number;
@@ -10,7 +11,6 @@ export interface NameSearch {
   page: number;
   /** Quantos itens cabem numa página. */
   limit: number;
-  order: ORDER;
 }
 
 /** Uma página da busca e o total com o mesmo filtro, para a paginação bater com a lista. */

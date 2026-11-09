@@ -161,7 +161,8 @@ Em andamento desde 2026-11-09, uma etapa por PR e um chat por etapa:
    - o hook `useSearchPage` descarta a resposta atrasada e recarrega a página depois de uma ação. Vale para Cadastros e para os seletores de dono (cadastro de pet) e de pet (agendamento);
    - Cadastros recarrega depois de desativar ou reativar, volta à página 1 ao trocar o status e volta uma página se a última esvaziar;
    - o id desempata a ordem; `%` e `_` na busca são texto; o `validateNameSearch` confere status, página, limite e o texto até 100 caracteres (`app/globals/limits.ts`);
-   - verificado: typecheck limpo, 137 testes passando (14 novos, em `tests/busca.test.mjs`) e o pacote Android gerado. O roteiro para conferir no aparelho está no PR #25.
+   - da varredura do PR #25, aprovado pelo Gabriel: com texto, a busca sai em ordem alfabética (antes, de Z a A); sem texto, os mais novos primeiro. A ordem deixou de ser parâmetro, e nada do usuário entra no texto do SQL. A aba ou o modal que fecha limpa a lista, para não reabrir com a da última vez;
+   - verificado: typecheck limpo, 136 testes passando (13 novos, em `tests/busca.test.mjs`) e o pacote Android gerado. O roteiro para conferir no aparelho está no PR #25.
 4. Próxima: renomear as ações de desativar, a terceira sugestão da varredura do PR #24, aprovada pelo Gabriel em 2026-11-09. O `deleteOwner` e o `deletePet` (controller, service e repository) e o `onConfirmDelete` do `ModalConfDelete` desativam, e não apagam. Um PR `refactor` só com os nomes. É um pedaço do NOMES-1, adiantado.
 5. Depois: o resto do BKP-1. Não depende de pergunta.
 6. O VALID-1 espera a pergunta 13 (Zod ou validadores próprios), e o BUG-8, a pergunta 16 (navegação).

@@ -12,7 +12,8 @@ interface SearchPage<T> extends Page<T> {
 /**
  * Carrega uma página da busca, com o total do mesmo filtro, quando `deps` muda e `enabled` está
  * ligado. Só a busca mais recente chega à tela: se o usuário troca de aba ou de página antes de a
- * anterior terminar, a resposta antiga é descartada. Uma falha aparece pelo ErrorProvider.
+ * anterior terminar, a resposta antiga é descartada. Desligada, a busca fica vazia, para a aba ou o
+ * modal não reabrir com a lista da última vez. Uma falha aparece pelo ErrorProvider.
  */
 export function useSearchPage<T>(
   load: () => Promise<Page<T>>,
@@ -24,7 +25,10 @@ export function useSearchPage<T>(
   const [reloadCount, setReloadCount] = useState(0);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      setPage(EMPTY_PAGE);
+      return;
+    }
     let isLatest = true;
     load()
       .then((result) => {

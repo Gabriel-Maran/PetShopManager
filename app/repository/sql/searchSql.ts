@@ -32,27 +32,22 @@ export function toSearchPattern(query: string): string {
   return `%${escaped}%`;
 }
 
-const SORT_ORDERS: readonly string[] = ["ASC", "DESC"];
-
 /**
- * A página e o total da busca. Sem texto, a lista sai pela data de cadastro; com texto, pelo nome. O
- * id desempata, para a mesma linha não aparecer em duas páginas.
+ * A página e o total da busca. Sem texto, os mais novos vêm primeiro; com texto, a ordem é alfabética.
+ * O id desempata, para a mesma linha não aparecer em duas páginas.
  */
 export function pagedNameSearch(source: SearchSource, search: NameSearch): PagedSql {
-  // A direção entra no texto do comando, porque o SQLite não aceita parâmetro no ORDER BY.
-  if (!SORT_ORDERS.includes(search.order)) {
-    throw new Error(`Ordem de busca inválida: ${String(search.order)}`);
-  }
-
   const { columns, from, alias } = source;
   const where = `WHERE ${alias}.is_ativo = ? AND ${alias}.nome_normalizado LIKE ? ESCAPE '\\'`;
   const filterParams = [search.ativo, toSearchPattern(search.query)];
-  const sortColumn = normalizeForSearch(search.query) ? "nome_normalizado" : "criado_em";
+  const orderBy = normalizeForSearch(search.query)
+    ? `${alias}.nome_normalizado ASC, ${alias}.id ASC`
+    : `${alias}.criado_em DESC, ${alias}.id DESC`;
 
   return {
     list: {
       sql: `SELECT ${columns} ${from} ${where}
-       ORDER BY ${alias}.${sortColumn} ${search.order}, ${alias}.id ${search.order}
+       ORDER BY ${orderBy}
        LIMIT ? OFFSET ?`,
       params: [...filterParams, search.limit, search.page * search.limit],
     },
