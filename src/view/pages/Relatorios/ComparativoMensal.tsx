@@ -7,14 +7,14 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import BarChart from "../../components/Relatorios/BarChart";
 import { useAsyncData } from "../../../hooks/useAsyncData";
-import {
-  getComparativoMensal,
-  getComparativoMensalAgendados,
-} from "../../../utils/relatorios/comparativoMensal";
+import { reportsService } from "../../../service/ReportsService";
 
 export default function ComparativoMensal() {
   const { data, loading } = useAsyncData(() =>
-    Promise.all([getComparativoMensal(), getComparativoMensalAgendados()]),
+    Promise.all([
+      reportsService.getCompletedByMonth(),
+      reportsService.getScheduledByMonth(),
+    ]),
   );
 
   const { colors } = useTheme();

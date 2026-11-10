@@ -2,11 +2,11 @@ import { getDatabase } from "../config/database";
 import { PaymentsMethod } from "../model/PaymentMethod";
 
 class PaymentMethodRepository {
-  async getAllPaymentMethod() {
+  async getAllPaymentMethod(): Promise<PaymentsMethod[]> {
     const db = await getDatabase();
 
     return db.getAllAsync<PaymentsMethod>(
-      `SELECT * FROM payment_methods ORDER BY id ASC`,
+      `SELECT id, tipo_pgto FROM payment_methods ORDER BY id ASC`,
     );
   }
 }
