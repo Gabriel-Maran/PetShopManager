@@ -6,6 +6,7 @@ import {
 } from "../Themes/ThemeProvider";
 import { useRef } from "react";
 import { configsController } from "../../controller/ConfigsController";
+import { A11Y_LABELS } from "../../globals/accessibilityLabels";
 
 const THUMB_SIZE = 40;
 const SWITCH_WIDTH = 140;
@@ -75,6 +76,9 @@ export default function ThemeToggle() {
         await configsController.updateConfig(1, isDark ? 0 : 1);
       }}
       activeOpacity={0.85}
+      accessibilityRole="switch"
+      accessibilityLabel={A11Y_LABELS.theme.darkMode}
+      accessibilityState={{ checked: isDark }}
     >
       <View
         style={[

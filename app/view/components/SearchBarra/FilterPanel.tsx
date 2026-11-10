@@ -5,6 +5,8 @@ import {
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
 import { StatusFiltro } from "../../../config/consts";
+import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
+import { touchTargetSlop } from "../Acessibilidade/accessibilityProps";
 
 interface FilterPanelProps {
   value: StatusFiltro;
@@ -12,12 +14,22 @@ interface FilterPanelProps {
   onClose: () => void;
 }
 
-const OPCOES: { val: StatusFiltro; label: string; accent: string }[] = [
-  { val: "ativo", label: "Ativos", accent: "#22C55E" },
-  { val: "inativo", label: "Inativos", accent: "#EF4444" },
+type AccentColor = keyof Pick<ThemeColors, "GREEN_COLOR" | "RED_COLOR">;
+
+const OPCOES: { val: StatusFiltro; label: string; accent: AccentColor }[] = [
+  { val: "ativo", label: "Ativos", accent: "GREEN_COLOR" },
+  { val: "inativo", label: "Inativos", accent: "RED_COLOR" },
 ];
 
-// ... imports
+// O fundo da opção escolhida é a cor dela com 6% de opacidade; o teste de contraste confere o texto
+// sobre esse fundo.
+const ACTIVE_BACKGROUND_ALPHA = "10";
+
+const CHIP_PADDING_VERTICAL = 7;
+const CHIP_BORDER_WIDTH = 1.5;
+const CHIP_LINE_HEIGHT = 18;
+const CHIP_HEIGHT =
+  CHIP_LINE_HEIGHT + 2 * (CHIP_PADDING_VERTICAL + CHIP_BORDER_WIDTH);
 
 export default function FilterPanel({
   value,
@@ -34,10 +46,14 @@ export default function FilterPanel({
 
   return (
     <View style={s.container}>
-      <Text style={s.title}>STATUS</Text>
-      <View style={s.row}>
+      {/* Em maiúsculas, o leitor poderia soletrar; o rótulo faz ele ler a palavra. */}
+      <Text style={s.title} accessibilityLabel={A11Y_LABELS.filter.group}>
+        STATUS
+      </Text>
+      <View style={s.row} accessibilityRole="radiogroup">
         {OPCOES.map((op) => {
           const active = value === op.val; // Verifica se o valor atual é igual à opção
+          const accent = colors[op.accent];
 
           return (
             <TouchableOpacity
@@ -46,20 +62,23 @@ export default function FilterPanel({
               style={[
                 s.chip,
                 active && {
-                  borderColor: op.accent,
-                  backgroundColor: op.accent + "10",
-                }, // +10 adiciona transparência
+                  borderColor: accent,
+                  backgroundColor: accent + ACTIVE_BACKGROUND_ALPHA,
+                },
               ]}
               onPress={() => handleSelect(op.val)}
               activeOpacity={0.7}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: active }}
+              hitSlop={touchTargetSlop({ height: CHIP_HEIGHT })}
             >
               <View
                 style={[
                   s.dot,
                   {
                     // Destaque do círculo interno
-                    backgroundColor: active ? op.accent : "transparent",
-                    borderColor: active ? op.accent : colors.BORDER_STRONG,
+                    backgroundColor: active ? accent : "transparent",
+                    borderColor: active ? accent : colors.BORDER_STRONG,
                   },
                 ]}
               />
@@ -67,7 +86,7 @@ export default function FilterPanel({
                 style={[
                   s.chipLabel,
                   // Destaque do texto
-                  active && { color: op.accent, fontWeight: "700" },
+                  active && { color: accent, fontWeight: "700" },
                 ]}
               >
                 {op.label}
@@ -106,10 +125,10 @@ const styles = (colors: ThemeColors) =>
       flexDirection: "row",
       alignItems: "center",
       gap: 7,
-      paddingVertical: 7,
+      paddingVertical: CHIP_PADDING_VERTICAL,
       paddingHorizontal: 13,
       borderRadius: 99,
-      borderWidth: 1.5,
+      borderWidth: CHIP_BORDER_WIDTH,
       borderColor: colors.BORDER_STRONG,
     },
     dot: {
@@ -120,6 +139,7 @@ const styles = (colors: ThemeColors) =>
     },
     chipLabel: {
       fontSize: 13,
+      lineHeight: CHIP_LINE_HEIGHT,
       fontWeight: "500",
       color: colors.TEXT_MUTED,
     },

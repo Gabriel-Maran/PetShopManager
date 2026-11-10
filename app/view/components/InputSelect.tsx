@@ -14,6 +14,10 @@ import {
   useThemedStyles,
 } from "../Themes/ThemeProvider";
 import InputWrapper from "./Cadastro/InputWrapper";
+import { A11Y_LABELS } from "../../globals/accessibilityLabels";
+import { touchTargetSlop } from "./Acessibilidade/accessibilityProps";
+
+const SELECT_MIN_HEIGHT = 45;
 
 interface InputSelectProps<T> {
   isEditavel: boolean;
@@ -50,6 +54,8 @@ export default function InputSelect<T>({
     setIsOpen(false);
   };
 
+  const selectedText = itemSelected ? labelExtractor(itemSelected) : placeholder;
+
   return (
     <InputWrapper
       image={image}
@@ -74,10 +80,12 @@ export default function InputSelect<T>({
         }}
         disabled={!isEditavel}
         activeOpacity={0.7}
+        accessibilityRole="combobox"
+        accessibilityLabel={A11Y_LABELS.field(titleName, selectedText)}
+        accessibilityState={{ expanded: isOpen }}
+        hitSlop={touchTargetSlop({ height: SELECT_MIN_HEIGHT })}
       >
-        <Text style={s.selectText}>
-          {itemSelected ? labelExtractor(itemSelected) : placeholder}
-        </Text>
+        <Text style={s.selectText}>{selectedText}</Text>
         {isEditavel && (
           <Image
             style={s.arrow}
@@ -99,6 +107,7 @@ export default function InputSelect<T>({
               <TouchableOpacity
                 style={[s.listItem]}
                 onPress={() => handleSelect(item)}
+                accessibilityRole="button"
               >
                 {renderItem(item, index)}
               </TouchableOpacity>
@@ -117,7 +126,7 @@ const styles = (colors: ThemeColors) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      minHeight: 45,
+      minHeight: SELECT_MIN_HEIGHT,
       width: "100%",
       borderWidth: 1.5,
       borderColor: colors.BORDER_STRONG,

@@ -139,6 +139,7 @@ export default function Calendario() {
   return (
     <View style={s.completeCalendar}>
       <Text
+        accessibilityRole="header"
         style={{
           fontSize: 20,
           fontWeight: "bold",
@@ -164,8 +165,8 @@ export default function Calendario() {
           [hoje]: {
             ...datasMarcadas[hoje],
             marked: datasMarcadas[hoje]?.marked ?? true,
-            dotColor: "#FFFFFF",
-            selectedDotColor: "#FFFFFF",
+            dotColor: colors.BACKGROUND,
+            selectedDotColor: colors.BACKGROUND,
             selected: true,
             customStyles: {
               container: {
@@ -179,7 +180,8 @@ export default function Calendario() {
                 padding: 0,
               },
               text: {
-                color: "#FFFFFF",
+                // A cor do fundo sobre o teal cheio: branco no claro, escuro no escuro; passa 4,5:1 nos dois.
+                color: colors.BACKGROUND,
                 fontWeight: "bold",
                 includeFontPadding: false,
                 textAlignVertical: "center",

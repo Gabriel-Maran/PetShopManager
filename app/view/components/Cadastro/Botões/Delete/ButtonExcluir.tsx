@@ -1,42 +1,35 @@
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import { ThemeColors, useThemedStyles } from "../../../../Themes/ThemeProvider";
+import { StyleSheet, View } from "react-native";
+import ActionIconButton from "../ActionIconButton";
 
 export default function ButtonExcluir({
   onDeactivate,
   itemId,
+  label,
 }: {
   onDeactivate: (itemId: number) => void;
   itemId: number;
+  /** O que o leitor de tela fala, como "Desativar Rex". */
+  label: string;
 }) {
-  const s = useThemedStyles(styles);
   return (
-    <View style={s.container}>
-      <TouchableOpacity onPress={() => onDeactivate(itemId)} style={s.button}>
-        <Image
-          style={s.icon}
-          source={require("../../../../../assets/crud/delete.png")}
-        />
-      </TouchableOpacity>
+    <View style={styles.container}>
+      <ActionIconButton
+        label={label}
+        variant="deactivate"
+        icon={require("../../../../../assets/crud/delete.png")}
+        onPress={() => onDeactivate(itemId)}
+        style={styles.button}
+      />
     </View>
   );
 }
 
-const styles = (colors: ThemeColors) =>
-  StyleSheet.create({
-    container: {
-      alignSelf: "center",
-      justifyContent: "flex-end",
-    },
-    button: {
-      marginLeft: 10,
-      backgroundColor: colors.EXCLUIR_BACKGROUND_COLOR,
-      padding: 8,
-      borderRadius: 15,
-      borderWidth: 1,
-      borderColor: colors.EXCLUIR_BORDER_COLOR,
-    },
-    icon: {
-      height: 28,
-      width: 28,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    alignSelf: "center",
+    justifyContent: "flex-end",
+  },
+  button: {
+    marginLeft: 10,
+  },
+});

@@ -1,5 +1,6 @@
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
+import { HIDDEN_FROM_SCREEN_READER } from "./Acessibilidade/accessibilityProps";
 
 type Variant = "destructive" | "default";
 
@@ -29,14 +30,27 @@ export default function ConfirmModal({
   const s = useThemedStyles(styles);
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onCancel}
+    >
       <View style={s.overlay}>
         <View style={s.box}>
-          <Text style={s.emoji}>{emoji}</Text>
-          <Text style={s.title}>{title}</Text>
+          <Text style={s.emoji} {...HIDDEN_FROM_SCREEN_READER}>
+            {emoji}
+          </Text>
+          <Text style={s.title} accessibilityRole="header">
+            {title}
+          </Text>
           <Text style={s.message}>{message}</Text>
           <View style={s.row}>
-            <TouchableOpacity style={[s.btn, s.btnCancel]} onPress={onCancel}>
+            <TouchableOpacity
+              style={[s.btn, s.btnCancel]}
+              onPress={onCancel}
+              accessibilityRole="button"
+            >
               <Text style={s.btnCancelTxt}>{cancelLabel}</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -45,6 +59,7 @@ export default function ConfirmModal({
                 variant === "destructive" ? s.btnDestructive : s.btnPrimary,
               ]}
               onPress={onConfirm}
+              accessibilityRole="button"
             >
               <Text style={s.btnConfirmTxt}>{confirmLabel}</Text>
             </TouchableOpacity>

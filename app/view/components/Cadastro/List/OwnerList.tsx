@@ -13,6 +13,7 @@ import { NewOrEditCadastros, Screen } from "../../../../config/consts";
 import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 import ButtonAtivar from "../Botões/ButtonAtivar";
+import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
 
 export default function OwnerList({
   cadastros,
@@ -33,6 +34,8 @@ export default function OwnerList({
         data={cadastros}
         renderItem={({ item }) => (
           <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityHint={A11Y_LABELS.registry.openOwnerHint}
             onPress={() =>
               navigate(Screen.NewOrEditOwner, {
                 mode: "view",
@@ -52,15 +55,24 @@ export default function OwnerList({
               </View>
 
               <ButtonEditar
+                label={A11Y_LABELS.registry.edit(item.nome)}
                 selectParam={
                   { owner: item, mode: "edit" } as NewOrEditCadastros
                 }
                 navegarPara={Screen.NewOrEditOwner}
               />
               {saoAtivados ? (
-                <ButtonExcluir itemId={item.id ?? -1} onDeactivate={onDeactivate} />
+                <ButtonExcluir
+                  label={A11Y_LABELS.registry.deactivate(item.nome)}
+                  itemId={item.id ?? -1}
+                  onDeactivate={onDeactivate}
+                />
               ) : (
-                <ButtonAtivar itemId={item.id ?? -1} onActivate={onActivate} />
+                <ButtonAtivar
+                  label={A11Y_LABELS.registry.activate(item.nome)}
+                  itemId={item.id ?? -1}
+                  onActivate={onActivate}
+                />
               )}
             </View>
           </TouchableOpacity>

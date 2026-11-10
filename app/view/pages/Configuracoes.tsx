@@ -24,7 +24,9 @@ export default function Configuracoes() {
         contentContainerStyle={s.scroll}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={s.sectionLabel}>Aparência</Text>
+        <Text style={s.sectionLabel} accessibilityRole="header">
+          Aparência
+        </Text>
         <View style={s.card}>
           <View style={s.row}>
             <View style={s.rowText}>
@@ -34,7 +36,9 @@ export default function Configuracoes() {
             <ThemeToggle />
           </View>
         </View>
-        <Text style={s.sectionLabel}>Dados</Text>
+        <Text style={s.sectionLabel} accessibilityRole="header">
+          Dados
+        </Text>
         <View style={s.card}>
           <DemoDataLoader onLoaded={() => navigate(Screen.Calendario)} />
           <DatabaseTransfer
@@ -59,12 +63,12 @@ const styles = (colors: ThemeColors) =>
     },
 
     // Section
+    // Os textos de apoio usam TEXT_MUTED em vez de opacidade, que deixava o contraste abaixo de 4,5:1.
     sectionLabel: {
       fontSize: 11,
       fontWeight: "700",
       letterSpacing: 1.2,
-      color: colors.TEXT_PRIMARY,
-      opacity: 0.45,
+      color: colors.TEXT_MUTED,
       marginTop: 24,
       marginBottom: 4,
       marginLeft: 4,
@@ -102,8 +106,7 @@ const styles = (colors: ThemeColors) =>
     },
     rowSubtitle: {
       fontSize: 12,
-      color: colors.TEXT_PRIMARY,
-      opacity: 0.5,
+      color: colors.TEXT_MUTED,
       marginTop: 2,
     },
   });

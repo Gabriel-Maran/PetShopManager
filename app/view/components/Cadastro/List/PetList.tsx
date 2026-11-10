@@ -18,6 +18,7 @@ import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 import { EspeciesAtendidasLabel } from "../../../../config/consts";
 import ButtonAtivar from "../Botões/ButtonAtivar";
 import { useScreen } from "../../../../hooks/useScreen";
+import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
 
 export default function PetList({
   cadastros,
@@ -39,6 +40,8 @@ export default function PetList({
         data={cadastros}
         renderItem={({ item }) => (
           <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityHint={A11Y_LABELS.registry.openPetHint}
             onPress={() =>
               navigate(Screen.NewOrEditPet, {
                 mode: "view",
@@ -63,6 +66,7 @@ export default function PetList({
               </Text>
             </View>
             <ButtonEditar
+              label={A11Y_LABELS.registry.edit(item.nome)}
               navegarPara={Screen.NewOrEditPet}
               selectParam={
                 {
@@ -72,9 +76,17 @@ export default function PetList({
               }
             />
             {saoAtivados ? (
-              <ButtonExcluir itemId={item.id ?? -1} onDeactivate={onDeactivate} />
+              <ButtonExcluir
+                label={A11Y_LABELS.registry.deactivate(item.nome)}
+                itemId={item.id ?? -1}
+                onDeactivate={onDeactivate}
+              />
             ) : (
-              <ButtonAtivar itemId={item.id ?? -1} onActivate={onActivate} />
+              <ButtonAtivar
+                label={A11Y_LABELS.registry.activate(item.nome)}
+                itemId={item.id ?? -1}
+                onActivate={onActivate}
+              />
             )}
           </TouchableOpacity>
         )}

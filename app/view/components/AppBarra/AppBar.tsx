@@ -8,7 +8,10 @@ export default function AppBar() {
   const { colors } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+    <View
+      style={[styles.container, { backgroundColor: colors.BACKGROUND }]}
+      accessibilityRole="tablist"
+    >
       <IconDePesquisa
         imgName={IMAGENS_NAMES.CALENDARIO}
         titleText="Calendário"

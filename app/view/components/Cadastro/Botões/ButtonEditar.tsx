@@ -1,10 +1,10 @@
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { NewOrEditCadastros, Screen } from "../../../../config/consts";
 import { useScreen } from "../../../../hooks/useScreen";
 import { Owner } from "../../../../model/Owner";
 import { Pet } from "../../../../model/Pet";
 import { Appointment } from "../../../../model/Appointment";
-import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
+import ActionIconButton from "./ActionIconButton";
 
 export default function ButtonEditar({
   navegarPara,
@@ -12,58 +12,32 @@ export default function ButtonEditar({
   editCampo = false,
   goEdit,
   setModal,
+  label,
 }: {
   navegarPara: Screen;
   selectParam?: NewOrEditCadastros | Pet | Owner | Appointment | unknown;
   editCampo?: boolean;
   goEdit?: boolean;
   setModal?: () => void;
+  /** O que o leitor de tela fala, como "Editar Rex" ou "Trocar dono". */
+  label: string;
 }) {
-  const { screen, navigate, params } = useScreen();
-  const s = useThemedStyles(styles);
+  const { navigate } = useScreen();
 
   return (
-    <View style={s.ctnEdit}>
-      <TouchableOpacity
-        onPress={
-          goEdit
-            ? setModal
-            : () => {
-                navigate(navegarPara, selectParam);
-              }
-        }
-        style={editCampo == false ? s.btnEdit : s.btnEditCampo}
-      >
-        <Image
-          style={s.iconEdit}
-          source={require("../../../../assets/crud/edit.png")}
-        />
-      </TouchableOpacity>
+    <View style={styles.ctnEdit}>
+      <ActionIconButton
+        label={label}
+        variant={editCampo ? "editField" : "edit"}
+        icon={require("../../../../assets/crud/edit.png")}
+        onPress={goEdit ? setModal : () => navigate(navegarPara, selectParam)}
+      />
     </View>
   );
 }
 
-const styles = (colors: ThemeColors) =>
-  StyleSheet.create({
-    ctnEdit: {
-      alignSelf: "center",
-    },
-    btnEdit: {
-      backgroundColor: colors.EDITAR_BACKGROUND_COLOR,
-      padding: 8,
-      borderRadius: 15,
-      borderWidth: 1,
-      borderColor: colors.EDITAR_BORDER_COLOR,
-    },
-    btnEditCampo: {
-      backgroundColor: colors.EDITAR_CAMPO_BACKGROUND_COLOR,
-      padding: 8,
-      borderRadius: 15,
-      borderWidth: 1,
-      borderColor: colors.EDITAR_CAMPO_BORDER_COLOR,
-    },
-    iconEdit: {
-      height: 28,
-      width: 28,
-    },
-  });
+const styles = StyleSheet.create({
+  ctnEdit: {
+    alignSelf: "center",
+  },
+});

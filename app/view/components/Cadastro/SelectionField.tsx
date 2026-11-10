@@ -13,6 +13,11 @@ import {
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
 import InputWrapper from "../../components/Cadastro/InputWrapper";
+import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
+import { touchTargetSlop } from "../Acessibilidade/accessibilityProps";
+
+/** Altura fixa da linha de "Cadastrar nova raça", para a área de toque chegar a 48 dp. */
+const NEW_BREED_LINE_HEIGHT = 20;
 
 export default function SelectionField({
   isEditavel = true,
@@ -56,6 +61,7 @@ export default function SelectionField({
           </View>
           {isEditavel && (
             <ButtonEditar
+              label={A11Y_LABELS.changeSelection(titleName)}
               navegarPara={Screen.Cadastros}
               goEdit={goEdit}
               setModal={onPress}
@@ -66,14 +72,24 @@ export default function SelectionField({
       ) : (
         isEditavel && (
           <View style={s.containerAcoes}>
-            <TouchableOpacity style={s.btnSalvar} onPress={onPress}>
+            <TouchableOpacity
+              style={s.btnSalvar}
+              onPress={onPress}
+              accessibilityRole="button"
+            >
               <Text style={s.txtSalvar}>{buttonText}</Text>
             </TouchableOpacity>
           </View>
         )
       )}
       {fazCadastro && onCadastro && (
-        <TouchableOpacity style={s.btnRotuloCadastro} onPress={onCadastro}>
+        <TouchableOpacity
+          style={s.btnRotuloCadastro}
+          onPress={onCadastro}
+          accessibilityRole="button"
+          accessibilityLabel={A11Y_LABELS.registry.newBreed}
+          hitSlop={touchTargetSlop({ height: NEW_BREED_LINE_HEIGHT })}
+        >
           <Text style={s.txtRotuloCadastro}>+ Cadastrar nova raça</Text>
         </TouchableOpacity>
       )}
@@ -126,6 +142,7 @@ const styles = (colors: ThemeColors) =>
     txtRotuloCadastro: {
       color: colors.TEXT_PRIMARY,
       fontSize: 14,
+      lineHeight: NEW_BREED_LINE_HEIGHT,
       fontWeight: "500",
     },
   });

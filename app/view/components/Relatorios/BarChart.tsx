@@ -1,6 +1,11 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../../Themes/ThemeProvider";
 import { formatValue } from "../../../utils/formatadores/formaterHelper";
+import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -31,6 +36,7 @@ export default function BarChart({
   invertLabelY = false,
 }: BarChartProps) {
   const s = useThemedStyles(styles);
+  const { colors } = useTheme();
 
   if (!data || data.length === 0) {
     return (
@@ -59,10 +65,19 @@ export default function BarChart({
           const ratio = maxY > 0 ? item.y / maxY : 0;
           const barHeight = Math.max(ratio * height, item.y > 0 ? 4 : 0);
           const isMax = item.y === maxY && maxY > 0;
+          const value = formatValue(item.y);
+          const valueWithSuffix = !suffix
+            ? value
+            : invertLabelY
+              ? `${value} ${suffix}`
+              : `${suffix} ${value}`;
 
           return (
+            // Cada barra é lida inteira, como "Segunda: 12 pets", e não em pedaços soltos.
             <View
               key={index}
+              accessible
+              accessibilityLabel={A11Y_LABELS.chartBar(item.x, valueWithSuffix)}
               style={[
                 s.barWrapper,
                 verticalLabels && { minWidth: 36, maxWidth: 52 },
@@ -72,13 +87,13 @@ export default function BarChart({
               <Text style={[s.valueLabel, isMax && s.valueLabelMax]}>
                 {invertLabelY ? (
                   <>
-                    {formatValue(item.y)}
+                    {value}
                     {suffix && <Text style={s.suffix}> {suffix}</Text>}
                   </>
                 ) : (
                   <>
                     {suffix && <Text style={s.suffix}>{suffix} </Text>}
-                    {formatValue(item.y)}
+                    {value}
                   </>
                 )}
               </Text>
@@ -90,7 +105,9 @@ export default function BarChart({
                     s.bar,
                     {
                       height: barHeight,
-                      backgroundColor: color ?? (isMax ? "#185FA5" : "#85B7EB"),
+                      backgroundColor:
+                        color ??
+                        (isMax ? colors.CHART_BAR_HIGHLIGHT : colors.CHART_BAR),
                     },
                   ]}
                 />
@@ -155,7 +172,7 @@ const styles = (colors: ThemeColors) =>
       textAlign: "justify",
     },
     valueLabelMax: {
-      color: "#185FA5",
+      color: colors.CHART_TEXT_HIGHLIGHT,
       fontWeight: "700",
     },
     suffix: {
