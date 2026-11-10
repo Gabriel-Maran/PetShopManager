@@ -1,6 +1,13 @@
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
 import { HIDDEN_FROM_SCREEN_READER } from "./Acessibilidade/accessibilityProps";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  LINE_HEIGHTS,
+  RADIUS,
+  SPACING,
+} from "../Themes/tokens";
 
 type Variant = "destructive" | "default";
 
@@ -77,39 +84,39 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.MODAL_BACKGROUND,
       justifyContent: "center",
       alignItems: "center",
-      padding: 32,
+      padding: SPACING[32],
     },
     box: {
       width: "100%",
       backgroundColor: colors.BACKGROUND,
-      borderRadius: 16,
-      padding: 24,
+      borderRadius: RADIUS[16],
+      padding: SPACING[24],
       alignItems: "center",
-      gap: 8,
+      gap: SPACING[8],
     },
-    emoji: { fontSize: 40 },
+    emoji: { fontSize: FONT_SIZE.DISPLAY },
     title: {
-      fontSize: 16,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.SUBTITLE,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.TEXT_PRIMARY,
       textAlign: "center",
     },
     message: {
-      fontSize: 14,
+      fontSize: FONT_SIZE.BODY,
       color: colors.TEXT_MUTED,
       textAlign: "center",
-      lineHeight: 20,
+      lineHeight: LINE_HEIGHTS[20],
     },
     row: {
       flexDirection: "row",
-      gap: 10,
-      marginTop: 12,
+      gap: SPACING[10],
+      marginTop: SPACING[12],
       width: "100%",
     },
     btn: {
       flex: 1,
-      paddingVertical: 12,
-      borderRadius: 12,
+      paddingVertical: SPACING[12],
+      borderRadius: RADIUS[12],
       alignItems: "center",
     },
     btnCancel: {
@@ -120,13 +127,13 @@ const styles = (colors: ThemeColors) =>
     btnPrimary: { backgroundColor: colors.PRIMARY_VARIANT },
     btnDestructive: { backgroundColor: colors.RED_COLOR },
     btnCancelTxt: {
-      fontSize: 14,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.BODY,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.TEXT_PRIMARY,
     },
     btnConfirmTxt: {
-      fontSize: 14,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.BODY,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.BACKGROUND,
     },
   });

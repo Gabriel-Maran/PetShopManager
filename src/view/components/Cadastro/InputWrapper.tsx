@@ -11,6 +11,7 @@ import {
   useThemedStyles,
   ThemeColors,
 } from "../../Themes/ThemeProvider";
+import { FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "../../Themes/tokens";
 
 interface InputWrapperProps {
   image: ImageSourcePropType;
@@ -45,7 +46,7 @@ export default function InputWrapper({
         style={[
           s.ctnImgInput,
           inputSelectIsOpen
-            ? { alignSelf: "flex-start", marginTop: 12.1 }
+            ? { alignSelf: "flex-start", marginTop: SPACING[12.1] }
             : { alignSelf: "center" },
         ]}
       >
@@ -53,7 +54,10 @@ export default function InputWrapper({
       </View>
 
       <View
-        style={[s.rightContent, whitGapComponents ? { gap: 5 } : { gap: 0 }]}
+        style={[
+          s.rightContent,
+          whitGapComponents ? { gap: SPACING[5] } : { gap: 0 },
+        ]}
       >
         {/* Em maiúsculas, o leitor poderia soletrar; o rótulo faz ele ler o nome do campo. */}
         <Text style={s.txtInput} accessibilityLabel={titleName}>
@@ -68,18 +72,18 @@ const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     ctnInput: {
       width: "100%",
-      padding: 15,
+      padding: SPACING[15],
       flexDirection: "row",
       alignItems: "flex-start",
-      gap: 10,
+      gap: SPACING[10],
     },
     ctnImgInput: {
       backgroundColor: colors.PRIMARY_SOFT,
-      padding: 8,
-      borderRadius: 15,
+      padding: SPACING[8],
+      borderRadius: RADIUS[15],
       borderWidth: 1,
       borderColor: colors.PRIMARY_VARIANT,
-      marginTop: 2,
+      marginTop: SPACING[2],
     },
     imgInput: {
       width: 28,
@@ -91,7 +95,7 @@ const styles = (colors: ThemeColors) =>
     },
     txtInput: {
       color: colors.TEXT_MUTED,
-      fontWeight: "bold",
-      fontSize: 12,
+      fontWeight: FONT_WEIGHT.BOLD,
+      fontSize: FONT_SIZE.SMALL,
     },
   });

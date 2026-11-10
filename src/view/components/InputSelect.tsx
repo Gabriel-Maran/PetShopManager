@@ -16,6 +16,7 @@ import {
 import InputWrapper from "./Cadastro/InputWrapper";
 import { A11Y_LABELS } from "../../globals/accessibilityLabels";
 import { touchTargetSlop } from "./Acessibilidade/accessibilityProps";
+import { FONT_SIZE, RADIUS, SPACING } from "../Themes/tokens";
 
 const SELECT_MIN_HEIGHT = 45;
 
@@ -130,13 +131,13 @@ const styles = (colors: ThemeColors) =>
       width: "100%",
       borderWidth: 1.5,
       borderColor: colors.BORDER_STRONG,
-      borderRadius: 10,
-      paddingHorizontal: 15,
-      paddingVertical: 10,
-      marginTop: 5,
+      borderRadius: RADIUS[10],
+      paddingHorizontal: SPACING[15],
+      paddingVertical: SPACING[10],
+      marginTop: SPACING[5],
     },
     selectText: {
-      fontSize: 16,
+      fontSize: FONT_SIZE.SUBTITLE,
       color: colors.TEXT_PRIMARY,
     },
     arrow: {
@@ -148,8 +149,8 @@ const styles = (colors: ThemeColors) =>
       width: "100%",
       borderWidth: 1,
       borderColor: colors.BORDER_LIGHT,
-      borderBottomLeftRadius: 8,
-      borderBottomRightRadius: 8,
+      borderBottomLeftRadius: RADIUS[8],
+      borderBottomRightRadius: RADIUS[8],
       backgroundColor: colors.BACKGROUND,
       overflow: "hidden",
     },

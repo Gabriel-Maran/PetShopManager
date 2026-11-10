@@ -17,6 +17,13 @@ import ConfirmModal from "./ConfirmModal";
 import { HIDDEN_FROM_SCREEN_READER } from "./Acessibilidade/accessibilityProps";
 import { DIALOGS } from "../../globals/messages";
 import { A11Y_LABELS } from "../../globals/accessibilityLabels";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  LINE_HEIGHTS,
+  RADIUS,
+  SPACING,
+} from "../Themes/tokens";
 
 /** O modal aberto: um só por vez, e as duas ações só começam depois da confirmação. */
 type PendingDialog = "export" | "import" | null;
@@ -151,33 +158,33 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     container: {
-      padding: 20,
-      gap: 16,
+      padding: SPACING[20],
+      gap: SPACING[16],
     },
 
     // Cabeçalho
     header: {
-      marginBottom: 4,
+      marginBottom: SPACING[4],
     },
     title: {
-      fontSize: 20,
-      fontWeight: "700",
+      fontSize: FONT_SIZE.TITLE,
+      fontWeight: FONT_WEIGHT.BOLD,
       color: colors.TEXT_PRIMARY,
-      marginBottom: 4,
+      marginBottom: SPACING[4],
     },
     subtitle: {
-      fontSize: 14,
+      fontSize: FONT_SIZE.BODY,
       color: colors.TEXT_MUTED,
-      lineHeight: 20,
+      lineHeight: LINE_HEIGHTS[20],
     },
 
     // Cards
     card: {
       flexDirection: "row",
       alignItems: "center",
-      borderRadius: 12,
-      padding: 16,
-      gap: 14,
+      borderRadius: RADIUS[12],
+      padding: SPACING[16],
+      gap: SPACING[14],
       borderWidth: 1,
     },
     cardExport: {
@@ -191,7 +198,7 @@ const styles = (colors: ThemeColors) =>
     cardIcon: {
       width: 44,
       height: 44,
-      borderRadius: 22,
+      borderRadius: RADIUS[22],
       alignItems: "center",
       justifyContent: "center",
     },
@@ -202,15 +209,15 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.EXCLUIR_BACKGROUND_COLOR,
     },
     icon: {
-      fontSize: 22,
+      fontSize: FONT_SIZE.TITLE_LARGE,
     },
     cardText: {
       flex: 1,
     },
     cardTitle: {
-      fontSize: 15,
-      fontWeight: "600",
-      marginBottom: 2,
+      fontSize: FONT_SIZE.BODY_LARGE,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
+      marginBottom: SPACING[2],
     },
     cardTitleExport: {
       color: colors.EDITAR_MAIN_COLOR,
@@ -219,9 +226,9 @@ const styles = (colors: ThemeColors) =>
       color: colors.EXCLUIR_MAIN_COLOR,
     },
     cardDescription: {
-      fontSize: 13,
+      fontSize: FONT_SIZE.BODY_SMALL,
       color: colors.TEXT_MUTED,
-      lineHeight: 18,
+      lineHeight: LINE_HEIGHTS[18],
     },
 
     // Aviso
@@ -229,22 +236,22 @@ const styles = (colors: ThemeColors) =>
       flexDirection: "row",
       alignItems: "flex-start",
       backgroundColor: colors.SURFACE_VARIANT,
-      borderRadius: 10,
-      padding: 12,
-      gap: 8,
+      borderRadius: RADIUS[10],
+      padding: SPACING[12],
+      gap: SPACING[8],
       borderWidth: 1,
       borderColor: colors.BORDER_MID,
-      marginTop: 4,
+      marginTop: SPACING[4],
     },
     warningIcon: {
-      fontSize: 16,
-      marginTop: 1,
+      fontSize: FONT_SIZE.SUBTITLE,
+      marginTop: SPACING[1],
     },
     warningText: {
       flex: 1,
-      fontSize: 12,
+      fontSize: FONT_SIZE.SMALL,
       color: colors.TEXT_MUTED,
-      lineHeight: 17,
+      lineHeight: LINE_HEIGHTS[17],
     },
 
     // Overlay
@@ -256,10 +263,10 @@ const styles = (colors: ThemeColors) =>
     },
     overlayBox: {
       backgroundColor: colors.BACKGROUND,
-      borderRadius: 14,
-      padding: 28,
+      borderRadius: RADIUS[14],
+      padding: SPACING[28],
       alignItems: "center",
-      gap: 14,
+      gap: SPACING[14],
       minWidth: 160,
       shadowColor: colors.SHADOW,
       shadowOpacity: 0.15,
@@ -267,8 +274,8 @@ const styles = (colors: ThemeColors) =>
       elevation: 8,
     },
     overlayText: {
-      fontSize: 15,
+      fontSize: FONT_SIZE.BODY_LARGE,
       color: colors.TEXT_PRIMARY,
-      fontWeight: "500",
+      fontWeight: FONT_WEIGHT.MEDIUM,
     },
   });

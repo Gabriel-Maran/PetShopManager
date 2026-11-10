@@ -14,6 +14,7 @@ import ButtonExcluir from "../Botões/Delete/ButtonExcluir";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 import ButtonAtivar from "../Botões/ButtonAtivar";
 import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
+import { FONT_SIZE, FONT_WEIGHT, SPACING } from "../../../Themes/tokens";
 
 export default function OwnerList({
   cadastros,
@@ -89,18 +90,18 @@ const styles = (colors: ThemeColors) =>
       flexDirection: "row",
       alignItems: "center",
       alignSelf: "center",
-      padding: 10,
+      padding: SPACING[10],
       height: 90,
       width: "95%",
-      gap: 10,
+      gap: SPACING[10],
       borderBottomWidth: 1,
       borderColor: colors.BORDER_MID,
     },
     mainContent: {
       flex: 1,
-      marginLeft: 10,
+      marginLeft: SPACING[10],
       alignSelf: "center",
-      gap: 5,
+      gap: SPACING[5],
     },
     img: {
       width: 30,
@@ -109,12 +110,12 @@ const styles = (colors: ThemeColors) =>
       tintColor: colors.TEXT_PRIMARY,
     },
     textMain: {
-      fontSize: 16,
-      fontWeight: "bold",
+      fontSize: FONT_SIZE.SUBTITLE,
+      fontWeight: FONT_WEIGHT.BOLD,
       color: colors.TEXT_PRIMARY,
     },
     textSub: {
-      fontSize: 12,
+      fontSize: FONT_SIZE.SMALL,
       color: colors.TEXT_MUTED,
     },
   });

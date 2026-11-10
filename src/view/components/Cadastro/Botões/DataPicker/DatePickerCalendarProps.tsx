@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { todayIso } from "../../../../../utils/datas";
 import { useTheme } from "../../../../Themes/ThemeProvider";
 import { Calendar } from "react-native-calendars";
+import { FONT_SIZE, FONT_WEIGHT, RADIUS } from "../../../../Themes/tokens";
 
 interface DatePickerCalendarProps {
   value?: string; // YYYY-MM-DD  (data selecionada)
@@ -28,7 +29,7 @@ export function DatePickerCalendar({
       customStyles: {
         container: {
           backgroundColor: colors.PRIMARY_CONTRAST,
-          borderRadius: 4,
+          borderRadius: RADIUS[4],
           width: 38,
           height: 38,
           alignItems: "center",
@@ -37,7 +38,7 @@ export function DatePickerCalendar({
         text: {
           // A cor do fundo sobre o teal cheio: branco no claro, escuro no escuro; passa 4,5:1 nos dois.
           color: colors.BACKGROUND,
-          fontWeight: "bold",
+          fontWeight: FONT_WEIGHT.BOLD,
           includeFontPadding: false,
           textAlignVertical: "center",
         },
@@ -52,8 +53,8 @@ export function DatePickerCalendar({
           container: {
             borderWidth: 2.5,
             borderColor: colors.PRIMARY_CONTRAST,
-            backgroundColor: "transparent",
-            borderRadius: 4,
+            backgroundColor: colors.TRANSPARENT,
+            borderRadius: RADIUS[4],
             width: 38,
             height: 38,
             alignItems: "center",
@@ -83,12 +84,12 @@ export function DatePickerCalendar({
         {
           backgroundColor: colors.BACKGROUND,
           calendarBackground: colors.BACKGROUND,
-          textMonthFontSize: 17,
-          textMonthFontWeight: "600",
+          textMonthFontSize: FONT_SIZE.SUBTITLE_LARGE,
+          textMonthFontWeight: FONT_WEIGHT.SEMIBOLD,
           monthTextColor: colors.TEXT_SECONDARY,
-          textDayHeaderFontSize: 12,
+          textDayHeaderFontSize: FONT_SIZE.SMALL,
           textSectionTitleColor: colors.TEXT_PRIMARY,
-          textDayFontSize: 17,
+          textDayFontSize: FONT_SIZE.SUBTITLE_LARGE,
           dayTextColor: colors.TEXT_SECONDARY,
           selectedDayBackgroundColor: colors.PRIMARY_CONTRAST,
           selectedDayTextColor: colors.BACKGROUND,
@@ -107,7 +108,7 @@ export function DatePickerCalendar({
             },
             text: {
               marginTop: 0,
-              fontSize: 17,
+              fontSize: FONT_SIZE.SUBTITLE_LARGE,
               color: colors.TEXT_SECONDARY,
               includeFontPadding: false,
               textAlignVertical: "center",

@@ -1,6 +1,7 @@
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
 import { HIDDEN_FROM_SCREEN_READER } from "../Acessibilidade/accessibilityProps";
+import { FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "../../Themes/tokens";
 
 interface Props {
   message: string | null;
@@ -46,35 +47,39 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.MODAL_BACKGROUND,
       justifyContent: "center",
       alignItems: "center",
-      padding: 32,
+      padding: SPACING[32],
     },
     box: {
       width: "100%",
       backgroundColor: colors.BACKGROUND,
-      borderRadius: 16,
-      padding: 24,
+      borderRadius: RADIUS[16],
+      padding: SPACING[24],
       alignItems: "center",
-      gap: 8,
+      gap: SPACING[8],
     },
     emoji: {
-      fontSize: 40,
+      fontSize: FONT_SIZE.DISPLAY,
     },
     title: {
-      fontSize: 16,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.SUBTITLE,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.TEXT_PRIMARY,
     },
     message: {
-      fontSize: 14,
+      fontSize: FONT_SIZE.BODY,
       color: colors.TEXT_MUTED,
       textAlign: "center",
     },
     btn: {
-      marginTop: 8,
+      marginTop: SPACING[8],
       backgroundColor: colors.PRIMARY_VARIANT,
-      paddingVertical: 12,
-      paddingHorizontal: 40,
-      borderRadius: 12,
+      paddingVertical: SPACING[12],
+      paddingHorizontal: SPACING[40],
+      borderRadius: RADIUS[12],
     },
-    btnTxt: { color: colors.BACKGROUND, fontWeight: "600", fontSize: 14 },
+    btnTxt: {
+      color: colors.BACKGROUND,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
+      fontSize: FONT_SIZE.BODY,
+    },
   });

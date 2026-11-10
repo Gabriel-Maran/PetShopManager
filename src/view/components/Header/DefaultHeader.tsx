@@ -7,6 +7,7 @@ import {
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
 import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
+import { SPACING } from "../../Themes/tokens";
 
 const LOGO_ON_LIGHT = require("../../../assets/logo/logoPetShopFundoBranco.png");
 const LOGO_ON_DARK = require("../../../assets/logo/logoPetShopFundoEscuro.png");
@@ -39,7 +40,7 @@ const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     container: {
       backgroundColor: colors.BACKGROUND,
-      paddingBottom: 10,
+      paddingBottom: SPACING[10],
     },
     btnImg: {
       width: 200,

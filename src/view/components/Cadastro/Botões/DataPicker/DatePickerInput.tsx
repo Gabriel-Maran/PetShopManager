@@ -3,6 +3,13 @@ import { ThemeColors, useThemedStyles } from "../../../../Themes/ThemeProvider";
 import { isoToBr } from "../../../../../utils/datas";
 import { A11Y_LABELS } from "../../../../../globals/accessibilityLabels";
 import { HIDDEN_FROM_SCREEN_READER } from "../../../Acessibilidade/accessibilityProps";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  LINE_HEIGHTS,
+  RADIUS,
+  SPACING,
+} from "../../../../Themes/tokens";
 
 export interface DatePickerInputProps {
   withIcon?: boolean;
@@ -64,41 +71,41 @@ export function DatePickerInput({
 
 const inputStyles = (colors: ThemeColors) =>
   StyleSheet.create({
-    wrapper: { gap: 6 },
+    wrapper: { gap: SPACING[6] },
     label: {
-      fontSize: 14,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.BODY,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.TEXT_PRIMARY,
     },
     inputRow: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 10,
+      gap: SPACING[10],
       borderWidth: 1.5,
       borderColor: colors.BORDER_STRONG,
-      borderRadius: 10,
-      paddingVertical: 12,
-      paddingHorizontal: 14,
+      borderRadius: RADIUS[10],
+      paddingVertical: SPACING[12],
+      paddingHorizontal: SPACING[14],
     },
     inputRowError: {
       borderColor: colors.RED_COLOR,
     },
-    icon: { fontSize: 18 },
+    icon: { fontSize: FONT_SIZE.TITLE_SMALL },
     text: {
       flex: 1,
-      fontSize: 16,
+      fontSize: FONT_SIZE.SUBTITLE,
       color: colors.TEXT_SECONDARY,
     },
     placeholder: {
       color: colors.TEXT_PLACEHOLDER,
     },
     chevron: {
-      fontSize: 22,
+      fontSize: FONT_SIZE.TITLE_LARGE,
       color: colors.PRIMARY_CONTRAST,
-      lineHeight: 24,
+      lineHeight: LINE_HEIGHTS[24],
     },
     error: {
-      fontSize: 12,
+      fontSize: FONT_SIZE.SMALL,
       color: colors.RED_COLOR,
     },
   });

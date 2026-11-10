@@ -10,11 +10,12 @@ import FilterPanel from "./FilterPanel";
 import { MAX_SEARCH_LENGTH } from "../../../globals/limits";
 import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
 import IconButton from "../Acessibilidade/IconButton";
+import { FONT_SIZE, RADIUS, SPACING } from "../../Themes/tokens";
 
 const SEARCH_ICON_SIZE = 30;
-const SEARCH_PADDING = 10;
+const SEARCH_PADDING = SPACING[10];
 const FILTER_ICON_SIZE = 36;
-const FILTER_PADDING = 10;
+const FILTER_PADDING = SPACING[10];
 
 export default function BarraDePesquisa({
   placeHolderStr,
@@ -102,10 +103,10 @@ const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     container: {
       width: "100%",
-      marginTop: 10,
+      marginTop: SPACING[10],
       flexDirection: "row",
-      paddingHorizontal: 16,
-      gap: 5,
+      paddingHorizontal: SPACING[16],
+      gap: SPACING[5],
     },
     pesquisa: {
       flex: 1,
@@ -113,15 +114,15 @@ const styles = (colors: ThemeColors) =>
       alignSelf: "center",
       alignItems: "center",
       backgroundColor: colors.THIRD_BACKGROUND,
-      padding: 5,
-      borderRadius: 10,
+      padding: SPACING[5],
+      borderRadius: RADIUS[10],
       borderWidth: 1,
       borderColor: colors.BORDER_STRONG,
     },
     input: {
       minHeight: 30,
       flex: 1,
-      fontSize: 16,
+      fontSize: FONT_SIZE.SUBTITLE,
       color: colors.TEXT_PRIMARY,
     },
     btnImg: {
@@ -134,7 +135,7 @@ const styles = (colors: ThemeColors) =>
     },
     btnFilter: {
       backgroundColor: colors.FILTER_BACKGROUND,
-      borderRadius: 99,
+      borderRadius: RADIUS.PILL,
       alignContent: "center",
       justifyContent: "center",
       alignSelf: "center",

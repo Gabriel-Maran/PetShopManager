@@ -16,6 +16,13 @@ import { isoToBr } from "../../../../../utils/datas";
 import { HIDDEN_FROM_SCREEN_READER } from "../../../Acessibilidade/accessibilityProps";
 import CloseButton from "../../../CloseButton";
 import { DatePickerCalendar } from "./DatePickerCalendarProps";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  LETTER_SPACINGS,
+  RADIUS,
+  SPACING,
+} from "../../../../Themes/tokens";
 
 interface DatePickerModalProps {
   visible: boolean;
@@ -124,13 +131,13 @@ const modalStyles = (colors: ThemeColors) =>
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
-      paddingHorizontal: 20,
+      paddingHorizontal: SPACING[20],
     },
     card: {
       width: "100%",
       maxWidth: 400,
       backgroundColor: colors.BACKGROUND,
-      borderRadius: 16,
+      borderRadius: RADIUS[16],
       overflow: "hidden",
       elevation: 8,
       shadowColor: colors.SHADOW,
@@ -142,42 +149,42 @@ const modalStyles = (colors: ThemeColors) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      paddingHorizontal: 18,
-      paddingTop: 18,
-      paddingBottom: 10,
+      paddingHorizontal: SPACING[18],
+      paddingTop: SPACING[18],
+      paddingBottom: SPACING[10],
     },
     title: {
-      fontSize: 17,
-      fontWeight: "700",
+      fontSize: FONT_SIZE.SUBTITLE_LARGE,
+      fontWeight: FONT_WEIGHT.BOLD,
       color: colors.TEXT_PRIMARY,
     },
     preview: {
-      marginHorizontal: 18,
-      marginBottom: 4,
-      paddingVertical: 8,
-      paddingHorizontal: 14,
+      marginHorizontal: SPACING[18],
+      marginBottom: SPACING[4],
+      paddingVertical: SPACING[8],
+      paddingHorizontal: SPACING[14],
       backgroundColor: withAlpha(
         colors.PRIMARY_CONTRAST,
         TINT_OPACITY.SELECTED_DATE,
       ),
-      borderRadius: 8,
+      borderRadius: RADIUS[8],
       alignItems: "center",
     },
     previewText: {
-      fontSize: 15,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.BODY_LARGE,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.PRIMARY_CONTRAST,
-      letterSpacing: 0.5,
+      letterSpacing: LETTER_SPACINGS.SLIGHT,
     },
     footer: {
       flexDirection: "row",
-      gap: 10,
-      padding: 16,
+      gap: SPACING[10],
+      padding: SPACING[16],
     },
     btn: {
       flex: 1,
-      paddingVertical: 13,
-      borderRadius: 10,
+      paddingVertical: SPACING[13],
+      borderRadius: RADIUS[10],
       alignItems: "center",
     },
     btnOutline: {
@@ -191,7 +198,7 @@ const modalStyles = (colors: ThemeColors) =>
       opacity: 0.4,
     },
     btnText: {
-      fontSize: 15,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.BODY_LARGE,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
     },
   });

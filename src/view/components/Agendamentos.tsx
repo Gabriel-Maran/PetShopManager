@@ -20,6 +20,13 @@ import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
 import { useAgendamentos } from "../contexts/agendamentos";
 import { A11Y_LABELS } from "../../globals/accessibilityLabels";
 import IconButton from "./Acessibilidade/IconButton";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  LETTER_SPACINGS,
+  RADIUS,
+  SPACING,
+} from "../Themes/tokens";
 
 const ICON_BUTTON_SIZE = 38;
 
@@ -165,8 +172,8 @@ const styles = (colors: ThemeColors) =>
     header: {
       flexDirection: "row",
       alignItems: "center",
-      paddingVertical: 10,
-      paddingHorizontal: 12,
+      paddingVertical: SPACING[10],
+      paddingHorizontal: SPACING[12],
       backgroundColor: colors.BACKGROUND,
       borderBottomWidth: 1,
       borderColor: colors.SURFACE_VARIANT,
@@ -176,22 +183,22 @@ const styles = (colors: ThemeColors) =>
       alignItems: "center",
     },
     titleLabel: {
-      fontSize: 10,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.OVERLINE,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.PRIMARY,
-      letterSpacing: 1.1,
+      letterSpacing: LETTER_SPACINGS.LABEL_SM,
       textTransform: "uppercase",
     },
     titleDate: {
-      fontSize: 15,
-      fontWeight: "700",
+      fontSize: FONT_SIZE.BODY_LARGE,
+      fontWeight: FONT_WEIGHT.BOLD,
       color: colors.TEXT_PRIMARY,
-      marginTop: 1,
+      marginTop: SPACING[1],
     },
     iconBtn: {
       width: ICON_BUTTON_SIZE,
       height: ICON_BUTTON_SIZE,
-      borderRadius: 10,
+      borderRadius: RADIUS[10],
       backgroundColor: colors.BACKGROUND,
       justifyContent: "center",
       alignItems: "center",
@@ -213,9 +220,9 @@ const styles = (colors: ThemeColors) =>
     row: {
       flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 14,
-      paddingVertical: 11,
-      gap: 10,
+      paddingHorizontal: SPACING[14],
+      paddingVertical: SPACING[11],
+      gap: SPACING[10],
       backgroundColor: colors.BACKGROUND,
     },
     linhaRiscando: {
@@ -223,7 +230,7 @@ const styles = (colors: ThemeColors) =>
       left: 14,
       right: 14,
       height: 4,
-      borderRadius: 10,
+      borderRadius: RADIUS[10],
       backgroundColor: colors.BORDER_MID,
     },
 
@@ -231,7 +238,7 @@ const styles = (colors: ThemeColors) =>
     avatar: {
       width: 44,
       height: 44,
-      borderRadius: 20,
+      borderRadius: RADIUS[20],
       backgroundColor: colors.PRIMARY_SOFT,
       justifyContent: "center",
       alignItems: "center",
@@ -239,7 +246,7 @@ const styles = (colors: ThemeColors) =>
     avatarDone: {
       width: 44,
       height: 44,
-      borderRadius: 20,
+      borderRadius: RADIUS[20],
       backgroundColor: colors.BORDER_LIGHT,
       justifyContent: "center",
       alignItems: "center",
@@ -259,56 +266,56 @@ const styles = (colors: ThemeColors) =>
       flex: 1,
     },
     petName: {
-      fontSize: 16,
-      fontWeight: "700",
+      fontSize: FONT_SIZE.SUBTITLE,
+      fontWeight: FONT_WEIGHT.BOLD,
       color: colors.TEXT_PRIMARY,
     },
     petNameDone: {
-      fontSize: 16,
-      fontWeight: "700",
+      fontSize: FONT_SIZE.SUBTITLE,
+      fontWeight: FONT_WEIGHT.BOLD,
       color: colors.TEXT_PLACEHOLDER,
     },
     // Textos cinza usam TEXT_MUTED: a cor de borda não passa de 4,5:1 como texto.
     ownerName: {
-      fontSize: 14,
+      fontSize: FONT_SIZE.BODY,
       color: colors.TEXT_MUTED,
-      marginTop: 2,
+      marginTop: SPACING[2],
     },
 
     // Lado direito: badge + horário
     right: {
       alignItems: "flex-end",
-      gap: 4,
+      gap: SPACING[4],
     },
     servicoBadge: {
       backgroundColor: colors.BACKGROUND,
-      borderRadius: 6,
-      paddingHorizontal: 8,
-      paddingVertical: 3,
+      borderRadius: RADIUS[6],
+      paddingHorizontal: SPACING[8],
+      paddingVertical: SPACING[3],
     },
     servicoTxt: {
-      fontSize: 13,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.BODY_SMALL,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.PRIMARY,
     },
     servicoTxtDone: {
-      fontSize: 13,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.BODY_SMALL,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.TEXT_MUTED,
     },
     time: {
-      fontSize: 15,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.BODY_LARGE,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.TEXT_MUTED,
     },
 
     // ── Empty ────────────────────────────────────────────────
     empty: {
-      paddingVertical: 40,
+      paddingVertical: SPACING[40],
       alignItems: "center",
     },
     emptyTxt: {
       color: colors.TEXT_MUTED,
-      fontSize: 18,
+      fontSize: FONT_SIZE.TITLE_SMALL,
     },
   });

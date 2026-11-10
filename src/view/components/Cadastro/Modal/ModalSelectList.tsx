@@ -14,6 +14,12 @@ import Pagination from "../List/Pagination";
 import BarraDePesquisa from "../../SearchBarra/BarraDePesquisa";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 import CloseButton from "../../CloseButton";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  RADIUS,
+  SPACING,
+} from "../../../Themes/tokens";
 
 interface ModalSelectListProps {
   items: any[] | null | undefined;
@@ -126,7 +132,7 @@ const styles = (colors: ThemeColors) =>
       width: "88%",
       height: "80%",
       backgroundColor: colors.BACKGROUND,
-      borderRadius: 16,
+      borderRadius: RADIUS[16],
       overflow: "hidden",
       elevation: 6,
       shadowColor: colors.SHADOW,
@@ -139,21 +145,21 @@ const styles = (colors: ThemeColors) =>
     modalHeader: {
       flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 16,
-      paddingVertical: 14,
+      paddingHorizontal: SPACING[16],
+      paddingVertical: SPACING[14],
       borderBottomWidth: 1,
       borderColor: colors.BORDER_MID,
     },
     modalTitle: {
       flex: 1,
-      fontSize: 15,
-      fontWeight: "700",
+      fontSize: FONT_SIZE.BODY_LARGE,
+      fontWeight: FONT_WEIGHT.BOLD,
       color: colors.TEXT_PRIMARY,
     },
     // Pesquisa
     searchWrap: {
-      paddingHorizontal: 12,
-      paddingVertical: 8,
+      paddingHorizontal: SPACING[12],
+      paddingVertical: SPACING[8],
       borderBottomWidth: 1,
       borderColor: colors.BORDER_MID,
     },
@@ -163,35 +169,35 @@ const styles = (colors: ThemeColors) =>
       flexGrow: 1,
     },
     empty: {
-      paddingVertical: 36,
+      paddingVertical: SPACING[36],
       alignItems: "center",
     },
     emptyTxt: {
-      fontSize: 13,
+      fontSize: FONT_SIZE.BODY_SMALL,
       color: colors.TEXT_MUTED,
     },
 
     paginationWrap: {
       borderTopWidth: 1,
       borderColor: colors.BORDER_MID,
-      paddingVertical: 4,
+      paddingVertical: SPACING[4],
     },
     itemRow: {
       flexDirection: "row",
-      paddingHorizontal: 20,
-      paddingVertical: 15,
+      paddingHorizontal: SPACING[20],
+      paddingVertical: SPACING[15],
       borderBottomWidth: 1,
       borderBottomColor: colors.BORDER_MID,
     },
     itemIconRow: {
       width: 30,
       height: 30,
-      marginRight: 12,
+      marginRight: SPACING[12],
       resizeMode: "contain",
       alignSelf: "center",
     },
     itemText: {
-      fontSize: 16,
+      fontSize: FONT_SIZE.SUBTITLE,
       color: colors.TEXT_PRIMARY,
       alignSelf: "center",
     },
