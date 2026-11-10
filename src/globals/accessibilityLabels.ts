@@ -32,6 +32,11 @@ export const A11Y_LABELS = {
     newBreed: "Cadastrar nova raça",
   },
 
+  backup: {
+    exportHint: "Avisa sobre os dados pessoais antes de compartilhar",
+    importHint: "Pede confirmação antes de substituir os dados",
+  },
+
   filter: {
     toggle: "Filtrar por status",
     group: "Status",
