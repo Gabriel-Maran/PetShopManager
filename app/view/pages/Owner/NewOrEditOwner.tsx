@@ -3,8 +3,6 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { useState } from "react";
@@ -13,12 +11,20 @@ import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import { useScreen } from "../../../hooks/useScreen";
 
 import { NewOrEditCadastros, Screen } from "../../../config/consts";
+import {
+  MAX_ADDRESS_LENGTH,
+  MAX_EMAIL_LENGTH,
+  MAX_OWNER_NAME_LENGTH,
+  MAX_PHONE_LENGTH,
+} from "../../../globals/limits";
 import { Owner, OwnerBuilder } from "../../../model/Owner";
 import { ownerController } from "../../../controller/OwnerController";
 
 import TitleBar from "../../components/Cadastro/TitleBar";
 import DefaultHeader from "../../components/Header/DefaultHeader";
 import InputInfo from "../../components/Cadastro/InputInfo";
+import FormSectionTitle from "../../components/Cadastro/FormSectionTitle";
+import SaveButton from "../../components/Cadastro/SaveButton";
 import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
 
 const maskPhone = (v: string) => {
@@ -89,7 +95,7 @@ export default function NewOrEditOwner() {
       >
         <View style={s.ctnCadastro}>
           <View style={s.viewDataReq}>
-            <Text style={s.titleDataInfo}>DADOS OBRIGATÓRIOS</Text>
+            <FormSectionTitle title="Dados obrigatórios" />
           </View>
           <View style={s.inputs}>
             <InputInfo
@@ -100,7 +106,7 @@ export default function NewOrEditOwner() {
               titleName="Nome Completo"
               variasLinhas={false}
               digitavel={!isViewing}
-              maximoCaracteres={100}
+              maximoCaracteres={MAX_OWNER_NAME_LENGTH}
               hasBorderBottom={true}
             />
             <InputInfo
@@ -110,13 +116,13 @@ export default function NewOrEditOwner() {
               placeHolder="(46) 90000-0000"
               titleName="Telefone"
               digitavel={!isViewing}
-              maximoCaracteres={15}
+              maximoCaracteres={MAX_PHONE_LENGTH}
               tipoTeclado="phone-pad"
               variasLinhas={false}
             />
           </View>
           <View style={s.viewDataNotReq}>
-            <Text style={s.titleDataInfo}>DADOS OPCIONAIS</Text>
+            <FormSectionTitle title="Dados opcionais" />
           </View>
           <View style={s.inputs}>
             <InputInfo
@@ -127,7 +133,7 @@ export default function NewOrEditOwner() {
               titleName="E-mail"
               variasLinhas={false}
               digitavel={!isViewing}
-              maximoCaracteres={254}
+              maximoCaracteres={MAX_EMAIL_LENGTH}
               tipoTeclado="email-address"
               hasBorderBottom={true}
             />
@@ -139,20 +145,16 @@ export default function NewOrEditOwner() {
               titleName="Endereço"
               variasLinhas={true}
               digitavel={!isViewing}
-              maximoCaracteres={120}
+              maximoCaracteres={MAX_ADDRESS_LENGTH}
             />
           </View>
           {!isViewing && (
             <View style={s.ctnBtnSalvar}>
-              <TouchableOpacity
-                style={s.btnSalvar}
+              <SaveButton
+                isEditing={isEditing}
+                isSaving={isSalvando}
                 onPress={salvarDono}
-                disabled={isSalvando}
-              >
-                <Text style={s.txtSalvar}>
-                  {isEditing ? "Salvar alterações" : "Salvar"}
-                </Text>
-              </TouchableOpacity>
+              />
             </View>
           )}
         </View>
@@ -186,20 +188,5 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.BACKGROUND,
       overflow: "hidden",
     },
-    titleDataInfo: {
-      color: colors.PRIMARY_VARIANT,
-      fontWeight: "500",
-      marginBottom: 8,
-    },
     ctnBtnSalvar: { marginTop: 25 },
-    btnSalvar: {
-      paddingVertical: 20,
-      paddingHorizontal: 75,
-      backgroundColor: colors.PRIMARY_VARIANT,
-      borderRadius: 15,
-    },
-    txtSalvar: {
-      color: colors.BACKGROUND,
-      textAlign: "center",
-    },
   });

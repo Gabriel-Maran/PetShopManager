@@ -38,7 +38,7 @@ app/
     consts.ts             enums, tipos, imagens da barra e tamanhos; reexporta o `Screen`
   model/                  interfaces das tabelas e builders; Search.ts tem a busca por nome e a página com o total (desde 2026-11-09)
   repository/             SQL de cada tabela
-    sql/                  os comandos de escrita, o SQL dos relatórios com data e a busca paginada por nome (searchSql.ts), que os testes também usam, sem o Expo (desde 2026-11-08)
+    sql/                  os comandos de escrita, o SQL dos relatórios com data e a busca paginada por nome (searchSql.ts) e a de raças (breedsSql.ts, PR #34), que os testes também usam, sem o Expo (desde 2026-11-08)
     fetchPage.ts          roda a página e a contagem de uma busca (desde 2026-11-09)
   service/                repassa as chamadas ao repository; BackupService exporta e importa o banco
   controller/             validação e regras de entrada; ScreenController guarda a tela atual e a guarda do voltar
@@ -46,7 +46,7 @@ app/
   errors/
     AppError.ts           o AppError (código e mensagem), o texto da tela e o log, sem o Expo (desde 2026-11-09)
   globals/
-    messages.ts           as mensagens que o app mostra ao usuário, uma por falha (desde 2026-11-09)
+    messages.ts           as mensagens que o app mostra ao usuário, uma por falha, e os textos dos modais de confirmação (DIALOGS, PR #34) (desde 2026-11-09)
     limits.ts             limites de entrada, como o tamanho de cada texto (desde 2026-11-09)
     accessibilityLabels.ts os rótulos do leitor de tela (A11Y_LABELS) (desde 2026-11-09)
   hooks/                  useScreen, useBackNavigation, useError, useAsyncAction, useAsyncData, useSearchPage, useFormState e buscas no banco para os formulários
@@ -56,12 +56,12 @@ app/
     formatadores/         número com vírgula e normalização de nome
     relatorios/           consultas SQL dos seis relatórios
     mascarar.ts           máscara de horário e de valor
-    raceSpecieHelper.ts   cria raça nova, com checagem de duplicidade
+    raceSpecieHelper.ts   cria raça nova pelo breedSchema, com checagem de duplicidade
   view/
     Themes/               a paleta clara e escura (colors.ts) e o ThemeProvider
     contexts/             data e mês selecionados no calendário
     pages/                telas: Home, Cadastros, Relatórios, Configurações e formulários
-    components/           peças das telas, agrupadas por assunto; Acessibilidade/ tem o IconButton e as props do leitor de tela
+    components/           peças das telas, agrupadas por assunto; Acessibilidade/ tem o IconButton e as props do leitor de tela; o CloseButton é o ✕ dos modais, e Cadastro/ tem o SaveButton e o FormSectionTitle dos formulários (PR #34)
   assets/                 ícones e imagens (4,9 MB no total, desde o REPO-3)
 ```
 

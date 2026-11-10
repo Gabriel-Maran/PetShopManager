@@ -1,6 +1,8 @@
 import { raceRepository } from "../repository/RaceRepository";
 import { AppError } from "../errors/AppError";
 import { MESSAGES } from "../globals/messages";
+import { breedSchema } from "../validation/breedSchema";
+import { parseInput } from "../validation/parseInput";
 
 interface CreateRaceParams {
   especieId: number;
@@ -8,38 +10,21 @@ interface CreateRaceParams {
 }
 
 /**
- * Cria uma nova raça com validação de duplicidade por espécie e devolve o id dela.
- * Normaliza o nome antes de comparar (trim + lowercase).
+ * Cria uma raça e devolve o id dela. O breedSchema confere a espécie e o nome, de 2 a 50 caracteres
+ * sem espaço nas pontas; a mesma raça na mesma espécie, sem olhar maiúsculas, é recusada.
  */
-export async function createRaceService({
-  especieId,
-  nomeRaca,
-}: CreateRaceParams): Promise<number> {
-  if (!especieId || especieId <= 0) {
-    throw new AppError("VALIDATION", MESSAGES.breed.speciesRequired);
-  }
+export async function createRaceService(input: CreateRaceParams): Promise<number> {
+  const { especieId, nomeRaca } = parseInput(breedSchema, input);
 
-  const normalizedName = nomeRaca.trim();
-
-  if (!normalizedName) {
-    throw new AppError("VALIDATION", MESSAGES.breed.nameRequired);
-  }
-
-  if (normalizedName.length < 2) {
-    throw new AppError("VALIDATION", MESSAGES.breed.nameTooShort);
-  }
-
-  const existing = await raceRepository.findRaceByNome(normalizedName);
-
+  const existing = await raceRepository.findRaceByNome(nomeRaca);
   const isDuplicate = existing.some(
-    (r) =>
-      r.nome_raca.trim().toLowerCase() === normalizedName.toLowerCase() &&
-      r.especie_id === especieId,
+    (race) =>
+      race.nome_raca.trim().toLowerCase() === nomeRaca.toLowerCase() &&
+      race.especie_id === especieId,
   );
-
   if (isDuplicate) {
     throw new AppError("CONFLICT", MESSAGES.breed.duplicate);
   }
 
-  return raceRepository.createRace(especieId, normalizedName);
+  return raceRepository.createRace(especieId, nomeRaca);
 }

@@ -1,6 +1,10 @@
 import { ImageSourcePropType, StyleSheet, Text, View } from "react-native";
 import { EspeciesAtendidasLabel } from "../../../../config/consts";
 import {
+  MAX_NOTES_LENGTH,
+  MAX_PET_NAME_LENGTH,
+} from "../../../../globals/limits";
+import {
   ThemeColors,
   useTheme,
   useThemedStyles,
@@ -240,7 +244,7 @@ export default function AbaInfoPet({
           titleName="Nome do Pet"
           variasLinhas={false}
           hasBorderBottom={true}
-          maximoCaracteres={25}
+          maximoCaracteres={MAX_PET_NAME_LENGTH}
           digitavel={isEditavel}
         />
 
@@ -306,7 +310,7 @@ export default function AbaInfoPet({
           titleName="Observações"
           variasLinhas={true}
           digitavel={isEditavel}
-          maximoCaracteres={250}
+          maximoCaracteres={MAX_NOTES_LENGTH}
           hasBorderBottom={false}
         />
       </View>

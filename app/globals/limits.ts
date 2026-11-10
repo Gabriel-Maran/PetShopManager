@@ -28,3 +28,9 @@ export const MAX_BREED_NAME_LENGTH = 50;
 
 /** O nome de um item escolhido numa lista do app, como o serviço e o tipo de pagamento. */
 export const MAX_LIST_ITEM_LENGTH = 50;
+
+/** O horário digitado com a máscara, "HH:MM". */
+export const MAX_TIME_LENGTH = 5;
+
+/** O valor digitado com a máscara de dinheiro, como "1250,00". */
+export const MAX_MONEY_INPUT_LENGTH = 7;

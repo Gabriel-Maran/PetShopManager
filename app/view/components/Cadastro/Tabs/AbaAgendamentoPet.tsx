@@ -3,6 +3,10 @@ import { useEffect, useRef } from "react";
 
 import { PacoteRemarcacao, TipoServico } from "../../../../config/consts";
 import {
+  MAX_MONEY_INPUT_LENGTH,
+  MAX_TIME_LENGTH,
+} from "../../../../globals/limits";
+import {
   ThemeColors,
   useTheme,
   useThemedStyles,
@@ -134,7 +138,7 @@ export default function AbaAgendamentoPet({
             titleName="Valor"
             variasLinhas={false}
             tipoTeclado="numeric"
-            maximoCaracteres={7}
+            maximoCaracteres={MAX_MONEY_INPUT_LENGTH}
             digitavel={isEditavel}
             hasBorderBottom={true}
             placeHolder="Digite o valor..."
@@ -154,7 +158,7 @@ export default function AbaAgendamentoPet({
             titleName="Horário Padrão"
             variasLinhas={false}
             tipoTeclado="numeric"
-            maximoCaracteres={5}
+            maximoCaracteres={MAX_TIME_LENGTH}
             digitavel={isEditavel}
             hasBorderBottom={false}
             placeHolder="Digite o horário..."

@@ -4,12 +4,15 @@ import {
   ScrollView,
   View,
   Text,
-  TouchableOpacity,
   Platform,
-  ActivityIndicator,
 } from "react-native";
 import { useState, useEffect, useCallback } from "react";
 import { EspeciesAtendidas, Screen } from "../../../config/consts";
+import {
+  MAX_MONEY_INPUT_LENGTH,
+  MAX_NOTES_LENGTH,
+  MAX_TIME_LENGTH,
+} from "../../../globals/limits";
 import { useScreen } from "../../../hooks/useScreen";
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
 
@@ -48,6 +51,8 @@ import SelectionField from "../../components/Cadastro/SelectionField";
 import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
 import InputSelect from "../../components/InputSelect";
 import ItemSelect from "../../components/Cadastro/ItemSelect";
+import FormSectionTitle from "../../components/Cadastro/FormSectionTitle";
+import SaveButton from "../../components/Cadastro/SaveButton";
 import InputDataPicker from "../../components/Cadastro/Botões/DataPicker/InputDataPicker";
 
 const MODAL_INICIAL: ModalConfig = {
@@ -216,19 +221,11 @@ export default function NewOrEditAppointment() {
 
   const BtnSalvar = (
     <View style={s.ctnBtnSalvar}>
-      <TouchableOpacity
-        style={[s.btnSalvar, isSalvando && s.btnSalvarDisabled]}
+      <SaveButton
+        isEditing={isEditing}
+        isSaving={isSalvando}
         onPress={salvarAgendamento}
-        disabled={isSalvando}
-      >
-        {isSalvando ? (
-          <ActivityIndicator color={colors.BACKGROUND} />
-        ) : (
-          <Text style={s.txtSalvar}>
-            {isEditing ? "Salvar alterações" : "Salvar"}
-          </Text>
-        )}
-      </TouchableOpacity>
+      />
     </View>
   );
 
@@ -243,7 +240,7 @@ export default function NewOrEditAppointment() {
         subtitle="Preencha as informações"
         confirmReturn={true}
       />
-      <View style={s.escolhaItem}>
+      <View style={s.escolhaItem} accessibilityRole="tablist">
         <ItemSelect
           title="Agendamento"
           isThisSelected={appointmentSelected}
@@ -266,7 +263,7 @@ export default function NewOrEditAppointment() {
           >
             <View style={s.ctnCadastro}>
               <View style={s.viewDataReq}>
-                <Text style={s.titleDataInfo}>DADOS</Text>
+                <FormSectionTitle title="Dados" />
               </View>
               <View style={s.inputs}>
                 <SelectionField
@@ -309,7 +306,7 @@ export default function NewOrEditAppointment() {
                   titleName="Horário"
                   variasLinhas={false}
                   tipoTeclado="numeric"
-                  maximoCaracteres={5}
+                  maximoCaracteres={MAX_TIME_LENGTH}
                   hasBorderBottom={true}
                 />
                 <Toggle
@@ -328,7 +325,7 @@ export default function NewOrEditAppointment() {
                   placeHolder="Uma observação adicional..."
                   titleName="Observações"
                   variasLinhas={true}
-                  maximoCaracteres={250}
+                  maximoCaracteres={MAX_NOTES_LENGTH}
                   hasBorderBottom={true}
                 />
                 {isEditing && (
@@ -384,7 +381,7 @@ export default function NewOrEditAppointment() {
         >
           <View style={s.ctnCadastro}>
             <View style={s.viewDataReq}>
-              <Text style={s.titleDataInfo}>DADOS</Text>
+              <FormSectionTitle title="Dados" />
             </View>
             <View style={s.inputs}>
               <InputInfo
@@ -395,7 +392,7 @@ export default function NewOrEditAppointment() {
                 titleName="Valor"
                 variasLinhas={false}
                 tipoTeclado="numeric"
-                maximoCaracteres={7}
+                maximoCaracteres={MAX_MONEY_INPUT_LENGTH}
                 hasBorderBottom={true}
               />
               <InputSelect
@@ -459,23 +456,5 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.BACKGROUND,
       overflow: "hidden",
     },
-    titleDataInfo: {
-      color: colors.PRIMARY_VARIANT,
-      fontWeight: "500",
-      marginBottom: 8,
-    },
     ctnBtnSalvar: { marginTop: 15 },
-    btnSalvar: {
-      paddingVertical: 20,
-      paddingHorizontal: 75,
-      backgroundColor: colors.PRIMARY_VARIANT,
-      borderRadius: 15,
-    },
-    btnSalvarDisabled: {
-      opacity: 0.6,
-    },
-    txtSalvar: {
-      color: colors.BACKGROUND,
-      textAlign: "center",
-    },
   });

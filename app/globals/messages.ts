@@ -95,3 +95,16 @@ export const MESSAGES = {
     resetDevOnly: "Apagar todos os dados só é possível no modo de desenvolvimento.",
   },
 } as const;
+
+/**
+ * Os textos dos modais de confirmação. Ficam fora de MESSAGES, que só tem frases completas, porque o
+ * título pode ser uma pergunta e o botão é um rótulo curto.
+ */
+export const DIALOGS = {
+  /** Sair de um formulário pelo voltar da tela ou do Android, com dados não salvos (BUG-8). */
+  leaveForm: {
+    title: "Confirma voltar?",
+    message: "Você perderá todos os novos dados não salvos.",
+    confirmLabel: "Voltar",
+  },
+} as const;

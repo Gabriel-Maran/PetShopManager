@@ -1,12 +1,12 @@
 # Próximos passos
 
-Atualizado em 2026-11-09, depois dos quatro agentes em paralelo (BUG-8, REPO-3, A11Y-1 e VALID-1).
+Atualizado em 2026-11-09, depois das pendências entre áreas dos quatro agentes em paralelo (PR #34).
 
-> **Para o próximo chat:** esta documentação está em revisão no PR #33 (branch `docs/agentes-em-paralelo`, worktree `.claude/worktrees/docs-paralelos`). A Parte 4 está completa no código desde o PR #32 (VALID-1); falta o Gabriel conferir no aparelho. O próximo passo é o Gabriel escolher o que aplicar das "Pendências entre áreas" e das "Sugestões das varreduras", abaixo, e o patch do Expo a partir de 2026-11-10.
+> **Para o próximo chat:** os itens 1 a 3 das "Pendências entre áreas" e três "Sugestões das varreduras", escolhidos pelo Gabriel, estão em revisão no PR #34 (branch `fix/pendencias-entre-areas`, worktree `.claude/worktrees/pendencias`). A documentação dos quatro agentes está em revisão no PR #33 (branch `docs/agentes-em-paralelo`, worktree `.claude/worktrees/docs-paralelos`), e o `proximos-passos.md` e o `decisoes.md` do #34 partem da versão do #33. Por isso o #33 entra antes; depois, a branch do #34 é atualizada com o `main`, ficando com a versão do #34 nesses dois arquivos. A Parte 4 está completa no código desde o PR #32 (VALID-1); falta o Gabriel conferir no aparelho. O próximo passo é o Gabriel revisar o #34 e escolher entre a limpeza (item 4), as sugestões que sobraram e o patch do Expo, a partir de 2026-11-10. O tamanho do pacote com o Zod (item 5) ficou para depois.
 >
 > Em 2026-11-09 entraram no `main`: ERRO-1 (PR #22), importação cancelada (#23), BUG-6 (#24), BUG-5 (#25), a ordem da busca (#26), os nomes de desativar (#27), o resto do BKP-1 (#28), REPO-3 (#29), BUG-8 (#30), A11Y-1 (#31) e VALID-1 (#32). Os quatro últimos rodaram ao mesmo tempo, cada um numa zona de arquivos só dele (ver `decisoes.md`). O README do Zod entrou pelo PR #33, porque o #32 foi mesclado antes desse commit. A Parte 3 foi aceita com o merge do PR #21, em 2026-11-08.
 >
-> Os roteiros para conferir no aparelho estão nos PRs #22 (ERRO-1), #24 (BUG-6), #25 (BUG-5), #26 (ordem da busca), #28 (BKP-1), #29 (REPO-3), #30 (BUG-8), #31 (A11Y-1, com o TalkBack) e #32 (VALID-1).
+> Os roteiros para conferir no aparelho estão nos PRs #22 (ERRO-1), #24 (BUG-6), #25 (BUG-5), #26 (ordem da busca), #28 (BKP-1), #29 (REPO-3), #30 (BUG-8), #31 (A11Y-1, com o TalkBack), #32 (VALID-1) e #34 (pendências entre áreas).
 >
 > O clone do Gabriel está no `0b0aaf0`, atrás do `main`. O #32 muda o `package-lock.json`, que está alterado no clone desde o `audit fix` de 2026-11-08. Antes do `git pull`, descarte a mudança local com `git checkout -- package-lock.json`. Depois do pull, rode `npm i`. O `node_modules` do clone já tem o zod 4.6.7, instalado em 2026-11-09 sem mudar o `package.json`. O `@expo/config` e o `@expo/fingerprint` do `audit fix` voltam a ser conferidos no PR do patch do Expo.
 >
@@ -18,50 +18,45 @@ Atualizado em 2026-11-09, depois dos quatro agentes em paralelo (BUG-8, REPO-3, 
 
 ## Pendências entre áreas (2026-11-09)
 
-Ajustes que os agentes acharam fora da própria zona e não fizeram. Nada aplicado; o Gabriel escolhe.
+Ajustes que os agentes acharam fora da própria zona e não fizeram. Os itens 1 a 3 estão no PR #34, escolhidos pelo Gabriel em 2026-11-09; os itens 4 e 5 ficam para depois.
 
-1. **Voltar com modal aberto (BUG-8):** o `ConfirmModal`, o `ModalConfDelete` e o `ErrorModal` não têm `onRequestClose`. Com um deles aberto, o voltar do Android não faz nada; deveria cancelar ou fechar. O `screenBack` do `DefaultHeader` nunca é passado e é código morto.
-2. **Validação (VALID-1):**
-   - o `raceSpecieHelper.ts` ainda valida a raça à mão, sem o limite de 50; deve usar o `breedSchema`;
-   - as telas escrevem o tamanho máximo à mão (`NewOrEditOwner`, `AbaInfoPet`, `NewOrEditAppointment` e `ModalCreateRacePet`); devem usar o `limits.ts`;
-   - o `NewOrEditPet`, com a remarcação desligada, deve mandar `null` no pacote, no início e no valor;
-   - a busca de raças do `SpeciesRepository` não escapa `%` e `_` no `LIKE`; dá para usar o `toSearchPattern`, como no BUG-5.
-3. **Acessibilidade nos formulários (A11Y-1):**
-   - o título da `TitleBar` como cabeçalho;
-   - `tablist` nas abas do pet e do agendamento;
-   - os botões Salvar com rótulo fixo e estado `busy` enquanto salvam;
-   - os títulos "DADOS…" com rótulo em letra normal;
-   - o `ButtonBack` com o `A11Y_LABELS.back`;
-   - o `color="#FFF"` do `NewOrEditPet` trocado pela cor do tema.
+1. **Voltar com modal aberto (BUG-8), no PR #34:** o `ConfirmModal`, o `ModalConfDelete` e o `ErrorModal` já tinham `onRequestClose` desde o PR #31. Saiu o `screenBack` morto do `DefaultHeader`, com o ícone `back.png`, que ficou sem uso.
+2. **Validação (VALID-1), no PR #34:**
+   - o `createRaceService` (`raceSpecieHelper.ts`) passa pelo `breedSchema`, com o limite de 50;
+   - as telas usam o `limits.ts`, que ganhou o `MAX_TIME_LENGTH` e o `MAX_MONEY_INPUT_LENGTH` para o horário e o valor;
+   - o `NewOrEditPet`, com a remarcação desligada, manda `null` no pacote, no início e no valor;
+   - a busca de raças usa o `toSearchPattern` com `ESCAPE`, num SQL só para a página e a contagem (`app/repository/sql/breedsSql.ts`), com 5 testes.
+3. **Acessibilidade nos formulários (A11Y-1), no PR #34:** os seis ajustes. Os botões Salvar viraram o `SaveButton`, e os títulos "DADOS…", o `FormSectionTitle`.
 4. **Limpeza (REPO-3):**
    - os métodos sem uso nas três camadas de agendamento, dono e pet, como o `getAppointmentsByDate`, que tem SQL inválido; a lista com as linhas está no relatório do PR #29;
    - o import do `OwnerBuilder`, a classe `ConfigBuilder` e o enum `ORDER`;
-   - os imports e as variáveis sem uso em cerca de 20 componentes;
+   - os imports e as variáveis sem uso em cerca de 20 componentes (o `LOGO` do `DefaultHeader` já saiu no PR #34);
    - os comentários de conversa nos componentes, no `App.tsx`, no `ButtonBack` e no `NewOrEditPet`;
    - o bloco `web` do `app.json` e o comentário do template em `index.ts`.
-5. **Tamanho do pacote:** o Zod somou 680 KB ao JavaScript do Android (de 2,78 MB para 3,46 MB). Cerca de 340 KB são traduções que o app não usa. Avaliar o `zod/mini` ou o tree shaking do Expo.
+5. **Tamanho do pacote:** o Zod somou 680 KB ao JavaScript do Android (de 2,78 MB para 3,46 MB). Cerca de 340 KB são traduções que o app não usa. Avaliar o `zod/mini` ou o tree shaking do Expo. Deixado para depois pelo Gabriel em 2026-11-09.
 
 ## Sugestões das varreduras (2026-11-09)
 
-Também não aplicadas:
+Não aplicadas, menos as três que o Gabriel escolheu, que estão no PR #34: os textos do modal de voltar (em `DIALOGS`, no `messages.ts`), o contraste do `Toggle` desligado (3:1) e o `CloseButton` dos três modais.
 
 - **Navegação:**
   - pedir confirmação só quando o formulário mudou;
   - na Home, o voltar recolher a agenda em tela cheia antes de sair;
-  - um `TAB_SCREENS` em `navigation.ts` para o `App.tsx` e a `AppBar`;
-  - os textos do modal de voltar em `messages.ts`.
+  - um `TAB_SCREENS` em `navigation.ts` para o `App.tsx` e a `AppBar`.
 - **Acessibilidade e tema:**
-  - o `Toggle` desligado tem contraste de 1,61:1 (falta uma borda ou um cinza mais escuro), e a animação não acompanha o `value` mudado por fora;
-  - um `CloseButton` compartilhado para o ✕ dos três modais;
+  - a animação do `Toggle` não acompanha o `value` mudado por fora;
+  - no tema escuro, a bolinha branca do `Toggle` ligado tem 2,56:1 sobre o verde (varredura do PR #34);
   - as cores fixas fora do tema, no `ThemeToggle`, nos cartões de Relatórios e no fundo dos modais, que deveria usar o `MODAL_BACKGROUND`;
   - um `withAlpha` no tema, no lugar de juntar "10" ao hex.
 - **Validação:**
   - os enums do pet num módulo sem React Native, como o `Screen`;
   - a checagem de dia real no `isIsoDate` de `datas.ts`;
   - conferir no app que a raça é da espécie escolhida;
-  - `CHECK` no banco numa versão 4 do esquema, tratando antes o dado antigo.
+  - `CHECK` no banco numa versão 4 do esquema, tratando antes o dado antigo;
+  - a raça repetida passa quando só o acento muda: o `findRaceByNome` compara em minúsculas, mas com acento, então "Pastor Alemao" entra ao lado de "Pastor Alemão" (varredura do PR #34).
 - **Limpeza:**
   - o `useServicos` e o `useTiposPagamento` chamam o repository direto e repetem o `useAsyncData`;
+  - o `createRaceService` é um service dentro de `utils/`, e a `AbaInfoPet` chama o `raceRepository` direto; os dois deveriam passar pelo controller e pelo service, como o resto (varredura do PR #34);
   - um tipo `Breed` no lugar dos `any[]` do `SpeciesRepository`;
   - o SQL dos relatórios com `?` em vez de valor no texto, e com testes;
   - campos dos relatórios que nenhuma tela lê;
@@ -132,7 +127,7 @@ Falta, nesta ordem:
 - A auditoria do código foi feita sobre o commit `e1d5f2f` do `main`.
 - O plano está em [`plano-de-melhorias.md`](plano-de-melhorias.md), com 35 itens: 9 P0, 16 P1 e 10 P2.
 - A arquitetura de hoje está em [`arquitetura.md`](arquitetura.md), e as respostas do checklist, em [`auditoria.md`](auditoria.md).
-- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só), #23 (importação cancelada), #24 (ações de Cadastros), #25 (busca com o mesmo filtro), #26 (ordem da busca), #27 (nomes de desativar), #28 (resto do BKP-1), #29 (REPO-3), #30 (BUG-8), #31 (A11Y-1) e #32 (VALID-1). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
+- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só), #23 (importação cancelada), #24 (ações de Cadastros), #25 (busca com o mesmo filtro), #26 (ordem da busca), #27 (nomes de desativar), #28 (resto do BKP-1), #29 (REPO-3), #30 (BUG-8), #31 (A11Y-1) e #32 (VALID-1); o #34 (pendências entre áreas) está em revisão. O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
 - Da Parte 1, falta o que depende das perguntas em aberto. As Partes 2 e 3 estão completas e aceitas. A Parte 4 começou e ficou completa no código em 2026-11-09, com o PR #32 (VALID-1); falta o Gabriel conferir no aparelho. Da Parte 6, o A11Y-1 e parte do REPO-3 foram adiantados no mesmo dia. A Parte 5 ainda não começou.
 - Falta o Gabriel responder [`perguntas-em-aberto.md`](perguntas-em-aberto.md). Várias partes abaixo dependem dessas respostas.
 
@@ -259,7 +254,7 @@ Pronto quando: o APK instala num Android limpo e mostra tudo com um toque, e o p
 ### Parte 6 · Qualidade contínua (P1)
 
 - TEST-2: lint, Prettier e o script `check` no CI, depois do aval das instalações.
-- A11Y-1: rótulos, papéis, áreas de toque e contraste. No `main` desde o PR #31, em 2026-11-09, adiantado; falta o teste com o TalkBack e os ajustes dos formulários (ver "Pendências entre áreas").
+- A11Y-1: rótulos, papéis, áreas de toque e contraste. No `main` desde o PR #31, em 2026-11-09, adiantado; falta o teste com o TalkBack. Os ajustes dos formulários e o contraste do `Toggle` estão em revisão no PR #34.
 - TEMA-1: tokens de espaço, raio, tipografia e cores de gráfico.
 - REPO-3: limpeza de código, imagens e comentários. Em parte no `main` desde o PR #29, em 2026-11-09, adiantado; o resto está em "Pendências entre áreas".
 - REPO-4: ruleset no `main`, se os parceiros concordarem.

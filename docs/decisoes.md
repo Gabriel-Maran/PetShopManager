@@ -369,3 +369,18 @@ Decisão do PR #29:
 - As sobras em arquivos de outras áreas ficaram anotadas em `proximos-passos.md`.
 
 Motivo: sem mudar comportamento, e sem mexer nos arquivos dos outros três PRs que rodavam ao mesmo tempo.
+
+**Pendências entre áreas dos PRs #29 a #32.**
+Contexto: os quatro agentes anotaram o que acharam fora da própria zona, em cinco itens, mais as sugestões das varreduras.
+Decisão do Gabriel: os itens 1 a 3 (voltar com modal aberto, validação e acessibilidade dos formulários) num PR só, com três sugestões: os textos do modal de voltar em `messages.ts`, o contraste do `Toggle` desligado e um `CloseButton` para os três modais. A limpeza (item 4) e o tamanho do pacote com o Zod (item 5) ficam para depois.
+
+Decisão do PR #34:
+- Os três modais do item 1 já tinham `onRequestClose` desde o PR #31; saiu só o `screenBack` morto do `DefaultHeader`.
+- Os textos do voltar ficam em `DIALOGS`, no `messages.ts`, e não em `MESSAGES`: o teste do ERRO-1 exige que toda mensagem de `MESSAGES` seja uma frase terminada em ponto, e o título do modal é uma pergunta e o botão é um rótulo.
+- A busca de raças ganhou um SQL só para a página e a contagem (`breedsSql.ts`). Sem texto, o padrão `%%` traz todas as raças, e o repository ficou com dois métodos em vez de quatro.
+- Com a remarcação desligada, o pacote, o início e o valor do pet vão como `null`, como o trigger de desativar o pet já faz com o início.
+- O `CloseButton` usa o círculo do seletor de lista, e o ✕ do calendário e o da nova raça mudaram de cara.
+- O trilho do `Toggle` desligado (`DESATIVADO`) chegou a 3:1 com o fundo nos dois temas, o mínimo da WCAG para o que não é texto (critério 1.4.11). O teste de contraste ganhou uma lista de pares de 3:1.
+- Os botões Salvar dos três formulários viraram o `SaveButton`, e os títulos "DADOS…", o `FormSectionTitle`.
+
+Motivo: as regras do Gabriel pedem limites e textos num lugar só, entrada validada por schema e código repetido extraído. Um componente por botão e por título faz os ajustes de acessibilidade valerem nos três formulários de uma vez.

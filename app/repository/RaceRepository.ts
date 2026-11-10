@@ -1,14 +1,16 @@
 import { getDatabase } from "../config/database";
 import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
+import { INSERT_BREED_SQL } from "./sql/breedsSql";
 
 class RaceTypeRepository {
   async createRace(especieId: number, nomeRaca: string): Promise<number> {
     const db = await getDatabase();
     const nomeNormalizado = normalizeForSearch(nomeRaca);
-    const result = await db.runAsync(
-      `INSERT INTO race (especie_id, nome_raca, nome_raca_normalized) VALUES (?, ?, ?)`,
-      [especieId, nomeRaca, nomeNormalizado],
-    );
+    const result = await db.runAsync(INSERT_BREED_SQL, [
+      especieId,
+      nomeRaca,
+      nomeNormalizado,
+    ]);
     return result.lastInsertRowId;
   }
 
