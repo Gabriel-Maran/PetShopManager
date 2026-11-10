@@ -7,15 +7,15 @@ import {
 import BarChart from "../../components/Relatorios/BarChart";
 
 import TitleBar from "../../components/Cadastro/TitleBar";
-import {
-  autoVsManuaisAgendados,
-  autoVsManuaisConcluidos,
-} from "../../../utils/relatorios/origemDados";
+import { reportsService } from "../../../service/ReportsService";
 import { useAsyncData } from "../../../hooks/useAsyncData";
 
 export default function OrigemAgendamentos() {
   const { data, loading } = useAsyncData(() =>
-    Promise.all([autoVsManuaisConcluidos(), autoVsManuaisAgendados()]),
+    Promise.all([
+      reportsService.getAppointmentsByOrigin(true),
+      reportsService.getAppointmentsByOrigin(false),
+    ]),
   );
 
   const { colors } = useTheme();

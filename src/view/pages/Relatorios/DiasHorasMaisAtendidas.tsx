@@ -7,15 +7,15 @@ import {
 import BarChart from "../../components/Relatorios/BarChart";
 
 import TitleBar from "../../components/Cadastro/TitleBar";
-import {
-  getDiasMaisAtendidos,
-  getHorasMaisAtendidas,
-} from "../../../utils/relatorios/datasSearcher";
+import { reportsService } from "../../../service/ReportsService";
 import { useAsyncData } from "../../../hooks/useAsyncData";
 
 export default function DiasHorasMaisAtendidas() {
   const { data, loading } = useAsyncData(() =>
-    Promise.all([getDiasMaisAtendidos(), getHorasMaisAtendidas()]),
+    Promise.all([
+      reportsService.getCompletedByWeekday(),
+      reportsService.getCompletedByHour(),
+    ]),
   );
 
   const { colors } = useTheme();

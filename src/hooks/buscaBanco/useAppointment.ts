@@ -1,18 +1,17 @@
-import { useEffect } from "react";
-import { useError } from "../useError";
+import { useAsyncData } from "../useAsyncData";
 import useFormState from "../useFormState";
 import { useSearchPage } from "../useSearchPage";
 import { petController } from "../../controller/PetController";
 import { LIMIT_ITEM_PAGE } from "../../config/consts";
 import { PetWithSpecieRaceAndOwner } from "../../model/Pet";
 import { ServiceType } from "../../model/ServiceType";
-import { serviceTypeRepository } from "../../repository/ServiceTypeRepository";
+import { serviceTypeService } from "../../service/ServiceTypeService";
 import { NewOrEditAppointmentParams } from "../../model/Appointment";
 import { useScreen } from "../useScreen";
 import { type IsoDate, todayIso } from "../../utils/datas";
 import { formatMoneyInput } from "../../utils/dinheiro";
 import { PaymentsMethod } from "../../model/PaymentMethod";
-import { paymentMethodRepository } from "../../repository/PaymentsMethodsRepository";
+import { paymentMethodService } from "../../service/PaymentMethodService";
 
 //========================================================================//
 
@@ -69,22 +68,12 @@ type ServiceTypeReturn = {
   servicesForm: ServicesForm;
 };
 
+/** Os serviços do seletor do agendamento. Até carregar, ou se falhar, a lista fica vazia. */
 export function useServicos(): ServiceTypeReturn {
-  const { showError } = useError();
-
-  const { form, updateField } = useFormState<ServicesForm>({
-    servico: [],
-  });
-
-  useEffect(() => {
-    serviceTypeRepository
-      .getAllServiceTypes()
-      .then((value) => updateField("servico", value))
-      .catch(showError);
-  }, []);
+  const { data } = useAsyncData(() => serviceTypeService.getAllServiceTypes());
 
   return {
-    servicesForm: form,
+    servicesForm: { servico: data ?? [] },
   };
 }
 
@@ -98,22 +87,12 @@ type PaymentMethodReturn = {
   pgtosForm: PaymentMethodType;
 };
 
+/** As formas de pagamento do seletor do agendamento. Até carregar, ou se falhar, a lista fica vazia. */
 export function useTiposPagamento(): PaymentMethodReturn {
-  const { showError } = useError();
-
-  const { form, updateField } = useFormState<PaymentMethodType>({
-    tipos_pgto: [],
-  });
-
-  useEffect(() => {
-    paymentMethodRepository
-      .getAllPaymentMethod()
-      .then((value) => updateField("tipos_pgto", value))
-      .catch(showError);
-  }, []);
+  const { data } = useAsyncData(() => paymentMethodService.getAllPaymentMethods());
 
   return {
-    pgtosForm: form,
+    pgtosForm: { tipos_pgto: data ?? [] },
   };
 }
 
