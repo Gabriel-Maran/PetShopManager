@@ -186,9 +186,9 @@ Os gráficos são um componente próprio (`BarChart`), sem biblioteca.
 
 Fica em Configurações (`DatabaseTransfer` e `BackupService`):
 
-- **Exportar:** consolida o WAL, copia o `petshop.db` para o cache e abre o compartilhamento do sistema.
-- **Importar:** o usuário escolhe um arquivo `.db`, que é copiado para a pasta dos bancos do app. Desde 2026-11-08 (etapa 3c), a cópia é aberta numa conexão só dela e passa pelas mesmas migrações do banco do aparelho (`backupRestore.ts`): um backup de versão anterior chega no formato de hoje, e um arquivo sem as sete tabelas do app, corrompido ou de versão mais nova é recusado antes de mexer nos dados. Depois, o app anexa a cópia com `ATTACH` e, numa transação, apaga e copia as sete tabelas, com as chaves estrangeiras desligadas. A cópia e os arquivos do SQLite ao lado dela são apagados no fim, com qualquer resultado.
-- Ainda não confere a integridade do arquivo nem desliga o `trusted_schema`, e a cópia usa `SELECT *` (ver BKP-1).
+- **Exportar:** consolida o WAL, copia o `petshop.db` para `backups/petshop-AAAA-MM-DD.db`, no cache, e abre o compartilhamento do sistema. Cada exportação apaga as cópias anteriores; a última fica no cache privado do app até a próxima, porque o app de destino pode ler o arquivo depois que o menu fecha.
+- **Importar:** o usuário escolhe um arquivo `.db`, que é copiado para a pasta dos bancos do app. Desde 2026-11-08 (etapa 3c), a cópia é aberta numa conexão só dela e passa pelas mesmas migrações do banco do aparelho (`backupRestore.ts`): um backup de versão anterior chega no formato de hoje, e um arquivo danificado (`integrity_check`), sem as sete tabelas do app ou de versão mais nova é recusado antes de mexer nos dados. Depois, o app anexa a cópia com `ATTACH` e confere se ela tem todas as colunas do app. Numa transação, com as chaves estrangeiras e os triggers do app desligados, apaga e copia as sete tabelas pelo nome das colunas, e a contagem de ids. A cópia e os arquivos do SQLite ao lado dela são apagados no fim, com qualquer resultado.
+- Todas as conexões abrem com o `trusted_schema` desligado (`SQL_CONNECTION_PRAGMAS`), para o esquema de um arquivo de fora não rodar função com efeito colateral.
 
 ## Tema e estilo
 

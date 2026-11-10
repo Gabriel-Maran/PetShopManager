@@ -9,10 +9,16 @@ import { V3 } from "./migrations/v3.ts";
 // ── Pragmas da conexão ────────────────────────────────────────────────────
 // Valem só para a conexão aberta e não ficam no arquivo do banco. Por isso são ligados a cada
 // abertura (getDatabase), e não numa migração.
+//
+// Com o trusted_schema desligado, os triggers, CHECKs, valores padrão e colunas geradas de um banco
+// só usam funções sem efeito colateral. O esquema do app só usa as funções do próprio SQLite (date,
+// strftime, substr...), e um backup escolhido pelo usuário, que vem de fora, não consegue rodar outra
+// coisa ao ser conferido ou anexado (BKP-1).
 
 export const SQL_CONNECTION_PRAGMAS = `
   PRAGMA foreign_keys = ON;
   PRAGMA recursive_triggers = ON;
+  PRAGMA trusted_schema = OFF;
 `;
 
 // ── Migrações ─────────────────────────────────────────────────────────────

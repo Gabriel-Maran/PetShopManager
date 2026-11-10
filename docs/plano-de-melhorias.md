@@ -183,7 +183,15 @@ Parte do app feita em 2026-11-08: o "hoje" e as conversões de data estão em `a
 
 Confirmado em 2026-11-08 por teste (`tests/backup.test.mjs`): na restauração, a agenda volta igual à do backup, mas o `ultimo_visita_data_auto` dos pets com pacote é refeito pelo trigger de cadastro, e fica além do último automático pendente. O copiar com `SELECT *` funciona entre bancos da mesma versão: o SQLite pula a coluna gerada `dia_semana`.
 
-Adiantado na etapa 3c, em 2026-11-08: a cópia do backup passa pelas migrações antes de entrar, então os dois bancos ficam na mesma versão. Um arquivo sem as tabelas do app, corrompido ou de versão mais nova é recusado sem mexer nos dados, e a cópia temporária é apagada com qualquer resultado. Falta o resto do "O que muda": `integrity_check`, `trusted_schema`, colunas nomeadas, triggers sem efeito na restauração, a cópia exportada no cache e o nome com a data.
+Adiantado na etapa 3c, em 2026-11-08: a cópia do backup passa pelas migrações antes de entrar, então os dois bancos ficam na mesma versão. Um arquivo sem as tabelas do app, corrompido ou de versão mais nova é recusado sem mexer nos dados, e a cópia temporária é apagada com qualquer resultado.
+
+Feito em 2026-11-09, no PR #28 (Parte 4):
+- o `PRAGMA integrity_check` confere a cópia antes de tudo, e um arquivo danificado tem mensagem própria;
+- o `trusted_schema` fica desligado em todas as conexões (`SQL_CONNECTION_PRAGMAS`): um backup com função de efeito colateral num trigger, `CHECK` ou coluna gerada é recusado sem rodar a função;
+- a cópia usa as colunas do app pelo nome, e um backup sem alguma delas é recusado antes de mexer nos dados;
+- os triggers do app saem durante a cópia e voltam iguais no fim, dentro da transação. O ponteiro da remarcação volta igual ao do backup, e a contagem de ids (`sqlite_sequence`) também;
+- a exportação grava `petshop-AAAA-MM-DD.db` numa pasta própria do cache, e cada exportação apaga as cópias anteriores. A cópia não é apagada logo depois do compartilhamento, porque o app de destino pode ler o arquivo depois que o menu fecha (decisão do Gabriel, ver `decisoes.md`);
+- verificado: typecheck limpo, 142 testes passando (6 novos em `tests/backup.test.mjs`) e o pacote Android gerado. Falta o Gabriel conferir no aparelho, com o roteiro do PR.
 
 - **Por quê:**
   - A importação aceita qualquer arquivo terminado em `.db` e copia com `SELECT *`, que depende da ordem das colunas. Um backup de outra versão falha ou grava dados nas colunas erradas.
