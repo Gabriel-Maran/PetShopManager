@@ -47,7 +47,7 @@ Prints com os dados de exemplo do próprio app.
 - **Banco:**
   - oito tabelas: donos, pets, agendamentos, serviços, formas de pagamento, espécies, raças e configurações;
   - desativar é exclusão lógica;
-  - a cascata e a remarcação ficam em triggers do SQLite.
+  - a cascata fica em triggers do SQLite, e a remarcação, numa função TypeScript pura e testada.
 - **Remarcação automática:**
   - o pacote 2 cai a cada 14 dias, e o pacote 4, a cada 7, sem passar da cota do mês;
   - quando a cota acaba, o próximo vai para o mês seguinte, no mesmo dia da semana;

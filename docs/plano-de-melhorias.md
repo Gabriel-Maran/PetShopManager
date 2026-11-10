@@ -304,6 +304,8 @@ Os itens de arquitetura (ARQ-1, ARQ-2, DADOS-3 e NOMES-1) mudam muitos arquivos 
 
 ### ARQ-1 · Reorganizar pastas e camadas
 
+Feito em 2026-11-10, no PR #42, como decidido na pergunta 17: a pasta `app/` virou `src/`, sem mudar nenhum conteúdo. Das exceções de camada, os relatórios em `utils` e os hooks que chamavam o repository saíram no PR #46, e a regra da agenda foi para `src/domain/` no PR #47. As pastas por assunto (`features/`, `data/`, `shared/`) e a regra de lint de imports ficam para depois do NOMES-1 e do TEST-2.
+
 - **Por quê:**
   - Os services só repassam chamadas, e a validação está nos controllers. Uma chamada atravessa três arquivos sem nenhuma regra no meio.
   - Os relatórios consultam o banco de dentro de `utils`, e alguns hooks chamam o repository direto.
@@ -321,6 +323,8 @@ Os itens de arquitetura (ARQ-1, ARQ-2, DADOS-3 e NOMES-1) mudam muitos arquivos 
 - **Pronto quando:** cada camada só importa a de baixo, conferido por uma regra de lint de imports, e os testes continuam passando.
 
 ### ARQ-2 · Remarcação em TypeScript
+
+Feito em 2026-11-10, no PR #47: a regra pura em `src/domain/packageSchedule.ts`, o `PackageScheduleService` grava numa transação, e a versão 4 do esquema tira os três triggers da conta de calendário. Um teste de equivalência compara a versão 3 e a 4 linha a linha. Verificado: typecheck limpo e 386 testes passando. Falta conferir no aparelho, pelo roteiro do PR.
 
 - **Por quê:** a lógica de calendário da remarcação está repetida em três triggers SQL, cada uma com dezenas de conversões `substr`. É difícil de ler, testar e mudar.
 - **O que muda:** uma função pura `gerarAgenda(pacote, inicio, ate)` no domínio, testada, chamada pelo serviço dentro de uma transação. Os triggers ficam só para integridade e cascata (última visita e desativação). A decisão está em `perguntas-em-aberto.md`.
@@ -356,6 +360,8 @@ Adiantado em 2026-11-09, no PR #27: as ações de desativar e reativar de donos 
 
 ### PERF-1 · Imagens e buscas mais leves
 
+Feito em 2026-11-10: os ícones e fundos foram reduzidos para 3 vezes o tamanho exibido no PR #44 (`src/assets` de 5,0 MB para 724 KB), e o ícone do pacote virou PNG no PR #48. A busca que descarta a resposta atrasada entrou no BUG-5 (PR #25), e o `getDatabase` já guardava a promessa da conexão. Falta conferir a nitidez no aparelho.
+
 - **Por quê:** os ícones dos campos aparecem com 28 dp, mas vêm de imagens grandes (`servicos.png` tem 2048×2102 px; `iconNome.png`, 1686×1680 px), o que pesa no APK e na memória. A busca espera 600 ms depois da digitação, mas não confere a ordem das respostas: uma resposta antiga que chegue atrasada sobrescreve a nova. Duas chamadas simultâneas a `getDatabase` podem abrir duas conexões.
 - **O que muda:** ícones redimensionados para três vezes o tamanho de exibição; buscas que ignoram respostas desatualizadas; `getDatabase` guardando a promessa da conexão.
 - **Pronto quando:** a pasta de imagens cai de tamanho de forma visível, e um teste do hook de busca mostra que só o último resultado entra na tela.
@@ -373,6 +379,8 @@ Adiantado em 2026-11-09, no PR #27: as ações de desativar e reativar de donos 
 - **Pronto quando:** os caminhos principais de cada formulário têm teste, inclusive os de erro.
 
 ### SEG-1 · Dados pessoais no aparelho e no backup
+
+Feito em 2026-11-10, no PR #45, como decidido na pergunta 20: `android.allowBackup: false` e um aviso ao exportar, dizendo que o arquivo não tem senha e traz os dados pessoais dos clientes. O backup com senha ficou como pergunta 24 em `perguntas-em-aberto.md`. Falta conferir no aparelho, num build novo.
 
 - **Por quê:** o banco guarda nome, telefone, e-mail e endereço dos clientes. Ele fica protegido na área privada do app, mas o backup exportado é um arquivo aberto, compartilhado por qualquer app, e o backup automático do Android pode copiar o banco para a nuvem.
 - **O que muda:** aviso no exportar de que o arquivo tem dados pessoais; decidir se o `allowBackup` do Android fica ligado; avaliar backup com senha (exige biblioteca).

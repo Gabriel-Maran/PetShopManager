@@ -40,3 +40,7 @@ Perguntas para o Gabriel, de 2026-11-05. Cada resposta vira uma linha datada em 
 
 22. ~~A descrição nova pode ser aplicada?~~ Aplicada em 2026-11-08.
 23. **Quem tira os prints e roda o build do APK?** O build precisa da sua conta Expo, e os prints, do app rodando (MIDIA-1 e BUILD-1).
+
+## Segurança
+
+24. **Backup com senha?** O arquivo exportado é um banco aberto, com os dados pessoais dos clientes (SEG-1). A recomendação é o SQLCipher pela opção `useSQLCipher` do plugin `expo-sqlite`, que já está instalado, conferindo antes a documentação da versão 58. Custo: o APK cresce alguns MB, precisa de build novo, e uma senha esquecida perde o backup.
