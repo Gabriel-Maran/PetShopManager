@@ -14,10 +14,6 @@ class OwnerController {
     return owner;
   }
 
-  getAllOwners(): Promise<Owner[]> {
-    return ownerService.getAllOwners();
-  }
-
   async searchOwnersPage(search: NameSearch): Promise<Page<Owner>> {
     return ownerService.searchOwnersPage(validateNameSearch(search));
   }

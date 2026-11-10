@@ -76,7 +76,7 @@ const styles = (colors: ThemeColors) =>
 
     // Card
     card: {
-      backgroundColor: colors.BACKGROUND, // ou SECOND_BACKGROUND — ajuste ao seu tema
+      backgroundColor: colors.BACKGROUND,
       borderRadius: 16,
       overflow: "hidden",
       // sombra sutil

@@ -16,13 +16,6 @@ class OwnerRepository {
     return db.getFirstAsync<Owner>(`SELECT * FROM owners WHERE id = ?`, [id]);
   }
 
-  async getAllOwners(): Promise<Owner[]> {
-    const db = await getDatabase();
-    return db.getAllAsync<Owner>(
-      `SELECT * FROM owners WHERE is_ativo = 1 ORDER BY criado_em DESC`,
-    );
-  }
-
   searchOwnersPage(search: NameSearch): Promise<Page<Owner>> {
     return fetchPage<Owner>(searchOwnersSql(search));
   }

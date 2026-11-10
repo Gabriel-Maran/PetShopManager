@@ -17,10 +17,6 @@ class AppointmentsController {
     return appointment;
   }
 
-  getAppointmentsByDate(date: IsoDate): Promise<Appointment[]> {
-    return appointmentsService.getAppointmentsByDate(date);
-  }
-
   getAppointmentsByDateWithOwnerAndPet(
     date: IsoDate,
   ): Promise<AppointmentsWithOwnerAndPet[]> {
@@ -29,18 +25,6 @@ class AppointmentsController {
 
   getAppointmentsByDateRange(from: IsoDate, to: IsoDate): Promise<Appointment[]> {
     return appointmentsService.getAppointmentsByDateRange(from, to);
-  }
-
-  getAppointmentsByDateRangeNotDone(from: IsoDate, to: IsoDate): Promise<Appointment[]> {
-    return appointmentsService.getAppointmentsByDateRangeNotDone(from, to);
-  }
-
-  getAppointmentsByPetId(petId: number): Promise<Appointment[]> {
-    return appointmentsService.getAppointmentsByPetId(petId);
-  }
-
-  getPendingAppointmentsByPetId(petId: number): Promise<Appointment[]> {
-    return appointmentsService.getPendingAppointmentsByPetId(petId);
   }
 
   async createAppointment(input: Appointment): Promise<void> {
@@ -54,22 +38,6 @@ class AppointmentsController {
     await this.getAppointmentById(id); // valida existência
     await petController.getPetById(appointment.pet_id); // o pet precisa existir
     await appointmentsService.updateAppointment(id, appointment);
-  }
-
-  // Método dedicado para concluir — dispara trg_ultima_visita e trg_remarcacao_automatica
-  async concludeAppointment(id: number): Promise<void> {
-    await this.getAppointmentById(id); // valida existência
-    await appointmentsService.concludeAppointment(id);
-  }
-
-  async deleteAppointment(id: number): Promise<void> {
-    await appointmentsService.deleteAppointment(parseRecordId(id, MESSAGES.appointment.notFound));
-  }
-
-  deleteFutureAutoAppointmentsByPetId(petId: number): Promise<void> {
-    return appointmentsService.deleteFutureAutoAppointmentsByPetId(
-      parseRecordId(petId, MESSAGES.pet.notFound),
-    );
   }
 }
 

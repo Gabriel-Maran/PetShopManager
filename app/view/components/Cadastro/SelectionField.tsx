@@ -7,11 +7,7 @@ import {
 } from "react-native";
 import { Screen } from "../../../config/consts";
 import ButtonEditar from "./Botões/ButtonEditar";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../Themes/ThemeProvider";
+import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
 import InputWrapper from "../../components/Cadastro/InputWrapper";
 import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
 import { touchTargetSlop } from "../Acessibilidade/accessibilityProps";
@@ -28,8 +24,8 @@ export default function SelectionField({
   hasBorderBottom,
   onPress,
   goEdit,
-  fazCadastro = false, // Novo: Booleano para exibir ou não o rótulo
-  onCadastro, // Novo: Função de callback para cadastrar
+  fazCadastro = false,
+  onCadastro,
 }: {
   isEditavel: boolean;
   image: ImageSourcePropType;
@@ -40,10 +36,9 @@ export default function SelectionField({
   onPress: () => void;
   onClear?: () => void;
   goEdit: boolean;
-  fazCadastro?: boolean; // Tipagem opcional
-  onCadastro?: () => void; // Tipagem opcional
+  fazCadastro?: boolean;
+  onCadastro?: () => void;
 }) {
-  const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
   return (

@@ -1,4 +1,3 @@
-// components/Pagination.tsx
 import { StyleSheet, Text, View } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";

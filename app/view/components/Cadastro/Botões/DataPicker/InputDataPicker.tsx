@@ -1,10 +1,5 @@
-import { ImageSourcePropType, TextInput, StyleSheet } from "react-native";
+import { ImageSourcePropType } from "react-native";
 import { DatePicker } from "./DatePicker";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../../../Themes/ThemeProvider";
 import InputWrapper from "../../InputWrapper";
 import { todayIso } from "../../../../../utils/datas";
 

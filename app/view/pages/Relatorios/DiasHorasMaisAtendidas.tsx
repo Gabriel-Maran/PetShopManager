@@ -79,7 +79,7 @@ const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     mainContainer: {
       flex: 1,
-      backgroundColor: colors.BACKGROUND, // Usa o fundo do seu tema
+      backgroundColor: colors.BACKGROUND,
     },
     loader: {
       flex: 1,
@@ -93,7 +93,7 @@ const styles = (colors: ThemeColors) =>
     },
     card: {
       width: "100%",
-      backgroundColor: colors.SURFACE, // Ou colors.card se tiver
+      backgroundColor: colors.SURFACE,
       borderRadius: 12,
       padding: 16,
       marginBottom: 20,
