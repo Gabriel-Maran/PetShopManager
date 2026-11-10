@@ -1,5 +1,5 @@
-import { Owner } from "../model/Owner";
-import type { NameSearch } from "../model/Search";
+import type { OwnerData } from "../validation/ownerSchema";
+import type { NameSearchData } from "../validation/searchSchema";
 import { ownerRepository } from "../repository/OwnerRepository";
 
 class OwnerService {
@@ -11,15 +11,15 @@ class OwnerService {
     return ownerRepository.getAllOwners();
   }
 
-  searchOwnersPage(search: NameSearch) {
+  searchOwnersPage(search: NameSearchData) {
     return ownerRepository.searchOwnersPage(search);
   }
 
-  createOwner(owner: Owner) {
+  createOwner(owner: OwnerData) {
     return ownerRepository.createOwner(owner);
   }
 
-  updateOwner(id: number, owner: Owner) {
+  updateOwner(id: number, owner: OwnerData) {
     return ownerRepository.updateOwner(id, owner);
   }
 

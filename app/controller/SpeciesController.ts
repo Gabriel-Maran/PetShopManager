@@ -1,6 +1,8 @@
 import { speciesService } from "../service/SpeciesService";
 import { Species } from "../repository/SpeciesRepository";
 import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
+import { breedCountSchema, breedSearchSchema } from "../validation/searchSchema";
+import { parseInput } from "../validation/parseInput";
 
 class SpeciesController {
   async searchSpecies(): Promise<Species[]> {
@@ -11,25 +13,35 @@ class SpeciesController {
     page: number,
     search: string,
   ): Promise<Species[]> {
-    if (!search) {
-      return speciesService.getBreedsBySpeciesPaginated(speciesId, page);
-    }
-    const normalizedSearch = normalizeForSearch(search);
-    return speciesService.searchBreedsBySpeciesAndSearchNamePaginated(
-      speciesId,
+    const breedSearch = parseInput(breedSearchSchema, {
+      especieId: speciesId,
       page,
-      normalizedSearch,
+      query: search,
+    });
+    if (!breedSearch.query) {
+      return speciesService.getBreedsBySpeciesPaginated(
+        breedSearch.especieId,
+        breedSearch.page,
+      );
+    }
+    return speciesService.searchBreedsBySpeciesAndSearchNamePaginated(
+      breedSearch.especieId,
+      breedSearch.page,
+      normalizeForSearch(breedSearch.query),
     );
   }
 
   async countBreeds(speciesId: number, search: string) {
-    if (!search) {
-      return speciesService.countBreedsBySpecies(speciesId);
+    const breedSearch = parseInput(breedCountSchema, {
+      especieId: speciesId,
+      query: search,
+    });
+    if (!breedSearch.query) {
+      return speciesService.countBreedsBySpecies(breedSearch.especieId);
     }
-    const normalizedSearch = normalizeForSearch(search);
     return speciesService.countBreedsBySpeciesAndSearchName(
-      speciesId,
-      normalizedSearch,
+      breedSearch.especieId,
+      normalizeForSearch(breedSearch.query),
     );
   }
 }

@@ -1,5 +1,7 @@
 import { Config } from "../model/Configuration";
 import { configsService } from "../service/ConfigsService";
+import { configUpdateSchema } from "../validation/configSchema";
+import { parseInput } from "../validation/parseInput";
 
 class ConfigsController {
   async getConfigById(id: number): Promise<Config | null> {
@@ -7,7 +9,8 @@ class ConfigsController {
   }
 
   async updateConfig(id: number, is_ativo: number): Promise<void> {
-    return configsService.updateConfig(id, is_ativo);
+    const config = parseInput(configUpdateSchema, { id, is_ativo });
+    return configsService.updateConfig(config.id, config.is_ativo);
   }
 }
 

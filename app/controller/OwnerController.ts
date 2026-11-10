@@ -1,36 +1,15 @@
-import { Owner, OwnerBuilder } from "../model/Owner";
+import { Owner } from "../model/Owner";
 import type { NameSearch, Page } from "../model/Search";
 import { ownerService } from "../service/OwnerService";
 import { AppError } from "../errors/AppError";
 import { MESSAGES } from "../globals/messages";
+import { ownerSchema } from "../validation/ownerSchema";
+import { parseInput, parseRecordId } from "../validation/parseInput";
 import { validateNameSearch } from "./validateNameSearch";
-
-/** Nome e telefone obrigatórios, e o telefone com DDD. Cada falha tem a sua mensagem. */
-function validateOwner(owner: Owner): void {
-  if (!owner.nome.trim()) {
-    throw new AppError("VALIDATION", MESSAGES.owner.nameRequired);
-  }
-  const telefone = owner.telefone.trim();
-  if (!telefone) {
-    throw new AppError("VALIDATION", MESSAGES.owner.phoneRequired);
-  }
-  if (!isValidPhone(telefone)) {
-    throw new AppError("VALIDATION", MESSAGES.owner.phoneInvalid);
-  }
-}
-
-/** DDD e número, com 10 ou 11 dígitos; o celular de 11 tem o 9 logo depois do DDD. */
-function isValidPhone(v: string): boolean {
-  const d = v.replace(/\D/g, "");
-  if (d.length < 10 || d.length > 11) return false;
-  if (/^(\d)\1+$/.test(d)) return false;
-  if (d.length === 11 && d[2] !== "9") return false;
-  return true;
-}
 
 class OwnerController {
   async getOwnerById(id: number): Promise<Owner> {
-    const owner = await ownerService.getOwnerById(id);
+    const owner = await ownerService.getOwnerById(parseRecordId(id, MESSAGES.owner.notFound));
     if (!owner) throw new AppError("NOT_FOUND", MESSAGES.owner.notFound);
     return owner;
   }
@@ -40,17 +19,15 @@ class OwnerController {
   }
 
   async searchOwnersPage(search: NameSearch): Promise<Page<Owner>> {
-    validateNameSearch(search);
-    return ownerService.searchOwnersPage(search);
+    return ownerService.searchOwnersPage(validateNameSearch(search));
   }
 
-  async createOwner(owner: Owner): Promise<void> {
-    validateOwner(owner);
-    await ownerService.createOwner(owner);
+  async createOwner(input: Owner): Promise<void> {
+    await ownerService.createOwner(parseInput(ownerSchema, input));
   }
 
-  async updateOwner(id: number, owner: Owner): Promise<void> {
-    validateOwner(owner);
+  async updateOwner(id: number, input: Owner): Promise<void> {
+    const owner = parseInput(ownerSchema, input);
     await this.getOwnerById(id); // valida existência, já faz throw se não encontrar
     await ownerService.updateOwner(id, owner);
   }
