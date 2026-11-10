@@ -34,19 +34,22 @@ app/
     migrator.ts           aplica as migrações pendentes numa transação e recria o banco do zero, sem o Expo (desde 2026-11-08)
     backupRestore.ts      atualiza a cópia de um backup pelas migrações e troca os dados do app pelos dela, sem o Expo (desde 2026-11-08)
     demoData.ts           dados de exemplo com datas em torno de hoje (desde 2026-11-08)
-    consts.ts             enums, tipos, telas, imagens da barra e tamanhos
+    navigation.ts         as telas (`Screen`) e o mapa de para onde cada uma volta, sem o React Native (desde 2026-11-09)
+    consts.ts             enums, tipos, imagens da barra e tamanhos; reexporta o `Screen`
   model/                  interfaces das tabelas e builders; Search.ts tem a busca por nome e a página com o total (desde 2026-11-09)
   repository/             SQL de cada tabela
     sql/                  os comandos de escrita, o SQL dos relatórios com data e a busca paginada por nome (searchSql.ts), que os testes também usam, sem o Expo (desde 2026-11-08)
     fetchPage.ts          roda a página e a contagem de uma busca (desde 2026-11-09)
   service/                repassa as chamadas ao repository; BackupService exporta e importa o banco
-  controller/             validação e regras de entrada; ScreenController guarda a tela atual
+  controller/             validação e regras de entrada; ScreenController guarda a tela atual e a guarda do voltar
+  validation/             um schema Zod por entidade, os campos comuns (fields.ts) e o parseInput, que vira AppError, sem o Expo (desde 2026-11-09, PR #32)
   errors/
     AppError.ts           o AppError (código e mensagem), o texto da tela e o log, sem o Expo (desde 2026-11-09)
   globals/
     messages.ts           as mensagens que o app mostra ao usuário, uma por falha (desde 2026-11-09)
-    limits.ts             limites de entrada, como o tamanho do texto da busca (desde 2026-11-09)
-  hooks/                  useScreen, useError, useAsyncAction, useAsyncData, useSearchPage, useFormState e buscas no banco para os formulários
+    limits.ts             limites de entrada, como o tamanho de cada texto (desde 2026-11-09)
+    accessibilityLabels.ts os rótulos do leitor de tela (A11Y_LABELS) (desde 2026-11-09)
+  hooks/                  useScreen, useBackNavigation, useError, useAsyncAction, useAsyncData, useSearchPage, useFormState e buscas no banco para os formulários
   utils/
     datas.ts              o tipo IsoDate ("AAAA-MM-DD"), o "hoje" no fuso do aparelho e o texto das telas, sem o Expo (desde 2026-11-08)
     dinheiro.ts           o tipo Cents, a máscara de valor e o campo de texto ↔ centavos, sem o Expo (desde 2026-11-08)
@@ -55,11 +58,11 @@ app/
     mascarar.ts           máscara de horário e de valor
     raceSpecieHelper.ts   cria raça nova, com checagem de duplicidade
   view/
-    Themes/               cores claras e escuras e o ThemeProvider
+    Themes/               a paleta clara e escura (colors.ts) e o ThemeProvider
     contexts/             data e mês selecionados no calendário
     pages/                telas: Home, Cadastros, Relatórios, Configurações e formulários
-    components/           peças das telas, agrupadas por assunto
-  assets/                 ícones e imagens (6,7 MB no total)
+    components/           peças das telas, agrupadas por assunto; Acessibilidade/ tem o IconButton e as props do leitor de tela
+  assets/                 ícones e imagens (4,9 MB no total, desde o REPO-3)
 ```
 
 ## Camadas
@@ -76,7 +79,7 @@ flowchart LR
 ```
 
 - **Telas e componentes** chamam os controllers, quase sempre dentro de `useEffect`, e passam o erro como veio ao `showError` do `useError`. As ações com carregamento usam o `useAsyncAction`, os relatórios carregam pelo `useAsyncData`, e as buscas paginadas por nome, pelo `useSearchPage`, que descarta a resposta atrasada.
-- **Controllers** validam a entrada (campos obrigatórios, telefone, porte, pacote, data `AAAA-MM-DD` e valor em centavos) e lançam `AppError` com uma mensagem de `globals/messages.ts` para cada falha.
+- **Controllers** validam a entrada e lançam `AppError` com uma mensagem de `globals/messages.ts` para cada falha. Desde o PR #32, a validação é o schema da entidade em `app/validation/`, pelo `parseInput`: texto com `trim` e tamanho máximo, id, data real, horário `HH:MM`, centavos, e-mail e telefone. O service recebe o tipo que sai do schema.
 - **Formulários** guardam o valor como o texto do campo ("80,00") e a data como `AAAA-MM-DD`. Ao salvar, o `parseMoneyInput` converte o texto em centavos, e um valor fora do formato vira a mensagem de erro da tela.
 - **Services** só repassam a chamada ao repository. Não há regra de negócio neles.
 - **Repositories** fazem o SQL com parâmetros `?` e devolvem os registros com `SELECT *`. A busca paginada por nome devolve a página e o total juntos, montados pela mesma função, com o mesmo filtro.
@@ -88,10 +91,9 @@ flowchart LR
 
 Não usa biblioteca de navegação. O `ScreenController` é um singleton que guarda a tela atual e os parâmetros e avisa os ouvintes. O hook `useScreen` assina essas mudanças, e o `App.tsx` escolhe a tela num `switch`.
 
-- Não há histórico: cada tela diz para onde volta (`TitleBar` com `returnTo`).
-- O botão voltar do Android não é tratado (não há `BackHandler`).
+- Não há histórico: o destino do voltar de cada tela vem de um mapa só, o `backRouteOf` de `config/navigation.ts` (desde 2026-11-09, BUG-8).
+- O botão voltar da tela e o do Android chamam o mesmo `requestBack()` do `ScreenController`. O `BackHandler` tem um listener só, na raiz (`useAndroidBackButton`, no `App.tsx`). Um formulário em edição registra uma guarda (`useBackGuard`), que abre a confirmação no lugar de voltar. No Calendário, o voltar fecha o app.
 - A barra de navegação inferior (`AppBar`) aparece só nas quatro telas principais.
-- Existe também um `ScreenService` com a mesma função, sem uso.
 
 ## Estado global
 
@@ -192,7 +194,9 @@ Fica em Configurações (`DatabaseTransfer` e `BackupService`):
 
 ## Tema e estilo
 
-As cores ficam em `view/Themes/ThemeProvider.tsx`, num objeto `light` e outro `dark`, e os componentes montam o estilo com `useThemedStyles(styles)`. Tamanhos de fonte, espaços e raios são escritos em cada componente. Algumas cores também (overlays, gráfico, destaque dos relatórios, interruptor do tema).
+As cores ficam em `view/Themes/colors.ts`, num objeto `light` e outro `dark`, e os componentes montam o estilo com `useThemedStyles(styles)`, do `ThemeProvider`. Desde 2026-11-09 (A11Y-1), um teste confere o contraste de 4,5:1 de cada par de texto e fundo nos dois temas. Tamanhos de fonte, espaços e raios são escritos em cada componente. Algumas cores também (overlays, gráfico, destaque dos relatórios, interruptor do tema).
+
+Acessibilidade: botão só com ícone usa o `IconButton` (ou o `ActionIconButton`), com papel, rótulo de `A11Y_LABELS` e área de toque de 48 dp, e os enfeites usam `HIDDEN_FROM_SCREEN_READER`.
 
 ## Erros
 
@@ -210,5 +214,5 @@ Desde 2026-11-09 (ERRO-1), num lugar só, em `app/errors/AppError.ts`:
 
 - `app.json`: nome "PetShop Manager", pacote `com.gabriel98989898.PetShopManager`, retrato, ícone e splash próprios.
 - `eas.json`: `preview` gera APK, `production` gera AAB. Sem versão mínima do EAS CLI e sem incremento automático de versão.
-- O script `web` existe no `package.json`, mas o app não tem suporte a web.
+- O app não tem suporte a web. O script `web` saiu do `package.json` no REPO-3, mas o bloco `web` do `app.json` continua.
 - Não há release publicada no GitHub.
