@@ -11,4 +11,4 @@ class PaymentMethodRepository {
   }
 }
 
-export const paymentMethodRepository = new PaymentMethodRepository 
+export const paymentMethodRepository = new PaymentMethodRepository();
