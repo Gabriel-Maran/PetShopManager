@@ -54,6 +54,7 @@ import ItemSelect from "../../components/Cadastro/ItemSelect";
 import FormSectionTitle from "../../components/Cadastro/FormSectionTitle";
 import SaveButton from "../../components/Cadastro/SaveButton";
 import InputDataPicker from "../../components/Cadastro/Botões/DataPicker/InputDataPicker";
+import { RADIUS, SPACING } from "../../Themes/tokens";
 
 const MODAL_INICIAL: ModalConfig = {
   visivel: false,
@@ -202,7 +203,7 @@ export default function NewOrEditAppointment() {
 
   const renderServicoItem = useCallback(
     (item: any) => (
-      <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+      <Text style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}>
         {item.servico}
       </Text>
     ),
@@ -211,7 +212,7 @@ export default function NewOrEditAppointment() {
 
   const renderPgtoItem = useCallback(
     (item: any) => (
-      <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+      <Text style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}>
         {item.tipo_pgto}
       </Text>
     ),
@@ -432,28 +433,28 @@ const styles = (colors: ThemeColors) =>
     scrollContent: {
       backgroundColor: colors.THIRD_BACKGROUND,
       flexGrow: 1,
-      marginTop: 10,
+      marginTop: SPACING[10],
     },
     escolhaItem: {
       flexDirection: "row",
       justifyContent: "space-evenly",
       width: "100%",
-      marginTop: 15,
-      marginBottom: 10,
+      marginTop: SPACING[15],
+      marginBottom: SPACING[10],
     },
     ctnCadastro: {
       flex: 1,
-      padding: 20,
+      padding: SPACING[20],
       alignItems: "center",
     },
     viewDataReq: { width: "100%", height: 28 },
     inputs: {
       width: "100%",
-      borderRadius: 10,
+      borderRadius: RADIUS[10],
       borderWidth: 1,
       borderColor: colors.BORDER_LIGHT,
       backgroundColor: colors.BACKGROUND,
       overflow: "hidden",
     },
-    ctnBtnSalvar: { marginTop: 15 },
+    ctnBtnSalvar: { marginTop: SPACING[15] },
   });
