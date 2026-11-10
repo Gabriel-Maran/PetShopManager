@@ -7,10 +7,6 @@ class OwnerService {
     return ownerRepository.getOwnerById(id);
   }
 
-  getAllOwners() {
-    return ownerRepository.getAllOwners();
-  }
-
   searchOwnersPage(search: NameSearchData) {
     return ownerRepository.searchOwnersPage(search);
   }

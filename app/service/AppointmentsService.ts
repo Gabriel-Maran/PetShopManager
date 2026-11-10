@@ -7,10 +7,6 @@ class AppointmentsService {
     return appointmentsRepository.getAppointmentById(id);
   }
 
-  getAppointmentsByDate(date: IsoDate) {
-    return appointmentsRepository.getAppointmentsByDate(date);
-  }
-
   getAppointmentsByDateWithOwnerAndPet(date: IsoDate) {
     return appointmentsRepository.getAppointmentsByDateWithOwnerAndPet(date);
   }
@@ -19,36 +15,12 @@ class AppointmentsService {
     return appointmentsRepository.getAppointmentsByDateRange(from, to);
   }
 
-  getAppointmentsByDateRangeNotDone(from: IsoDate, to: IsoDate) {
-    return appointmentsRepository.getAppointmentsByDateRangeNotDone(from, to);
-  }
-
-  getAppointmentsByPetId(petId: number) {
-    return appointmentsRepository.getAppointmentsByPetId(petId);
-  }
-
-  getPendingAppointmentsByPetId(petId: number) {
-    return appointmentsRepository.getPendingAppointmentsByPetId(petId);
-  }
-
   createAppointment(appointment: AppointmentData) {
     return appointmentsRepository.createAppointment(appointment);
   }
 
   updateAppointment(id: number, appointment: AppointmentData) {
     return appointmentsRepository.updateAppointment(id, appointment);
-  }
-
-  concludeAppointment(id: number) {
-    return appointmentsRepository.concludeAppointment(id);
-  }
-
-  deleteAppointment(id: number) {
-    return appointmentsRepository.deleteAppointmentById(id);
-  }
-
-  deleteFutureAutoAppointmentsByPetId(petId: number) {
-    return appointmentsRepository.deleteFutureAutoAppointmentsByPetId(petId);
   }
 }
 
