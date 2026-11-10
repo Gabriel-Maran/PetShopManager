@@ -1,7 +1,6 @@
 import { Platform, StatusBar } from "react-native";
 import { Pet, PetWithSpecieRaceAndOwner } from "../model/Pet";
 import { Owner } from "../model/Owner";
-import { BarChartItem } from "../view/components/Relatorios/BarChart";
 
 export const STATUS_BAR_HEIGHT =
   Platform.OS === "ios" ? 44 : (StatusBar.currentHeight ?? 24);
@@ -58,7 +57,3 @@ export type RelatorioParams = {
 };
 
 export type StatusFiltro = "ativo" | "inativo";
-
-export interface PlanoItem extends BarChartItem {
-  pacote: 2 | 4;
-}

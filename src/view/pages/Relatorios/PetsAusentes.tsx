@@ -2,16 +2,16 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
 import { useTheme } from "../../Themes/ThemeProvider";
 import BarChart from "../../components/Relatorios/BarChart";
-import {
-  petsAusentesComRemarcacao,
-  petsAusentesSemRemarcacao,
-} from "../../../utils/relatorios/petsAusentes";
+import { reportsService } from "../../../service/ReportsService";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import { useAsyncData } from "../../../hooks/useAsyncData";
 
 export default function PetsAusentes() {
   const { data, loading } = useAsyncData(() =>
-    Promise.all([petsAusentesSemRemarcacao(), petsAusentesComRemarcacao()]),
+    Promise.all([
+      reportsService.getAbsentPets(false),
+      reportsService.getAbsentPets(true),
+    ]),
   );
 
   const { colors } = useTheme();

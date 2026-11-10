@@ -7,10 +7,10 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import BarChart from "../../components/Relatorios/BarChart";
 import { useAsyncData } from "../../../hooks/useAsyncData";
-import { comparativoRemarcacao } from "../../../utils/relatorios/remarcacoes";
+import { reportsService } from "../../../service/ReportsService";
 
 export default function RemarcacoesIntervals() {
-  const { data, loading } = useAsyncData(comparativoRemarcacao);
+  const { data, loading } = useAsyncData(() => reportsService.getPetsByReschedule());
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
