@@ -171,7 +171,7 @@ export default function NewOrEditAppointment() {
   );
 
   const handleChangeEntregarPet = useCallback(
-    (value: any) => updateAppointmentsField("entregar_pet", value),
+    (value: number) => updateAppointmentsField("entregar_pet", value),
     [updateAppointmentsField],
   );
 
@@ -181,7 +181,7 @@ export default function NewOrEditAppointment() {
   );
 
   const handleChangeConcluido = useCallback(
-    (value: any) => updateAppointmentsField("concluido", value),
+    (value: number) => updateAppointmentsField("concluido", value),
     [updateAppointmentsField],
   );
 
@@ -196,7 +196,7 @@ export default function NewOrEditAppointment() {
   );
 
   const handleChangeTaPago = useCallback(
-    (value: any) => updateAppointmentsField("ta_pago", value),
+    (value: number) => updateAppointmentsField("ta_pago", value),
     [updateAppointmentsField],
   );
 

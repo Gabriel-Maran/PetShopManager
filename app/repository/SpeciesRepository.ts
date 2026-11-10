@@ -1,13 +1,11 @@
 import { getDatabase } from "../config/database";
+import type { EspeciesAtendidas } from "../config/petEnums";
 import { FIND_SPECIES_SQL } from "./sql/breedsSql";
 
-/**
- * Uma espécie: o id e o nome guardado no banco, um dos `EspeciesAtendidas`. O nome fica `string`
- * enquanto o `pegarRacasBanco` (usePet.ts) guarda as raças com este tipo.
- */
+/** Uma espécie: o id e o nome guardado no banco, um dos `EspeciesAtendidas`. */
 export type Species = {
   id: number;
-  nome: string;
+  nome: EspeciesAtendidas;
 };
 
 class SpeciesRepository {

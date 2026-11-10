@@ -12,21 +12,16 @@ export const TipoServico = {
 export type TipoServico = ValueOf<typeof TipoServico>;
 
 /** Os pacotes de remarcação, pelas semanas entre os agendamentos automáticos: o número que o banco guarda. */
-export const PACOTES_REMARCACAO = {
+export const PacoteRemarcacao = {
   Mensal: 4,
   Quinzenal: 2,
 } as const;
-export type PacoteRemarcacao = ValueOf<typeof PACOTES_REMARCACAO>;
+export type PacoteRemarcacao = ValueOf<typeof PacoteRemarcacao>;
 
-/**
- * Os pacotes com o caminho de volta, do número para o nome, como o enum numérico gerava: o formulário
- * do pet confere o pacote salvo com `valor in PacoteRemarcacao`. Os schemas usam o PACOTES_REMARCACAO.
- */
-export const PacoteRemarcacao = {
-  ...PACOTES_REMARCACAO,
-  4: "Mensal",
-  2: "Quinzenal",
-} as const;
+/** Se o valor é um dos pacotes, como o pet salvo traz do banco. */
+export function isPacoteRemarcacao(value: unknown): value is PacoteRemarcacao {
+  return Object.values(PacoteRemarcacao).some((pacote) => pacote === value);
+}
 
 export const EspeciesAtendidas = {
   CAO: "CAO",

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 import {
-  PacoteRemarcacao,
+  isPacoteRemarcacao,
   PorteAnimal,
   Screen,
   TipoServico,
@@ -46,10 +46,11 @@ import AbaInfoPet, {
   AbrirModalConfig,
 } from "../../components/Cadastro/Tabs/AbaInfoPet";
 import AbaAgendamentoPet from "../../components/Cadastro/Tabs/AbaAgendamentoPet";
+import type { PetForm } from "./petForm";
 
-const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
-  id: key,
-  nome: PorteAnimalLabel[key as keyof typeof PorteAnimalLabel],
+const portesList = Object.values(PorteAnimal).map((porte) => ({
+  id: porte,
+  nome: PorteAnimalLabel[porte],
 }));
 
 // Os nomes do dono e da raça são buscados a partir dos ids ao abrir a edição; mudam sem o usuário mexer.
@@ -75,7 +76,8 @@ export default function NewOrEditPet() {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
 
-  const { form, updateField, isDirty } = useFormState(
+  const savedPacote = params?.pet?.pacote_remarcacao;
+  const { form, updateField, isDirty } = useFormState<PetForm>(
     {
       nome: params?.pet?.nome ?? "",
       especie: params?.pet?.especie ?? 0,
@@ -91,11 +93,7 @@ export default function NewOrEditPet() {
         params?.pet?.porte && params.pet?.porte in PorteAnimal
           ? (params.pet?.porte as PorteAnimal)
           : PorteAnimal.MEDIO,
-      pacoteRemarcacao:
-        params?.pet?.pacote_remarcacao &&
-        params.pet?.pacote_remarcacao in PacoteRemarcacao
-          ? (params.pet?.pacote_remarcacao as PacoteRemarcacao)
-          : undefined,
+      pacoteRemarcacao: isPacoteRemarcacao(savedPacote) ? savedPacote : undefined,
       dataInicioPacote: params?.pet?.data_inicio_pacote ?? todayIso(),
       horario_padrao: params?.pet?.horario_padrao ?? "",
     },
@@ -277,12 +275,11 @@ export default function NewOrEditPet() {
               isEditavel={!isViewing}
               form={form}
               isNewPet={isNewPet}
-              updateField={updateField as (field: string, value: any) => void}
+              updateField={updateField}
               portesList={portesList}
               especiesList={especiesList}
               racasList={racasList ?? []}
               abrirModal={abrirModal}
-              salvarPet={salvarPet}
               visible={isCadastroPetSelecte}
             />
           </View>
@@ -291,7 +288,7 @@ export default function NewOrEditPet() {
             <AbaAgendamentoPet
               isEditavel={!isViewing}
               form={form}
-              updateField={updateField as (field: string, value: any) => void}
+              updateField={updateField}
               visible={!isCadastroPetSelecte}
             />
           </View>

@@ -16,7 +16,15 @@ import {
   updatePet,
 } from "./helpers/database.mjs";
 import { UPDATE_APPOINTMENT_SQL } from "../app/repository/sql/appointmentsSql.ts";
-import { UPDATE_PET_REMARCACAO_SQL } from "../app/repository/sql/petsSql.ts";
+
+/**
+ * Só o pacote do pet, sem o resto do cadastro, para o teste mexer apenas nas colunas que o trigger olha.
+ * O app grava o pet inteiro pelo UPDATE_PET_SQL. Parâmetros: remarcacao_ativa, pacote_remarcacao,
+ * data_inicio_pacote, valor_pacote, id.
+ */
+const UPDATE_PET_REMARCACAO_SQL = `UPDATE pets SET
+  remarcacao_ativa = ?, pacote_remarcacao = ?, data_inicio_pacote = ?, valor_pacote = ?
+  WHERE id = ?`;
 
 /** Os automáticos agrupados por mês, na ordem das datas. */
 function autoByMonth(agenda) {

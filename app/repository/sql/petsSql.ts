@@ -61,13 +61,12 @@ export const UPDATE_PET_SQL = `UPDATE pets SET
         valor_pacote = ?
        WHERE id = ?`;
 
-/** Parâmetros: remarcacao_ativa, pacote_remarcacao, data_inicio_pacote, valor_pacote, id. */
-export const UPDATE_PET_REMARCACAO_SQL = `UPDATE pets SET
-        remarcacao_ativa = ?,
-        pacote_remarcacao = ?,
-        data_inicio_pacote = ?,
-        valor_pacote = ?
-       WHERE id = ?`;
+
+/** Parâmetros: id. O pet com as colunas do modelo, sem o `nome_normalizado`, que é só da busca. */
+export const FIND_PET_SQL = `SELECT id, nome, especie, porte, raca, observacoes, dono_id, servico_padrao, valor_pacote,
+  remarcacao_ativa, pacote_remarcacao, data_inicio_pacote, horario_padrao, current_ultima_visita_data,
+  ultimo_visita_data_auto, is_ativo, criado_em
+  FROM pets WHERE id = ?`;
 
 /** Parâmetros: id. Exclusão lógica; o trigger limpa o pacote e os automáticos futuros. */
 export const DEACTIVATE_PET_SQL = `UPDATE pets SET is_ativo = 0 WHERE id = ?`;

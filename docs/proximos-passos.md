@@ -2,14 +2,7 @@
 
 Atualizado em 2026-11-09, depois da segunda rodada de quatro agentes em paralelo (PRs #35 a #38).
 
-> **Para o próximo chat:** a segunda rodada de quatro agentes em paralelo teve um PR por frente, cada um com uma zona de arquivos só dele. Nenhum arquivo aparece em dois PRs, e o conjunto foi testado junto num worktree local: typecheck limpo e 331 testes passando.
-> - [PR #35](https://github.com/Gabriel-Maran/PetShopManager/pull/35), tema e `Toggle`, no `main`;
-> - [PR #36](https://github.com/Gabriel-Maran/PetShopManager/pull/36), navegação, no `main`;
-> - [PR #37](https://github.com/Gabriel-Maran/PetShopManager/pull/37), limpeza do REPO-3, no `main`;
-> - [PR #38](https://github.com/Gabriel-Maran/PetShopManager/pull/38), validação e raças, em revisão (branch `fix/validacao-de-racas`, worktree `.claude/worktrees/validacao-racas`), sem conflito com o `main`;
-> - esta documentação, num PR próprio (branch `docs/quatro-frentes`, worktree `docs-frentes`).
->
-> O próximo passo é o Gabriel mesclar o #38 e escolher, nas "Pendências entre áreas" e nas "Sugestões das varreduras" abaixo, o que entra no PR de integração. Esse PR começa depois do #38. O patch do Expo pode entrar a partir de 2026-11-10.
+> **Para o próximo chat:** os quatro PRs da segunda rodada em paralelo (#35 a #38) e a documentação (#39) estão no `main`. As sete "Pendências entre áreas" e duas sugestões da varredura estão em revisão no PR de integração (branch `fix/pendencias-das-frentes`, worktree `.claude/worktrees/pendencias-frentes`), feito a pedido do Gabriel em 2026-11-09. O próximo passo é o Gabriel revisar esse PR. Depois vêm o patch do Expo, a partir de 2026-11-10, e as sugestões que sobraram.
 >
 > Em 2026-11-09 entraram no `main`, antes desta rodada: ERRO-1 (PR #22), importação cancelada (#23), BUG-6 (#24), BUG-5 (#25), a ordem da busca (#26), os nomes de desativar (#27), o resto do BKP-1 (#28), REPO-3 (#29), BUG-8 (#30), A11Y-1 (#31), VALID-1 (#32), a documentação da primeira rodada (#33) e as pendências entre áreas (#34). A Parte 3 foi aceita com o merge do PR #21, em 2026-11-08.
 >
@@ -23,34 +16,28 @@ Atualizado em 2026-11-09, depois da segunda rodada de quatro agentes em paralelo
 >
 > Worktrees: os de `docs-paralelos` e `pendencias` (PRs #33 e #34, já no `main`) foram removidos em 2026-11-09. O `integracao` (branch local `fix/integracao-das-frentes`, que junta as quatro branches) serve só para testar o conjunto, e nunca vai para o GitHub. Para tirar um worktree, primeiro a junction, com `cmd /c rmdir`, e depois `git worktree remove`.
 
-## Pendências entre áreas (2026-11-09, PRs #35 a #38)
+## Pendências entre áreas e varredura (2026-11-09, PRs #35 a #38)
 
-Ajustes que os agentes acharam fora da própria zona e não fizeram. Esperam a escolha do Gabriel, para um PR de integração depois do merge dos quatro.
+Feitas no PR de integração, a pedido do Gabriel:
 
-1. **Raça da espécie anterior (bug, importante com o #38):** ao trocar a espécie, a `AbaInfoPet` (linhas 121 a 123) limpa só o `raca_nome`, e o id em `raca` continua o da raça da espécie anterior. Com o #38, salvar nessa situação mostra "A raça escolhida é de outra espécie". Antes, a raça errada era gravada sem aviso. O ajuste é limpar o `raca` junto. Assim o pet cai no "Escolha a raça do pet.".
-2. **Remarcação desfeita conta como mudança (#36):** ligar e desligar a remarcação na `AbaAgendamentoPet` (linhas 75 a 78) põe `dataInicioPacote` em `undefined`. Como num pet novo esse campo começa com `todayIso()`, o voltar continua pedindo confirmação depois de desfazer.
+1. **Raça da espécie anterior (bug):** trocar a espécie na `AbaInfoPet` limpa a raça escolhida. O efeito que rodava a cada render virou o handler da escolha da espécie.
+2. **Remarcação desfeita:** ligar e desligar a remarcação recomeça o pacote com a data de hoje, e não vazia. O formulário desfeito volta a ficar igual ao que abriu, e o voltar não pede confirmação.
 3. **Tipos:**
-   - o `updateField: (field: string, value: any)` da `AbaInfoPet` e da `AbaAgendamentoPet` obriga dois casts com `any` no `NewOrEditPet`;
-   - os `handleChange*` do `NewOrEditAppointment` recebem `value: any`, e o certo é `number`;
-   - o `usePet` guarda as raças como `Species[]`, e o certo é `Breed[]`. Depois disso, o `Species.nome` volta a ser `EspeciesAtendidas`.
-4. **Pacote de remarcação:** o `NewOrEditPet` confere o pacote com `in PacoteRemarcacao`, que depende do caminho de volta do número para o nome. Com o `PACOTES_REMARCACAO`, esse caminho sai do `petEnums.ts`, e a `AbaAgendamentoPet` dispensa o `filter`.
-5. **Tema (#35):**
-   - o `FilterPanel` (linhas 26 e 66) passa a usar `withAlpha(accent, TINT_OPACITY.ACTIVE_FILTER)` no lugar do sufixo `"10"`;
-   - o `shadowColor: "#000"` vira `colors.SHADOW` em 10 arquivos: os seis relatórios, `Configuracoes`, `DatabaseTransfer`, `ModalSelectList` e `ModalCreateRacePet`.
-6. **Sobras:**
-   - a prop `salvarPet` que o `NewOrEditPet` passa e a `AbaInfoPet` não usa;
-   - o comentário do `demoData.ts` que cita os enums de `consts.ts`;
-   - o `UPDATE_PET_REMARCACAO_SQL`, que só um teste usa.
-7. **Flags no `tsconfig.json`:** ligar `noUnusedLocals` e `noUnusedParameters`. Com os quatro PRs juntos, o `tsc` já não acusa nada.
+   - o formulário do pet tem um tipo só (`PetForm`, em `pages/Pet/petForm.ts`), e o `UpdateField<T>` do `useFormState` tipa o `updateField` das duas abas. Saíram os casts com `any`;
+   - os `handleChange*` do agendamento recebem `number`;
+   - o `usePet` guarda as raças como `Breed[]`, e o `Species.nome` voltou a ser `EspeciesAtendidas`.
+4. **Pacote de remarcação:** o `PacoteRemarcacao` é só `{ Mensal: 4, Quinzenal: 2 }`, como os outros valores do pet, e o `isPacoteRemarcacao` confere o pacote salvo. Saíram o caminho de volta e o `PACOTES_REMARCACAO`.
+5. **Tema:** o `FilterPanel` usa o `withAlpha`, e as 10 sombras usam `colors.SHADOW`.
+6. **Sobras:** saíram a prop `salvarPet` da `AbaInfoPet` e o `UPDATE_PET_REMARCACAO_SQL` do app, que agora fica só no teste de remarcação. O comentário do `demoData.ts` aponta para o `petEnums.ts`.
+7. **`tsconfig.json`:** `noUnusedLocals` e `noUnusedParameters` ligados.
+
+Da varredura, também no PR:
+- o `ThemeToggle` grava o tema pelo `useAsyncAction`, e uma falha aparece no modal de erro;
+- o `getPetById` lê as colunas pelo nome (`FIND_PET_SQL`), com testes em `tests/pets.test.mjs`.
 
 ## Sugestões das varreduras (2026-11-09)
 
-Da varredura final dos PRs #35 a #38:
-
-- o `ThemeToggle` grava o tema sem `catch` (`updateConfig`, linha 76). Se a gravação falhar, a promise fica sem tratamento e o tema salvo diverge do que aparece na tela. O certo é passar pelo `useAsyncAction`, com uma mensagem de `MESSAGES`;
-- o `getPetById` do `PetRepository` ainda usa `SELECT *`, e as colunas deveriam ser explícitas, como no resto;
-- o voltar do agendamento e do pet pode pedir confirmação sem mudança, se algum efeito da tela mudar um campo ao abrir. Conferir no aparelho com o roteiro do #36.
-
+- o voltar do agendamento e do pet pode pedir confirmação sem mudança, se algum efeito da tela mudar um campo ao abrir. Conferir no aparelho, com o roteiro do #36.
 Das varreduras anteriores, ainda não aplicadas:
 
 - `CHECK` no banco numa versão 4 do esquema, tratando antes o dado antigo;

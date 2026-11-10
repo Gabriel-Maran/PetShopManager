@@ -1,7 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
-import { useEffect, useRef } from "react";
 
 import { PacoteRemarcacao, TipoServico } from "../../../../config/consts";
+import type { UpdateField } from "../../../../hooks/useFormState";
+import type { PetForm } from "../../../pages/Pet/petForm";
 import {
   MAX_MONEY_INPUT_LENGTH,
   MAX_TIME_LENGTH,
@@ -12,7 +13,7 @@ import {
   useThemedStyles,
 } from "../../../Themes/ThemeProvider";
 
-import { type IsoDate, todayIso } from "../../../../utils/datas";
+import { todayIso } from "../../../../utils/datas";
 import { mascararHorario } from "../../../../utils/mascarar";
 import { maskMoneyInput } from "../../../../utils/dinheiro";
 
@@ -27,26 +28,15 @@ const tiposServicoList = Object.values(TipoServico).map((v) => ({
   nome: v,
 }));
 
-const pacotesRemarcacaoList = Object.values(PacoteRemarcacao)
-  .filter((v): v is PacoteRemarcacao => typeof v === "number")
-  .map((v) => ({
-    id: v,
-    nome:
-      v === PacoteRemarcacao.Mensal
-        ? "Mensal (4 semanas)"
-        : "Quinzenal (2 semanas)",
-  }));
+const pacotesRemarcacaoList = Object.values(PacoteRemarcacao).map((v) => ({
+  id: v,
+  nome:
+    v === PacoteRemarcacao.Mensal ? "Mensal (4 semanas)" : "Quinzenal (2 semanas)",
+}));
 
 interface AbaAgendamentoPetProps {
-  form: {
-    valorPacote: string;
-    servicoPadrao: TipoServico;
-    remarcAtiva: boolean;
-    pacoteRemarcacao?: PacoteRemarcacao;
-    dataInicioPacote?: IsoDate;
-    horario_padrao?: string;
-  };
-  updateField: (field: string, value: any) => void;
+  form: PetForm;
+  updateField: UpdateField<PetForm>;
   isEditavel: boolean;
   visible: boolean;
 }
@@ -60,23 +50,15 @@ export default function AbaAgendamentoPet({
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
 
-  // Controla se é a primeira renderização para não limpar dados ao abrir edição
-  const isMounted = useRef(false);
-
-  useEffect(() => {
-    // Pula o primeiro render — evita apagar pacoteRemarcacao e dataInicioPacote
-    // carregados do pet existente ao entrar na tela de edição
-    if (!isMounted.current) {
-      isMounted.current = true;
-      return;
-    }
-
-    // Só limpa quando o usuário REALMENTE altera a flag de remarcação
+  // Ligar ou desligar a remarcação recomeça o pacote com os valores de um pet novo. A data volta para
+  // hoje, e não para vazio, para o formulário desfeito ficar igual ao que abriu.
+  const handleRemarcacaoChange = (value: number) => {
+    updateField("remarcAtiva", value === 1);
     updateField("pacoteRemarcacao", undefined);
-    updateField("dataInicioPacote", undefined);
+    updateField("dataInicioPacote", todayIso());
     updateField("valorPacote", "");
     updateField("horario_padrao", "");
-  }, [form.remarcAtiva]);
+  };
 
   if (visible == false) {
     return;
@@ -104,7 +86,7 @@ export default function AbaAgendamentoPet({
       <Toggle
         image={require("../../../../assets/outros/auto_gen.png")}
         value={form.remarcAtiva ? 1 : 0}
-        onChange={(value) => updateField("remarcAtiva", value === 1)}
+        onChange={handleRemarcacaoChange}
         title="Remarcação automática ativa"
         subtitle=""
         hasBorderBottom={true}
@@ -145,7 +127,7 @@ export default function AbaAgendamentoPet({
           />
           <InputDataPicker
             image={require("../../../../assets/nav_bar/calendario.png")}
-            item={form.dataInicioPacote ?? todayIso()}
+            item={form.dataInicioPacote}
             setItem={(v) => updateField("dataInicioPacote", v)}
             titleName={"Data do agendamento"}
             isEditavel={isEditavel}

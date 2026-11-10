@@ -7,7 +7,7 @@ import * as z from "zod";
 import { parseInput, parseRecordId } from "../app/validation/parseInput.ts";
 import { ownerSchema } from "../app/validation/ownerSchema.ts";
 import { petSchema } from "../app/validation/petSchema.ts";
-import { PACOTES_REMARCACAO, PacoteRemarcacao, PorteAnimal, TipoServico } from "../app/config/petEnums.ts";
+import { isPacoteRemarcacao, PacoteRemarcacao, PorteAnimal, TipoServico } from "../app/config/petEnums.ts";
 import { appointmentSchema } from "../app/validation/appointmentSchema.ts";
 import { breedSchema } from "../app/validation/breedSchema.ts";
 import { breedCountSchema, breedSearchSchema, nameSearchSchema } from "../app/validation/searchSchema.ts";
@@ -317,14 +317,17 @@ describe("dono", () => {
 // ─── Pet ────────────────────────────────────────────────────────────────────
 
 describe("pet", () => {
-  test("os valores do pet vêm de petEnums.ts, e o pacote guarda o caminho de volta do enum numérico", () => {
+  test("os valores do pet vêm de petEnums.ts", () => {
     assert.deepEqual(Object.values(PorteAnimal), ["PEQUENO", "MEDIO", "GRANDE", "GRANDAO"]);
     assert.deepEqual(Object.values(TipoServico), ["Banho", "Banho e Tosa", "Banho e Higiênica"]);
-    assert.deepEqual(PACOTES_REMARCACAO, { Mensal: 4, Quinzenal: 2 });
-    // O formulário do pet confere o pacote salvo com `valor in PacoteRemarcacao`, como fazia com o enum.
-    assert.ok(4 in PacoteRemarcacao && 2 in PacoteRemarcacao);
-    assert.ok(!(3 in PacoteRemarcacao));
-    assert.deepEqual(Object.values(PacoteRemarcacao).filter((v) => typeof v === "number"), [4, 2]);
+    assert.deepEqual(PacoteRemarcacao, { Mensal: 4, Quinzenal: 2 });
+  });
+
+  test("isPacoteRemarcacao aceita só 4 e 2, como o pet salvo traz do banco", () => {
+    assert.ok(isPacoteRemarcacao(4) && isPacoteRemarcacao(2));
+    for (const entrada of [3, 0, -4, "4", "Mensal", null, undefined, NaN, {}, [4]]) {
+      assert.equal(isPacoteRemarcacao(entrada), false, String(entrada));
+    }
   });
 
   test("aceita o pet sem pacote e o pet com o pacote completo", () => {

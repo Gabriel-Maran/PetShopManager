@@ -129,7 +129,7 @@ const styles = (colors: ThemeColors) =>
       borderRadius: 16,
       overflow: "hidden",
       elevation: 6,
-      shadowColor: "#000",
+      shadowColor: colors.SHADOW,
       shadowOffset: { width: 0, height: 3 },
       shadowOpacity: 0.2,
       shadowRadius: 6,
