@@ -412,3 +412,14 @@ Decisão do PR:
 - Limpar a raça ao trocar a espécie e recomeçar o pacote ao ligar a remarcação saíram de `useEffect` e foram para o handler do toque. O efeito rodava também ao abrir a tela e dependia de uma ref para pular o primeiro render.
 - O `UPDATE_PET_REMARCACAO_SQL` foi para o teste, que é o único que o usa. O app grava o pet inteiro.
 Motivo: as regras pedem TypeScript estrito, sem `any`, e campos explícitos nas consultas. Com tudo no `main`, as flags de sobras do `tsconfig.json` já passam.
+
+**Arquitetura sem os parceiros (perguntas 14, 17, 19, 20 e 21).**
+Contexto: a Parte 7 mexe em quase todos os arquivos, e o plano previa combinar com o João Pedro e o Gustavo. O Gabriel avisou que os dois não estão mexendo no código e não vão mexer: a refatoração é feita só por ele e pelo Claude, e os dois sabem que ela vai para o portfólio dos três.
+Decisão do Gabriel, nas recomendações do Claude:
+- P17 (ARQ-1): a pasta `app/` vira `src/`.
+- P21 (NOMES-1): identificadores em inglês, depois do ARQ-1, um PR por camada.
+- P14 (ARQ-2): a remarcação sai dos triggers e vira uma função TypeScript testada; os triggers ficam com a integridade e a cascata.
+- P20 (SEG-1): o backup automático do Android é desligado; fica a exportação manual do app.
+- P19 (TEMA-1): na primeira abertura, o app segue o tema do sistema; depois, vale a escolha do usuário.
+- A Parte 7 não espera mais a conversa com os parceiros. O React Navigation do ARQ-3 entra com a análise de segurança de costume, e quem instala é o Gabriel.
+Motivo: sem outra pessoa no código, mover pastas e renomear não gera conflito. A pasta `src/` evita o conflito com o expo-router; os nomes em inglês seguem a regra do Gabriel; a regra da remarcação fica legível e testável; e o banco, com nome, telefone e endereço de clientes, não vai para o Drive sem ninguém pedir.
