@@ -3,25 +3,12 @@
 // parseInput mostra a genérica. Sem depender do Expo, para os testes rodarem no Node, que exige a
 // extensão .ts nos imports.
 import * as z from "zod";
-import { type IsoDate, isIsoDate } from "../utils/datas.ts";
+import { isIsoDate } from "../utils/datas.ts";
 import { isValidCents } from "../utils/dinheiro.ts";
 import { MESSAGES } from "../globals/messages.ts";
 
 /** Horas de 00 a 23 e minutos de 00 a 59, sempre com dois dígitos: "09:30". */
 const HOUR_MINUTE = /^([01]\d|2[0-3]):[0-5]\d$/;
-
-const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-const isLeapYear = (year: number) => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-
-/** "AAAA-MM-DD" de um dia que existe: 2028-02-29 passa, 2026-02-30 e 2026-13-01 não. Sem fuso. */
-function isCalendarDate(text: string): text is IsoDate {
-  if (!isIsoDate(text)) return false;
-  const [year, month, day] = text.split("-").map(Number);
-  if (month < 1 || month > 12) return false;
-  const lastDay = month === 2 && isLeapYear(year) ? 29 : DAYS_IN_MONTH[month - 1];
-  return day >= 1 && day <= lastDay;
-}
 
 /** Vazio, só espaços, nulo ou ausente viram null; texto chega ao schema sem espaço nas pontas. */
 function blankToNull(value: unknown): unknown {
@@ -61,7 +48,7 @@ export function choice<const T extends z.core.util.EnumLike>(values: T, field: s
 }
 
 /** Data sem hora, no formato do banco ("AAAA-MM-DD"), de um dia que existe no calendário. */
-export const isoDate = (message: string) => z.string().refine(isCalendarDate, message);
+export const isoDate = (message: string) => z.string().refine(isIsoDate, message);
 
 /** Horário "HH:MM", de 00:00 a 23:59. Com `required`, o vazio tem a sua mensagem. */
 export function time(invalid: string, required?: string) {

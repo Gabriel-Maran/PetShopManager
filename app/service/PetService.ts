@@ -1,40 +1,25 @@
 import { petRepository } from "../repository/PetRepository";
-import type { PetData, PetRemarcacaoData } from "../validation/petSchema";
+import type { PetData } from "../validation/petSchema";
 import type { NameSearchData } from "../validation/searchSchema";
+import { speciesService } from "./SpeciesService";
 
 class PetService {
   getPetById(id: number) {
     return petRepository.getPetById(id);
   }
 
-  getAllPets() {
-    return petRepository.getAllPets();
-  }
-
   searchPetsPage(search: NameSearchData) {
     return petRepository.searchPetsPage(search);
   }
 
-  getPetsByOwnerId(ownerId: number) {
-    return petRepository.getPetsByOwnerId(ownerId);
-  }
-
-  createPet(pet: PetData) {
+  async createPet(pet: PetData) {
+    await speciesService.assertBreedOfSpecies(pet.raca, pet.especie);
     return petRepository.createPet(pet);
   }
 
-  updatePet(id: number, pet: PetData) {
+  async updatePet(id: number, pet: PetData) {
+    await speciesService.assertBreedOfSpecies(pet.raca, pet.especie);
     return petRepository.updatePet(id, pet);
-  }
-
-  updateRemarcacao(id: number, remarcacao: PetRemarcacaoData) {
-    return petRepository.updateRemarcacao(
-      id,
-      remarcacao.remarcacao_ativa,
-      remarcacao.pacote_remarcacao,
-      remarcacao.data_inicio_pacote,
-      remarcacao.valor_pacote,
-    );
   }
 
   deactivatePet(id: number) {

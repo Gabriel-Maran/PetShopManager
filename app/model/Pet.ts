@@ -1,4 +1,4 @@
-import { PacoteRemarcacao, PorteAnimal, TipoServico } from "../config/consts";
+import { PacoteRemarcacao, PorteAnimal, TipoServico } from "../config/petEnums";
 import type { IsoDate } from "../utils/datas";
 import type { Cents } from "../utils/dinheiro";
 

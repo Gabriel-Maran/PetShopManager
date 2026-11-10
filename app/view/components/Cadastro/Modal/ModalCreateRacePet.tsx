@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Modal,
   View,
@@ -17,7 +17,7 @@ import {
   useThemedStyles,
 } from "../../../Themes/ThemeProvider";
 import { useAsyncAction } from "../../../../hooks/useAsyncAction";
-import { createRaceService } from "../../../../utils/raceSpecieHelper";
+import { speciesController } from "../../../../controller/SpeciesController";
 import InputSelect from "../../InputSelect";
 import { EspeciesAtendidasLabel } from "../../../../config/consts";
 import InputInfo from "../InputInfo";
@@ -62,10 +62,10 @@ export default function ModalCadastroRaca({
     onClose();
   }
 
-  // A validação da espécie e do nome fica no createRaceService, com as mensagens de cada falha.
+  // A validação da espécie e do nome fica no controller e no service, com as mensagens de cada falha.
   const { run: handleSubmit, isRunning: loading } = useAsyncAction(async () => {
     const especieId = especieSelecionada?.id ?? 0;
-    const id = await createRaceService({ especieId, nomeRaca });
+    const id = await speciesController.createBreed({ especieId, nomeRaca });
     onSuccess(id, nomeRaca.trim(), especieId);
     handleClose();
   });

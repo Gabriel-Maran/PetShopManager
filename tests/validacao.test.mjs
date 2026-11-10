@@ -3,11 +3,11 @@
 // em inglês, chega à tela.
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import * as z from "zod";
 import { parseInput, parseRecordId } from "../app/validation/parseInput.ts";
 import { ownerSchema } from "../app/validation/ownerSchema.ts";
-import { createPetSchemas } from "../app/validation/petSchema.ts";
+import { petSchema } from "../app/validation/petSchema.ts";
+import { PACOTES_REMARCACAO, PacoteRemarcacao, PorteAnimal, TipoServico } from "../app/config/petEnums.ts";
 import { appointmentSchema } from "../app/validation/appointmentSchema.ts";
 import { breedSchema } from "../app/validation/breedSchema.ts";
 import { breedCountSchema, breedSearchSchema, nameSearchSchema } from "../app/validation/searchSchema.ts";
@@ -28,15 +28,6 @@ import {
 import { createDatabase } from "./helpers/database.mjs";
 import { INSERT_OWNER_SQL } from "../app/repository/sql/ownersSql.ts";
 import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
-
-// Os mesmos valores dos enums de consts.ts, que importa o React Native e não roda no Node. O pacote é um
-// enum numérico: o TypeScript gera também o caminho de volta, do número para o nome.
-const PET_ENUMS = {
-  porte: { PEQUENO: "PEQUENO", MEDIO: "MEDIO", GRANDE: "GRANDE", GRANDAO: "GRANDAO" },
-  servico: { Banho: "Banho", BanhoETosa: "Banho e Tosa", BanhoEHigienica: "Banho e Higiênica" },
-  pacote: { Mensal: 4, Quinzenal: 2, 4: "Mensal", 2: "Quinzenal" },
-};
-const petSchemas = createPetSchemas(PET_ENUMS);
 
 // ─── Apoio ──────────────────────────────────────────────────────────────────
 
@@ -65,16 +56,6 @@ function captureConsoleError(t, work) {
   work();
   return spy.mock.calls.map((call) => call.arguments);
 }
-
-/** Os valores de um enum de consts.ts, lidos do código-fonte. */
-function enumFromSource(source, name) {
-  const body = new RegExp(`export enum ${name} \\{([^}]*)\\}`).exec(source)[1];
-  const entries = [...body.matchAll(/(\w+)\s*=\s*("[^"]*"|\d+)/g)];
-  return Object.fromEntries(entries.map(([, key, value]) => [key, JSON.parse(value)]));
-}
-
-/** Só as chaves de nome do enum, sem o caminho de volta do enum numérico. */
-const forwardEntries = (values) => Object.fromEntries(Object.entries(values).filter(([key]) => isNaN(Number(key))));
 
 const owner = (fields = {}) => ({
   nome: "Ana Souza",
@@ -183,7 +164,7 @@ describe("parseInput", () => {
       [appointmentSchema, appointment({ valor: "80,00" })],
       [appointmentSchema, appointment({ pet_id: "1" })],
       [appointmentSchema, appointment({ data: 20261109 })],
-      [petSchemas.pet, pet({ especie: 1.5 })],
+      [petSchema, pet({ especie: 1.5 })],
     ];
     for (const [schema, input] of wrongTypes) {
       const error = errorOf(schema, input);
@@ -198,8 +179,8 @@ describe("parseInput", () => {
       [ownerSchema, null],
       [ownerSchema, owner({ nome: ["Ana"] })],
       [ownerSchema, owner({ email: "x@" })],
-      [petSchemas.pet, pet({ porte: { $ne: null } })],
-      [petSchemas.pet, petWithPackage({ pacote_remarcacao: null })],
+      [petSchema, pet({ porte: { $ne: null } })],
+      [petSchema, petWithPackage({ pacote_remarcacao: null })],
       [appointmentSchema, appointment({ hora: "25:00" })],
       [appointmentSchema, appointment({ concluido: true })],
       [nameSearchSchema, nameSearch({ page: "0" })],
@@ -336,30 +317,33 @@ describe("dono", () => {
 // ─── Pet ────────────────────────────────────────────────────────────────────
 
 describe("pet", () => {
-  test("os enums do teste são os mesmos de consts.ts", () => {
-    const source = readFileSync(new URL("../app/config/consts.ts", import.meta.url), "utf8");
-    assert.deepEqual(enumFromSource(source, "PorteAnimal"), PET_ENUMS.porte);
-    assert.deepEqual(enumFromSource(source, "TipoServico"), PET_ENUMS.servico);
-    assert.deepEqual(enumFromSource(source, "PacoteRemarcacao"), forwardEntries(PET_ENUMS.pacote));
+  test("os valores do pet vêm de petEnums.ts, e o pacote guarda o caminho de volta do enum numérico", () => {
+    assert.deepEqual(Object.values(PorteAnimal), ["PEQUENO", "MEDIO", "GRANDE", "GRANDAO"]);
+    assert.deepEqual(Object.values(TipoServico), ["Banho", "Banho e Tosa", "Banho e Higiênica"]);
+    assert.deepEqual(PACOTES_REMARCACAO, { Mensal: 4, Quinzenal: 2 });
+    // O formulário do pet confere o pacote salvo com `valor in PacoteRemarcacao`, como fazia com o enum.
+    assert.ok(4 in PacoteRemarcacao && 2 in PacoteRemarcacao);
+    assert.ok(!(3 in PacoteRemarcacao));
+    assert.deepEqual(Object.values(PacoteRemarcacao).filter((v) => typeof v === "number"), [4, 2]);
   });
 
   test("aceita o pet sem pacote e o pet com o pacote completo", () => {
-    const withoutPackage = parseInput(petSchemas.pet, pet());
+    const withoutPackage = parseInput(petSchema, pet());
     assert.equal(withoutPackage.observacoes, null);
     assert.equal(withoutPackage.pacote_remarcacao, null);
     assert.equal(withoutPackage.valor_pacote, null);
 
-    const withPackage = parseInput(petSchemas.pet, petWithPackage());
+    const withPackage = parseInput(petSchema, petWithPackage());
     assert.equal(withPackage.pacote_remarcacao, 4);
     assert.equal(withPackage.valor_pacote, 32_000);
     assert.equal(withPackage.horario_padrao, "09:30");
   });
 
   test("nome: obrigatório e até o limite", () => {
-    assertRejects(petSchemas.pet, pet({ nome: "  " }), MESSAGES.pet.nameRequired);
-    assert.doesNotThrow(() => parseInput(petSchemas.pet, pet({ nome: "a".repeat(MAX_PET_NAME_LENGTH) })));
+    assertRejects(petSchema, pet({ nome: "  " }), MESSAGES.pet.nameRequired);
+    assert.doesNotThrow(() => parseInput(petSchema, pet({ nome: "a".repeat(MAX_PET_NAME_LENGTH) })));
     assertRejects(
-      petSchemas.pet,
+      petSchema,
       pet({ nome: "a".repeat(MAX_PET_NAME_LENGTH + 1) }),
       MESSAGES.textTooLong("O nome do pet", MAX_PET_NAME_LENGTH),
     );
@@ -367,33 +351,33 @@ describe("pet", () => {
 
   test("espécie, dono e raça precisam de um id escolhido", () => {
     for (const value of [0, -3]) {
-      assertRejects(petSchemas.pet, pet({ especie: value }), MESSAGES.pet.speciesRequired);
-      assertRejects(petSchemas.pet, pet({ dono_id: value }), MESSAGES.pet.ownerRequired);
-      assertRejects(petSchemas.pet, pet({ raca: value }), MESSAGES.pet.breedRequired);
+      assertRejects(petSchema, pet({ especie: value }), MESSAGES.pet.speciesRequired);
+      assertRejects(petSchema, pet({ dono_id: value }), MESSAGES.pet.ownerRequired);
+      assertRejects(petSchema, pet({ raca: value }), MESSAGES.pet.breedRequired);
     }
   });
 
   test("porte e serviço padrão só aceitam os valores da lista, e a mensagem mostra quais", () => {
     for (const porte of ["pequeno", "ENORME", "", null]) {
       assertRejects(
-        petSchemas.pet,
+        petSchema,
         pet({ porte }),
         MESSAGES.invalidOption("Porte", ["PEQUENO", "MEDIO", "GRANDE", "GRANDAO"]),
         String(porte),
       );
     }
     assertRejects(
-      petSchemas.pet,
+      petSchema,
       pet({ servico_padrao: "Tosa" }),
       MESSAGES.invalidOption("Serviço padrão", ["Banho", "Banho e Tosa", "Banho e Higiênica"]),
     );
   });
 
   test("pacote: só 4 (mensal) ou 2 (quinzenal); o nome do enum não passa como valor", () => {
-    assert.equal(parseInput(petSchemas.pet, petWithPackage({ pacote_remarcacao: 2 })).pacote_remarcacao, 2);
+    assert.equal(parseInput(petSchema, petWithPackage({ pacote_remarcacao: 2 })).pacote_remarcacao, 2);
     for (const pacote_remarcacao of [3, 0, "Mensal", "4"]) {
       assertRejects(
-        petSchemas.pet,
+        petSchema,
         petWithPackage({ pacote_remarcacao }),
         MESSAGES.invalidOption("Pacote de remarcação", [4, 2]),
         String(pacote_remarcacao),
@@ -402,30 +386,30 @@ describe("pet", () => {
   });
 
   test("com a remarcação ligada, pacote, valor e início são obrigatórios, cada um com a sua mensagem", () => {
-    assertRejects(petSchemas.pet, petWithPackage({ pacote_remarcacao: null }), MESSAGES.pet.packageRequired);
-    assertRejects(petSchemas.pet, petWithPackage({ valor_pacote: undefined }), MESSAGES.pet.packageValueRequired);
-    assertRejects(petSchemas.pet, petWithPackage({ data_inicio_pacote: "" }), MESSAGES.pet.packageStartRequired);
+    assertRejects(petSchema, petWithPackage({ pacote_remarcacao: null }), MESSAGES.pet.packageRequired);
+    assertRejects(petSchema, petWithPackage({ valor_pacote: undefined }), MESSAGES.pet.packageValueRequired);
+    assertRejects(petSchema, petWithPackage({ data_inicio_pacote: "" }), MESSAGES.pet.packageStartRequired);
   });
 
   test("com a remarcação desligada, o pacote pode ficar vazio", () => {
-    const data = parseInput(petSchemas.pet, pet({ pacote_remarcacao: undefined, data_inicio_pacote: null }));
+    const data = parseInput(petSchema, pet({ pacote_remarcacao: undefined, data_inicio_pacote: null }));
     assert.equal(data.data_inicio_pacote, null);
   });
 
   test("valor do pacote: centavos inteiros e sem sinal", () => {
-    assert.equal(parseInput(petSchemas.pet, petWithPackage({ valor_pacote: 0 })).valor_pacote, 0);
+    assert.equal(parseInput(petSchema, petWithPackage({ valor_pacote: 0 })).valor_pacote, 0);
     for (const valor_pacote of [-1, 120.5, Number.MAX_SAFE_INTEGER + 1]) {
-      assertRejects(petSchemas.pet, petWithPackage({ valor_pacote }), MESSAGES.money.invalid, String(valor_pacote));
+      assertRejects(petSchema, petWithPackage({ valor_pacote }), MESSAGES.money.invalid, String(valor_pacote));
     }
   });
 
   test("início do pacote: um dia que existe no calendário", () => {
     for (const data_inicio_pacote of ["2028-02-29", "2026-12-31", "2026-01-01"]) {
-      assert.doesNotThrow(() => parseInput(petSchemas.pet, petWithPackage({ data_inicio_pacote })));
+      assert.doesNotThrow(() => parseInput(petSchema, petWithPackage({ data_inicio_pacote })));
     }
     for (const data_inicio_pacote of ["2026-02-30", "2026-02-29", "2100-02-29", "2026-04-31", "2026-13-01", "2026-00-10", "2026-01-00", "09/11/2026", "2026-1-9"]) {
       assertRejects(
-        petSchemas.pet,
+        petSchema,
         petWithPackage({ data_inicio_pacote }),
         MESSAGES.date.invalid,
         data_inicio_pacote,
@@ -435,48 +419,26 @@ describe("pet", () => {
 
   test("horário padrão: HH:MM real, e vazio fica 00:00, como no banco", () => {
     for (const horario_padrao of ["", "  ", null, undefined]) {
-      assert.equal(parseInput(petSchemas.pet, pet({ horario_padrao })).horario_padrao, "00:00");
+      assert.equal(parseInput(petSchema, pet({ horario_padrao })).horario_padrao, "00:00");
     }
-    assert.equal(parseInput(petSchemas.pet, pet({ horario_padrao: "23:59" })).horario_padrao, "23:59");
+    assert.equal(parseInput(petSchema, pet({ horario_padrao: "23:59" })).horario_padrao, "23:59");
     for (const horario_padrao of ["9", "9:30", "24:00", "12:60", "0930", "09h30"]) {
-      assertRejects(petSchemas.pet, pet({ horario_padrao }), MESSAGES.pet.defaultTimeInvalid, horario_padrao);
+      assertRejects(petSchema, pet({ horario_padrao }), MESSAGES.pet.defaultTimeInvalid, horario_padrao);
     }
   });
 
   test("observação: opcional e até o limite", () => {
-    assert.doesNotThrow(() => parseInput(petSchemas.pet, pet({ observacoes: "a".repeat(MAX_NOTES_LENGTH) })));
+    assert.doesNotThrow(() => parseInput(petSchema, pet({ observacoes: "a".repeat(MAX_NOTES_LENGTH) })));
     assertRejects(
-      petSchemas.pet,
+      petSchema,
       pet({ observacoes: "a".repeat(MAX_NOTES_LENGTH + 1) }),
       MESSAGES.textTooLong("A observação do pet", MAX_NOTES_LENGTH),
     );
   });
 
   test("remarcação ativa e ativo só aceitam 0 ou 1", () => {
-    assertRejects(petSchemas.pet, pet({ remarcacao_ativa: 2 }), MESSAGES.invalidFlag("Remarcação ativa"));
-    assertRejects(petSchemas.pet, pet({ is_ativo: "1" }), MESSAGES.invalidFlag("Ativo"));
-  });
-
-  test("a troca só do pacote segue as mesmas regras e descarta o resto", () => {
-    const data = parseInput(petSchemas.remarcacao, {
-      remarcacao_ativa: 1,
-      pacote_remarcacao: 2,
-      valor_pacote: 15_000,
-      data_inicio_pacote: "2026-11-09",
-      nome: "não entra",
-    });
-    assert.deepEqual(data, {
-      remarcacao_ativa: 1,
-      pacote_remarcacao: 2,
-      valor_pacote: 15_000,
-      data_inicio_pacote: "2026-11-09",
-    });
-    assertRejects(
-      petSchemas.remarcacao,
-      { remarcacao_ativa: 1, pacote_remarcacao: 2, valor_pacote: 15_000 },
-      MESSAGES.pet.packageStartRequired,
-    );
-    assert.doesNotThrow(() => parseInput(petSchemas.remarcacao, { remarcacao_ativa: 0 }));
+    assertRejects(petSchema, pet({ remarcacao_ativa: 2 }), MESSAGES.invalidFlag("Remarcação ativa"));
+    assertRejects(petSchema, pet({ is_ativo: "1" }), MESSAGES.invalidFlag("Ativo"));
   });
 });
 
@@ -638,9 +600,9 @@ describe("entrada maliciosa", () => {
       [ownerSchema, owner({ telefone: huge }), MESSAGES.owner.phoneInvalid],
       [ownerSchema, owner({ email: `${huge}@example.com` }), MESSAGES.textTooLong("O e-mail", MAX_EMAIL_LENGTH)],
       [ownerSchema, owner({ endereco: huge }), MESSAGES.textTooLong("O endereço", MAX_ADDRESS_LENGTH)],
-      [petSchemas.pet, pet({ nome: huge }), MESSAGES.textTooLong("O nome do pet", MAX_PET_NAME_LENGTH)],
-      [petSchemas.pet, pet({ observacoes: huge }), MESSAGES.textTooLong("A observação do pet", MAX_NOTES_LENGTH)],
-      [petSchemas.pet, pet({ horario_padrao: huge }), MESSAGES.pet.defaultTimeInvalid],
+      [petSchema, pet({ nome: huge }), MESSAGES.textTooLong("O nome do pet", MAX_PET_NAME_LENGTH)],
+      [petSchema, pet({ observacoes: huge }), MESSAGES.textTooLong("A observação do pet", MAX_NOTES_LENGTH)],
+      [petSchema, pet({ horario_padrao: huge }), MESSAGES.pet.defaultTimeInvalid],
       [appointmentSchema, appointment({ servico: huge }), MESSAGES.textTooLong("O serviço", MAX_LIST_ITEM_LENGTH)],
       [appointmentSchema, appointment({ hora: huge }), MESSAGES.appointment.timeInvalid],
       [appointmentSchema, appointment({ data: huge }), MESSAGES.date.invalid],
@@ -664,7 +626,7 @@ describe("entrada maliciosa", () => {
   });
 
   test("objeto no lugar de valor não passa como filtro", () => {
-    assertRejects(petSchemas.pet, pet({ dono_id: { $gt: 0 } }), MESSAGES.invalidInput);
+    assertRejects(petSchema, pet({ dono_id: { $gt: 0 } }), MESSAGES.invalidInput);
     assertRejects(nameSearchSchema, nameSearch({ ativo: { $ne: 0 } }), MESSAGES.invalidFlag("Filtro ativo"));
   });
 });

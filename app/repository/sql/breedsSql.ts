@@ -1,9 +1,22 @@
-// SQL da busca de raças no seletor do pet, sem depender do Expo: o SpeciesRepository e os testes
-// executam os mesmos comandos.
+// SQL das raças e das espécies, sem depender do Expo: os repositories e os testes executam os mesmos
+// comandos.
 import { toSearchPattern, type SqlQuery } from "./searchSql.ts";
 
 /** Parâmetros: especie_id, nome_raca, nome_raca_normalized. */
 export const INSERT_BREED_SQL = `INSERT INTO race (especie_id, nome_raca, nome_raca_normalized) VALUES (?, ?, ?)`;
+
+/** Parâmetros: id. Devolve a linha só se a espécie existe. */
+export const FIND_SPECIES_SQL = `SELECT id FROM species WHERE id = ?`;
+
+/** Parâmetros: id. A raça com a espécie dela. */
+export const FIND_BREED_SQL = `SELECT id, especie_id, nome_raca FROM race WHERE id = ?`;
+
+/**
+ * Parâmetros: especie_id. Os nomes das raças da espécie, para achar a repetida pelo nome normalizado no
+ * código: o `nome_raca_normalized` da carga inicial tira também a pontuação ("vira-lata srd"), e o do
+ * app não, então comparar a coluna deixaria passar "vira-lata (srd)".
+ */
+export const LIST_BREED_NAMES_SQL = `SELECT nome_raca FROM race WHERE especie_id = ?`;
 
 /**
  * O filtro da busca, o mesmo na página e na contagem. O texto vira o padrão do LIKE com `%`, `_` e `\`
