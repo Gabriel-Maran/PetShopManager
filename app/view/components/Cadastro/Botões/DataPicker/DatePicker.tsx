@@ -19,6 +19,8 @@ interface DatePickerProps {
   value?: string; // YYYY-MM-DD
   onChange: (date: string) => void;
   label?: string;
+  /** Nome do campo para o leitor de tela, quando o rótulo visível fica fora do componente. */
+  accessibilityName?: string;
   placeholder?: string;
   minDate?: string;
   maxDate?: string;
@@ -32,6 +34,7 @@ export function DatePicker({
   value,
   onChange,
   label,
+  accessibilityName,
   placeholder,
   minDate,
   maxDate,
@@ -65,6 +68,7 @@ export function DatePicker({
         withIcon={withIcon}
         value={value}
         label={label}
+        accessibilityName={accessibilityName}
         placeholder={placeholder}
         error={error}
         onPress={handleOpen}
@@ -79,7 +83,7 @@ export function DatePicker({
         onConfirm={handleConfirm}
         minDate={minDate}
         maxDate={maxDate}
-        title={modalTitle ?? label}
+        title={modalTitle || label || accessibilityName}
       />
     </>
   );

@@ -4,6 +4,7 @@ import {
   useTheme,
   useThemedStyles,
 } from "../../../../Themes/ThemeProvider";
+import { HIDDEN_FROM_SCREEN_READER } from "../../../Acessibilidade/accessibilityProps";
 
 interface Props {
   message: string | null;
@@ -22,13 +23,20 @@ export default function ModalConfDelete({
   const s = useThemedStyles(styles);
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
       <View style={s.overlay}>
         <View style={s.box}>
-          <Text style={s.emoji}>⚠️</Text>
+          <Text style={s.emoji} {...HIDDEN_FROM_SCREEN_READER}>
+            ⚠️
+          </Text>
 
           <View style={s.messageTop}>
-            <Text style={s.title}>
+            <Text style={s.title} accessibilityRole="header">
               Deseja mesmo desativar?
             </Text>
             <Text style={s.message}>{message}</Text>
@@ -38,6 +46,7 @@ export default function ModalConfDelete({
             <TouchableOpacity
               style={[s.btn, { backgroundColor: colors.TEXT_SECONDARY }]}
               onPress={onClose}
+              accessibilityRole="button"
             >
               <Text style={s.btnTxt}>Cancelar</Text>
             </TouchableOpacity>
@@ -45,6 +54,7 @@ export default function ModalConfDelete({
             <TouchableOpacity
               style={[s.btn, { backgroundColor: colors.EXCLUIR_MAIN_COLOR }]}
               onPress={onConfirm}
+              accessibilityRole="button"
             >
               <Text style={s.btnTxt}>Desativar</Text>
             </TouchableOpacity>

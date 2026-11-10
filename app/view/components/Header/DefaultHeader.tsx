@@ -6,6 +6,7 @@ import {
   useTheme,
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
+import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
 const LOGO = require("../../../assets/logo/logoPetShopFundoBranco.png");
 const BACK_ICON = require("../../../assets/setas/back.png");
 
@@ -18,7 +19,8 @@ export default function DefaultHeader({ screenBack }: { screenBack?: Screen }) {
     <View style={s.container}>
       <TouchableOpacity
         style={s.btnImg}
-        accessibilityLabel="Ir para calendário"
+        accessibilityRole="button"
+        accessibilityLabel={A11Y_LABELS.goToCalendar}
         onPress={() => navigate(Screen.Calendario)}
       >
         <Image
@@ -35,7 +37,8 @@ export default function DefaultHeader({ screenBack }: { screenBack?: Screen }) {
       {screenBack && (
         <TouchableOpacity
           style={s.btnVoltar}
-          accessibilityLabel="Voltar"
+          accessibilityRole="button"
+          accessibilityLabel={A11Y_LABELS.back}
           onPress={() => navigate(screenBack)}
         >
           <Image source={BACK_ICON} style={s.imgVoltar} />

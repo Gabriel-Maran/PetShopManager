@@ -1,4 +1,4 @@
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import { useState, useEffect } from "react";
 
 import { useScreen } from "../../hooks/useScreen";
@@ -26,9 +26,13 @@ import PetList from "../components/Cadastro/List/PetList";
 import Pagination from "../components/Cadastro/List/Pagination";
 import OwnerList from "../components/Cadastro/List/OwnerList";
 import ModalConfDelete from "../components/Cadastro/Botões/Delete/ModalConfDelete";
+import IconButton from "../components/Acessibilidade/IconButton";
 import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
+import { A11Y_LABELS } from "../../globals/accessibilityLabels";
 
 type CadastroItem = Owner | PetWithSpecieRaceAndOwner;
+
+const ADD_BUTTON_SIZE = 65;
 
 export default function Cadastros() {
   const { navigate, params } = useScreen<NewOrEditCadastros>();
@@ -131,7 +135,7 @@ export default function Cadastros() {
           statusFiltro={isAtivo ? "ativo" : "inativo"}
         />
 
-        <View style={s.escolhaItem}>
+        <View style={s.escolhaItem} accessibilityRole="tablist">
           <ItemSelect
             title="Donos"
             isThisSelected={isOwnerSelected}
@@ -173,7 +177,13 @@ export default function Cadastros() {
       </View>
 
       <View style={s.ctnBtnAdd}>
-        <TouchableOpacity
+        <IconButton
+          label={
+            isOwnerSelected
+              ? A11Y_LABELS.registry.addOwner
+              : A11Y_LABELS.registry.addPet
+          }
+          width={ADD_BUTTON_SIZE}
           style={s.btnAdd}
           onPress={() =>
             navigate(
@@ -185,7 +195,7 @@ export default function Cadastros() {
             style={s.imgAdd}
             source={require("../../assets/crud/addWhite.png")}
           />
-        </TouchableOpacity>
+        </IconButton>
       </View>
     </>
   );
@@ -211,9 +221,9 @@ const styles = (colors: ThemeColors) =>
     },
     btnAdd: {
       backgroundColor: colors.PRIMARY,
-      borderRadius: 32.5,
-      width: 65,
-      height: 65,
+      borderRadius: ADD_BUTTON_SIZE / 2,
+      width: ADD_BUTTON_SIZE,
+      height: ADD_BUTTON_SIZE,
       justifyContent: "center",
       alignItems: "center",
     },

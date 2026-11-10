@@ -14,7 +14,13 @@ import {
   View,
 } from "react-native";
 import { isoToBr } from "../../../../../utils/datas";
+import { A11Y_LABELS } from "../../../../../globals/accessibilityLabels";
+import IconButton from "../../../Acessibilidade/IconButton";
+import { HIDDEN_FROM_SCREEN_READER } from "../../../Acessibilidade/accessibilityProps";
 import { DatePickerCalendar } from "./DatePickerCalendarProps";
+
+/** Tamanho aproximado do ✕ na tela, para a área de toque do Fechar chegar a 48 dp. */
+const CLOSE_GLYPH_SIZE = 20;
 
 interface DatePickerModalProps {
   visible: boolean;
@@ -48,18 +54,28 @@ export function DatePickerModal({
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      {/* Backdrop */}
-      <Pressable style={s.backdrop} onPress={onClose} />
+      {/* Backdrop: fechar pelo leitor de tela é com o botão Fechar ou o voltar do Android. */}
+      <Pressable
+        style={s.backdrop}
+        onPress={onClose}
+        {...HIDDEN_FROM_SCREEN_READER}
+      />
 
       {/* Card */}
       <View style={s.centeredView} pointerEvents="box-none">
         <View style={s.card}>
           {/* Cabeçalho */}
           <View style={s.header}>
-            <Text style={s.title}>{title}</Text>
-            <TouchableOpacity onPress={onClose} hitSlop={12}>
+            <Text style={s.title} accessibilityRole="header">
+              {title}
+            </Text>
+            <IconButton
+              label={A11Y_LABELS.close}
+              width={CLOSE_GLYPH_SIZE}
+              onPress={onClose}
+            >
               <Text style={s.closeBtn}>✕</Text>
-            </TouchableOpacity>
+            </IconButton>
           </View>
 
           {/* Data selecionada (preview) */}
@@ -83,6 +99,7 @@ export function DatePickerModal({
               style={[s.btn, s.btnOutline]}
               onPress={onClose}
               activeOpacity={0.7}
+              accessibilityRole="button"
             >
               <Text style={[s.btnText, { color: colors.TEXT_SECONDARY }]}>
                 Cancelar
@@ -94,8 +111,12 @@ export function DatePickerModal({
               onPress={() => value && onConfirm(value)}
               activeOpacity={0.7}
               disabled={!value}
+              accessibilityRole="button"
             >
-              <Text style={[s.btnText, { color: "#FFFFFF" }]}>Confirmar</Text>
+              {/* Texto sobre o verde cheio usa a cor do fundo: escuro no tema escuro, branco no claro. */}
+              <Text style={[s.btnText, { color: colors.BACKGROUND }]}>
+                Confirmar
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

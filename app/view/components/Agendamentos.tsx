@@ -18,6 +18,10 @@ import { appointmentController } from "../../controller/AppointmentsController";
 import { isoToBr } from "../../utils/datas";
 import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
 import { useAgendamentos } from "../contexts/agendamentos";
+import { A11Y_LABELS } from "../../globals/accessibilityLabels";
+import IconButton from "./Acessibilidade/IconButton";
+
+const ICON_BUTTON_SIZE = 38;
 
 export default function Agendamentos({
   isFullScreen,
@@ -43,23 +47,32 @@ export default function Agendamentos({
   return (
     <View style={[s.container, { marginTop: margemSuperior }]}>
       <View style={s.header}>
-        <TouchableOpacity
+        <IconButton
+          label={A11Y_LABELS.appointments.add}
+          width={ICON_BUTTON_SIZE}
           style={s.iconBtn}
           onPress={() =>
             navigate(Screen.NewOrEditAppointment, { dateSelected })
           }
         >
           <Image source={require("../../assets/crud/add.png")} style={s.icon} />
-        </TouchableOpacity>
+        </IconButton>
 
-        <View style={s.titleBlock}>
+        <View style={s.titleBlock} accessible accessibilityRole="header">
           <Text style={s.titleLabel}>Agendamentos</Text>
           <Text style={s.titleDate}>
             {isoToBr(dateSelected)}
           </Text>
         </View>
 
-        <TouchableOpacity
+        <IconButton
+          label={
+            isFullScreen
+              ? A11Y_LABELS.appointments.collapse
+              : A11Y_LABELS.appointments.expand
+          }
+          width={ICON_BUTTON_SIZE}
+          accessibilityState={{ expanded: isFullScreen }}
           style={s.iconBtn}
           onPress={() => setFullScreen(!isFullScreen)}
         >
@@ -71,7 +84,7 @@ export default function Agendamentos({
             }
             style={s.icon}
           />
-        </TouchableOpacity>
+        </IconButton>
       </View>
 
       <FlatList
@@ -88,6 +101,14 @@ export default function Agendamentos({
           <TouchableOpacity
             style={s.row}
             activeOpacity={0.6}
+            accessibilityRole="button"
+            accessibilityLabel={A11Y_LABELS.appointments.item({
+              pet: item.nome_pet,
+              owner: item.nome_dono,
+              service: item.servico,
+              time: item.hora,
+              done: Boolean(item.concluido),
+            })}
             onPress={() =>
               navigate(Screen.NewOrEditAppointment, { appointment: item })
             }
@@ -168,8 +189,8 @@ const styles = (colors: ThemeColors) =>
       marginTop: 1,
     },
     iconBtn: {
-      width: 38,
-      height: 38,
+      width: ICON_BUTTON_SIZE,
+      height: ICON_BUTTON_SIZE,
       borderRadius: 10,
       backgroundColor: colors.BACKGROUND,
       justifyContent: "center",
@@ -247,9 +268,10 @@ const styles = (colors: ThemeColors) =>
       fontWeight: "700",
       color: colors.TEXT_PLACEHOLDER,
     },
+    // Textos cinza usam TEXT_MUTED: a cor de borda não passa de 4,5:1 como texto.
     ownerName: {
       fontSize: 14,
-      color: colors.BORDER_STRONG,
+      color: colors.TEXT_MUTED,
       marginTop: 2,
     },
 
@@ -272,12 +294,12 @@ const styles = (colors: ThemeColors) =>
     servicoTxtDone: {
       fontSize: 13,
       fontWeight: "600",
-      color: colors.BORDER_STRONG,
+      color: colors.TEXT_MUTED,
     },
     time: {
       fontSize: 15,
       fontWeight: "600",
-      color: colors.BORDER_STRONG,
+      color: colors.TEXT_MUTED,
     },
 
     // ── Empty ────────────────────────────────────────────────
@@ -286,7 +308,7 @@ const styles = (colors: ThemeColors) =>
       alignItems: "center",
     },
     emptyTxt: {
-      color: colors.BORDER_STRONG,
+      color: colors.TEXT_MUTED,
       fontSize: 18,
     },
   });

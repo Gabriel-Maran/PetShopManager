@@ -14,6 +14,7 @@ import {
 } from "../Themes/ThemeProvider";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import ConfirmModal from "./ConfirmModal";
+import { HIDDEN_FROM_SCREEN_READER } from "./Acessibilidade/accessibilityProps";
 
 interface DatabaseTransferProps {
   onImportSuccess?: () => void;
@@ -39,7 +40,9 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
   return (
     <View style={s.container}>
       <View style={s.header}>
-        <Text style={s.title}>Backup & Restauração</Text>
+        <Text style={s.title} accessibilityRole="header">
+          Backup & Restauração
+        </Text>
         <Text style={s.subtitle}>
           Exporte seus dados para guardar ou transferir para outro celular.
         </Text>
@@ -50,8 +53,13 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
         onPress={() => exportAction.run()}
         disabled={loading}
         activeOpacity={0.75}
+        accessibilityRole="button"
+        accessibilityState={{ busy: exportAction.isRunning }}
       >
-        <View style={[s.cardIcon, s.cardIconExport]}>
+        <View
+          style={[s.cardIcon, s.cardIconExport]}
+          {...HIDDEN_FROM_SCREEN_READER}
+        >
           <Text style={s.icon}>📤</Text>
         </View>
         <View style={s.cardText}>
@@ -70,8 +78,13 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
         onPress={() => setConfirmVisible(true)}
         disabled={loading}
         activeOpacity={0.75}
+        accessibilityRole="button"
+        accessibilityState={{ busy: importAction.isRunning }}
       >
-        <View style={[s.cardIcon, s.cardIconImport]}>
+        <View
+          style={[s.cardIcon, s.cardIconImport]}
+          {...HIDDEN_FROM_SCREEN_READER}
+        >
           <Text style={s.icon}>📥</Text>
         </View>
         <View style={s.cardText}>
@@ -86,7 +99,9 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
       </TouchableOpacity>
 
       <View style={s.warning}>
-        <Text style={s.warningIcon}>⚠️</Text>
+        <Text style={s.warningIcon} {...HIDDEN_FROM_SCREEN_READER}>
+          ⚠️
+        </Text>
         <Text style={s.warningText}>
           A importação substitui permanentemente todos os dados existentes.
           Exporte antes de importar.

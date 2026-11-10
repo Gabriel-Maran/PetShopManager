@@ -55,7 +55,10 @@ export default function InputWrapper({
       <View
         style={[s.rightContent, whitGapComponents ? { gap: 5 } : { gap: 0 }]}
       >
-        <Text style={s.txtInput}>{titleName.toUpperCase()}</Text>
+        {/* Em maiúsculas, o leitor poderia soletrar; o rótulo faz ele ler o nome do campo. */}
+        <Text style={s.txtInput} accessibilityLabel={titleName}>
+          {titleName.toUpperCase()}
+        </Text>
         {children}
       </View>
     </View>

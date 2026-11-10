@@ -1,16 +1,16 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../../../Themes/ThemeProvider";
+import { ThemeColors, useThemedStyles } from "../../../../Themes/ThemeProvider";
 import { isoToBr } from "../../../../../utils/datas";
+import { A11Y_LABELS } from "../../../../../globals/accessibilityLabels";
+import { HIDDEN_FROM_SCREEN_READER } from "../../../Acessibilidade/accessibilityProps";
 
 export interface DatePickerInputProps {
   withIcon?: boolean;
   value?: string; // YYYY-MM-DD
   placeholder?: string;
   label?: string;
+  /** Nome do campo para o leitor de tela, quando o rótulo visível fica fora do componente. */
+  accessibilityName?: string;
   onPress: () => void;
   isEditavel?: boolean;
   error?: string;
@@ -21,12 +21,15 @@ export function DatePickerInput({
   value,
   placeholder = "Selecione uma data",
   label,
+  accessibilityName,
   onPress,
   isEditavel,
   error,
 }: DatePickerInputProps) {
-  const { colors } = useTheme();
   const s = useThemedStyles(inputStyles);
+  const displayText = value ? isoToBr(value) : placeholder;
+  // O leitor fala o nome do campo e a data, como "Data do agendamento: 09/11/2026".
+  const name = accessibilityName || label;
 
   return (
     <View style={s.wrapper}>
@@ -38,16 +41,21 @@ export function DatePickerInput({
         onPress={onPress}
         disabled={isEditavel}
         accessibilityRole="button"
-        accessibilityLabel={label ?? placeholder}
+        accessibilityLabel={name ? A11Y_LABELS.field(name, displayText) : displayText}
+        accessibilityHint={A11Y_LABELS.datePickerHint}
       >
         {/* Ícone de calendário (unicode simples — troque por um ícone da sua lib) */}
-        {withIcon && <Text style={s.icon}>📅</Text>}
+        {withIcon && (
+          <Text style={s.icon} {...HIDDEN_FROM_SCREEN_READER}>
+            📅
+          </Text>
+        )}
 
-        <Text style={[s.text, !value && s.placeholder]}>
-          {value ? isoToBr(value) : placeholder}
+        <Text style={[s.text, !value && s.placeholder]}>{displayText}</Text>
+
+        <Text style={s.chevron} {...HIDDEN_FROM_SCREEN_READER}>
+          ›
         </Text>
-
-        <Text style={s.chevron}>›</Text>
       </TouchableOpacity>
 
       {error && <Text style={s.error}>{error}</Text>}
@@ -74,7 +82,7 @@ const inputStyles = (colors: ThemeColors) =>
       paddingHorizontal: 14,
     },
     inputRowError: {
-      borderColor: "#E53E3E",
+      borderColor: colors.RED_COLOR,
     },
     icon: { fontSize: 18 },
     text: {
@@ -83,7 +91,7 @@ const inputStyles = (colors: ThemeColors) =>
       color: colors.TEXT_SECONDARY,
     },
     placeholder: {
-      color: colors.THIRD_BACKGROUND,
+      color: colors.TEXT_PLACEHOLDER,
     },
     chevron: {
       fontSize: 22,
@@ -92,6 +100,6 @@ const inputStyles = (colors: ThemeColors) =>
     },
     error: {
       fontSize: 12,
-      color: "#E53E3E",
+      color: colors.RED_COLOR,
     },
   });

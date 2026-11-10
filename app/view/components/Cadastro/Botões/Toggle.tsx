@@ -13,6 +13,14 @@ import {
   useThemedStyles,
 } from "../../../Themes/ThemeProvider";
 import InputWrapper from "../InputWrapper";
+import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
+import {
+  HIDDEN_FROM_SCREEN_READER,
+  touchTargetSlop,
+} from "../../Acessibilidade/accessibilityProps";
+
+const SWITCH_WIDTH = 50;
+const SWITCH_HEIGHT = 30;
 
 export default function Toggle({
   hasBorderBottom = false,
@@ -65,12 +73,24 @@ export default function Toggle({
       hasBorderBottom={hasBorderBottom}
     >
       <View style={s.toggleESubtitle}>
-        {subtitle && <Text style={s.subtitle}>{subtitle}</Text>}
+        {/* A pergunta já vai no nome do interruptor; escondida aqui, o leitor não a repete. */}
+        {subtitle && (
+          <Text style={s.subtitle} {...HIDDEN_FROM_SCREEN_READER}>
+            {subtitle}
+          </Text>
+        )}
 
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={!noEdit ? toggleSwitch : undefined}
           disabled={noEdit}
+          accessibilityRole="switch"
+          accessibilityLabel={A11Y_LABELS.toggle(title, subtitle)}
+          accessibilityState={{ checked: Boolean(value) }}
+          hitSlop={touchTargetSlop({
+            width: SWITCH_WIDTH,
+            height: SWITCH_HEIGHT,
+          })}
         >
           <Animated.View style={[s.switchContainer, { backgroundColor }]}>
             <Animated.View
@@ -108,8 +128,8 @@ const styles = (colors: ThemeColors) =>
       color: colors.TEXT_SECONDARY,
     },
     switchContainer: {
-      width: 50,
-      height: 30,
+      width: SWITCH_WIDTH,
+      height: SWITCH_HEIGHT,
       borderRadius: 15,
       justifyContent: "center",
     },

@@ -1,6 +1,10 @@
 // components/Pagination.tsx
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
+import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
+import IconButton from "../../Acessibilidade/IconButton";
+
+const BUTTON_SIZE = 36;
 
 interface Props {
   currentPage: number;
@@ -33,7 +37,9 @@ export default function Pagination({
   return (
     <View style={s.container}>
       {/* Anterior */}
-      <TouchableOpacity
+      <IconButton
+        label={A11Y_LABELS.pagination.previous}
+        width={BUTTON_SIZE}
         style={[s.btn, currentPage === 0 && s.btnDisabled]}
         onPress={() => {
           if (currentPage > 0) {
@@ -43,23 +49,28 @@ export default function Pagination({
         disabled={currentPage === 0}
       >
         <Text style={s.arrow}>‹</Text>
-      </TouchableOpacity>
+      </IconButton>
 
       {/* Números */}
       {getPages().map((page) => (
-        <TouchableOpacity
+        <IconButton
           key={page}
+          label={A11Y_LABELS.pagination.page(page + 1)}
+          width={BUTTON_SIZE}
+          accessibilityState={{ selected: page === currentPage }}
           style={[s.btn, page === currentPage && s.btnActive]}
           onPress={() => onPageChange(page)}
         >
           <Text style={[s.txt, page === currentPage && s.txtActive]}>
             {page + 1}
           </Text>
-        </TouchableOpacity>
+        </IconButton>
       ))}
 
       {/* Próximo */}
-      <TouchableOpacity
+      <IconButton
+        label={A11Y_LABELS.pagination.next}
+        width={BUTTON_SIZE}
         style={[s.btn, currentPage === totalPages - 1 && s.btnDisabled]}
         onPress={() => {
           if (currentPage < totalPages - 1) {
@@ -69,7 +80,7 @@ export default function Pagination({
         disabled={currentPage === totalPages - 1}
       >
         <Text style={s.arrow}>›</Text>
-      </TouchableOpacity>
+      </IconButton>
     </View>
   );
 }
@@ -84,8 +95,8 @@ const styles = (colors: ThemeColors) =>
       paddingVertical: 12,
     },
     btn: {
-      width: 36,
-      height: 36,
+      width: BUTTON_SIZE,
+      height: BUTTON_SIZE,
       borderRadius: 8,
       justifyContent: "center",
       alignItems: "center",
@@ -104,13 +115,14 @@ const styles = (colors: ThemeColors) =>
       color: colors.TEXT_MUTED,
       fontSize: 14,
     },
+    // Texto sobre o verde cheio usa a cor do fundo, como nos botões Salvar: passa 4,5:1 nos dois temas.
     txtActive: {
-      color: colors.TEXT_PRIMARY,
+      color: colors.BACKGROUND,
       fontWeight: "600",
     },
     arrow: {
       fontSize: 20,
-      color: colors.BORDER_STRONG,
+      color: colors.TEXT_MUTED,
       lineHeight: 22,
     },
   });

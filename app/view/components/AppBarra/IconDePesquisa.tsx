@@ -25,6 +25,8 @@ export default function IconDePesquisa({
     <TouchableOpacity
       style={[s.container, isActive && s.containerActive]}
       onPress={() => navigate(screenName)}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: isActive }}
     >
       <Image
         style={[s.image, !isActive && s.imageInactive]}
@@ -54,8 +56,9 @@ const styles = (colors: ThemeColors) =>
       height: 30,
       tintColor: colors.PRIMARY,
     },
+    // A aba inativa continua tocável, então o texto dela precisa de 4,5:1: TEXT_MUTED, não DESATIVADO.
     imageInactive: {
-      tintColor: colors.DESATIVADO,
+      tintColor: colors.TEXT_MUTED,
     },
     title: {
       fontSize: 13,
@@ -64,6 +67,6 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.BACKGROUND,
     },
     titleInactive: {
-      color: colors.DESATIVADO,
+      color: colors.TEXT_MUTED,
     },
   });

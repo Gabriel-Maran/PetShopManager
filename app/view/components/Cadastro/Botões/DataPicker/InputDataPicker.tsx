@@ -33,6 +33,7 @@ export default function InputDataPicker({
         isEditavel={isEditavel}
         withIcon={false}
         label=""
+        accessibilityName={titleName}
         value={item ?? todayIso()}
         onChange={setItem}
         minDate="2024-01-01"

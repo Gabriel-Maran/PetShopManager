@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Image,
-  View,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { Image, View, TextInput, StyleSheet } from "react-native";
 import {
   ThemeColors,
   useTheme,
@@ -14,6 +8,13 @@ import {
 import { StatusFiltro } from "../../../config/consts";
 import FilterPanel from "./FilterPanel";
 import { MAX_SEARCH_LENGTH } from "../../../globals/limits";
+import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
+import IconButton from "../Acessibilidade/IconButton";
+
+const SEARCH_ICON_SIZE = 30;
+const SEARCH_PADDING = 10;
+const FILTER_ICON_SIZE = 36;
+const FILTER_PADDING = 10;
 
 export default function BarraDePesquisa({
   placeHolderStr,
@@ -57,12 +58,18 @@ export default function BarraDePesquisa({
         />
       ) : (
         <View style={s.pesquisa}>
-          <TouchableOpacity onPress={() => setSearch(text)} style={s.btnImg}>
+          <IconButton
+            label={A11Y_LABELS.search}
+            width={SEARCH_ICON_SIZE + 2 * SEARCH_PADDING}
+            height={SEARCH_ICON_SIZE}
+            onPress={() => setSearch(text)}
+            style={s.btnImg}
+          >
             <Image
               style={s.img}
               source={require("../../../assets/outros/search.png")}
             />
-          </TouchableOpacity>
+          </IconButton>
           <TextInput
             onChangeText={setText}
             value={text}
@@ -75,7 +82,10 @@ export default function BarraDePesquisa({
         </View>
       )}
       {hasFilter && (
-        <TouchableOpacity
+        <IconButton
+          label={A11Y_LABELS.filter.toggle}
+          width={FILTER_ICON_SIZE + 2 * FILTER_PADDING}
+          accessibilityState={{ expanded: isSelectedFilter }}
           onPress={() => setIsSelectedFilter(!isSelectedFilter)}
           style={s.btnFilter}
         >
@@ -83,7 +93,7 @@ export default function BarraDePesquisa({
             style={s.imgFilter}
             source={require("../../../assets/outros/filter.png")}
           />
-        </TouchableOpacity>
+        </IconButton>
       )}
     </View>
   );
@@ -116,11 +126,11 @@ const styles = (colors: ThemeColors) =>
       color: colors.TEXT_PRIMARY,
     },
     btnImg: {
-      paddingHorizontal: 10,
+      paddingHorizontal: SEARCH_PADDING,
     },
     img: {
-      width: 30,
-      height: 30,
+      width: SEARCH_ICON_SIZE,
+      height: SEARCH_ICON_SIZE,
       tintColor: colors.TEXT_MUTED,
     },
     btnFilter: {
@@ -129,11 +139,11 @@ const styles = (colors: ThemeColors) =>
       alignContent: "center",
       justifyContent: "center",
       alignSelf: "center",
-      padding: 10,
+      padding: FILTER_PADDING,
     },
     imgFilter: {
       tintColor: colors.FILTER_ICON,
-      width: 36,
-      height: 36,
+      width: FILTER_ICON_SIZE,
+      height: FILTER_ICON_SIZE,
     },
   });

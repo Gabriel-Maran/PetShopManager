@@ -10,6 +10,7 @@ import DefaultHeader from "../components/Header/DefaultHeader";
 import { useScreen } from "../../hooks/useScreen";
 import { APP_BAR_HEIGHT, RelatorioType, Screen } from "../../config/consts";
 import { NewOrEditAppointmentParams } from "../../model/Appointment";
+import { HIDDEN_FROM_SCREEN_READER } from "../components/Acessibilidade/accessibilityProps";
 
 const REPORTS: {
   id: string;
@@ -86,11 +87,20 @@ export default function Relatorios() {
         contentContainerStyle={s.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={s.pageTitle}>Relatórios</Text>
+        <Text style={s.pageTitle} accessibilityRole="header">
+          Relatórios
+        </Text>
 
         {SECTIONS.map((section) => (
           <View key={section.tag} style={s.section}>
-            <Text style={s.sectionLabel}>{section.tag.toUpperCase()}</Text>
+            {/* Em maiúsculas, o leitor poderia soletrar; o rótulo faz ele ler a palavra. */}
+            <Text
+              style={s.sectionLabel}
+              accessibilityRole="header"
+              accessibilityLabel={section.tag}
+            >
+              {section.tag.toUpperCase()}
+            </Text>
 
             <View style={s.cardList}>
               {section.items.map((report, index) => (
@@ -104,6 +114,7 @@ export default function Relatorios() {
                     navigate(Screen.RelatorioView, { type: report.type })
                   }
                   activeOpacity={0.65}
+                  accessibilityRole="button"
                 >
                   <View
                     style={[s.cardAccent, { backgroundColor: report.accent }]}
@@ -112,7 +123,9 @@ export default function Relatorios() {
                     <Text style={s.cardTitle}>{report.title}</Text>
                     <Text style={s.cardSubtitle}>{report.subtitle}</Text>
                   </View>
-                  <Text style={s.cardArrow}>›</Text>
+                  <Text style={s.cardArrow} {...HIDDEN_FROM_SCREEN_READER}>
+                    ›
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>

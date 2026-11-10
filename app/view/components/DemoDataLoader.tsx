@@ -19,6 +19,7 @@ import {
 } from "../Themes/ThemeProvider";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import ConfirmModal from "./ConfirmModal";
+import { HIDDEN_FROM_SCREEN_READER } from "./Acessibilidade/accessibilityProps";
 
 interface DemoDataLoaderProps {
   onLoaded?: () => void;
@@ -109,9 +110,11 @@ export function DemoDataLoader({ onLoaded }: DemoDataLoaderProps) {
         disabled={loading}
         activeOpacity={0.75}
         accessibilityRole="button"
+        accessibilityState={{ busy: loading }}
       >
         <View
           style={[s.cardIcon, config.destructive && s.cardIconDestructive]}
+          {...HIDDEN_FROM_SCREEN_READER}
         >
           <Text style={s.icon}>{config.emoji}</Text>
         </View>

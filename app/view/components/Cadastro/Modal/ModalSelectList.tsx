@@ -13,6 +13,10 @@ import { LIMIT_ITEM_PAGE } from "../../../../config/consts";
 import Pagination from "../List/Pagination";
 import BarraDePesquisa from "../../SearchBarra/BarraDePesquisa";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
+import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
+import IconButton from "../../Acessibilidade/IconButton";
+
+const CLOSE_BUTTON_SIZE = 30;
 
 interface ModalSelectListProps {
   items: any[] | null | undefined;
@@ -50,13 +54,25 @@ export default function ModalSelectList({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <Pressable style={s.overlay} onPress={onClose}>
-        <Pressable style={s.modalContent} onPress={() => {}}>
+      {/* Os Pressable só fecham ao tocar fora; sem accessible, o leitor percorre o conteúdo item a item. */}
+      <Pressable style={s.overlay} onPress={onClose} accessible={false}>
+        <Pressable
+          style={s.modalContent}
+          onPress={() => {}}
+          accessible={false}
+        >
           <View style={s.modalHeader}>
-            <Text style={s.modalTitle}>{titulo}</Text>
-            <TouchableOpacity style={s.closeBtn} onPress={onClose}>
+            <Text style={s.modalTitle} accessibilityRole="header">
+              {titulo}
+            </Text>
+            <IconButton
+              label={A11Y_LABELS.close}
+              width={CLOSE_BUTTON_SIZE}
+              style={s.closeBtn}
+              onPress={onClose}
+            >
               <Text style={s.closeIcon}>✕</Text>
-            </TouchableOpacity>
+            </IconButton>
           </View>
 
           <View style={s.searchWrap}>
@@ -75,6 +91,7 @@ export default function ModalSelectList({
                 <TouchableOpacity
                   style={s.itemRow}
                   onPress={() => onSelect(item)}
+                  accessibilityRole="button"
                 >
                   {iconSource && (
                     <Image source={iconSource} style={s.itemIconRow} />
@@ -144,9 +161,9 @@ const styles = (colors: ThemeColors) =>
       color: colors.TEXT_PRIMARY,
     },
     closeBtn: {
-      width: 30,
-      height: 30,
-      borderRadius: 15,
+      width: CLOSE_BUTTON_SIZE,
+      height: CLOSE_BUTTON_SIZE,
+      borderRadius: CLOSE_BUTTON_SIZE / 2,
       backgroundColor: colors.PRIMARY_SOFT,
       justifyContent: "center",
       alignItems: "center",

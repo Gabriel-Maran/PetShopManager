@@ -4,7 +4,12 @@ import {
   useTheme,
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
+import { touchTargetSlop } from "../Acessibilidade/accessibilityProps";
 
+const PADDING_VERTICAL = 10;
+const LINE_HEIGHT = 20;
+
+/** Uma aba de escolha, como Donos ou Pets. Quem usa põe as abas num contêiner com papel "tablist". */
 export default function ItemSelect({
   isThisSelected,
   valorSelect,
@@ -27,6 +32,11 @@ export default function ItemSelect({
         },
       ]}
       onPress={() => setValorSelect(valorSelect)}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: isThisSelected }}
+      hitSlop={touchTargetSlop({
+        height: LINE_HEIGHT + 2 * PADDING_VERTICAL,
+      })}
     >
       <Text
         style={[
@@ -45,12 +55,13 @@ export default function ItemSelect({
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     escolhaBtn: {
-      paddingVertical: 10,
+      paddingVertical: PADDING_VERTICAL,
       paddingHorizontal: 30,
       width: "40%",
       borderRadius: 20,
     },
     escolhaText: {
       textAlign: "center",
+      lineHeight: LINE_HEIGHT,
     },
   });

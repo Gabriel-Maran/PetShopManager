@@ -21,6 +21,12 @@ import { createRaceService } from "../../../../utils/raceSpecieHelper";
 import InputSelect from "../../InputSelect";
 import { EspeciesAtendidasLabel } from "../../../../config/consts";
 import InputInfo from "../InputInfo";
+import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
+import IconButton from "../../Acessibilidade/IconButton";
+
+const SUBMIT_LABEL = "Cadastrar";
+/** Tamanho aproximado do ✕ na tela, para a área de toque do Fechar chegar a 48 dp. */
+const CLOSE_GLYPH_SIZE = 16;
 
 interface Especie {
   id: number;
@@ -80,17 +86,21 @@ export default function ModalCadastroRaca({
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <Pressable style={s.overlay} onPress={handleClose}>
-          <Pressable style={s.card} onPress={() => {}}>
+        {/* Os Pressable só fecham ao tocar fora; sem accessible, o leitor percorre o conteúdo item a item. */}
+        <Pressable style={s.overlay} onPress={handleClose} accessible={false}>
+          <Pressable style={s.card} onPress={() => {}} accessible={false}>
             {/* Cabeçalho */}
             <View style={s.header}>
-              <Text style={s.title}>Nova Raça</Text>
-              <TouchableOpacity
+              <Text style={s.title} accessibilityRole="header">
+                Nova Raça
+              </Text>
+              <IconButton
+                label={A11Y_LABELS.close}
+                width={CLOSE_GLYPH_SIZE}
                 onPress={handleClose}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Text style={s.closeIcon}>✕</Text>
-              </TouchableOpacity>
+              </IconButton>
             </View>
 
             <View style={s.divider} />
@@ -149,6 +159,7 @@ export default function ModalCadastroRaca({
                 style={s.cancelBtn}
                 onPress={handleClose}
                 disabled={loading}
+                accessibilityRole="button"
               >
                 <Text style={s.cancelText}>Cancelar</Text>
               </TouchableOpacity>
@@ -158,11 +169,15 @@ export default function ModalCadastroRaca({
                 onPress={handleSubmit}
                 disabled={loading}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                // Durante o envio o texto some; o rótulo fixo mantém o nome do botão.
+                accessibilityLabel={SUBMIT_LABEL}
+                accessibilityState={{ busy: loading }}
               >
                 {loading ? (
-                  <ActivityIndicator size="small" color="#fff" />
+                  <ActivityIndicator size="small" color={colors.BACKGROUND} />
                 ) : (
-                  <Text style={s.submitText}>Cadastrar</Text>
+                  <Text style={s.submitText}>{SUBMIT_LABEL}</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -252,6 +267,6 @@ const styles = (colors: ThemeColors) =>
     submitText: {
       fontSize: 15,
       fontWeight: "700",
-      color: "#fff",
+      color: colors.BACKGROUND,
     },
   });

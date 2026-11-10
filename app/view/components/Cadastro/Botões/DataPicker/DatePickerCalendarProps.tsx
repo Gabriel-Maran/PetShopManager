@@ -35,7 +35,8 @@ export function DatePickerCalendar({
           justifyContent: "center",
         },
         text: {
-          color: "#FFFFFF",
+          // A cor do fundo sobre o teal cheio: branco no claro, escuro no escuro; passa 4,5:1 nos dois.
+          color: colors.BACKGROUND,
           fontWeight: "bold",
           includeFontPadding: false,
           textAlignVertical: "center",
