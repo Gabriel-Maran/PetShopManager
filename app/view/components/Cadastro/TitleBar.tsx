@@ -1,46 +1,36 @@
 import { StyleSheet, Text, View } from "react-native";
+import { useCallback, useState } from "react";
 import ButtonBack from "./Botões/ButtonBack";
-import { Screen } from "../../../config/consts";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../Themes/ThemeProvider";
-import { useState } from "react";
+import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
 import { useScreen } from "../../../hooks/useScreen";
+import { useBackGuard } from "../../../hooks/useBackNavigation";
 import ConfirmModal from "../ConfirmModal";
 
+/** O título das telas internas, com o voltar. Para onde ele leva fica em config/navigation.ts. */
 export default function TitleBar({
   confirmReturn = false,
-  params,
   title,
   subtitle,
-  returnTo,
   isViewing,
 }: {
+  /** Pede confirmação antes de sair, nos formulários em que o usuário pode perder o que digitou. */
   confirmReturn?: boolean;
-  params?: any;
   title: string;
   subtitle: string;
-  returnTo: Screen;
   isViewing?: boolean;
 }) {
   const s = useThemedStyles(styles);
-  const { colors } = useTheme();
-  const [isOpenModal, setIsOpenModal] = useState(false);
-  const { navigate } = useScreen();
-  function navegarBack() {
-    navigate(returnTo, params);
-  }
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const { requestBack, goBack } = useScreen();
+  const openConfirm = useCallback(() => setIsConfirmOpen(true), []);
+
+  // A guarda vale para o botão da tela e para o do Android, que pedem a mesma confirmação.
+  useBackGuard(confirmReturn ? openConfirm : null);
+
   return (
     <>
       <View style={s.container}>
-        <ButtonBack
-          confirmReturn={confirmReturn}
-          backTo={returnTo}
-          params={params}
-          onPress={() => setIsOpenModal(true)}
-        />
+        <ButtonBack onPress={requestBack} />
 
         <View>
           <Text style={s.txtTitle}>{title}</Text>
@@ -48,14 +38,14 @@ export default function TitleBar({
         </View>
       </View>
       <ConfirmModal
-        visible={isOpenModal}
+        visible={isConfirmOpen}
         emoji="⚠️"
         title="Confirma voltar?"
         message="Você perderá todos os novos dados não salvos."
         confirmLabel="Voltar"
         variant="destructive"
-        onConfirm={navegarBack}
-        onCancel={() => setIsOpenModal(false)}
+        onConfirm={goBack}
+        onCancel={() => setIsConfirmOpen(false)}
       />
     </>
   );

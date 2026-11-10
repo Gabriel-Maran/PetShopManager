@@ -6,7 +6,6 @@ import {
   petsAusentesComRemarcacao,
   petsAusentesSemRemarcacao,
 } from "../../../utils/relatorios/petsAusentes";
-import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import { useAsyncData } from "../../../hooks/useAsyncData";
 
@@ -20,7 +19,6 @@ export default function PetsAusentes() {
 
   const titleBar = (
     <TitleBar
-      returnTo={Screen.Relatorios}
       title="Pets Ausentes"
       subtitle="Pets há mais tempo sem visita"
     />

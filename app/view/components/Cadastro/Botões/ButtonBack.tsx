@@ -1,36 +1,16 @@
 import { Image, StyleSheet, TouchableOpacity } from "react-native";
-import { Screen } from "../../../../config/consts";
-import { useScreen } from "../../../../hooks/useScreen";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 
-// 1. Tornamos 'backTo' opcional e adicionamos 'onPress' opcional
-interface ButtonBackProps {
-  confirmReturn: boolean;
-  backTo?: Screen;
-  params?: any;
-  onPress?: () => void;
-}
-
-export default function ButtonBack({
-  confirmReturn = false,
-  backTo,
-  params,
-  onPress,
-}: ButtonBackProps) {
-  const { navigate } = useScreen();
+export default function ButtonBack({ onPress }: { onPress: () => void }) {
   const s = useThemedStyles(styles);
 
-  // 2. Executa a função personalizada se existir; caso contrário, navega
-  const handlePress = () => {
-    if (confirmReturn && onPress) {
-      onPress();
-    } else if (backTo) {
-      navigate(backTo, params);
-    }
-  };
-
   return (
-    <TouchableOpacity onPress={handlePress} style={s.btnBack}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={s.btnBack}
+      accessibilityRole="button"
+      accessibilityLabel="Voltar"
+    >
       <Image
         style={s.imgBack}
         source={require("../../../../assets/setas/voltarBlack.png")}
@@ -39,6 +19,8 @@ export default function ButtonBack({
   );
 }
 
+// Ícone de 40 + padding de 4 + borda de 1 dos dois lados: 50 dp, acima do toque mínimo de 48 do
+// Android, então o botão dispensa hitSlop.
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     imgBack: {

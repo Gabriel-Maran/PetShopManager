@@ -6,7 +6,6 @@ import {
 } from "../../Themes/ThemeProvider";
 import BarChart from "../../components/Relatorios/BarChart";
 
-import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import {
   getDiasMaisAtendidos,
@@ -24,7 +23,6 @@ export default function DiasHorasMaisAtendidas() {
 
   const titleBar = (
     <TitleBar
-      returnTo={Screen.Relatorios}
       title="Frequência de Atendimento"
       subtitle="Análise de picos de horários e dias"
     />

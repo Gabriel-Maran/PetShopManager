@@ -6,7 +6,6 @@ import {
 } from "../../Themes/ThemeProvider";
 import BarChart from "../../components/Relatorios/BarChart";
 
-import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import {
   autoVsManuaisAgendados,
@@ -24,7 +23,6 @@ export default function OrigemAgendamentos() {
 
   const titleBar = (
     <TitleBar
-      returnTo={Screen.Relatorios}
       title="Origem dos Agendamentos"
       subtitle="Canais automáticos e manuais"
     />

@@ -232,8 +232,6 @@ export default function NewOrEditPet() {
 
       <View style={{ backgroundColor: colors.THIRD_BACKGROUND }}>
         <TitleBar
-          returnTo={Screen.Cadastros}
-          params={{ type: "PET", mode: "view" } as NewOrEditCadastros}
           title={
             isEditing
               ? "Editar Pet"
