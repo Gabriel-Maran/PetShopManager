@@ -1,0 +1,74 @@
+// Os campos que os schemas de cada entidade montam (VALID-1). Cada campo recebe a mensagem de cada
+// falha que o usuário pode corrigir; o tipo errado ou o campo ausente ficam sem mensagem, e o
+// parseInput mostra a genérica. Sem depender do Expo, para os testes rodarem no Node, que exige a
+// extensão .ts nos imports.
+import * as z from "zod";
+import { type IsoDate, isIsoDate } from "../utils/datas.ts";
+import { isValidCents } from "../utils/dinheiro.ts";
+import { MESSAGES } from "../globals/messages.ts";
+
+/** Horas de 00 a 23 e minutos de 00 a 59, sempre com dois dígitos: "09:30". */
+const HOUR_MINUTE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+const isLeapYear = (year: number) => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+
+/** "AAAA-MM-DD" de um dia que existe: 2028-02-29 passa, 2026-02-30 e 2026-13-01 não. Sem fuso. */
+function isCalendarDate(text: string): text is IsoDate {
+  if (!isIsoDate(text)) return false;
+  const [year, month, day] = text.split("-").map(Number);
+  if (month < 1 || month > 12) return false;
+  const lastDay = month === 2 && isLeapYear(year) ? 29 : DAYS_IN_MONTH[month - 1];
+  return day >= 1 && day <= lastDay;
+}
+
+/** Vazio, só espaços, nulo ou ausente viram null; texto chega ao schema sem espaço nas pontas. */
+function blankToNull(value: unknown): unknown {
+  if (typeof value === "string") return value.trim() || null;
+  return value ?? null;
+}
+
+/** Campo opcional: o que estiver vazio vira null, e o resto passa pelo `schema`. */
+export const optional = <T extends z.ZodType>(schema: T) =>
+  z.preprocess(blankToNull, schema.nullable());
+
+/** Campo com valor padrão: o que estiver vazio vira `fallback`, e tudo passa pelo `schema`. */
+export const withDefault = <T extends z.ZodType>(schema: T, fallback: z.input<T>) =>
+  z.preprocess((value) => blankToNull(value) ?? fallback, schema);
+
+/**
+ * Texto com no máximo `max` caracteres, sem espaço nas pontas. O tamanho é conferido primeiro e
+ * interrompe o resto: um texto gigante não chega às outras regras.
+ */
+export const text = (max: number, tooLong: string) =>
+  z.string().trim().max(max, { error: tooLong, abort: true });
+
+/** Texto que não pode ficar vazio nem só com espaços. */
+export const requiredText = (max: number, messages: { required: string; tooLong: string }) =>
+  text(max, messages.tooLong).min(1, messages.required);
+
+/** O id de um registro: inteiro positivo. */
+export const id = (message?: string) => z.int().positive(message);
+
+/** Sim ou não, guardado como 0 ou 1 no banco. */
+export const flag = (field: string) => z.literal([0, 1], MESSAGES.invalidFlag(field));
+
+/** Um valor da lista `values` (um enum do app). A mensagem mostra os valores aceitos. */
+export function choice<const T extends z.core.util.EnumLike>(values: T, field: string) {
+  const accepted = z.enum(values).options;
+  return z.enum(values, MESSAGES.invalidOption(field, accepted));
+}
+
+/** Data sem hora, no formato do banco ("AAAA-MM-DD"), de um dia que existe no calendário. */
+export const isoDate = (message: string) => z.string().refine(isCalendarDate, message);
+
+/** Horário "HH:MM", de 00:00 a 23:59. Com `required`, o vazio tem a sua mensagem. */
+export function time(invalid: string, required?: string) {
+  const trimmed = z.string().trim();
+  const filled = required ? trimmed.min(1, { error: required, abort: true }) : trimmed;
+  return filled.regex(HOUR_MINUTE, invalid);
+}
+
+/** Valor em centavos inteiros e sem sinal, como o banco guarda. */
+export const cents = (message: string) => z.number().refine(isValidCents, message);

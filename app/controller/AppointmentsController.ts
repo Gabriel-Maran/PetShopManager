@@ -1,36 +1,18 @@
 import { Appointment } from "../model/Appointment";
 import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
 import { appointmentsService } from "../service/AppointmentsService";
-import { type IsoDate, isIsoDate } from "../utils/datas";
-import { isValidCents } from "../utils/dinheiro";
+import type { IsoDate } from "../utils/datas";
 import { AppError } from "../errors/AppError";
 import { MESSAGES } from "../globals/messages";
-
-/**
- * Campos obrigatórios, a data no formato do banco e o valor em centavos. Cada falha tem a sua
- * mensagem.
- */
-function validateAppointment(appointment: Appointment): void {
-  if (!appointment.pet_id) {
-    throw new AppError("VALIDATION", MESSAGES.appointment.petRequired);
-  }
-  if (!appointment.servico?.trim()) {
-    throw new AppError("VALIDATION", MESSAGES.appointment.serviceRequired);
-  }
-  if (!isIsoDate(appointment.data)) {
-    throw new AppError("VALIDATION", MESSAGES.date.invalid);
-  }
-  if (!appointment.hora) {
-    throw new AppError("VALIDATION", MESSAGES.appointment.timeRequired);
-  }
-  if (!isValidCents(appointment.valor)) {
-    throw new AppError("VALIDATION", MESSAGES.money.invalid);
-  }
-}
+import { appointmentSchema } from "../validation/appointmentSchema";
+import { parseInput, parseRecordId } from "../validation/parseInput";
+import { petController } from "./PetController";
 
 class AppointmentsController {
   async getAppointmentById(id: number): Promise<Appointment> {
-    const appointment = await appointmentsService.getAppointmentById(id);
+    const appointment = await appointmentsService.getAppointmentById(
+      parseRecordId(id, MESSAGES.appointment.notFound),
+    );
     if (!appointment) throw new AppError("NOT_FOUND", MESSAGES.appointment.notFound);
     return appointment;
   }
@@ -61,14 +43,16 @@ class AppointmentsController {
     return appointmentsService.getPendingAppointmentsByPetId(petId);
   }
 
-  async createAppointment(appointment: Appointment): Promise<void> {
-    validateAppointment(appointment);
+  async createAppointment(input: Appointment): Promise<void> {
+    const appointment = parseInput(appointmentSchema, input);
+    await petController.getPetById(appointment.pet_id); // o pet precisa existir
     await appointmentsService.createAppointment(appointment);
   }
 
-  async updateAppointment(id: number, appointment: Appointment): Promise<void> {
-    if (!id) throw new AppError("NOT_FOUND", MESSAGES.appointment.notFound);
-    validateAppointment(appointment);
+  async updateAppointment(id: number, input: Appointment): Promise<void> {
+    const appointment = parseInput(appointmentSchema, input);
+    await this.getAppointmentById(id); // valida existência
+    await petController.getPetById(appointment.pet_id); // o pet precisa existir
     await appointmentsService.updateAppointment(id, appointment);
   }
 
@@ -79,11 +63,13 @@ class AppointmentsController {
   }
 
   async deleteAppointment(id: number): Promise<void> {
-    await appointmentsService.deleteAppointment(id);
+    await appointmentsService.deleteAppointment(parseRecordId(id, MESSAGES.appointment.notFound));
   }
 
   deleteFutureAutoAppointmentsByPetId(petId: number): Promise<void> {
-    return appointmentsService.deleteFutureAutoAppointmentsByPetId(petId);
+    return appointmentsService.deleteFutureAutoAppointmentsByPetId(
+      parseRecordId(petId, MESSAGES.pet.notFound),
+    );
   }
 }
 

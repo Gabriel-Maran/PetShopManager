@@ -1,94 +1,31 @@
 import { petService } from "../service/PetService";
-import {
-  PacoteRemarcacao,
-  PorteAnimal,
-  TipoServico,
-} from "../config/consts";
+import { PacoteRemarcacao, PorteAnimal, TipoServico } from "../config/consts";
 import { Pet, PetWithSpecieRaceAndOwner } from "../model/Pet";
-import { type IsoDate, isIsoDate } from "../utils/datas";
-import { type Cents, isValidCents } from "../utils/dinheiro";
 import { AppError } from "../errors/AppError";
 import { MESSAGES } from "../globals/messages";
 import type { NameSearch, Page } from "../model/Search";
+import { createPetSchemas } from "../validation/petSchema";
+import { parseInput, parseRecordId } from "../validation/parseInput";
 import { validateNameSearch } from "./validateNameSearch";
 import { ownerController } from "./OwnerController";
 
-/** Falha de validação dos dados do pet. */
-const invalid = (message: string) => new AppError("VALIDATION", message);
+const petSchemas = createPetSchemas({
+  porte: PorteAnimal,
+  servico: TipoServico,
+  pacote: PacoteRemarcacao,
+});
+
+/** O pacote de remarcação como a tela manda, antes de conferir. */
+type PetRemarcacaoInput = Pick<
+  Pet,
+  "remarcacao_ativa" | "pacote_remarcacao" | "data_inicio_pacote" | "valor_pacote"
+>;
 
 class PetController {
-  // ─── Helpers de validação ────────────────────────────────────────────────
-
-  private validatePorte(porte: unknown): void {
-    if (!Object.values(PorteAnimal).includes(porte as PorteAnimal)) {
-      throw invalid(MESSAGES.invalidOption("Porte", Object.values(PorteAnimal)));
-    }
-  }
-
-  private validateServicoPadrao(servico: unknown): void {
-    if (!Object.values(TipoServico).includes(servico as TipoServico)) {
-      throw invalid(
-        MESSAGES.invalidOption("Serviço padrão", Object.values(TipoServico)),
-      );
-    }
-  }
-
-  private validateFlag(value: unknown, campo: string): void {
-    if (value !== 0 && value !== 1) {
-      throw invalid(MESSAGES.invalidFlag(campo));
-    }
-  }
-
-  private validateRemarcacaoFields(pet: Partial<Pet>): void {
-    // Sem pacote ativo, o valor pode ficar vazio, mas o que vier precisa ser centavos.
-    if (pet.valor_pacote != null && !isValidCents(pet.valor_pacote)) {
-      throw invalid(MESSAGES.money.invalid);
-    }
-
-    if (pet.remarcacao_ativa !== 1) return;
-
-    const pacoteValido = Object.values(PacoteRemarcacao).includes(
-      pet.pacote_remarcacao as PacoteRemarcacao,
-    );
-    if (!pacoteValido) {
-      throw invalid(
-        MESSAGES.invalidOption("Pacote de remarcação", Object.values(PacoteRemarcacao)),
-      );
-    }
-
-    if (pet.valor_pacote == null) {
-      throw invalid(MESSAGES.pet.packageValueRequired);
-    }
-
-    if (!isIsoDate(pet.data_inicio_pacote)) {
-      throw invalid(MESSAGES.pet.packageStartRequired);
-    }
-  }
-
-  private validateBaseFields(pet: Partial<Pet>): void {
-    if (!pet.nome?.trim()) {
-      throw invalid(MESSAGES.pet.nameRequired);
-    }
-
-    if (!pet.especie || pet.especie <= 0) {
-      throw invalid(MESSAGES.pet.speciesRequired);
-    }
-
-    if (!pet.dono_id || pet.dono_id <= 0) {
-      throw invalid(MESSAGES.pet.ownerRequired);
-    }
-
-    this.validatePorte(pet.porte);
-
-    if (!pet.raca || pet.raca <= 0) {
-      throw invalid(MESSAGES.pet.breedRequired);
-    }
-  }
-
   // ─── Consultas ───────────────────────────────────────────────────────────
 
   async getPetById(id: number): Promise<Pet> {
-    const pet = await petService.getPetById(id);
+    const pet = await petService.getPetById(parseRecordId(id, MESSAGES.pet.notFound));
     if (!pet) throw new AppError("NOT_FOUND", MESSAGES.pet.notFound);
     return pet;
   }
@@ -100,8 +37,7 @@ class PetController {
   async searchPetsPage(
     search: NameSearch,
   ): Promise<Page<PetWithSpecieRaceAndOwner>> {
-    validateNameSearch(search);
-    return petService.searchPetsPage(search);
+    return petService.searchPetsPage(validateNameSearch(search));
   }
 
   getPetsByOwnerId(ownerId: number): Promise<Pet[]> {
@@ -110,72 +46,23 @@ class PetController {
 
   // ─── Mutações ────────────────────────────────────────────────────────────
 
-  async createPet(petSalvar: Pet): Promise<void> {
-    // Campos base obrigatórios (raca é opcional conforme a interface)
-    this.validateBaseFields(petSalvar);
-
-    // servico_padrao é obrigatório na interface
-    this.validateServicoPadrao(petSalvar.servico_padrao);
-
-    // remarcacao_ativa deve ser 0 ou 1
-    this.validateFlag(petSalvar.remarcacao_ativa, "Remarcação ativa");
-
-    // is_ativo deve ser 0 ou 1
-    this.validateFlag(petSalvar.is_ativo, "Ativo");
-
-    // Campos do pacote de remarcação quando ativo
-    this.validateRemarcacaoFields(petSalvar);
-
-    await ownerController.getOwnerById(petSalvar.dono_id);
-    await petService.createPet(petSalvar);
+  async createPet(input: Pet): Promise<void> {
+    const pet = parseInput(petSchemas.pet, input);
+    await ownerController.getOwnerById(pet.dono_id);
+    await petService.createPet(pet);
   }
 
-  async updatePet(id: number, petSalvar: Pet): Promise<void> {
-    // raca não é obrigatória na atualização (opcional na interface)
-    this.validateBaseFields(petSalvar);
-
-    // servico_padrao é obrigatório na interface
-    this.validateServicoPadrao(petSalvar.servico_padrao);
-
-    // remarcacao_ativa deve ser 0 ou 1
-    this.validateFlag(petSalvar.remarcacao_ativa, "Remarcação ativa");
-
-    // is_ativo deve ser 0 ou 1
-    this.validateFlag(petSalvar.is_ativo, "Ativo");
-
-    // Campos do pacote quando remarcação ativa
-    this.validateRemarcacaoFields(petSalvar);
-
+  async updatePet(id: number, input: Pet): Promise<void> {
+    const pet = parseInput(petSchemas.pet, input);
     await this.getPetById(id);
-    await ownerController.getOwnerById(petSalvar.dono_id);
-    await petService.updatePet(id, petSalvar);
+    await ownerController.getOwnerById(pet.dono_id);
+    await petService.updatePet(id, pet);
   }
 
-  async updateRemarcacao(
-    id: number,
-    remarcacaoAtiva: number,
-    pacoteRemarcacao: PacoteRemarcacao | null,
-    dataInicioPacote: IsoDate | null,
-    valorPacote: Cents | null,
-  ): Promise<void> {
-    this.validateFlag(remarcacaoAtiva, "Remarcação ativa");
-
-    // Reutiliza validateRemarcacaoFields com um objeto parcial
-    this.validateRemarcacaoFields({
-      remarcacao_ativa: remarcacaoAtiva,
-      pacote_remarcacao: pacoteRemarcacao,
-      data_inicio_pacote: dataInicioPacote,
-      valor_pacote: valorPacote,
-    });
-
+  async updateRemarcacao(id: number, input: PetRemarcacaoInput): Promise<void> {
+    const remarcacao = parseInput(petSchemas.remarcacao, input);
     await this.getPetById(id);
-    await petService.updateRemarcacao(
-      id,
-      remarcacaoAtiva,
-      pacoteRemarcacao,
-      dataInicioPacote,
-      valorPacote,
-    );
+    await petService.updateRemarcacao(id, remarcacao);
   }
 
   async deactivatePet(id: number): Promise<void> {

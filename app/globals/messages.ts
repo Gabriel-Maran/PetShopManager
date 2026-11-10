@@ -5,6 +5,12 @@ export const MESSAGES = {
   /** Para qualquer erro que não é um AppError: um bug, uma falha do SQLite ou do aparelho. */
   unexpected: "Algo deu errado. Tente de novo.",
 
+  /**
+   * Entrada que o formulário não monta: tipo errado, campo ausente ou algo que nem é um cadastro. Não
+   * veio do que o usuário digitou, e o detalhe vai para o log (VALID-1).
+   */
+  invalidInput: "Os dados chegaram num formato inesperado. Feche a tela e tente de novo.",
+
   date: {
     invalid: "Data inválida. Escolha a data no calendário.",
   },
@@ -20,6 +26,9 @@ export const MESSAGES = {
   /** Campo de sim ou não guardado como número no banco. */
   invalidFlag: (field: string) => `${field} deve ser 0 ou 1.`,
 
+  /** Texto acima do limite do campo, de `limits.ts`. O campo vem com o artigo: "O nome do dono". */
+  textTooLong: (field: string, max: number) => `${field} pode ter até ${max} caracteres.`,
+
   search: {
     tooLong: (max: number) => `A busca pode ter até ${max} caracteres.`,
     invalidPage: "Página inválida. Volte para a primeira página e tente de novo.",
@@ -30,6 +39,7 @@ export const MESSAGES = {
     nameRequired: "Informe o nome do dono.",
     phoneRequired: "Informe o telefone do dono.",
     phoneInvalid: "Telefone inválido. Use o DDD e o número, como (45) 99999-9999.",
+    emailInvalid: "E-mail inválido. Use o formato nome@exemplo.com.",
   },
 
   pet: {
@@ -38,8 +48,10 @@ export const MESSAGES = {
     speciesRequired: "Escolha a espécie do pet.",
     ownerRequired: "Escolha o dono do pet.",
     breedRequired: "Escolha a raça do pet.",
+    packageRequired: "Escolha o pacote de remarcação.",
     packageValueRequired: "Informe o valor do pacote, no formato 120,00.",
     packageStartRequired: "Escolha no calendário a data de início do pacote.",
+    defaultTimeInvalid: "Horário padrão inválido. Use horas e minutos, como 09:30.",
   },
 
   appointment: {
@@ -47,6 +59,7 @@ export const MESSAGES = {
     petRequired: "Escolha o pet do agendamento.",
     serviceRequired: "Escolha o serviço do agendamento.",
     timeRequired: "Informe o horário do agendamento.",
+    timeInvalid: "Horário inválido. Use horas e minutos, como 09:30.",
   },
 
   breed: {
