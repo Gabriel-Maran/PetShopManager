@@ -1,7 +1,8 @@
+/**
+ * Máscara do campo de horário, aplicada a cada tecla: "1430" → "14:30". Uma hora acima de 23 vira 23,
+ * e um minuto acima de 59 vira 59, para o campo nunca mostrar um horário que não existe.
+ */
 export function mascararHorario(txt: string): string {
-  // ESSE BICHÃO MÁSCARA HORÁRIO
-  // ELA TAMBÉM TRANSFORMA A HORA CASO SEJA > 23 
-  // E O MINUTO CASO > 59
   const d = txt.replace(/\D/g, "");
   if (!d) return "";
   if (d.length <= 2) {

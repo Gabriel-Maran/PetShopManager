@@ -1,7 +1,6 @@
 import { PlanoItem } from "../../config/consts";
 import { getDatabase } from "../../config/database";
 import type { IsoDate } from "../datas";
-import { BarChartItem } from "../../view/components/Relatorios/BarChart";
 
 /**
  * Retorna a contagem de pets ativos por plano de remarcação.

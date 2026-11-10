@@ -81,7 +81,7 @@ export function useServicos(): ServiceTypeReturn {
       .getAllServiceTypes()
       .then((value) => updateField("servico", value))
       .catch(showError);
-  }, []); // ← [] correto, busca apenas uma vez
+  }, []);
 
   return {
     servicesForm: form,
@@ -105,7 +105,6 @@ export function useTiposPagamento(): PaymentMethodReturn {
     tipos_pgto: [],
   });
 
-  // CORRIGIDO: estava sem [], re-buscava em todo render
   useEffect(() => {
     paymentMethodRepository
       .getAllPaymentMethod()
