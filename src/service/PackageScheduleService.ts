@@ -4,7 +4,6 @@
 // AppointmentsService) e os testes rodarem o mesmo código. Os imports levam a extensão .ts porque o
 // Node dos testes exige.
 import { inTransaction } from "../config/migrator.ts";
-import { monthOf } from "../domain/isoCalendar.ts";
 import {
   isAutoVisitConclusion,
   nextPackageVisitDate,
@@ -23,7 +22,7 @@ import {
   type ScheduleDatabase,
 } from "../repository/PackageScheduleRepository.ts";
 import type { Appointment } from "../model/Appointment.ts";
-import type { IsoDate } from "../utils/datas.ts";
+import { monthOf, type IsoDate } from "../utils/datas.ts";
 
 export class PackageScheduleService {
   // Campo declarado à parte, e não no construtor, porque o Node dos testes só apaga os tipos.

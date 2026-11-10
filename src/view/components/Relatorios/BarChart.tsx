@@ -6,13 +6,9 @@ import {
 } from "../../Themes/ThemeProvider";
 import { formatValue } from "../../../utils/formatadores/formaterHelper";
 import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
+import type { BarChartItem } from "../../../utils/relatorios/graficos";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
-
-export interface BarChartItem {
-  x: string;
-  y: number;
-}
 
 interface BarChartProps {
   data: BarChartItem[];

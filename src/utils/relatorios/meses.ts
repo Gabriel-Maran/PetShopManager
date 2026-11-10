@@ -1,6 +1,6 @@
 // Os meses do comparativo mensal, contados pelo calendário do aparelho. Sem o Expo, para os testes
 // rodarem no Node.
-import { dateToIso, type IsoDate, todayIso } from "../datas.ts";
+import { dateToIso, type IsoDate, monthOf, todayIso } from "../datas.ts";
 import type { BarSpec } from "./graficos.ts";
 
 const MONTH_LABELS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
@@ -22,7 +22,7 @@ function formatMonth(yearMonth: string): string {
 function monthBars(first: Date, count: number): BarSpec<string>[] {
   return Array.from({ length: count }, (_, i) => {
     // O dia 1 evita que um dia 29 a 31 pule para o mês seguinte ao somar os meses.
-    const yearMonth = dateToIso(new Date(first.getFullYear(), first.getMonth() + i, 1)).slice(0, 7);
+    const yearMonth = monthOf(dateToIso(new Date(first.getFullYear(), first.getMonth() + i, 1)));
     return [yearMonth, formatMonth(yearMonth)] as const;
   });
 }
