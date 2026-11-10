@@ -17,6 +17,7 @@ import {
   Screen,
 } from "./app/config/consts";
 import { useScreen } from "./app/hooks/useScreen";
+import { useAndroidBackButton } from "./app/hooks/useBackNavigation";
 
 import {
   ThemeColors,
@@ -39,8 +40,8 @@ import { AgendamentosProvider } from "./app/view/contexts/agendamentos";
 import RelatorioView from "./app/view/pages/Relatorios/Render/RelatorioView";
 
 function AppContent() {
-  const { screen } = useScreen();
-  const { params } = useScreen<RelatorioParams>();
+  const { screen, params } = useScreen<RelatorioParams>();
+  useAndroidBackButton();
 
   let content: ReactNode;
 

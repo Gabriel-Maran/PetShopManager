@@ -17,16 +17,8 @@ export const IMAGENS_BY_NAME = {
   CONFIGURACOES: require("../assets/nav_bar/settings.png"),
 };
 
-export enum Screen {
-  Calendario = "Calendario",
-  Cadastros = "Cadastros",
-  Relatorios = "Relatorios",
-  Configuracoes = "Configuracoes",
-  NewOrEditOwner = "NewOrEditOwner",
-  NewOrEditPet = "NewOrEditPet",
-  NewOrEditAppointment = "NewOrEditAppointment",
-  RelatorioView = "RelatorioView",
-}
+// As telas vivem em navigation.ts, que roda nos testes; o reexport mantém os imports de consts.
+export { Screen } from "./navigation";
 
 export enum TipoServico {
   Banho = "Banho",

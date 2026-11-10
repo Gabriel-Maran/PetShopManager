@@ -11,4 +11,4 @@ class ServiceTypeRepository {
   }
 }
 
-export const serviceTypeRepository = new ServiceTypeRepository
+export const serviceTypeRepository = new ServiceTypeRepository();
