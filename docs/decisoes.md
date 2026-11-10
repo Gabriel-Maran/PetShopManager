@@ -402,3 +402,13 @@ Decisões dos PRs:
   - o enum `ORDER` saiu.
 
 Motivo: a mesma da primeira rodada. Os PRs são independentes, e o Gabriel revisa e mescla em qualquer ordem.
+
+**Pendências da segunda rodada, num PR de integração.**
+Contexto: os agentes dos PRs #35 a #38 anotaram sete ajustes fora da própria zona, e a varredura final achou mais dois.
+Decisão do Gabriel: o coordenador faz todos num PR só, depois do merge dos quatro.
+Decisão do PR:
+- O formulário do pet ganhou um tipo (`PetForm`), e as abas recebem o `updateField` tipado pelo `UpdateField<T>` do `useFormState`. Antes, cada aba tinha uma cópia parcial do formulário, e o `any` escondia campos com o tipo errado (o porte era `string`).
+- O `PacoteRemarcacao` deixou de imitar o enum numérico, e o pacote salvo é conferido pelo `isPacoteRemarcacao`. Assim ele fica igual aos outros valores do pet.
+- Limpar a raça ao trocar a espécie e recomeçar o pacote ao ligar a remarcação saíram de `useEffect` e foram para o handler do toque. O efeito rodava também ao abrir a tela e dependia de uma ref para pular o primeiro render.
+- O `UPDATE_PET_REMARCACAO_SQL` foi para o teste, que é o único que o usa. O app grava o pet inteiro.
+Motivo: as regras pedem TypeScript estrito, sem `any`, e campos explícitos nas consultas. Com tudo no `main`, as flags de sobras do `tsconfig.json` já passam.

@@ -3,7 +3,7 @@
 // movimento. Os telefones são fictícios, e os e-mails usam o example.com, domínio reservado para
 // exemplos. O módulo não importa nada do app, para os testes rodarem o SQL num SQLite em memória.
 
-// Os mesmos valores dos enums de consts.ts (TipoServico, EspeciesAtendidas e PorteAnimal).
+// Os mesmos valores de petEnums.ts (TipoServico, EspeciesAtendidas e PorteAnimal).
 type ServiceName = "Banho" | "Banho e Tosa" | "Banho e Higiênica";
 type Species = "CAO" | "GATO";
 type Size = "PEQUENO" | "MEDIO" | "GRANDE";

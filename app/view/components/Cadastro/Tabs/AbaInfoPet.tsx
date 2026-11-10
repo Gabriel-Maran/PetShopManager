@@ -17,6 +17,11 @@ import { ownerController } from "../../../../controller/OwnerController";
 import { speciesController } from "../../../../controller/SpeciesController";
 import ModalCadastroRaca from "../Modal/ModalCreateRacePet";
 import { useError } from "../../../../hooks/useError";
+import type { UpdateField } from "../../../../hooks/useFormState";
+import type { PorteAnimal } from "../../../../config/petEnums";
+import type { Breed } from "../../../../model/Breed";
+import type { Species } from "../../../../repository/SpeciesRepository";
+import type { PetForm } from "../../../pages/Pet/petForm";
 
 export type TipoModal = "DONO" | "RACA";
 
@@ -28,28 +33,16 @@ export interface AbrirModalConfig {
   aoSelecionar: (item: any) => void;
 }
 
-export interface FormInfoPet {
-  nome: string;
-  especie: number;
-  dono_id: number;
-  dono_nome: string;
-  raca: number;
-  raca_nome: string;
-  observacoes: string;
-  porte: string;
-}
-
 interface AbaInfoPetProps {
   visible: boolean;
   isEditavel?: boolean;
   isNewPet: boolean;
-  form: FormInfoPet;
-  updateField: (field: string, value: any) => void;
+  form: PetForm;
+  updateField: UpdateField<PetForm>;
   abrirModal: (config: AbrirModalConfig) => void;
-  especiesList: any[];
-  racasList: any[];
-  portesList: { id: string; nome: string }[];
-  salvarPet: () => void;
+  especiesList: Species[];
+  racasList: Breed[];
+  portesList: { id: PorteAnimal; nome: string }[];
 }
 
 export default function AbaInfoPet({
@@ -114,10 +107,16 @@ export default function AbaInfoPet({
     if (porteEncontrado) updateField("porte", porteEncontrado.id);
   }, [isNewPet]);
 
-  // --- Limpa raça ao trocar espécie ---
-  useEffect(() => {
-    updateField("raca_nome", "");
-  }, [form.especie]);
+  // A raça é de uma espécie só: trocar a espécie apaga a raça escolhida, e o pet pede outra ao salvar.
+  const handleSelecionarEspecie = useCallback(
+    (item: Species) => {
+      if (item.id === form.especie) return;
+      updateField("especie", item.id);
+      updateField("raca", 0);
+      updateField("raca_nome", "");
+    },
+    [form.especie, updateField],
+  );
 
   const especieSelecionada = useMemo(
     () => especiesList.find((e) => e.id === form.especie),
@@ -261,7 +260,7 @@ export default function AbaInfoPet({
           itens={especiesList}
           itemSelected={especieSelecionada}
           labelExtractor={labelExtractorEspecie}
-          onChange={(item) => updateField("especie", item.id)}
+          onChange={handleSelecionarEspecie}
           renderItem={renderEspecieItem}
           hasBorderBottom={true}
           isEditavel={isEditavel}

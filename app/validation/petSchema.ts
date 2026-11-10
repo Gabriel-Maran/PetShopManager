@@ -1,7 +1,7 @@
 // O cadastro do pet e o pacote de remarcação (VALID-1). Sem depender do Expo, para os testes rodarem
 // no Node, que exige a extensão .ts nos imports.
 import * as z from "zod";
-import { PACOTES_REMARCACAO, PorteAnimal, TipoServico } from "../config/petEnums.ts";
+import { PacoteRemarcacao, PorteAnimal, TipoServico } from "../config/petEnums.ts";
 import { MESSAGES } from "../globals/messages.ts";
 import { MAX_NOTES_LENGTH, MAX_PET_NAME_LENGTH } from "../globals/limits.ts";
 import {
@@ -56,7 +56,7 @@ export const petSchema = z
     ),
     is_ativo: flag("Ativo"),
     remarcacao_ativa: flag("Remarcação ativa"),
-    pacote_remarcacao: optional(choice(PACOTES_REMARCACAO, "Pacote de remarcação")),
+    pacote_remarcacao: optional(choice(PacoteRemarcacao, "Pacote de remarcação")),
     valor_pacote: optional(cents(MESSAGES.money.invalid)),
     data_inicio_pacote: optional(isoDate(MESSAGES.date.invalid)),
     horario_padrao: withDefault(time(MESSAGES.pet.defaultTimeInvalid), DEFAULT_TIME),

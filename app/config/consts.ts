@@ -24,6 +24,7 @@ export { Screen } from "./navigation";
 export {
   EspeciesAtendidas,
   EspeciesAtendidasLabel,
+  isPacoteRemarcacao,
   PacoteRemarcacao,
   PorteAnimal,
   PorteAnimalLabel,

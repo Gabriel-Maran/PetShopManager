@@ -94,7 +94,7 @@ const styles = (colors: ThemeColors) =>
       paddingHorizontal: 6,
       marginBottom: 20,
       elevation: 3,
-      shadowColor: "#000",
+      shadowColor: colors.SHADOW,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,

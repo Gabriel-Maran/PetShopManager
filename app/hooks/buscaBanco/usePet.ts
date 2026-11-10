@@ -4,11 +4,12 @@ import { ownerController } from "../../controller/OwnerController";
 import { LIMIT_ITEM_PAGE } from "../../config/consts";
 import { Owner } from "../../model/Owner";
 import { Species } from "../../repository/SpeciesRepository";
+import type { Breed } from "../../model/Breed";
 import { useError } from "../useError";
 import { useSearchPage } from "../useSearchPage";
 export function pegarRacasBanco(formEspecieId: number): {
   especiesList: Species[];
-  racasList: Species[];
+  racasList: Breed[];
   page: number;
   setPage: (page: number) => void;
   searchTxt: string;
@@ -18,7 +19,7 @@ export function pegarRacasBanco(formEspecieId: number): {
   const { showError } = useError();
 
   const [especiesList, setEspeciesList] = useState<Species[]>([]);
-  const [racasList, setRacasList] = useState<Species[]>([]);
+  const [racasList, setRacasList] = useState<Breed[]>([]);
   const [page, setPage] = useState<number>(0);
   const [searchTxt, setSearchTxt] = useState<string>("");
   const [total, setTotal] = useState<number>(0);

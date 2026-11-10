@@ -80,7 +80,7 @@ const styles = (colors: ThemeColors) =>
       borderRadius: 16,
       overflow: "hidden",
       // sombra sutil
-      shadowColor: "#000",
+      shadowColor: colors.SHADOW,
       shadowOpacity: 0.06,
       shadowRadius: 8,
       shadowOffset: { width: 0, height: 2 },

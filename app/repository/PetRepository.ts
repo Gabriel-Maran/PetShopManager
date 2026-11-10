@@ -2,6 +2,7 @@ import { getDatabase } from "../config/database";
 import {
   ACTIVATE_PET_SQL,
   DEACTIVATE_PET_SQL,
+  FIND_PET_SQL,
   INSERT_PET_SQL,
   searchPetsSql,
   UPDATE_PET_SQL,
@@ -14,7 +15,7 @@ import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
 class PetRepository {
   async getPetById(id: number): Promise<Pet | null> {
     const db = await getDatabase();
-    return db.getFirstAsync<Pet>(`SELECT * FROM pets WHERE id = ?`, [id]);
+    return db.getFirstAsync<Pet>(FIND_PET_SQL, [id]);
   }
 
   searchPetsPage(search: NameSearch): Promise<Page<PetWithSpecieRaceAndOwner>> {

@@ -5,6 +5,7 @@ import {
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
 import { StatusFiltro } from "../../../config/consts";
+import { TINT_OPACITY, withAlpha } from "../../Themes/alpha";
 import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
 import { touchTargetSlop } from "../Acessibilidade/accessibilityProps";
 
@@ -22,7 +23,6 @@ const OPCOES: { val: StatusFiltro; label: string; accent: AccentColor }[] = [
 
 // O fundo da opção escolhida é a cor dela com 6% de opacidade; o teste de contraste confere o texto
 // sobre esse fundo.
-const ACTIVE_BACKGROUND_ALPHA = "10";
 
 const CHIP_PADDING_VERTICAL = 7;
 const CHIP_BORDER_WIDTH = 1.5;
@@ -61,7 +61,7 @@ export default function FilterPanel({
                 s.chip,
                 active && {
                   borderColor: accent,
-                  backgroundColor: accent + ACTIVE_BACKGROUND_ALPHA,
+                  backgroundColor: withAlpha(accent, TINT_OPACITY.ACTIVE_FILTER),
                 },
               ]}
               onPress={() => handleSelect(op.val)}

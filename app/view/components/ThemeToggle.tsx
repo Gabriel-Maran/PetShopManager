@@ -6,6 +6,7 @@ import {
 } from "../Themes/ThemeProvider";
 import { useRef } from "react";
 import { configsController } from "../../controller/ConfigsController";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
 import { A11Y_LABELS } from "../../globals/accessibilityLabels";
 
 const THUMB_SIZE = 40;
@@ -19,6 +20,10 @@ const THUMB_ON = SWITCH_WIDTH - THUMB_SIZE - PADDING - WRAPPER_PADDING;
 export default function ThemeToggle() {
   const { isDark, trocarTheme } = useTheme();
   const s = useThemedStyles(styles);
+  // Se a gravação falhar, o modal de erro avisa que o tema escolhido não ficou salvo para a próxima vez.
+  const { run: saveTheme } = useAsyncAction((nextIsDark: boolean) =>
+    configsController.updateConfig(1, nextIsDark ? 1 : 0),
+  );
 
   const thumbAnim = useRef(new Animated.Value(isDark ? 1 : 0)).current;
   const thumbFadeAnim = useRef(new Animated.Value(1)).current;
@@ -71,9 +76,9 @@ export default function ThemeToggle() {
 
   return (
     <TouchableOpacity
-      onPress={async () => {
+      onPress={() => {
         toggleSwitch();
-        await configsController.updateConfig(1, isDark ? 0 : 1);
+        saveTheme(!isDark);
       }}
       activeOpacity={0.85}
       accessibilityRole="switch"

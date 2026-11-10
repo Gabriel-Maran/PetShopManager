@@ -99,7 +99,7 @@ const styles = (colors: ThemeColors) =>
       marginBottom: 20,
       // Sombra leve para dar profundidade
       elevation: 3,
-      shadowColor: "#000",
+      shadowColor: colors.SHADOW,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,

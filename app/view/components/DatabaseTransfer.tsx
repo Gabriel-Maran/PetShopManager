@@ -237,7 +237,7 @@ const styles = (colors: ThemeColors) =>
       alignItems: "center",
       gap: 14,
       minWidth: 160,
-      shadowColor: "#000",
+      shadowColor: colors.SHADOW,
       shadowOpacity: 0.15,
       shadowRadius: 12,
       elevation: 8,
