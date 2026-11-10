@@ -5,6 +5,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  appointmentsOf,
   asMigrationDatabase,
   createDatabase,
   createLegacyDatabase,
@@ -14,6 +15,9 @@ import {
   isoDate,
   legacyDateInt,
   openConnection,
+  packageScheduleOf,
+  pendingAutoOf,
+  petRow,
   toDate,
 } from "./helpers/database.mjs";
 import {
@@ -38,6 +42,10 @@ const schemaObjects = (db) =>
   db
     .prepare("SELECT type, name, sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type, name")
     .all();
+const triggerNames = (db) => schemaObjects(db).filter(({ type }) => type === "trigger").map(({ name }) => name);
+
+/** Os triggers da remarcação, que a versão 4 tira (ARQ-2). */
+const SCHEDULE_TRIGGERS = ["trg_pet_remarcacao_ativar", "trg_pet_remarcacao_insert", "trg_remarcacao_automatica"];
 
 /** Uma migração a mais depois das do app, só para o teste. */
 const nextMigration = (statements, offset = 1) => ({ version: LATEST + offset, statements });
@@ -46,7 +54,7 @@ const nextMigration = (statements, offset = 1) => ({ version: LATEST + offset, s
 const PACKAGE = { data_inicio_pacote: isoDate(3), valor_pacote: 20000 };
 const LEGACY_PACKAGE = { data_inicio_pacote: legacyDateInt(3), valor_pacote: "200,00" };
 
-/** Um dono com um pet de pacote, que já gera a agenda automática pelo trigger. */
+/** Um dono com um pet de pacote. Nas versões 1 a 3, o trigger da época gera a agenda dele. */
 function insertOwnerWithPackagePet(db, pkg = PACKAGE) {
   const dono_id = insertOwner(db);
   const pet = insertPet(db, { dono_id, remarcacao_ativa: 1, pacote_remarcacao: 4, ...pkg });
@@ -81,7 +89,14 @@ describe("migrações do banco", () => {
     assert.equal(userVersion(db), LATEST);
     assert.equal(count(db, "species"), 3);
     assert.equal(count(db, "payment_methods"), 5);
-    assert.equal(schemaObjects(db).filter((object) => object.type === "trigger").length, 8);
+    // Desde a versão 4, só os de integridade e cascata; a agenda do pacote é do PackageScheduleService.
+    assert.deepEqual(triggerNames(db), [
+      "trg_owner_desativar_pets",
+      "trg_pet_ativar_owner",
+      "trg_pet_desativar_limpar_remarcacao",
+      "trg_pet_remarcacao_desativar",
+      "trg_ultima_visita",
+    ]);
     assert.equal(foreignKeys(db), 1, "as chaves estrangeiras voltam a valer depois da migração");
   });
 
@@ -160,10 +175,10 @@ describe("migrações do banco", () => {
       ["owners", "pets", "appointments"].map((table) => [table, rows(db, table)]),
     );
 
-    await migrate(db);
+    await migrate(db, MIGRATIONS.slice(0, 3));
 
     assert.equal(userVersion(db), 3);
-    assert.deepEqual(schemaObjects(db), schemaObjects(await createDatabase()));
+    assert.deepEqual(schemaObjects(db), schemaObjects(await databaseAt(3)));
 
     const centsByText = new Map(legacyValues);
     const appointments = rows(db, "appointments");
@@ -195,6 +210,58 @@ describe("migrações do banco", () => {
         .lastInsertRowid,
     );
     assert.equal(nextId, deletedId + 1, "a contagem de ids continua de onde parou");
+  });
+
+  test("banco na versão 3: sobe para a 4 sem perder dados e sem os triggers da remarcação", async () => {
+    const db = await databaseAt(3);
+    const { pet } = insertOwnerWithPackagePet(db);
+    const before = Object.fromEntries(
+      ["owners", "pets", "appointments"].map((table) => [table, rows(db, table)]),
+    );
+    const v3Objects = schemaObjects(db);
+    assert.ok(pendingAutoOf(db, pet.id).length > 0, "o trigger da versão 3 gerou a agenda");
+
+    await migrate(db);
+
+    assert.equal(userVersion(db), 4);
+    for (const [table, tableRows] of Object.entries(before)) {
+      assert.deepEqual(rows(db, table), tableRows, `${table} continua igual`);
+    }
+    assert.deepEqual(schemaObjects(db), schemaObjects(await createDatabase()));
+    assert.deepEqual(
+      schemaObjects(db),
+      v3Objects.filter(({ name }) => !SCHEDULE_TRIGGERS.includes(name)),
+      "só saem os três triggers da remarcação",
+    );
+  });
+
+  test("a agenda que veio da versão 3 continua pela remarcação em TypeScript", async () => {
+    const db = await databaseAt(3);
+    const { pet } = insertOwnerWithPackagePet(db);
+    await migrate(db);
+    const [first] = pendingAutoOf(db, pet.id);
+    const lastBefore = petRow(db, pet.id).ultimo_visita_data_auto;
+    const countBefore = appointmentsOf(db, pet.id).length;
+
+    await packageScheduleOf(db).updateAppointment(first.id, { ...first, concluido: 1 });
+
+    const agenda = appointmentsOf(db, pet.id);
+    assert.equal(agenda.length, countBefore + 1, "concluir cria o próximo");
+    assert.ok(agenda.at(-1).data > lastBefore);
+    assert.equal(petRow(db, pet.id).ultimo_visita_data_auto, agenda.at(-1).data);
+    assert.equal(petRow(db, pet.id).current_ultima_visita_data, first.data, "a última visita segue no trigger");
+  });
+
+  test("banco de antes das migrações sobe direto para a última versão, sem os triggers da remarcação", async () => {
+    const db = createLegacyDatabase();
+    const { pet } = insertOwnerWithPackagePet(db, LEGACY_PACKAGE);
+    const appointmentsBefore = rows(db, "appointments").length;
+
+    assert.equal(await migrate(db), LATEST);
+
+    assert.deepEqual(schemaObjects(db), schemaObjects(await createDatabase()));
+    assert.equal(rows(db, "appointments").length, appointmentsBefore, "a agenda gravada fica");
+    assert.equal(petRow(db, pet.id).data_inicio_pacote, isoDate(3));
   });
 
   test("só as migrações pendentes rodam, em ordem", async () => {

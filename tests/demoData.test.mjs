@@ -1,17 +1,19 @@
 // Roda o esquema real do app e os dados de exemplo num SQLite em memória (node:sqlite), com os
-// triggers ligados, e confere o que as telas e os relatórios vão mostrar. Nada é gravado em disco.
+// triggers ligados e a agenda dos pacotes pela regra da remarcação, e confere o que as telas e os
+// relatórios vão mostrar. Nada é gravado em disco.
 //
 // Os triggers comparam datas com o relógio do SQLite ('now'), que não dá para fixar. Por isso o
 // "hoje" dos dados é o dia de verdade, e as checagens valem para qualquer data.
 import { beforeEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { createDatabase, isoDate } from "./helpers/database.mjs";
+import { appointmentsOf, createDatabase, isoDate, petRow } from "./helpers/database.mjs";
 import {
   buildDemoDataSql,
   COUNT_USER_DATA_SQL,
   DEMO_DATA_SUMMARY,
 } from "../src/config/demoData.ts";
 import { normalizeForSearch } from "../src/utils/formatadores/normalizaNome.ts";
+import { packagePlanOf, scheduleClockOf, scheduleForNewPet } from "../src/domain/packageSchedule.ts";
 
 const today = new Date();
 const todayDate = `'${isoDate(0)}'`;
@@ -58,7 +60,7 @@ describe("dados de exemplo", () => {
     }
   });
 
-  test("cada pet com pacote ganha a agenda automática pelo trigger", () => {
+  test("cada pet com pacote ganha a agenda automática", () => {
     loadDemoData(db);
 
     const withoutAgenda = count(
@@ -72,6 +74,27 @@ describe("dados de exemplo", () => {
     );
     assert.equal(count(db, "SELECT COUNT(*) AS total FROM pets WHERE remarcacao_ativa = 1"), DEMO_DATA_SUMMARY.packages);
     assert.equal(withoutAgenda, 0);
+  });
+
+  test("a agenda dos pacotes é a que o cadastro pelo app gera, com o ponteiro no último automático", () => {
+    loadDemoData(db);
+    const clock = scheduleClockOf(today);
+
+    const packagePets = db.prepare("SELECT id FROM pets WHERE remarcacao_ativa = 1").all();
+    assert.equal(packagePets.length, DEMO_DATA_SUMMARY.packages);
+    for (const { id } of packagePets) {
+      const pet = petRow(db, id);
+      const expected = scheduleForNewPet(packagePlanOf(pet, clock.today), clock, pet.horario_padrao);
+      const agenda = appointmentsOf(db, id);
+
+      assert.deepEqual(
+        agenda.map((a) => ({ date: a.data, cents: a.valor, auto: a.is_auto_agen === 1 })),
+        expected,
+        pet.nome,
+      );
+      assert.ok(agenda.every((a) => a.hora === pet.horario_padrao && a.servico === pet.servico_padrao));
+      assert.equal(pet.ultimo_visita_data_auto, expected.filter((visit) => visit.auto).at(-1).date);
+    }
   });
 
   test("nada fica pendente no passado, e o futuro só tem agendamentos em aberto", () => {

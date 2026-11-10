@@ -2,7 +2,8 @@
 // comandos SQL dos repositories (src/repository/sql). Nada é gravado em disco.
 //
 // Os triggers comparam datas com o relógio do SQLite ('now', no fuso local), que não dá para fixar. Por
-// isso as datas dos testes são relativas ao dia de verdade e ficam longe da virada do dia.
+// isso as datas dos testes são relativas ao dia de verdade e ficam longe da virada do dia. A remarcação
+// (PackageScheduleService) recebe o "agora" de quem chama; aqui, o relógio de verdade, como no app.
 import { DatabaseSync } from "node:sqlite";
 import { MIGRATIONS, SQL_CONNECTION_PRAGMAS } from "../../src/config/schema.ts";
 import { migrateDatabase } from "../../src/config/migrator.ts";
@@ -10,6 +11,7 @@ import { normalizeForSearch } from "../../src/utils/formatadores/normalizaNome.t
 import { todayIso } from "../../src/utils/datas.ts";
 import { INSERT_OWNER_SQL } from "../../src/repository/sql/ownersSql.ts";
 import { INSERT_PET_SQL, UPDATE_PET_SQL } from "../../src/repository/sql/petsSql.ts";
+import { PackageScheduleService } from "../../src/service/PackageScheduleService.ts";
 
 /** Conexão aberta como o getDatabase do app abre, ainda sem as migrações. */
 export function openConnection(path = ":memory:") {
@@ -18,17 +20,27 @@ export function openConnection(path = ":memory:") {
   return db;
 }
 
-/** O DatabaseSync com a interface assíncrona do expo-sqlite que as migrações e a restauração usam. */
+/**
+ * O DatabaseSync com a interface assíncrona do expo-sqlite que as migrações, a restauração e a
+ * remarcação usam, com os parâmetros um a um.
+ */
 export function asMigrationDatabase(db) {
   return {
     execAsync: async (sql) => {
       db.exec(sql);
     },
-    getFirstAsync: async (sql) => db.prepare(sql).get() ?? null,
-    getAllAsync: async (sql) => db.prepare(sql).all(),
-    runAsync: async (sql, ...params) => db.prepare(sql).run(...params),
+    getFirstAsync: async (sql, ...params) => db.prepare(sql).get(...params) ?? null,
+    getAllAsync: async (sql, ...params) => db.prepare(sql).all(...params),
+    runAsync: async (sql, ...params) => {
+      const { changes, lastInsertRowid } = db.prepare(sql).run(...params);
+      return { changes: Number(changes), lastInsertRowId: Number(lastInsertRowid) };
+    },
   };
 }
+
+/** A remarcação do app sobre o banco do teste. `connection` troca a conexão, para simular falhas. */
+export const packageScheduleOf = (db, connection = asMigrationDatabase(db)) =>
+  new PackageScheduleService(async () => connection);
 
 /**
  * Banco novo levado só até a versão pedida, como um aparelho com o app daquela época. O caminho pode
@@ -109,17 +121,33 @@ const petParams = (pet) => [
   pet.valor_pacote,
 ];
 
-/** Cadastra um pet como o app faz. Devolve o pet completo, para editar depois com updatePet. */
+/** O formulário de um pet com os campos padrão, mais os passados. */
+export const newPet = (fields) => ({ ...DEFAULT_PET, ...fields });
+
+/**
+ * Só o INSERT do pet, sem passar pela remarcação. Serve para quem não olha a agenda e para os bancos
+ * das versões 1 a 3, em que os triggers ainda geravam a agenda. Devolve o pet completo.
+ */
 export function insertPet(db, fields) {
-  const pet = { ...DEFAULT_PET, ...fields };
+  const pet = newPet(fields);
   const result = db.prepare(INSERT_PET_SQL).run(...petParams(pet));
   return { ...pet, id: Number(result.lastInsertRowid) };
 }
 
-/** Salva o formulário de edição do pet, que regrava todos os campos, como o app faz. */
+/** Só o UPDATE do formulário do pet, sem passar pela remarcação, como o insertPet. */
 export function updatePet(db, pet) {
   db.prepare(UPDATE_PET_SQL).run(...petParams(pet), pet.id);
 }
+
+/** Cadastra um pet como o app faz, pela remarcação. Devolve o pet completo, para editar com savePet. */
+export async function createPet(db, fields, now = new Date()) {
+  const pet = newPet(fields);
+  const id = await packageScheduleOf(db).createPet(pet, now);
+  return { ...pet, id };
+}
+
+/** Salva o formulário de edição do pet como o app faz: regrava todos os campos, pela remarcação. */
+export const savePet = (db, pet, now = new Date()) => packageScheduleOf(db).updatePet(pet.id, pet, now);
 
 export const petRow = (db, id) => db.prepare("SELECT * FROM pets WHERE id = ?").get(id);
 

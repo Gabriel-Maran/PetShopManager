@@ -128,11 +128,12 @@ async function columnsOf(db: MigrationDatabase, schema: "main" | "src", table: s
   return rows.map(({ name }) => name);
 }
 
-// Os triggers são as regras do dia a dia: cadastrar um pet com pacote, por exemplo, gera a agenda e
-// move o ponteiro da remarcação (ultimo_visita_data_auto). Na restauração, a agenda e o ponteiro já vêm
-// prontos do backup. Por isso os triggers do app saem durante a cópia e voltam iguais, na mesma ordem,
-// pelo comando guardado no próprio banco do app. Roda dentro da transação: se a cópia falhar, o ROLLBACK
-// traz os triggers de volta.
+// Os triggers são as regras do dia a dia: desativar o dono, por exemplo, desativa os pets e limpa o
+// pacote deles. Na restauração, os dados já vêm prontos do backup, com a agenda e o ponteiro da
+// remarcação (ultimo_visita_data_auto). Desde a versão 4 do esquema, a agenda nem é mais de trigger,
+// mas a regra vale para qualquer trigger: eles saem durante a cópia e voltam iguais, na mesma ordem,
+// pelo comando guardado no próprio banco do app. Roda dentro da transação: se a cópia falhar, o
+// ROLLBACK traz os triggers de volta.
 async function withoutAppTriggers(db: MigrationDatabase, work: () => Promise<void>) {
   const triggers = await db.getAllAsync<{ name: string; sql: string }>(LIST_APP_TRIGGERS_SQL);
   for (const { name } of triggers) {

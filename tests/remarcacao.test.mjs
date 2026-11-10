@@ -1,30 +1,26 @@
-// Caracterização da remarcação automática, que vive nos triggers. Os testes "corrigido" eram os
-// "confirmado" do TEST-1: descreviam o BUG-3 e o BUG-4, e a versão 2 do esquema inverteu a checagem.
+// Caracterização da remarcação automática. Até a versão 3 do esquema ela vivia nos triggers; desde a
+// 4, no PackageScheduleService (ARQ-2), e estes testes passam pelo mesmo caminho do app. Os testes
+// "corrigido" eram os "confirmado" do TEST-1: descreviam o BUG-3 e o BUG-4, e a versão 2 do esquema
+// inverteu a checagem.
 import { beforeEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
 import {
   appointmentsOf,
+  asMigrationDatabase,
   createDatabase,
+  createPet,
   daysBetween,
   insertOwner,
-  insertPet,
   isoDate,
   monthOf,
+  newPet,
+  packageScheduleOf,
   pendingAutoOf,
   petRow,
+  savePet,
   toDate,
-  updatePet,
 } from "./helpers/database.mjs";
-import { UPDATE_APPOINTMENT_SQL } from "../src/repository/sql/appointmentsSql.ts";
-
-/**
- * Só o pacote do pet, sem o resto do cadastro, para o teste mexer apenas nas colunas que o trigger olha.
- * O app grava o pet inteiro pelo UPDATE_PET_SQL. Parâmetros: remarcacao_ativa, pacote_remarcacao,
- * data_inicio_pacote, valor_pacote, id.
- */
-const UPDATE_PET_REMARCACAO_SQL = `UPDATE pets SET
-  remarcacao_ativa = ?, pacote_remarcacao = ?, data_inicio_pacote = ?, valor_pacote = ?
-  WHERE id = ?`;
+import { INSERT_PACKAGE_VISIT_SQL } from "../src/repository/sql/appointmentsSql.ts";
 
 /** Os automáticos agrupados por mês, na ordem das datas. */
 function autoByMonth(agenda) {
@@ -36,18 +32,11 @@ function autoByMonth(agenda) {
 }
 
 /** Salva o formulário de um agendamento como o app faz, mudando só os campos passados. */
-function saveAppointment(db, appointment, changes) {
-  const a = { ...appointment, ...changes };
-  db.prepare(UPDATE_APPOINTMENT_SQL).run(
-    a.pet_id, a.servico, a.data, a.hora, a.entregar_pet, a.concluido, a.observacao,
-    a.valor, a.tipo_pgto, a.ta_pago, a.id,
-  );
-}
+const saveAppointment = (db, appointment, changes) =>
+  packageScheduleOf(db).updateAppointment(appointment.id, { ...appointment, ...changes });
 
-/** Conclui como o app: salva o formulário com o concluído marcado, o que dispara os triggers. */
-function concludeAppointment(db, appointment) {
-  saveAppointment(db, appointment, { concluido: 1 });
-}
+/** Conclui como o app: salva o formulário com o concluído marcado, o que cria o próximo automático. */
+const concludeAppointment = (db, appointment) => saveAppointment(db, appointment, { concluido: 1 });
 
 describe("agenda gerada ao cadastrar um pet com pacote", () => {
   let db;
@@ -62,9 +51,9 @@ describe("agenda gerada ao cadastrar um pet com pacote", () => {
     [2, 14, 20000, 10000],
     [4, 7, 32000, 8000],
   ]) {
-    test(`pacote ${pacote}: a cada ${gap} dias, até ${pacote} por mês, no mesmo dia da semana`, () => {
+    test(`pacote ${pacote}: a cada ${gap} dias, até ${pacote} por mês, no mesmo dia da semana`, async () => {
       const inicio = isoDate(3);
-      const pet = insertPet(db, {
+      const pet = await createPet(db, {
         dono_id: ownerId, remarcacao_ativa: 1, pacote_remarcacao: pacote,
         data_inicio_pacote: inicio, horario_padrao: "09:30", valor_pacote: valor,
       });
@@ -94,8 +83,8 @@ describe("agenda gerada ao cadastrar um pet com pacote", () => {
     });
   }
 
-  test("com início no passado, as datas que já passaram entram como manuais pendentes", () => {
-    const pet = insertPet(db, {
+  test("com início no passado, as datas que já passaram entram como manuais pendentes", async () => {
+    const pet = await createPet(db, {
       dono_id: ownerId, remarcacao_ativa: 1, pacote_remarcacao: 4,
       data_inicio_pacote: isoDate(-30), valor_pacote: 32000,
     });
@@ -109,8 +98,8 @@ describe("agenda gerada ao cadastrar um pet com pacote", () => {
     [4, 10003, 2501, 2500],
     [2, 20001, 10001, 10000],
   ]) {
-    test(`pacote ${pacote} de ${valor} centavos: a sobra da divisão fica com os primeiros do mês`, () => {
-      const pet = insertPet(db, {
+    test(`pacote ${pacote} de ${valor} centavos: a sobra da divisão fica com os primeiros do mês`, async () => {
+      const pet = await createPet(db, {
         dono_id: ownerId, remarcacao_ativa: 1, pacote_remarcacao: pacote,
         data_inicio_pacote: isoDate(3), valor_pacote: valor,
       });
@@ -127,23 +116,23 @@ describe("agenda gerada ao cadastrar um pet com pacote", () => {
     });
   }
 
-  test("o dia da semana calculado pelo banco é o da data", () => {
-    const pet = insertPet(db, {
+  test("o dia da semana calculado pelo banco é o da data", async () => {
+    const pet = await createPet(db, {
       dono_id: ownerId, remarcacao_ativa: 1, pacote_remarcacao: 4, data_inicio_pacote: isoDate(3),
     });
 
     assert.ok(appointmentsOf(db, pet.id).every((a) => a.dia_semana === toDate(a.data).getDay()));
   });
 
-  test("o cadastro novo grava o dia de hoje do aparelho, em texto", () => {
-    const pet = insertPet(db, { dono_id: ownerId });
+  test("o cadastro novo grava o dia de hoje do aparelho, em texto", async () => {
+    const pet = await createPet(db, { dono_id: ownerId });
 
     assert.equal(petRow(db, pet.id).criado_em, isoDate(0));
     assert.equal(db.prepare("SELECT criado_em FROM owners WHERE id = ?").get(ownerId).criado_em, isoDate(0));
   });
 
-  test("sem pacote, o cadastro não gera agenda", () => {
-    const pet = insertPet(db, { dono_id: ownerId });
+  test("sem pacote, o cadastro não gera agenda", async () => {
+    const pet = await createPet(db, { dono_id: ownerId });
 
     assert.equal(appointmentsOf(db, pet.id).length, 0);
   });
@@ -155,18 +144,18 @@ describe("conclusão de um agendamento automático", () => {
 
   beforeEach(async () => {
     db = await createDatabase();
-    pet = insertPet(db, {
+    pet = await createPet(db, {
       dono_id: insertOwner(db), remarcacao_ativa: 1, pacote_remarcacao: 4,
       data_inicio_pacote: isoDate(3), valor_pacote: 32000,
     });
   });
 
-  test("concluir cria o próximo depois do último da agenda e grava a última visita", () => {
+  test("concluir cria o próximo depois do último da agenda e grava a última visita", async () => {
     const [first] = pendingAutoOf(db, pet.id);
     const autoCount = appointmentsOf(db, pet.id).length;
     const lastBefore = petRow(db, pet.id).ultimo_visita_data_auto;
 
-    concludeAppointment(db, first);
+    await concludeAppointment(db, first);
 
     const agenda = appointmentsOf(db, pet.id);
     assert.equal(agenda.length, autoCount + 1);
@@ -177,11 +166,11 @@ describe("conclusão de um agendamento automático", () => {
     assert.equal(petRow(db, pet.id).ultimo_visita_data_auto, newest.data);
   });
 
-  test("o próximo criado pela conclusão leva a sobra de centavos se for um dos primeiros do mês", () => {
-    updatePet(db, { ...pet, valor_pacote: 10003 });
+  test("o próximo criado pela conclusão leva a sobra de centavos se for um dos primeiros do mês", async () => {
+    await savePet(db, { ...pet, valor_pacote: 10003 });
     const [first] = pendingAutoOf(db, pet.id);
 
-    concludeAppointment(db, first);
+    await concludeAppointment(db, first);
 
     const agenda = appointmentsOf(db, pet.id);
     const newest = agenda.at(-1);
@@ -189,36 +178,36 @@ describe("conclusão de um agendamento automático", () => {
     assert.equal(newest.valor, position <= 10003 % 4 ? 2501 : 2500, `${newest.data}, ${position}º do mês`);
   });
 
-  test("salvar um automático pendente, sem concluir, não cria nada", () => {
+  test("salvar um automático pendente, sem concluir, não cria nada", async () => {
     const [first] = pendingAutoOf(db, pet.id);
     const count = appointmentsOf(db, pet.id).length;
 
-    saveAppointment(db, first, { observacao: "Cliente pediu perfume" });
+    await saveAppointment(db, first, { observacao: "Cliente pediu perfume" });
 
     assert.equal(appointmentsOf(db, pet.id).length, count);
   });
 
-  test("BUG-3, corrigido: salvar de novo um automático já concluído não cria outro agendamento", () => {
+  test("BUG-3, corrigido: salvar de novo um automático já concluído não cria outro agendamento", async () => {
     const [first] = pendingAutoOf(db, pet.id);
-    concludeAppointment(db, first);
+    await concludeAppointment(db, first);
     const agendaBefore = appointmentsOf(db, pet.id);
     const concluded = agendaBefore.find((a) => a.id === first.id);
 
     // Marcar como pago regrava o formulário inteiro, com concluido = 1 de novo.
-    saveAppointment(db, concluded, { ta_pago: 1, tipo_pgto: "PIX" });
+    await saveAppointment(db, concluded, { ta_pago: 1, tipo_pgto: "PIX" });
 
     const agenda = appointmentsOf(db, pet.id);
     assert.equal(agenda.length, agendaBefore.length);
     assert.equal(agenda.find((a) => a.id === first.id).ta_pago, 1);
   });
 
-  test("salvar de novo um concluído antigo não volta a última visita para a data dele", () => {
+  test("salvar de novo um concluído antigo não volta a última visita para a data dele", async () => {
     const [first, second] = pendingAutoOf(db, pet.id);
-    concludeAppointment(db, first);
-    concludeAppointment(db, second);
+    await concludeAppointment(db, first);
+    await concludeAppointment(db, second);
     const concluded = appointmentsOf(db, pet.id).find((a) => a.id === first.id);
 
-    saveAppointment(db, concluded, { ta_pago: 1 });
+    await saveAppointment(db, concluded, { ta_pago: 1 });
 
     assert.equal(petRow(db, pet.id).current_ultima_visita_data, second.data);
   });
@@ -233,12 +222,12 @@ describe("edição do pet com pacote", () => {
   // automático vencido, que ninguém concluiu.
   beforeEach(async () => {
     db = await createDatabase();
-    pet = insertPet(db, {
+    pet = await createPet(db, {
       dono_id: insertOwner(db), remarcacao_ativa: 1, pacote_remarcacao: 4,
       data_inicio_pacote: isoDate(-30), horario_padrao: "10:00", valor_pacote: 32000,
     });
     [nextAuto] = pendingAutoOf(db, pet.id).filter((a) => a.data > isoDate(1));
-    saveAppointment(db, nextAuto, { hora: "15:30" });
+    await saveAppointment(db, nextAuto, { hora: "15:30" });
     db.prepare(
       "INSERT INTO appointments (pet_id, servico, data, hora, is_auto_agen) VALUES (?, 'Banho', ?, '10:00', 1)",
     ).run(pet.id, isoDate(-5));
@@ -247,12 +236,12 @@ describe("edição do pet com pacote", () => {
   const pastOf = (petId) => appointmentsOf(db, petId).filter((a) => a.data < isoDate(-1));
   const futureAutoOf = (petId) => pendingAutoOf(db, petId).filter((a) => a.data > isoDate(1));
 
-  test("BUG-4, corrigido: mudar só a observação não mexe na agenda", () => {
+  test("BUG-4, corrigido: mudar só a observação não mexe na agenda", async () => {
     const agendaBefore = appointmentsOf(db, pet.id);
     // Sem datas passadas ou sem automático futuro, o teste não provaria nada.
     assert.ok(pastOf(pet.id).length >= 3 && nextAuto, "o cenário precisa de datas passadas e de um automático futuro");
 
-    updatePet(db, { ...pet, observacoes: "Mudou só a observação" });
+    await savePet(db, { ...pet, observacoes: "Mudou só a observação" });
 
     assert.deepEqual(appointmentsOf(db, pet.id), agendaBefore);
   });
@@ -262,10 +251,10 @@ describe("edição do pet com pacote", () => {
     ["o serviço", { servico_padrao: "Banho e Tosa" }, (a) => a.servico === "Banho e Tosa"],
     ["o valor", { valor_pacote: 40000 }, (a) => a.valor === 10000],
   ]) {
-    test(`trocar ${campo} refaz os automáticos de hoje em diante e mantém o que já passou`, () => {
+    test(`trocar ${campo} refaz os automáticos de hoje em diante e mantém o que já passou`, async () => {
       const pastBefore = pastOf(pet.id);
 
-      updatePet(db, { ...pet, ...mudanca });
+      await savePet(db, { ...pet, ...mudanca });
 
       const future = futureAutoOf(pet.id);
       assert.ok(future.length > 0);
@@ -275,8 +264,8 @@ describe("edição do pet com pacote", () => {
     });
   }
 
-  test("trocar o pacote de 4 para 2 refaz os futuros a cada 14 dias", () => {
-    updatePet(db, { ...pet, pacote_remarcacao: 2, valor_pacote: 20000 });
+  test("trocar o pacote de 4 para 2 refaz os futuros a cada 14 dias", async () => {
+    await savePet(db, { ...pet, pacote_remarcacao: 2, valor_pacote: 20000 });
 
     const future = futureAutoOf(pet.id);
     assert.ok(future.length >= 2);
@@ -292,13 +281,102 @@ describe("edição do pet com pacote", () => {
 describe("desligar a remarcação", () => {
   test("apaga os automáticos pendentes a partir de amanhã", async () => {
     const db = await createDatabase();
-    const pet = insertPet(db, {
+    const pet = await createPet(db, {
       dono_id: insertOwner(db), remarcacao_ativa: 1, pacote_remarcacao: 2,
       data_inicio_pacote: isoDate(3), valor_pacote: 20000,
     });
 
-    db.prepare(UPDATE_PET_REMARCACAO_SQL).run(0, null, null, null, pet.id);
+    // Com a remarcação desligada, o formulário manda o pacote, o início e o valor vazios.
+    await savePet(db, { ...pet, remarcacao_ativa: 0, pacote_remarcacao: null, data_inicio_pacote: null, valor_pacote: null });
 
     assert.equal(pendingAutoOf(db, pet.id).filter((a) => a.data > isoDate(1)).length, 0);
+  });
+});
+
+describe("a remarcação grava tudo numa transação", () => {
+  /** A conexão do teste com a gravação de um atendimento do pacote falhando, como num disco cheio. */
+  function failingOnVisit(db, { after = 0 } = {}) {
+    const connection = asMigrationDatabase(db);
+    let inserts = 0;
+    return {
+      ...connection,
+      runAsync: async (sql, ...params) => {
+        if (sql === INSERT_PACKAGE_VISIT_SQL && ++inserts > after) throw new Error("disk I/O error");
+        return connection.runAsync(sql, ...params);
+      },
+    };
+  }
+
+  const count = (db, table) => db.prepare(`SELECT COUNT(*) AS total FROM ${table}`).get().total;
+  const PACOTE = { remarcacao_ativa: 1, pacote_remarcacao: 4, data_inicio_pacote: isoDate(3), valor_pacote: 32000 };
+
+  test("se a agenda falha no meio do cadastro, o pet também não fica", async () => {
+    const db = await createDatabase();
+    const dono_id = insertOwner(db);
+    const schedule = packageScheduleOf(db, failingOnVisit(db, { after: 3 }));
+
+    await assert.rejects(schedule.createPet(newPet({ dono_id, ...PACOTE }), new Date()), /disk I\/O error/);
+
+    assert.equal(count(db, "pets"), 0);
+    assert.equal(count(db, "appointments"), 0);
+    // Sem transação presa: o próximo cadastro grava normalmente.
+    const pet = await createPet(db, { dono_id, ...PACOTE });
+    assert.ok(pendingAutoOf(db, pet.id).length > 0);
+  });
+
+  test("se o próximo automático falha, a conclusão é desfeita e a última visita não muda", async () => {
+    const db = await createDatabase();
+    const pet = await createPet(db, { dono_id: insertOwner(db), ...PACOTE });
+    const [first] = pendingAutoOf(db, pet.id);
+    const before = appointmentsOf(db, pet.id);
+
+    await assert.rejects(
+      packageScheduleOf(db, failingOnVisit(db)).updateAppointment(first.id, { ...first, concluido: 1 }),
+      /disk I\/O error/,
+    );
+
+    assert.deepEqual(appointmentsOf(db, pet.id), before);
+    assert.equal(petRow(db, pet.id).current_ultima_visita_data, null);
+  });
+
+  test("se refazer a agenda falha, a edição do pet é desfeita", async () => {
+    const db = await createDatabase();
+    const pet = await createPet(db, { dono_id: insertOwner(db), ...PACOTE });
+    const before = { pet: petRow(db, pet.id), agenda: appointmentsOf(db, pet.id) };
+
+    await assert.rejects(
+      packageScheduleOf(db, failingOnVisit(db)).updatePet(pet.id, { ...pet, horario_padrao: "16:00" }, new Date()),
+      /disk I\/O error/,
+    );
+
+    assert.deepEqual(petRow(db, pet.id), before.pet);
+    assert.deepEqual(appointmentsOf(db, pet.id), before.agenda);
+  });
+
+  test("ids que não existem não gravam nada nem criam agenda", async () => {
+    const db = await createDatabase();
+    const pet = await createPet(db, { dono_id: insertOwner(db), ...PACOTE });
+    const [first] = pendingAutoOf(db, pet.id);
+    const before = appointmentsOf(db, pet.id);
+    const schedule = packageScheduleOf(db);
+
+    await schedule.updateAppointment(999999, { ...first, concluido: 1 });
+    await schedule.updatePet(999999, { ...pet, horario_padrao: "16:00" }, new Date());
+    await schedule.activatePet(999999, new Date());
+
+    assert.deepEqual(appointmentsOf(db, pet.id), before);
+    assert.equal(count(db, "pets"), 1);
+  });
+
+  test("a observação com SQL vai como texto para o próximo automático", async () => {
+    const db = await createDatabase();
+    const pet = await createPet(db, { dono_id: insertOwner(db), ...PACOTE });
+    const [first] = pendingAutoOf(db, pet.id);
+    const observacao = "Ração'); DROP TABLE pets; --";
+
+    await saveAppointment(db, first, { concluido: 1, observacao });
+
+    assert.equal(appointmentsOf(db, pet.id).at(-1).observacao, observacao);
+    assert.equal(count(db, "pets"), 1);
   });
 });

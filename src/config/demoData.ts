@@ -1,7 +1,9 @@
 // Dados de exemplo para conhecer o app sem expor clientes reais: donos, pets, pacotes e
 // agendamentos inventados, com datas em torno de hoje, para o calendário e os relatórios terem
 // movimento. Os telefones são fictícios, e os e-mails usam o example.com, domínio reservado para
-// exemplos. O módulo não importa nada do app, para os testes rodarem o SQL num SQLite em memória.
+// exemplos. Do app, o módulo só importa a regra pura da remarcação, sem o Expo, para os testes rodarem
+// o SQL num SQLite em memória. Os imports levam a extensão .ts porque o Node dos testes exige.
+import { scheduleForNewPet, type NewPetVisit, type ScheduleClock } from "../domain/packageSchedule.ts";
 
 // Os mesmos valores de petEnums.ts (TipoServico, EspeciesAtendidas e PorteAnimal).
 type ServiceName = "Banho" | "Banho e Tosa" | "Banho e Higiênica";
@@ -31,7 +33,7 @@ interface DemoPet {
   owner: number;
   service: ServiceName;
   notes: string;
-  /** Com pacote, a agenda vem do trigger de remarcação. Sem ele, do histórico abaixo. */
+  /** Com pacote, a agenda vem da regra da remarcação. Sem ele, do histórico abaixo. */
   pkg?: DemoPackage;
   lastVisitDaysAgo?: number;
   everyDays?: number;
@@ -71,7 +73,7 @@ const DEMO_OWNERS: DemoOwner[] = [
 ];
 
 const DEMO_PETS: DemoPet[] = [
-  // Pets com pacote: o trigger gera a agenda, passada e futura.
+  // Pets com pacote: a regra da remarcação gera a agenda, passada e futura.
   { name: "Thor", species: "CAO", race: "Labrador Retriever", size: "GRANDE", owner: 0, service: "Banho e Tosa", notes: "Muito ativo", pkg: { visitsPerMonth: 4, price: 32000, startDaysAgo: 42, time: "08:00" } },
   { name: "Mel", species: "CAO", race: "Vira-lata (SRD)", size: "PEQUENO", owner: 2, service: "Banho", notes: "Dócil", pkg: { visitsPerMonth: 2, price: 16000, startDaysAgo: 56, time: "09:00" } },
   { name: "Max", species: "CAO", race: "Poodle", size: "MEDIO", owner: 5, service: "Banho e Tosa", notes: "Late bastante", pkg: { visitsPerMonth: 4, price: 28000, startDaysAgo: 35, time: "10:00" } },
@@ -161,6 +163,7 @@ interface DemoDataOptions {
 export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string {
   const todayDate = text(toIsoDate(today));
   const nowTime = `${pad(today.getHours())}:${pad(today.getMinutes())}`;
+  const clock: ScheduleClock = { today: toIsoDate(today), time: nowTime };
   const phoneOf = (ownerIndex: number) => `(44) 99911-${1111 + ownerIndex}`;
   const ownerId = (ownerIndex: number) => `(SELECT id FROM owners WHERE telefone = ${text(phoneOf(ownerIndex))})`;
   const petId = (petName: string) => `(SELECT id FROM pets WHERE nome_normalizado = ${text(normalize(petName))})`;
@@ -170,17 +173,31 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
     return `(${text(owner.name)}, ${text(normalize(owner.name))}, ${text(phoneOf(index))}, ${text(email)}, ${text(owner.address)}, ${flag(owner.active !== false)})`;
   });
 
+  // Cada pet com pacote entra junto com a agenda, como o PackageScheduleService grava no cadastro: os
+  // ids dos agendamentos seguem a mesma ordem, e o ponteiro aponta para o último automático.
   const pets = DEMO_PETS.map((pet) => {
     const speciesId = `(SELECT id FROM species WHERE nome = ${text(pet.species)})`;
     const raceId = `(SELECT id FROM race WHERE especie_id = ${speciesId} AND nome_raca = ${text(pet.race)})`;
     const pkg = pet.pkg;
-    return `INSERT INTO pets (nome, nome_normalizado, especie, porte, raca, observacoes, dono_id, servico_padrao,
-      remarcacao_ativa, pacote_remarcacao, valor_pacote, data_inicio_pacote, horario_padrao, is_ativo)
+    const start = pkg ? toIsoDate(addDays(today, -pkg.startDaysAgo)) : null;
+    const visits = pkg && start ? packageVisits(pkg, start, clock) : [];
+    const lastAuto = visits.filter((visit) => visit.auto).at(-1)?.date;
+    const insertPet = `INSERT INTO pets (nome, nome_normalizado, especie, porte, raca, observacoes, dono_id, servico_padrao,
+      remarcacao_ativa, pacote_remarcacao, valor_pacote, data_inicio_pacote, horario_padrao, is_ativo,
+      ultimo_visita_data_auto)
       VALUES (${text(pet.name)}, ${text(normalize(pet.name))}, ${speciesId}, ${text(pet.size)}, ${raceId},
       ${text(pet.notes)}, ${ownerId(pet.owner)}, ${text(pet.service)}, ${flag(Boolean(pkg))},
       ${pkg ? pkg.visitsPerMonth : "NULL"}, ${pkg ? pkg.price : 0},
-      ${pkg ? text(toIsoDate(addDays(today, -pkg.startDaysAgo))) : "NULL"}, ${text(pkg ? pkg.time : "00:00")},
-      ${flag(pet.active !== false)});`;
+      ${start ? text(start) : "NULL"}, ${text(pkg ? pkg.time : "00:00")},
+      ${flag(pet.active !== false)}, ${lastAuto ? text(lastAuto) : "NULL"});`;
+    if (!pkg || visits.length === 0) return insertPet;
+    const rows = visits.map(
+      (visit) =>
+        `(${petId(pet.name)}, ${text(pet.service)}, ${text(visit.date)}, ${text(pkg.time)}, 0, ${flag(visit.auto)}, ${visit.cents})`,
+    );
+    return `${insertPet}
+    INSERT INTO appointments (pet_id, servico, data, hora, entregar_pet, is_auto_agen, valor) VALUES
+      ${rows.join(",\n      ")};`;
   });
 
   const appointments: string[] = [];
@@ -221,7 +238,7 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
       is_auto_agen, valor, tipo_pgto, ta_pago) VALUES
       ${appointments.join(",\n      ")};
 
-    -- Os atendimentos passados dos pacotes, que o trigger gera como manuais, ficam concluídos e pagos.
+    -- Os atendimentos passados dos pacotes, que a remarcação gera como manuais, ficam concluídos e pagos.
     UPDATE appointments
     SET concluido = 1, ta_pago = 1,
         tipo_pgto = CASE id % 4 WHEN 0 THEN 'PIX' WHEN 1 THEN 'Cartão de Débito' WHEN 2 THEN 'Dinheiro' ELSE 'Cartão de Crédito' END
@@ -233,6 +250,15 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
       SELECT MAX(data) FROM appointments a WHERE a.pet_id = pets.id AND a.concluido = 1
     );
   `;
+}
+
+/** A agenda do pacote de um pet de exemplo, pela mesma regra do cadastro no app. */
+function packageVisits(pkg: DemoPackage, start: string, clock: ScheduleClock): NewPetVisit[] {
+  return scheduleForNewPet(
+    { visitsPerMonth: pkg.visitsPerMonth, start, priceCents: pkg.price },
+    clock,
+    pkg.time,
+  );
 }
 
 /** Texto entre aspas simples para o SQL, com as aspas internas dobradas. */
