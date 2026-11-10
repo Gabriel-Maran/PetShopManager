@@ -108,7 +108,7 @@ Motivo: confirmar os bugs prováveis (BUG-3, BUG-4 e BKP-1) e proteger os trigge
 **Dados de exemplo (DEMO-1), adiantados para a Parte 1** (resposta à pergunta 18).
 Decisão:
 - Um botão "Carregar dados de exemplo" em Configurações, em todos os builds, que só aparece com o app vazio (nenhum dono, pet ou agendamento). Ele pede confirmação, e o service confere de novo dentro da transação.
-- Os dados ficam em `app/config/demoData.ts`:
+- Os dados ficam em `src/config/demoData.ts`:
   - 21 donos, um deles desativado;
   - 26 pets, 8 com pacote;
   - histórico de 180 dias e agendamentos para os próximos dias, com datas relativas a hoje;
@@ -126,7 +126,7 @@ Motivo: a transação exclusiva abre outra conexão, sem os `PRAGMA foreign_keys
 
 **Esquema separado do Expo e testes em `.mjs`.**
 Decisão:
-- O SQL do esquema foi para `app/config/schema.ts`, sem mudar nenhum comando (conferido comando a comando, ignorando só a indentação). O `initDatabase` executa a lista `SCHEMA_STATEMENTS`.
+- O SQL do esquema foi para `src/config/schema.ts`, sem mudar nenhum comando (conferido comando a comando, ignorando só a indentação). O `initDatabase` executa a lista `SCHEMA_STATEMENTS`.
 - Os testes ficam em `tests/*.test.mjs`, rodam com `npm test` (`node:test` e `node:sqlite`) e entram no `npm run check` e no CI.
 
 Motivo:
@@ -136,7 +136,7 @@ Motivo:
 
 **Testes de caracterização com o SQL do próprio app (TEST-1).**
 Decisão:
-- Os comandos de escrita que os testes usam saíram dos repositories para `app/repository/sql/`, sem o Expo, sem mudar nenhum texto: inserir e editar pet e agendamento, concluir, ligar e desligar o pacote, ativar e desativar donos e pets, e restaurar o backup.
+- Os comandos de escrita que os testes usam saíram dos repositories para `src/repository/sql/`, sem o Expo, sem mudar nenhum texto: inserir e editar pet e agendamento, concluir, ligar e desligar o pacote, ativar e desativar donos e pets, e restaurar o backup.
 - Os repositories e o `BackupService` usam as mesmas constantes.
 - Os testes de bug descrevem o comportamento de hoje com o nome "confirmado". A correção, na Parte 3, inverte a checagem.
 - A restauração de backup é testada com um banco em memória compartilhada (`file:...?mode=memory&cache=shared`), anexado como `src`, sem arquivo.
@@ -200,7 +200,7 @@ Motivo:
 
 **Dinheiro num lugar só (etapa 2 do DADOS-2 e DADOS-3).**
 Decisão:
-- `app/utils/dinheiro.ts` tem a máscara de digitação, a conversão entre o texto e os centavos e o formato gravado no banco.
+- `src/utils/dinheiro.ts` tem a máscara de digitação, a conversão entre o texto e os centavos e o formato gravado no banco.
 - O `InputInfo` deixou de aplicar a máscara de valor em todo campo com teclado numérico. Cada campo de valor usa a máscara no próprio `setItem`, como o horário e o telefone já faziam.
 - Os controllers gravam o valor sempre com duas casas ("12,5" vira "12,50") e recusam um valor fora do formato, como só uma vírgula. O agendamento sem valor fica com "0,00", o padrão da tabela. O valor do pacote é obrigatório e precisa ser válido com a remarcação ligada; sem ela, fica como veio.
 - O valor do pacote agora aceita até duas casas na digitação, como o do agendamento.
@@ -230,7 +230,7 @@ Decisão:
 - Os modelos (`Appointment`, `Pet`, `Owner`) têm a data como `IsoDate` e o valor como `Cents`. Os formulários guardam o valor como o texto do campo e a data em ISO, que é o formato do seletor.
 - O texto vira centavos na tela, ao salvar, pelo `parseMoneyInput`: vazio vira nulo, e um valor fora do formato lança o erro com a mensagem para o usuário. A montagem do modelo foi para dentro do `try`, para essa mensagem aparecer no `useError`.
 - Os controllers conferem o resultado: data no formato `AAAA-MM-DD` (`isIsoDate`) e centavos inteiros sem sinal (`isValidCents`). O agendamento sem valor fica com 0. O pacote sem remarcação pode ficar sem valor; com ela, o valor é obrigatório.
-- O SQL dos relatórios que faz conta com data (comparativo mensal e pets ausentes) foi para `app/repository/sql/relatoriosSql.ts`, com testes. O comparativo mensal passou a usar uma consulta só, com o intervalo como parâmetro.
+- O SQL dos relatórios que faz conta com data (comparativo mensal e pets ausentes) foi para `src/repository/sql/relatoriosSql.ts`, com testes. O comparativo mensal passou a usar uma consulta só, com o intervalo como parâmetro.
 
 Motivo:
 - Com o banco em ISO, converter para outro formato no app só criaria pontos de erro. O seletor e o calendário já usavam ISO.
@@ -241,7 +241,7 @@ Motivo:
 Decisão:
 - A cópia do arquivo importado é aberta numa conexão só dela e passa pelo mesmo `migrateDatabase` do banco do aparelho. Só depois ela é anexada e copiada para o app, como antes.
 - Antes das migrações, a cópia precisa ter as sete tabelas do backup. Um arquivo sem elas, ou que nem abre como banco SQLite, é recusado com uma mensagem só ("não é um backup do PetShop Manager"). Um backup de versão mais nova tem mensagem própria ("Este backup é de uma versão mais nova do app"), porque a da abertura do app fala dos dados do aparelho.
-- A atualização e a restauração ficam em `app/config/backupRestore.ts`, sem o Expo, e os testes rodam esse código. O `BackupService` só cuida dos arquivos. A restauração reaproveita o `withForeignKeysOff` e o `inTransaction` do `migrator.ts`, que passaram a ser exportados.
+- A atualização e a restauração ficam em `src/config/backupRestore.ts`, sem o Expo, e os testes rodam esse código. O `BackupService` só cuida dos arquivos. A restauração reaproveita o `withForeignKeysOff` e o `inTransaction` do `migrator.ts`, que passaram a ser exportados.
 - O `ATTACH` recebe o caminho como parâmetro, em vez de montar o texto do comando.
 - A cópia temporária e os arquivos que o SQLite cria ao lado dela (`-wal`, `-shm`, `-journal`) são apagados no fim, com qualquer resultado.
 
@@ -255,7 +255,7 @@ Motivo:
 **Erros num lugar só (ERRO-1).**
 Contexto: o mesmo `handleError` estava copiado em 8 arquivos, a conversão `e instanceof Error ? e.message : ...` aparecia 12 vezes, o backup e os dados de exemplo tinham o próprio modal, e a mensagem de qualquer erro, inclusive do SQLite, chegava à tela.
 Decisão:
-- A falha prevista é um `AppError` (`app/errors/AppError.ts`), com um código e uma mensagem de `app/globals/messages.ts`. Só ela aparece na tela. Qualquer outro erro mostra "Algo deu errado. Tente de novo." e vai inteiro para o log, pelo `logError`.
+- A falha prevista é um `AppError` (`src/errors/AppError.ts`), com um código e uma mensagem de `src/globals/messages.ts`. Só ela aparece na tela. Qualquer outro erro mostra "Algo deu errado. Tente de novo." e vai inteiro para o log, pelo `logError`.
 - O `showError` recebe o erro como veio, e não o texto: nenhuma tela monta a mensagem.
 - Dois hooks: o `useAsyncAction`, para as ações com carregamento (salvar, importar, carregar o exemplo), com a trava do toque duplo; e o `useAsyncData`, para os dados que uma tela carrega ao abrir, como os relatórios.
 - Cada falha de validação tem a sua frase. O dono separa nome, telefone vazio e telefone inválido; o agendamento separa pet, serviço, data, horário e valor. Um teste garante que nenhuma mensagem se repete.
@@ -330,9 +330,9 @@ Decisão do Gabriel: Zod. A versão é a 4.6.7, instalada em 2026-11-09 com a li
 - o zod 3 continua só dentro do `expo`, que ainda exige essa versão.
 
 Decisão do PR #32:
-- Os schemas ficam em `app/validation/`, um por entidade, montados com os campos de `fields.ts` (texto com `trim` e tamanho máximo, id, data real, horário `HH:MM`, centavos, sim ou não). O `parseInput` converte a falha no `AppError` com a mensagem de `messages.ts`. Nenhuma mensagem do Zod chega à tela.
+- Os schemas ficam em `src/validation/`, um por entidade, montados com os campos de `fields.ts` (texto com `trim` e tamanho máximo, id, data real, horário `HH:MM`, centavos, sim ou não). O `parseInput` converte a falha no `AppError` com a mensagem de `messages.ts`. Nenhuma mensagem do Zod chega à tela.
 - A validação fica no controller, que já validava. No service, a consulta de existência viria antes, e um pet sem dono mostraria "Dono não encontrado" em vez de "Escolha o dono do pet".
-- Os services recebem os tipos derivados dos schemas (`OwnerData`, `PetData`, `AppointmentData`). Os modelos de `app/model/` não mudam, porque descrevem a linha do banco, que pode ter dado antigo.
+- Os services recebem os tipos derivados dos schemas (`OwnerData`, `PetData`, `AppointmentData`). Os modelos de `src/model/` não mudam, porque descrevem a linha do banco, que pode ter dado antigo.
 - Id fora do formato responde como "não encontrado". Tipo errado ou campo ausente mostram a mensagem genérica de entrada inválida, e o erro do Zod vai para o log pelo `cause`.
 - O `createPetSchemas` recebe os enums do pet, porque o `consts.ts` importa o React Native e não roda no Node.
 - E-mail, endereço e observações vazios passam a gravar `null`, e o horário padrão vazio vira `00:00`.
@@ -344,7 +344,7 @@ Contexto: a navegação é própria e não tratava o `BackHandler`, então o vol
 Decisão do Gabriel: o `BackHandler` agora, e a biblioteca de navegação no ARQ-3.
 
 Decisão do PR #30:
-- O mapa de qual tela volta para qual fica em `app/config/navigation.ts` (`backRouteOf`), e a `TitleBar` deixou de receber o destino.
+- O mapa de qual tela volta para qual fica em `src/config/navigation.ts` (`backRouteOf`), e a `TitleBar` deixou de receber o destino.
 - Há um listener só, na raiz (`useAndroidBackButton`, no `App.tsx`). O botão da tela e o do Android chamam o mesmo `requestBack()` do `ScreenController`.
 - O formulário em edição registra uma guarda (`useBackGuard`), que abre a mesma confirmação nos dois botões. Sem guarda, vale o mapa. No Calendário, o voltar fecha o app.
 - O `Screen` virou objeto `as const`, para os testes do Node lerem o mapa.
@@ -356,9 +356,9 @@ Motivo: um caminho só para os dois botões. Os relatórios ficam sem a `TitleBa
 Contexto: botões de ícone sem nome para o leitor de tela, o `Toggle` mudo, áreas de toque de 38 dp e o texto branco sobre o verde com contraste de 3,4:1.
 Decisão do PR #31:
 - Botão só com ícone usa o `IconButton` (ou o `ActionIconButton`, que juntou editar, desativar e reativar), com papel, rótulo obrigatório e área de 48 dp.
-- Os rótulos ficam em `app/globals/accessibilityLabels.ts` (`A11Y_LABELS`), e os enfeites usam `HIDDEN_FROM_SCREEN_READER`.
+- Os rótulos ficam em `src/globals/accessibilityLabels.ts` (`A11Y_LABELS`), e os enfeites usam `HIDDEN_FROM_SCREEN_READER`.
 - Os verdes do tema claro escureceram até passar de 4,5:1. No tema escuro, o texto sobre cor cheia usa a cor de fundo. Texto cinza usa o `TEXT_MUTED`, nunca cor de borda nem opacidade.
-- A paleta saiu do `ThemeProvider` para `app/view/Themes/colors.ts`, para o teste conferir o contraste no Node. Um par novo de texto e fundo entra na lista do teste.
+- A paleta saiu do `ThemeProvider` para `src/view/Themes/colors.ts`, para o teste conferir o contraste no Node. Um par novo de texto e fundo entra na lista do teste.
 
 Motivo: as diretrizes de acessibilidade do Android (48 dp e 4,5:1), num padrão só, que um teste protege.
 

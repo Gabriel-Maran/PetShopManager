@@ -80,7 +80,7 @@ flowchart LR
 ```
 
 - **Telas e componentes** chamam os controllers, quase sempre dentro de `useEffect`, e passam o erro como veio ao `showError` do `useError`. As ações com carregamento usam o `useAsyncAction`, os relatórios carregam pelo `useAsyncData`, e as buscas paginadas por nome, pelo `useSearchPage`, que descarta a resposta atrasada.
-- **Controllers** validam a entrada e lançam `AppError` com uma mensagem de `globals/messages.ts` para cada falha. Desde o PR #32, a validação é o schema da entidade em `app/validation/`, pelo `parseInput`: texto com `trim` e tamanho máximo, id, data real, horário `HH:MM`, centavos, e-mail e telefone. O service recebe o tipo que sai do schema.
+- **Controllers** validam a entrada e lançam `AppError` com uma mensagem de `globals/messages.ts` para cada falha. Desde o PR #32, a validação é o schema da entidade em `src/validation/`, pelo `parseInput`: texto com `trim` e tamanho máximo, id, data real, horário `HH:MM`, centavos, e-mail e telefone. O service recebe o tipo que sai do schema.
 - **Formulários** guardam o valor como o texto do campo ("80,00") e a data como `AAAA-MM-DD`. Ao salvar, o `parseMoneyInput` converte o texto em centavos, e um valor fora do formato vira a mensagem de erro da tela.
 - **Services** quase só repassam a chamada ao repository. A exceção são as regras da raça (PR #38): o `SpeciesService` recusa a raça repetida pelo nome sem acento e a espécie que não existe, e o `PetService` confere que a raça do pet é da espécie escolhida.
 - **Repositories** fazem o SQL com parâmetros `?` e devolvem os registros com `SELECT *`. A busca paginada por nome devolve a página e o total juntos, montados pela mesma função, com o mesmo filtro.
@@ -201,9 +201,9 @@ Acessibilidade: botão só com ícone usa o `IconButton` (ou o `ActionIconButton
 
 ## Erros
 
-Desde 2026-11-09 (ERRO-1), num lugar só, em `app/errors/AppError.ts`:
+Desde 2026-11-09 (ERRO-1), num lugar só, em `src/errors/AppError.ts`:
 
-- **Criar:** a falha prevista é um `AppError`, com um código (`VALIDATION`, `NOT_FOUND`, `CONFLICT`, `INVALID_BACKUP`, `DATABASE` ou `UNAVAILABLE`) e uma mensagem de `app/globals/messages.ts`. O motivo de verdade, quando há, fica no `cause`.
+- **Criar:** a falha prevista é um `AppError`, com um código (`VALIDATION`, `NOT_FOUND`, `CONFLICT`, `INVALID_BACKUP`, `DATABASE` ou `UNAVAILABLE`) e uma mensagem de `src/globals/messages.ts`. O motivo de verdade, quando há, fica no `cause`.
 - **Mostrar:** o `toUserMessage` devolve a mensagem do `AppError`. Qualquer outro erro (um bug, o SQLite, o Expo) vira "Algo deu errado. Tente de novo.", para a tela não mostrar SQL nem detalhe interno.
 - **Registrar:** o `logError` manda para o log o erro inesperado inteiro e o `AppError` com `cause`. A falha de validação é prevista e não vai para o log.
 - **Nas telas:** o `showError` do `ErrorProvider` recebe o erro como veio e faz as duas coisas. O `useAsyncAction` liga o carregamento, barra o toque duplo e mostra a falha; o `useAsyncData` carrega os dados de uma tela ao abrir e mostra a falha uma vez só.

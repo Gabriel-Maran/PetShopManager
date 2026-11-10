@@ -17,16 +17,16 @@ import {
   pendingAutoOf,
   petRow,
 } from "./helpers/database.mjs";
-import { buildDemoDataSql } from "../app/config/demoData.ts";
-import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
-import { MIGRATIONS } from "../app/config/schema.ts";
+import { buildDemoDataSql } from "../src/config/demoData.ts";
+import { normalizeForSearch } from "../src/utils/formatadores/normalizaNome.ts";
+import { MIGRATIONS } from "../src/config/schema.ts";
 import {
   restoreBackup,
   upgradeBackup,
-} from "../app/config/backupRestore.ts";
-import { BACKUP_TABLES } from "../app/repository/sql/backupSql.ts";
-import { MESSAGES } from "../app/globals/messages.ts";
-import { AppError } from "../app/errors/AppError.ts";
+} from "../src/config/backupRestore.ts";
+import { BACKUP_TABLES } from "../src/repository/sql/backupSql.ts";
+import { MESSAGES } from "../src/globals/messages.ts";
+import { AppError } from "../src/errors/AppError.ts";
 
 const LATEST = MIGRATIONS.length;
 

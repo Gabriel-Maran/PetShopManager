@@ -2,14 +2,14 @@
 // área de toque mínima dos botões e os rótulos que o leitor de tela fala.
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { THEME_COLORS } from "../app/view/Themes/colors.ts";
-import { TINT_OPACITY, withAlpha } from "../app/view/Themes/alpha.ts";
+import { THEME_COLORS } from "../src/view/Themes/colors.ts";
+import { TINT_OPACITY, withAlpha } from "../src/view/Themes/alpha.ts";
 import {
   HIDDEN_FROM_SCREEN_READER,
   MIN_TOUCH_TARGET,
   touchTargetSlop,
-} from "../app/view/components/Acessibilidade/accessibilityProps.ts";
-import { A11Y_LABELS } from "../app/globals/accessibilityLabels.ts";
+} from "../src/view/components/Acessibilidade/accessibilityProps.ts";
+import { A11Y_LABELS } from "../src/globals/accessibilityLabels.ts";
 
 /** Os canais de uma cor "#RRGGBB" ou "rgb(r, g, b)", de 0 a 255. */
 function parseColor(color) {

@@ -9,9 +9,9 @@ import {
   isTabScreen,
   Screen,
   TAB_SCREENS,
-} from "../app/config/navigation.ts";
-import { ScreenController } from "../app/controller/ScreenController.ts";
-import { isFormDirty, isSameFieldValue } from "../app/utils/formDirty.ts";
+} from "../src/config/navigation.ts";
+import { ScreenController } from "../src/controller/ScreenController.ts";
+import { isFormDirty, isSameFieldValue } from "../src/utils/formDirty.ts";
 
 const ALL_SCREENS = Object.values(Screen);
 

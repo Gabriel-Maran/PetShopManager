@@ -10,8 +10,8 @@ import {
   buildDemoDataSql,
   COUNT_USER_DATA_SQL,
   DEMO_DATA_SUMMARY,
-} from "../app/config/demoData.ts";
-import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
+} from "../src/config/demoData.ts";
+import { normalizeForSearch } from "../src/utils/formatadores/normalizaNome.ts";
 
 const today = new Date();
 const todayDate = `'${isoDate(0)}'`;

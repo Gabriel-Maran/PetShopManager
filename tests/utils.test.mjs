@@ -1,10 +1,10 @@
 // Caracterização das funções de data, máscara, formatação e normalização usadas nas telas.
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { dateToIso, isIsoDate, isoToBr, todayIso } from "../app/utils/datas.ts";
-import { formatValue } from "../app/utils/formatadores/formaterHelper.ts";
-import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
-import { mascararHorario } from "../app/utils/mascarar.ts";
+import { dateToIso, isIsoDate, isoToBr, todayIso } from "../src/utils/datas.ts";
+import { formatValue } from "../src/utils/formatadores/formaterHelper.ts";
+import { normalizeForSearch } from "../src/utils/formatadores/normalizaNome.ts";
+import { mascararHorario } from "../src/utils/mascarar.ts";
 import {
   centsToMoney,
   formatMoneyInput,
@@ -12,9 +12,9 @@ import {
   maskMoneyInput,
   moneyToCents,
   parseMoneyInput,
-} from "../app/utils/dinheiro.ts";
-import { MESSAGES } from "../app/globals/messages.ts";
-import { AppError } from "../app/errors/AppError.ts";
+} from "../src/utils/dinheiro.ts";
+import { MESSAGES } from "../src/globals/messages.ts";
+import { AppError } from "../src/errors/AppError.ts";
 
 /** Roda o teste com o fuso do processo trocado, como se o aparelho estivesse nesse fuso. */
 function withTimeZone(timeZone, run) {
