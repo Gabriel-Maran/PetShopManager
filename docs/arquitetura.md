@@ -34,13 +34,14 @@ app/
     migrator.ts           aplica as migrações pendentes numa transação e recria o banco do zero, sem o Expo (desde 2026-11-08)
     backupRestore.ts      atualiza a cópia de um backup pelas migrações e troca os dados do app pelos dela, sem o Expo (desde 2026-11-08)
     demoData.ts           dados de exemplo com datas em torno de hoje (desde 2026-11-08)
-    navigation.ts         as telas (`Screen`) e o mapa de para onde cada uma volta, sem o React Native (desde 2026-11-09)
-    consts.ts             enums, tipos, imagens da barra e tamanhos; reexporta o `Screen`
-  model/                  interfaces das tabelas e builders; Search.ts tem a busca por nome e a página com o total (desde 2026-11-09)
+    navigation.ts         as telas (`Screen`), as abas da barra de baixo (`TAB_SCREENS`, PR #36) e o mapa de para onde cada uma volta, sem o React Native (desde 2026-11-09)
+    petEnums.ts           os valores fixos do pet (serviço, pacote, espécie e porte) como objetos `as const`, sem o React Native (PR #38)
+    consts.ts             tipos, imagens da barra e tamanhos; reexporta o `Screen` e os valores do pet
+  model/                  interfaces das tabelas e builders; Search.ts tem a busca por nome e a página com o total (desde 2026-11-09); Breed.ts tem a raça (PR #38)
   repository/             SQL de cada tabela
     sql/                  os comandos de escrita, o SQL dos relatórios com data e a busca paginada por nome (searchSql.ts) e a de raças (breedsSql.ts, PR #34), que os testes também usam, sem o Expo (desde 2026-11-08)
     fetchPage.ts          roda a página e a contagem de uma busca (desde 2026-11-09)
-  service/                repassa as chamadas ao repository; BackupService exporta e importa o banco
+  service/                repassa as chamadas ao repository, menos as regras da raça (breedRules.ts, sem o Expo, PR #38); BackupService exporta e importa o banco
   controller/             validação e regras de entrada; ScreenController guarda a tela atual e a guarda do voltar
   validation/             um schema Zod por entidade, os campos comuns (fields.ts) e o parseInput, que vira AppError, sem o Expo (desde 2026-11-09, PR #32)
   errors/
@@ -56,9 +57,9 @@ app/
     formatadores/         número com vírgula e normalização de nome
     relatorios/           consultas SQL dos seis relatórios
     mascarar.ts           máscara de horário e de valor
-    raceSpecieHelper.ts   cria raça nova pelo breedSchema, com checagem de duplicidade
+    formDirty.ts          se o formulário mudou desde que abriu, para o voltar só pedir confirmação nesse caso, sem o React Native (PR #36)
   view/
-    Themes/               a paleta clara e escura (colors.ts) e o ThemeProvider
+    Themes/               a paleta clara e escura (colors.ts), o ThemeProvider e o withAlpha (alpha.ts, PR #35)
     contexts/             data e mês selecionados no calendário
     pages/                telas: Home, Cadastros, Relatórios, Configurações e formulários
     components/           peças das telas, agrupadas por assunto; Acessibilidade/ tem o IconButton e as props do leitor de tela; o CloseButton é o ✕ dos modais, e Cadastro/ tem o SaveButton e o FormSectionTitle dos formulários (PR #34)
@@ -81,7 +82,7 @@ flowchart LR
 - **Telas e componentes** chamam os controllers, quase sempre dentro de `useEffect`, e passam o erro como veio ao `showError` do `useError`. As ações com carregamento usam o `useAsyncAction`, os relatórios carregam pelo `useAsyncData`, e as buscas paginadas por nome, pelo `useSearchPage`, que descarta a resposta atrasada.
 - **Controllers** validam a entrada e lançam `AppError` com uma mensagem de `globals/messages.ts` para cada falha. Desde o PR #32, a validação é o schema da entidade em `app/validation/`, pelo `parseInput`: texto com `trim` e tamanho máximo, id, data real, horário `HH:MM`, centavos, e-mail e telefone. O service recebe o tipo que sai do schema.
 - **Formulários** guardam o valor como o texto do campo ("80,00") e a data como `AAAA-MM-DD`. Ao salvar, o `parseMoneyInput` converte o texto em centavos, e um valor fora do formato vira a mensagem de erro da tela.
-- **Services** só repassam a chamada ao repository. Não há regra de negócio neles.
+- **Services** quase só repassam a chamada ao repository. A exceção são as regras da raça (PR #38): o `SpeciesService` recusa a raça repetida pelo nome sem acento e a espécie que não existe, e o `PetService` confere que a raça do pet é da espécie escolhida.
 - **Repositories** fazem o SQL com parâmetros `?` e devolvem os registros com `SELECT *`. A busca paginada por nome devolve a página e o total juntos, montados pela mesma função, com o mesmo filtro.
 - **Relatórios** ficam em `utils/relatorios` e consultam o banco direto, sem passar pelas outras camadas.
 - Os hooks `useServicos` e `useTiposPagamento` chamam o repository direto.
@@ -194,7 +195,7 @@ Fica em Configurações (`DatabaseTransfer` e `BackupService`):
 
 ## Tema e estilo
 
-As cores ficam em `view/Themes/colors.ts`, num objeto `light` e outro `dark`, e os componentes montam o estilo com `useThemedStyles(styles)`, do `ThemeProvider`. Desde 2026-11-09 (A11Y-1), um teste confere o contraste de 4,5:1 de cada par de texto e fundo nos dois temas. Tamanhos de fonte, espaços e raios são escritos em cada componente. Algumas cores também (overlays, gráfico, destaque dos relatórios, interruptor do tema).
+As cores ficam em `view/Themes/colors.ts`, num objeto `light` e outro `dark`, e os componentes montam o estilo com `useThemedStyles(styles)`, do `ThemeProvider`. Desde 2026-11-09 (A11Y-1), um teste confere o contraste de 4,5:1 de cada par de texto e fundo nos dois temas. Tamanhos de fonte, espaços e raios são escritos em cada componente. Desde o PR #35, as cores do interruptor do tema, do destaque dos relatórios, da bolinha do `Toggle`, da sombra e do fundo dos modais também estão no tema, e a transparência sai do `withAlpha`. Ainda ficam fora algumas sombras `#000` e o fundo do filtro ativo (ver `proximos-passos.md`).
 
 Acessibilidade: botão só com ícone usa o `IconButton` (ou o `ActionIconButton`), com papel, rótulo de `A11Y_LABELS` e área de toque de 48 dp, e os enfeites usam `HIDDEN_FROM_SCREEN_READER`.
 
