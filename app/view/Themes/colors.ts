@@ -27,6 +27,13 @@ const light = {
   MODAL_BACKGROUND: "rgba(0,0,0,0.45)",
   /** O trilho do interruptor desligado: 3:1 com o fundo, para ele não sumir na tela. */
   DESATIVADO: "#8C8A82",
+  /** A bolinha do interruptor: 3:1 com o trilho ligado (PRIMARY) e com o desligado (DESATIVADO). */
+  TOGGLE_THUMB: "#FFFFFF",
+  SHADOW: "#000000",
+
+  /** O céu e o sol do botão de tema; no escuro, a noite e a lua. */
+  THEME_TOGGLE_SKY: "#4CC9F0",
+  THEME_TOGGLE_THUMB: "#FFDF22",
 
   RED_COLOR: "#b71c1c",
   GREEN_COLOR: "#2B7630",
@@ -53,6 +60,14 @@ const light = {
   CHART_BAR: "#85B7EB",
   CHART_BAR_HIGHLIGHT: "#185FA5",
   CHART_TEXT_HIGHLIGHT: "#185FA5",
+
+  /** A faixa de cor de cada cartão de Relatórios; é enfeite, sem mínimo de contraste. */
+  REPORT_ACCENT_BUSY_DAYS: "#6366F1",
+  REPORT_ACCENT_ABSENT_PETS: "#EF4444",
+  REPORT_ACCENT_RESCHEDULES: "#F59E0B",
+  REPORT_ACCENT_ORIGIN: "#10B981",
+  REPORT_ACCENT_MONTHLY: "#3B82F6",
+  REPORT_ACCENT_PACKAGES: "#A855F7",
 };
 
 export type ThemeColors = typeof light;
@@ -81,6 +96,12 @@ const dark: ThemeColors = {
 
   MODAL_BACKGROUND: "rgba(0,0,0,0.80)",
   DESATIVADO: "#646A74",
+  // O branco sobre o PRIMARY do escuro dá 2,5:1; a bolinha escura, como no Material 3, passa de 3:1.
+  TOGGLE_THUMB: "#0F1115",
+  SHADOW: "#000000",
+
+  THEME_TOGGLE_SKY: "#03045E",
+  THEME_TOGGLE_THUMB: "#DEDEDA",
 
   RED_COLOR: "#e57373",
   GREEN_COLOR: "#81c784",
@@ -107,6 +128,13 @@ const dark: ThemeColors = {
   CHART_BAR: "#85B7EB",
   CHART_BAR_HIGHLIGHT: "#185FA5",
   CHART_TEXT_HIGHLIGHT: "#85B7EB",
+
+  REPORT_ACCENT_BUSY_DAYS: "#6366F1",
+  REPORT_ACCENT_ABSENT_PETS: "#EF4444",
+  REPORT_ACCENT_RESCHEDULES: "#F59E0B",
+  REPORT_ACCENT_ORIGIN: "#10B981",
+  REPORT_ACCENT_MONTHLY: "#3B82F6",
+  REPORT_ACCENT_PACKAGES: "#A855F7",
 };
 
 export const THEME_COLORS = { light, dark };

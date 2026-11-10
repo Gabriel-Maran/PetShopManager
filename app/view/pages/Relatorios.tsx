@@ -5,12 +5,18 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
-import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../Themes/ThemeProvider";
 import DefaultHeader from "../components/Header/DefaultHeader";
 import { useScreen } from "../../hooks/useScreen";
 import { APP_BAR_HEIGHT, RelatorioType, Screen } from "../../config/consts";
 import { NewOrEditAppointmentParams } from "../../model/Appointment";
 import { HIDDEN_FROM_SCREEN_READER } from "../components/Acessibilidade/accessibilityProps";
+
+type ReportAccent = Extract<keyof ThemeColors, `REPORT_ACCENT_${string}`>;
 
 const REPORTS: {
   id: string;
@@ -18,7 +24,7 @@ const REPORTS: {
   title: string;
   subtitle: string;
   tag: string;
-  accent: string;
+  accent: ReportAccent;
 }[] = [
   {
     id: "dias",
@@ -26,7 +32,7 @@ const REPORTS: {
     title: "Dias movimentados",
     subtitle: "Dias com mais agendamentos",
     tag: "Operacional",
-    accent: "#6366F1",
+    accent: "REPORT_ACCENT_BUSY_DAYS",
   },
   {
     id: "churn",
@@ -34,7 +40,7 @@ const REPORTS: {
     title: "Pets ausentes",
     subtitle: "Clientes sem visita há X dias",
     tag: "Retenção",
-    accent: "#EF4444",
+    accent: "REPORT_ACCENT_ABSENT_PETS",
   },
   {
     id: "remarcacao",
@@ -42,7 +48,7 @@ const REPORTS: {
     title: "Remarcações",
     subtitle: "Pets com remarcação ativa vs inativos",
     tag: "Engajamento",
-    accent: "#F59E0B",
+    accent: "REPORT_ACCENT_RESCHEDULES",
   },
   {
     id: "origem",
@@ -50,7 +56,7 @@ const REPORTS: {
     title: "Origem dos agendamentos",
     subtitle: "Automáticos vs manuais",
     tag: "Operacional",
-    accent: "#10B981",
+    accent: "REPORT_ACCENT_ORIGIN",
   },
   {
     id: "mensal",
@@ -58,7 +64,7 @@ const REPORTS: {
     title: "Comparativo mensal",
     subtitle: "Evolução mês a mês",
     tag: "Financeiro",
-    accent: "#3B82F6",
+    accent: "REPORT_ACCENT_MONTHLY",
   },
   {
     id: "pacotes",
@@ -66,7 +72,7 @@ const REPORTS: {
     title: "Pacotes ativos",
     subtitle: "Pets no plano 2x/mês vs 4x/mês",
     tag: "Financeiro",
-    accent: "#A855F7",
+    accent: "REPORT_ACCENT_PACKAGES",
   },
 ];
 
@@ -76,6 +82,7 @@ const SECTIONS = Array.from(new Set(REPORTS.map((r) => r.tag))).map((tag) => ({
 }));
 
 export default function Relatorios() {
+  const { colors } = useTheme();
   const s = useThemedStyles(styles);
   const { navigate } = useScreen<NewOrEditAppointmentParams>();
 
@@ -117,7 +124,7 @@ export default function Relatorios() {
                   accessibilityRole="button"
                 >
                   <View
-                    style={[s.cardAccent, { backgroundColor: report.accent }]}
+                    style={[s.cardAccent, { backgroundColor: colors[report.accent] }]}
                   />
                   <View style={s.cardBody}>
                     <Text style={s.cardTitle}>{report.title}</Text>
