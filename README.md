@@ -35,6 +35,7 @@ Prints com os dados de exemplo do próprio app.
 - Expo SDK 58 (`expo` 58.0.21), React Native 0.88.1 e React 19.3.0.
 - TypeScript 6.0.3 em modo `strict`.
 - `expo-sqlite` para o banco local e `react-native-calendars` para o calendário.
+- Zod 4 para validar a entrada, com um schema por entidade.
 - `expo-file-system`, `expo-sharing` e `expo-document-picker` para o backup.
 - Build Android pelo EAS: o perfil `preview` gera APK, e o `production` gera AAB.
 - Testes com `node:test` e `node:sqlite`, sem dependências.
@@ -42,7 +43,7 @@ Prints com os dados de exemplo do próprio app.
 
 ## Como funciona por dentro
 
-- **Camadas:** telas → controllers (validação) → services → repositories (SQL com parâmetros) → SQLite.
+- **Camadas:** telas → controllers (validação pelos schemas de `app/validation/`) → services → repositories (SQL com parâmetros) → SQLite.
 - **Banco:**
   - oito tabelas: donos, pets, agendamentos, serviços, formas de pagamento, espécies, raças e configurações;
   - desativar é exclusão lógica;
