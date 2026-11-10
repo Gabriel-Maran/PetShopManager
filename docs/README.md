@@ -8,3 +8,4 @@ Plano de melhorias do app, criado em 2026-11-05. Comece pelos próximos passos.
 - [`arquitetura.md`](arquitetura.md): como o app está organizado hoje.
 - [`decisoes.md`](decisoes.md): decisões tomadas, com data e motivo.
 - [`perguntas-em-aberto.md`](perguntas-em-aberto.md): o que ainda precisa de resposta.
+- [`checklist-perguntas.md`](checklist-perguntas.md): as perguntas a responder ao iniciar, ao decidir e ao entregar, com um arquivo por tipo de tarefa e por área em [`checklist/`](checklist/).
