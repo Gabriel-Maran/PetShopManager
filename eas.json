@@ -1,4 +1,8 @@
 {
+  "cli": {
+    "version": ">= 27.3.0",
+    "appVersionSource": "remote"
+  },
   "build": {
     "preview": {
       "android": {
@@ -6,6 +10,7 @@
       }
     },
     "production": {
+      "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
       }
