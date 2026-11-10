@@ -54,7 +54,6 @@ export default function BarraDePesquisa({
         <FilterPanel
           value={statusFiltro}
           onChange={onStatusFiltroChange ?? (() => {})}
-          onClose={() => setIsSelectedFilter(false)}
         />
       ) : (
         <View style={s.pesquisa}>

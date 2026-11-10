@@ -11,7 +11,6 @@ import { touchTargetSlop } from "../Acessibilidade/accessibilityProps";
 interface FilterPanelProps {
   value: StatusFiltro;
   onChange: (n: number) => void;
-  onClose: () => void;
 }
 
 type AccentColor = keyof Pick<ThemeColors, "GREEN_COLOR" | "RED_COLOR">;
@@ -34,7 +33,6 @@ const CHIP_HEIGHT =
 export default function FilterPanel({
   value,
   onChange,
-  onClose,
 }: FilterPanelProps) {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();

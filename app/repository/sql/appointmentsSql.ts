@@ -27,6 +27,3 @@ export const UPDATE_APPOINTMENT_SQL = `UPDATE appointments SET
         tipo_pgto = ?,
         ta_pago = ?
        WHERE id = ?`;
-
-/** Parâmetros: id. Dispara o trg_ultima_visita e, se for automático, o trg_remarcacao_automatica. */
-export const CONCLUDE_APPOINTMENT_SQL = `UPDATE appointments SET concluido = 1 WHERE id = ?`;

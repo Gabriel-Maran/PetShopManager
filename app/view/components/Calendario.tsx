@@ -5,10 +5,8 @@ import {
   useTheme,
   useThemedStyles,
 } from "../Themes/ThemeProvider";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useError } from "../../hooks/useError";
-
-import { Appointment } from "../../model/Appointment";
 
 import { appointmentController } from "../../controller/AppointmentsController";
 
@@ -58,7 +56,6 @@ LocaleConfig.locales["pt-br"] = {
   today: "Hoje",
 };
 
-//Configura o calendário para usar o locale pt-br
 LocaleConfig.defaultLocale = "pt-br";
 
 export default function Calendario() {
@@ -98,12 +95,10 @@ export default function Calendario() {
     const { inicio, fim } = pegarIntervaloMes();
     appointmentController
       .getAppointmentsByDateRange(inicio, fim)
-      //.getAppointmentsByDateRangeNotDone(inicio, fim)
       .then(setDatasComAgendamento)
       .catch(showError);
   }, [mesSelecionado, dateSelected]);
 
-  // useMemo pra guardar as datas
   const datasMarcadas = useMemo(() => {
     const marks = datasComAgendamento.reduce(
       (acc, appointment) => {

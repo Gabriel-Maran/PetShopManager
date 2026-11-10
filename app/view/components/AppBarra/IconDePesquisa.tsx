@@ -1,11 +1,7 @@
 import { Image, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { IMAGENS_BY_NAME, IMAGENS_NAMES, Screen } from "../../../config/consts";
 import { useScreen } from "../../../hooks/useScreen";
-import {
-  useTheme,
-  useThemedStyles,
-  ThemeColors,
-} from "../../Themes/ThemeProvider";
+import { useThemedStyles, ThemeColors } from "../../Themes/ThemeProvider";
 
 export default function IconDePesquisa({
   imgName,

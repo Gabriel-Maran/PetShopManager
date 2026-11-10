@@ -3,6 +3,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { THEME_COLORS } from "../app/view/Themes/colors.ts";
+import { TINT_OPACITY, withAlpha } from "../app/view/Themes/alpha.ts";
 import {
   HIDDEN_FROM_SCREEN_READER,
   MIN_TOUCH_TARGET,
@@ -40,6 +41,14 @@ function overlay(color, alpha, background) {
   const bottom = parseColor(background);
   const mixed = top.map((channel, i) => Math.round(channel * alpha + bottom[i] * (1 - alpha)));
   return `#${mixed.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/** A cor que aparece quando uma cor "rgba(r, g, b, a)", como a do `withAlpha`, fica sobre `background`. */
+function flatten(rgba, background) {
+  const match = rgba.match(/^rgba\((\d+), (\d+), (\d+), ([\d.]+)\)$/);
+  if (!match) throw new Error(`Cor em formato não suportado: ${rgba}`);
+  const [red, green, blue, alpha] = match.slice(1).map(Number);
+  return overlay(`rgb(${red}, ${green}, ${blue})`, alpha, background);
 }
 
 // Texto comum precisa de 4,5:1 (WCAG 2.1, critério 1.4.3).
@@ -80,13 +89,16 @@ const NON_TEXT_PAIRS = [
   ["DESATIVADO", "BACKGROUND", "trilho do interruptor desligado"],
   ["PRIMARY", "BACKGROUND", "trilho do interruptor ligado"],
   ["PRIMARY", "PRIMARY_SOFT", "✕ do Fechar dos modais"],
+  ["TOGGLE_THUMB", "PRIMARY", "bolinha do interruptor ligado"],
+  ["TOGGLE_THUMB", "DESATIVADO", "bolinha do interruptor desligado"],
 ];
 
-// Fundos feitos com a própria cor do texto em transparência: [texto, alfa em hex, fundo, onde aparece].
+// Fundos feitos com a própria cor do texto em transparência, pelo `withAlpha`:
+// [texto, opacidade de TINT_OPACITY, fundo, onde aparece].
 const TINTED_PAIRS = [
-  ["PRIMARY_CONTRAST", "22", "BACKGROUND", "data escolhida no calendário"],
-  ["GREEN_COLOR", "10", "THIRD_BACKGROUND", "opção Ativos do filtro"],
-  ["RED_COLOR", "10", "THIRD_BACKGROUND", "opção Inativos do filtro"],
+  ["PRIMARY_CONTRAST", "SELECTED_DATE", "BACKGROUND", "data escolhida no calendário"],
+  ["GREEN_COLOR", "ACTIVE_FILTER", "THIRD_BACKGROUND", "opção Ativos do filtro"],
+  ["RED_COLOR", "ACTIVE_FILTER", "THIRD_BACKGROUND", "opção Inativos do filtro"],
 ];
 
 describe("cálculo de contraste", () => {
@@ -120,6 +132,44 @@ describe("cálculo de contraste", () => {
     assert.equal(overlay("#000000", 0.5, "#ffffff"), "#808080");
     assert.equal(overlay("#123456", 1, "#ffffff"), "#123456");
     assert.equal(overlay("#123456", 0, "#ffffff"), "#ffffff");
+    assert.equal(flatten("rgba(0, 0, 0, 0.5)", "#ffffff"), "#808080");
+  });
+});
+
+describe("withAlpha", () => {
+  test("põe a opacidade numa cor #RRGGBB, sem importar maiúsculas", () => {
+    assert.equal(withAlpha("#0B7377", 0.13), "rgba(11, 115, 119, 0.13)");
+    assert.equal(withAlpha("#ffffff", 0.5), withAlpha("#FFFFFF", 0.5));
+  });
+
+  test("aceita #RGB e rgb(r, g, b)", () => {
+    assert.equal(withAlpha("#0f8", 0.2), "rgba(0, 255, 136, 0.2)");
+    assert.equal(withAlpha("rgb(203, 31, 31)", 0.1), "rgba(203, 31, 31, 0.1)");
+  });
+
+  test("aceita as opacidades 0 e 1, os limites", () => {
+    assert.equal(withAlpha("#000000", 0), "rgba(0, 0, 0, 0)");
+    assert.equal(withAlpha("#000000", 1), "rgba(0, 0, 0, 1)");
+  });
+
+  test("funciona com todas as cores hex dos dois temas", () => {
+    for (const colors of Object.values(THEME_COLORS)) {
+      for (const color of Object.values(colors).filter((value) => value.startsWith("#"))) {
+        assert.doesNotThrow(() => withAlpha(color, 0.5), color);
+      }
+    }
+  });
+
+  test("falha com cor em formato que não sabe ler, em vez de devolver outra cor", () => {
+    for (const color of ["", "red", "#12345", "#1234567", "#12345678", "#GGGGGG", "rgb(256, 0, 0)", "rgba(0, 0, 0, 0.5)"]) {
+      assert.throws(() => withAlpha(color, 0.5), /formato não suportado/, color);
+    }
+  });
+
+  test("falha com opacidade fora de 0 a 1 ou que não é número finito", () => {
+    for (const opacity of [-0.1, 1.1, 34, Number.NaN, Number.POSITIVE_INFINITY]) {
+      assert.throws(() => withAlpha("#000000", opacity), /opacidade fora de 0 a 1/, String(opacity));
+    }
   });
 });
 
@@ -145,10 +195,9 @@ for (const [themeName, colors] of Object.entries(THEME_COLORS)) {
       });
     }
 
-    for (const [text, alphaHex, background, where] of TINTED_PAIRS) {
+    for (const [text, opacity, background, where] of TINTED_PAIRS) {
       test(`${text} sobre ele mesmo em transparência (${where})`, () => {
-        const alpha = parseInt(alphaHex, 16) / 255;
-        const tinted = overlay(colors[text], alpha, colors[background]);
+        const tinted = flatten(withAlpha(colors[text], TINT_OPACITY[opacity]), colors[background]);
         const ratio = contrastRatio(colors[text], tinted);
         assert.ok(
           ratio >= MIN_TEXT_CONTRAST,
