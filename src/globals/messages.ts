@@ -59,6 +59,9 @@ export const MESSAGES = {
     notFound: "Agendamento não encontrado.",
     petRequired: "Escolha o pet do agendamento.",
     serviceRequired: "Escolha o serviço do agendamento.",
+    serviceNotFound: "Este serviço não está na lista. Escolha um serviço da lista.",
+    paymentMethodNotFound:
+      "Esta forma de pagamento não está na lista. Escolha uma forma de pagamento da lista.",
     timeRequired: "Informe o horário do agendamento.",
     timeInvalid: "Horário inválido. Use horas e minutos, como 09:30.",
   },

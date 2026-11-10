@@ -21,6 +21,7 @@ import {
   INTEGRITY_CHECK_SQL,
   LIST_APP_TRIGGERS_SQL,
   LIST_TABLES_SQL,
+  REQUIRED_BACKUP_TABLES,
   tableColumnsSql,
 } from "../repository/sql/backupSql.ts";
 import { AppError } from "../errors/AppError.ts";
@@ -44,7 +45,7 @@ export async function upgradeBackup(
   // Sem esta checagem, as migrações criariam as tabelas vazias num arquivo qualquer, e a restauração
   // apagaria os dados do app.
   const tables = await listTables(backup);
-  if (!BACKUP_TABLES.every((table) => tables.has(table))) {
+  if (!REQUIRED_BACKUP_TABLES.every((table) => tables.has(table))) {
     throw new AppError("INVALID_BACKUP", MESSAGES.backup.notABackup);
   }
   // O migrateDatabase também recusa, mas com a mensagem da abertura do app, que fala dos dados do

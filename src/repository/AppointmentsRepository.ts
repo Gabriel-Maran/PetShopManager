@@ -1,5 +1,10 @@
 import { getDatabase } from "../config/database";
-import { INSERT_APPOINTMENT_SQL } from "./sql/appointmentsSql";
+import {
+  FIND_APPOINTMENT_SQL,
+  INSERT_APPOINTMENT_SQL,
+  LIST_APPOINTMENTS_BETWEEN_SQL,
+  LIST_APPOINTMENTS_OF_DAY_SQL,
+} from "./sql/appointmentsSql";
 import { Appointment } from "../model/Appointment";
 import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
 import type { IsoDate } from "../utils/datas";
@@ -9,32 +14,14 @@ import type { IsoDate } from "../utils/datas";
 class AppointmentRepository {
   async getAppointmentById(id: number): Promise<Appointment | null> {
     const db = await getDatabase();
-    return db.getFirstAsync<Appointment>(
-      `SELECT * FROM appointments WHERE id = ?`,
-      [id],
-    );
+    return db.getFirstAsync<Appointment>(FIND_APPOINTMENT_SQL, [id]);
   }
 
   async getAppointmentsByDateWithOwnerAndPet(
     date: IsoDate,
   ): Promise<AppointmentsWithOwnerAndPet[]> {
     const db = await getDatabase();
-    return db.getAllAsync<AppointmentsWithOwnerAndPet>(
-      `
-    SELECT 
-      AP.*,
-      PT.nome    AS nome_pet,
-      SP.nome    AS especie,
-      OW.nome    AS nome_dono
-    FROM appointments AS AP
-    JOIN pets    AS PT ON AP.pet_id = PT.id
-    JOIN owners  AS OW ON PT.dono_id = OW.id
-    JOIN species AS SP ON PT.especie = SP.id
-    WHERE AP.data = ?
-    ORDER BY AP.concluido, AP.hora ASC
-    `,
-      [date],
-    );
+    return db.getAllAsync<AppointmentsWithOwnerAndPet>(LIST_APPOINTMENTS_OF_DAY_SQL, [date]);
   }
 
   // Retorna agendamentos de um intervalo de datas (útil para tela de calendário)
@@ -43,10 +30,7 @@ class AppointmentRepository {
     to: IsoDate,
   ): Promise<Appointment[]> {
     const db = await getDatabase();
-    return db.getAllAsync<Appointment>(
-      `SELECT * FROM appointments WHERE data BETWEEN ? AND ? ORDER BY data ASC`,
-      [from, to],
-    );
+    return db.getAllAsync<Appointment>(LIST_APPOINTMENTS_BETWEEN_SQL, [from, to]);
   }
 
   // Cria agendamento manual (is_auto_agen = 0 por padrão)

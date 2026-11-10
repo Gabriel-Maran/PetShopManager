@@ -121,7 +121,9 @@ describe("agenda gerada ao cadastrar um pet com pacote", () => {
       dono_id: ownerId, remarcacao_ativa: 1, pacote_remarcacao: 4, data_inicio_pacote: isoDate(3),
     });
 
-    assert.ok(appointmentsOf(db, pet.id).every((a) => a.dia_semana === toDate(a.data).getDay()));
+    const agenda = db.prepare("SELECT data, dia_semana FROM appointments WHERE pet_id = ?").all(pet.id);
+    assert.ok(agenda.length > 0);
+    assert.ok(agenda.every((a) => a.dia_semana === toDate(a.data).getDay()));
   });
 
   test("o cadastro novo grava o dia de hoje do aparelho, em texto", async () => {
@@ -229,7 +231,8 @@ describe("edição do pet com pacote", () => {
     [nextAuto] = pendingAutoOf(db, pet.id).filter((a) => a.data > isoDate(1));
     await saveAppointment(db, nextAuto, { hora: "15:30" });
     db.prepare(
-      "INSERT INTO appointments (pet_id, servico, data, hora, is_auto_agen) VALUES (?, 'Banho', ?, '10:00', 1)",
+      `INSERT INTO appointments (pet_id, servico_id, data, hora, is_auto_agen)
+       VALUES (?, (SELECT id FROM service_type WHERE servico = 'Banho'), ?, '10:00', 1)`,
     ).run(pet.id, isoDate(-5));
   });
 

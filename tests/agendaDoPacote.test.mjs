@@ -192,7 +192,7 @@ describe("quando a edição refaz a agenda", () => {
     data_inicio_pacote: "2026-11-03",
     valor_pacote: 32000,
     horario_padrao: "10:00",
-    servico_padrao: "Banho",
+    servico_padrao_id: 1,
     is_ativo: 1,
     ultimo_visita_data_auto: "2027-06-22",
   };
@@ -207,7 +207,7 @@ describe("quando a edição refaz a agenda", () => {
     ["data_inicio_pacote", "2026-11-05"],
     ["valor_pacote", 40000],
     ["horario_padrao", "16:00"],
-    ["servico_padrao", "Banho e Tosa"],
+    ["servico_padrao_id", 2],
   ]) {
     test(`mudar ${field} refaz`, () => {
       assert.equal(shouldRebuildSchedule(pet, { ...pet, [field]: value }), true);

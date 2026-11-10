@@ -227,7 +227,7 @@ describe("migrações do banco", () => {
     for (const [table, tableRows] of Object.entries(before)) {
       assert.deepEqual(rows(db, table), tableRows, `${table} continua igual`);
     }
-    assert.deepEqual(schemaObjects(db), schemaObjects(await createDatabase()));
+    assert.deepEqual(schemaObjects(db), schemaObjects(await databaseAt(4)));
     assert.deepEqual(
       schemaObjects(db),
       v3Objects.filter(({ name }) => !SCHEDULE_TRIGGERS.includes(name)),
@@ -268,19 +268,18 @@ describe("migrações do banco", () => {
     assert.deepEqual(rows(db, "pets").map(semHorario), before.map(semHorario));
   });
 
+  // Antes da versão 5, o nulo quebrava a conclusão (PR #49). A remarcação de hoje grava no formato da
+  // versão 6, então o banco antigo é montado à mão: o pet sem horário e um automático pendente.
   test("o pet antigo sem horário volta a concluir o automático", async () => {
     const db = await databaseAt(4);
     const { pet } = insertOwnerWithPackagePet(db);
-    await packageScheduleOf(db).updatePet(pet.id, { ...pet, data_inicio_pacote: isoDate(1) }, new Date());
     db.prepare("UPDATE pets SET horario_padrao = NULL WHERE id = ?").run(pet.id);
-    const [first] = pendingAutoOf(db, pet.id);
-    await assert.rejects(
-      packageScheduleOf(db).updateAppointment(first.id, { ...first, concluido: 1 }),
-      /NOT NULL/,
-      "antes da versão 5, o nulo quebra a conclusão",
-    );
+    db.prepare(
+      "INSERT INTO appointments (pet_id, servico, data, hora, is_auto_agen) VALUES (?, 'Banho', ?, '10:00', 1)",
+    ).run(pet.id, isoDate(1));
 
     await migrate(db);
+    const [first] = pendingAutoOf(db, pet.id);
     await packageScheduleOf(db).updateAppointment(first.id, { ...first, concluido: 1 });
 
     assert.equal(pendingAutoOf(db, pet.id).at(-1).hora, "00:00", "o próximo da agenda leva o 00:00");

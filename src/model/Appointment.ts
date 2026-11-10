@@ -4,6 +4,7 @@ import type { Cents } from "../utils/dinheiro";
 export interface Appointment {
   id?: number;
   pet_id: number;
+  /** O nome do serviço. Desde a versão 6 do esquema, o banco guarda o id, e o repository traduz. */
   servico: string;
   hora: string;
   data: IsoDate;
@@ -12,6 +13,7 @@ export interface Appointment {
   observacao?: string | null;
   is_auto_agen: number; // 0 ou 1
   valor: Cents;
+  /** O nome da forma de pagamento, ou vazio se não foi informada. O banco guarda o id, como o serviço. */
   tipo_pgto: string;
   ta_pago: number;
   criado_em?: IsoDate;

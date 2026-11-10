@@ -11,6 +11,7 @@ export interface Pet {
   raca_nome?: string;
   observacoes?: string | null;
   dono_id: number;
+  /** O nome do serviço. Desde a versão 6 do esquema, o banco guarda o id, e o repository traduz. */
   servico_padrao: TipoServico;
   valor_pacote?: Cents | null;
   remarcacao_ativa: number; // 0 ou 1

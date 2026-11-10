@@ -37,10 +37,12 @@ export type PetPackage = Pick<
   | "data_inicio_pacote"
   | "valor_pacote"
   | "horario_padrao"
-  | "servico_padrao"
   | "is_ativo"
   | "ultimo_visita_data_auto"
->;
+> & {
+  /** O serviço padrão pelo id, como o banco grava desde a versão 6 do esquema. */
+  servico_padrao_id: number;
+};
 
 /** O pacote pronto para a conta. */
 export interface PackagePlan {
@@ -156,7 +158,7 @@ const SCHEDULE_FIELDS = [
   "data_inicio_pacote",
   "is_ativo",
   "horario_padrao",
-  "servico_padrao",
+  "servico_padrao_id",
   "valor_pacote",
 ] as const satisfies readonly (keyof PetPackage)[];
 

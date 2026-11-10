@@ -14,7 +14,7 @@ export const appointmentSchema = z.object({
   data: isoDate(MESSAGES.date.invalid),
   hora: time(MESSAGES.appointment.timeInvalid, MESSAGES.appointment.timeRequired),
   valor: cents(MESSAGES.money.invalid),
-  // Opcional na tela; o banco guarda o texto vazio quando não há escolha.
+  // Opcional na tela. O vazio é a forma não informada, que o banco guarda como id nulo (versão 6).
   tipo_pgto: text(MAX_LIST_ITEM_LENGTH, MESSAGES.textTooLong("O tipo de pagamento", MAX_LIST_ITEM_LENGTH)),
   observacao: optional(
     text(MAX_NOTES_LENGTH, MESSAGES.textTooLong("A observação do agendamento", MAX_NOTES_LENGTH)),

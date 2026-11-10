@@ -4,16 +4,27 @@
 // Os nomes de tabela, coluna e trigger que entram no texto dos comandos vêm desta lista ou do esquema
 // do próprio app ("main"), nunca do arquivo importado.
 
-/** As tabelas restauradas, nesta ordem. Um arquivo sem todas elas não é backup do app. */
+/**
+ * As tabelas restauradas, nesta ordem. A payment_methods entrou na versão 6 do esquema, quando o
+ * agendamento passou a apontar para ela pelo id: os ids variam de um aparelho para outro (a carga
+ * inicial de maio de 2026 tinha o PIX no 3, e a de hoje tem no 4), então a lista vem junto do backup.
+ */
 export const BACKUP_TABLES = [
   "configs",
   "service_type",
+  "payment_methods",
   "species",
   "race",
   "owners",
   "pets",
   "appointments",
 ];
+
+/**
+ * As tabelas que todo backup do app tem: um arquivo sem alguma delas não é backup. A payment_methods
+ * fica de fora porque veio depois da exportação, e a versão 1 do esquema a cria na cópia.
+ */
+export const REQUIRED_BACKUP_TABLES = BACKUP_TABLES.filter((table) => table !== "payment_methods");
 
 /** Confere o arquivo inteiro e para no primeiro problema. Um arquivo íntegro devolve "ok". */
 export const INTEGRITY_CHECK_SQL = "PRAGMA integrity_check(1);";
