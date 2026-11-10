@@ -423,3 +423,43 @@ Decisão do Gabriel, nas recomendações do Claude:
 - P19 (TEMA-1): na primeira abertura, o app segue o tema do sistema; depois, vale a escolha do usuário.
 - A Parte 7 não espera mais a conversa com os parceiros. O React Navigation do ARQ-3 entra com a análise de segurança de costume, e quem instala é o Gabriel.
 Motivo: sem outra pessoa no código, mover pastas e renomear não gera conflito. A pasta `src/` evita o conflito com o expo-router; os nomes em inglês seguem a regra do Gabriel; a regra da remarcação fica legível e testável; e o banco, com nome, telefone e endereço de clientes, não vai para o Drive sem ninguém pedir.
+
+## 2026-11-10
+
+**Checklist de perguntas por momento do trabalho.**
+Contexto: o Gabriel trouxe o checklist que usa ao desenvolver, com perguntas por tipo de entrega, e pediu que o Claude o use como o próprio julgamento, antes de entregar.
+Decisão (PR #43):
+- `docs/checklist-perguntas.md` é o índice: o que ler ao iniciar, ao decidir por conta, durante, ao entregar e depois do merge, com uma linha de descrição por arquivo.
+- `docs/checklist/` tem um arquivo por tipo de tarefa (planejamento, features, bugs, refactors) e por área, com uma nota de como cada pergunta vale no app, que não tem API, login nem servidor.
+- O `CLAUDE.md` local manda ler o índice nesses três momentos, e os agentes recebem a mesma instrução. As respostas que importam vão para a seção "Checklist" do PR.
+Motivo: as perguntas do Gabriel passam a ser respondidas antes de ele precisar fazê-las.
+
+**Terceira rodada de agentes em paralelo (PRs #44 a #47).**
+Contexto: o Gabriel pediu vários agentes ao mesmo tempo, cada um na sua branch e com PR para o `main`, sem mexer no código do outro.
+Decisão:
+- Quatro frentes já decididas e com arquivos separados: PERF-1 (imagens), SEG-1 (backup), relatórios pelo service e ARQ-2. O NOMES-1 ficou de fora, porque mexe em todos os arquivos, e o tema do sistema (P19) também, porque precisaria de uma migração, como o ARQ-2.
+- `messages.ts` e o helper dos testes tiveram um dono só. As pendências fora da zona foram para a seção "Pendências entre áreas" do PR, e o coordenador conferiu o diff de cada branch: nenhuma saiu da zona.
+- Problema: os agentes partiram da branch do ARQ-1 (PR #42) antes do merge. Com o squash, os PRs ficaram em conflito ou com o CI vermelho. O coordenador reaplicou cada commit em cima do `main` (`git rebase --onto`), conferiu as quatro juntas (409 testes) e atualizou as branches.
+Motivo: frentes separadas por arquivo não geram conflito entre si. Daqui em diante, os agentes partem só do `main` atualizado.
+
+Decisões dos PRs:
+- PR #45, SEG-1:
+  - os textos dos dois modais do backup (exportar e importar) ficam em `DIALOGS`;
+  - um estado só (`pendingDialog`) garante que os dois modais nunca abrem juntos;
+  - a transferência direta entre celulares no Android 12 ou mais novo continua possível, porque bloqueá-la exigiria um config plugin próprio, e é o próprio dono levando os dados;
+  - o backup com senha não foi feito: virou a pergunta 24.
+- PR #46, relatórios:
+  - as telas de relatório e os hooks das listas de serviço e pagamento chamam o service direto, sem controller, porque não há entrada do usuário para validar, como o backup e os dados de exemplo;
+  - os campos que nenhuma tela lia saíram das consultas, entre eles o telefone do dono nos pets ausentes;
+  - o resultado dos 12 gráficos foi comparado antes e depois, sobre os dados de exemplo, e saiu idêntico.
+- PR #47, ARQ-2:
+  - ficam dois triggers que só apagam (`trg_pet_remarcacao_desativar` e `trg_pet_desativar_limpar_remarcacao`), porque entram em "integridade e cascata" da pergunta 14;
+  - a agenda dos dados de exemplo usa o mesmo "hoje" do `buildDemoDataSql`, e não o relógio do SQLite;
+  - um segundo toque com uma gravação em andamento falha no `BEGIN IMMEDIATE` antes de gravar e mostra a mensagem padrão. Antes, os dois cadastros entravam. O `useAsyncAction` já barra o toque duplo na tela.
+
+**Varredura da terceira rodada (PRs #48 e #49).**
+Decisão do Gabriel: aplicar as quatro sugestões.
+- PR #48: o tipo `BarChartItem` saiu do componente para `utils/relatorios/graficos.ts`, porque o service não pode depender da tela; as contas de calendário do ARQ-2 foram para `src/utils/datas.ts`, para as datas ficarem num lugar só; o ícone do pacote virou um PNG de 84 px.
+- PR #49: a versão 5 do esquema troca o horário padrão nulo por `00:00`. Um pet antigo com pacote e sem horário não conseguia concluir o automático, porque a `hora` do agendamento é `NOT NULL`. Era assim nos triggers, e o ARQ-2 manteve de propósito, para não misturar refactor com correção. O `NOT NULL` na coluna fica para o DADOS-4, que recria a tabela.
+Motivo: as regras pedem camadas na direção certa, datas num módulo só e dado antigo tratado por migração.
+

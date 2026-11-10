@@ -1,22 +1,18 @@
 # Próximos passos
 
-Atualizado em 2026-11-09, depois da segunda rodada de quatro agentes em paralelo (PRs #35 a #38).
+Atualizado em 2026-11-10, depois da terceira rodada de agentes em paralelo (PRs #44 a #47) e da varredura dela (PRs #48 e #49).
 
-> **Decidido em 2026-11-09:** as perguntas 14, 17, 19, 20 e 21 da arquitetura estão respondidas, e a Parte 7 não depende mais dos parceiros (ver `decisoes.md`).
+> **Para o próximo chat:**
+> - Leia antes o [`checklist-perguntas.md`](checklist-perguntas.md) (PR #43): ele diz que perguntas responder ao iniciar, ao decidir e ao entregar.
+> - Em revisão: o PR #48 (sugestões da varredura: tipo do gráfico fora da tela, datas num módulo só e ícone do pacote em PNG), o PR #49 (versão 5 do esquema: horário nulo vira `00:00`) e este PR de documentação. O próximo passo é o Gabriel revisar os três.
+> - Depois: o patch do Expo (item 2 da lista abaixo, liberado desde hoje), o NOMES-1, que precisa ser feito sozinho porque mexe em todos os arquivos, e o tema do sistema na primeira abertura (P19), que precisa de uma migração própria.
+> - Agentes em paralelo partem só do `main` atualizado. Na terceira rodada eles partiram da branch do ARQ-1 antes do merge, e o squash deixou os PRs em conflito (ver `decisoes.md`).
 >
-> **Para o próximo chat:** os quatro PRs da segunda rodada em paralelo (#35 a #38) e a documentação (#39) estão no `main`. As sete "Pendências entre áreas" e duas sugestões da varredura estão em revisão no PR de integração (branch `fix/pendencias-das-frentes`, worktree `.claude/worktrees/pendencias-frentes`), feito a pedido do Gabriel em 2026-11-09. O próximo passo é o Gabriel revisar esse PR. Depois vêm o patch do Expo, a partir de 2026-11-10, e as sugestões que sobraram.
+> Entraram no `main` em 2026-11-10: as decisões de arquitetura (#41), o ARQ-1 (`app/` virou `src/`, #42), o checklist (#43), o PERF-1 (#44), o SEG-1 (#45), os relatórios pelo service (#46) e o ARQ-2 (#47). Os roteiros para conferir no aparelho estão nos PRs #44 a #47; o do SEG-1 precisa de um build novo, porque o `allowBackup` só vale no APK.
 >
-> Em 2026-11-09 entraram no `main`, antes desta rodada: ERRO-1 (PR #22), importação cancelada (#23), BUG-6 (#24), BUG-5 (#25), a ordem da busca (#26), os nomes de desativar (#27), o resto do BKP-1 (#28), REPO-3 (#29), BUG-8 (#30), A11Y-1 (#31), VALID-1 (#32), a documentação da primeira rodada (#33) e as pendências entre áreas (#34). A Parte 3 foi aceita com o merge do PR #21, em 2026-11-08.
+> O clone do Gabriel: o `node_modules` está incompleto (sem `.bin` e sem a pasta `@expo`, conferido em 2026-11-10), então o `npm run typecheck` e o `export:android` falham nele. O `tsc` roda por `node node_modules/typescript/bin/tsc --noEmit`, e os testes rodam. Para consertar, o Gabriel roda `npm ci` no clone, sem mudanças locais pendentes.
 >
-> Os roteiros para conferir no aparelho estão nos PRs #22 (ERRO-1), #24 (BUG-6), #25 (BUG-5), #26 (ordem da busca), #28 (BKP-1), #29 (REPO-3), #30 (BUG-8), #31 (A11Y-1, com o TalkBack), #32 (VALID-1), #34 (pendências entre áreas) e #35 a #38.
->
-> O clone do Gabriel foi atualizado para o `e4be9eb` (PR #33) em 2026-11-09, com `git pull`. O `node_modules` dele já tem o zod 4.6.7.
->
-> Duas branches remotas voltaram por engano depois do merge, e o Gabriel pode apagá-las no GitHub:
-> - `fix/contagem-de-cadastros`, depois do PR #25, com um commit que já entrou pelo PR #26;
-> - `feat/validacao-com-zod`, depois do PR #32, com o commit do README, que entrou pelo PR #33.
->
-> Worktrees: os de `docs-paralelos` e `pendencias` (PRs #33 e #34, já no `main`) foram removidos em 2026-11-09. O `integracao` (branch local `fix/integracao-das-frentes`, que junta as quatro branches) serve só para testar o conjunto, e nunca vai para o GitHub. Para tirar um worktree, primeiro a junction, com `cmd /c rmdir`, e depois `git worktree remove`.
+> Worktrees: os de `src-folder`, `checklist` e `seg-backup` foram removidos em 2026-11-10. Os de `perf-imagens` (este PR de documentação), `relatorios-service` (PR #48), `remarcacao-ts` (PR #49) e `integracao-r3` (branch local `test/integracao-rodada-3`, que nunca vai para o GitHub) saem depois do merge. Para tirar um worktree, primeiro a junction, com `cmd /c rmdir`, e depois `git worktree remove`.
 
 ## Pendências entre áreas e varredura (2026-11-09, PRs #35 a #38)
 
@@ -42,10 +38,7 @@ Da varredura, também no PR:
 - o voltar do agendamento e do pet pode pedir confirmação sem mudança, se algum efeito da tela mudar um campo ao abrir. Conferir no aparelho, com o roteiro do #36.
 Das varreduras anteriores, ainda não aplicadas:
 
-- `CHECK` no banco numa versão 4 do esquema, tratando antes o dado antigo;
-- o `useServicos` e o `useTiposPagamento` chamam o repository direto e repetem o `useAsyncData`;
-- o SQL dos relatórios com `?` em vez de valor no texto, e com testes;
-- campos dos relatórios que nenhuma tela lê;
+- `CHECK` no banco numa versão nova do esquema (DADOS-4), tratando antes o dado antigo; a 4 e a 5 já foram usadas pelo ARQ-2 e pelo PR #49;
 - o tamanho do pacote: o Zod somou 680 KB ao JavaScript do Android. Avaliar o `zod/mini` ou o tree shaking do Expo. Deixado para depois pelo Gabriel em 2026-11-09.
 
 ## Em andamento: segurança e configuração do repositório
@@ -248,6 +241,8 @@ Pronto quando: o APK instala num Android limpo e mostra tudo com um toque, e o p
 Pronto quando: `npm run check` passa no CI, e o teste com o TalkBack percorre o app sem botão mudo.
 
 ### Parte 7 em diante · Arquitetura (P2)
+
+Feitos em 2026-11-10: ARQ-1 (#42), ARQ-2 (#47), PERF-1 (#44 e #48) e SEG-1 (#45), e os relatórios e as listas pelo service (#46). Falta conferir no aparelho.
 
 Um PR por item, nesta ordem: ARQ-1 (pastas e camadas), NOMES-1 (nomes), ARQ-2 (remarcação em TypeScript), DADOS-3 e DADOS-4 (esquema), ARQ-3 (navegação), PERF-1, BUILD-2, TEST-3 e SEG-1. As perguntas 13 a 21 estão respondidas desde 2026-11-09: `src/`, nomes em inglês, remarcação em TypeScript, backup automático desligado e tema do sistema na primeira abertura. A Parte 7 é feita só pelo Gabriel e pelo Claude, sem esperar os parceiros (ver `decisoes.md`).
 
