@@ -1,4 +1,4 @@
-// A regra pura da remarcação (domain/packageSchedule.ts e domain/isoCalendar.ts), com o "hoje" fixo:
+// A regra pura da remarcação (domain/packageSchedule.ts) e as contas de calendário de utils/datas.ts, com o "hoje" fixo:
 // sem banco e sem relógio, os casos-limite do calendário ficam exatos.
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
@@ -9,7 +9,7 @@ import {
   monthOf,
   sameWeekdayInNextMonth,
   weekdayOf,
-} from "../src/domain/isoCalendar.ts";
+} from "../src/utils/datas.ts";
 import {
   buildPackageSchedule,
   isAutoVisitConclusion,

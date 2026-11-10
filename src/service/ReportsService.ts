@@ -2,6 +2,7 @@ import type { PacoteRemarcacao } from "../config/petEnums";
 import { reportsRepository } from "../repository/ReportsRepository";
 import { todayIso } from "../utils/datas";
 import {
+  type BarChartItem,
   countsToBars,
   HOUR_BARS,
   ORIGIN_BARS,
@@ -14,7 +15,6 @@ import {
   type MonthRange,
   nextMonthsRange,
 } from "../utils/relatorios/meses";
-import type { BarChartItem } from "../view/components/Relatorios/BarChart";
 
 /** Quantos pets cada gráfico de pets ausentes mostra. */
 const ABSENT_PETS_LIMIT = 30;

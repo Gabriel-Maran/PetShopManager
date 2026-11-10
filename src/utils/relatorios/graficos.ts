@@ -1,6 +1,14 @@
 // Contagens do banco viram as barras dos relatórios. Sem o Expo, para os testes rodarem no Node.
 import { PacoteRemarcacao } from "../../config/petEnums.ts";
-import type { BarChartItem } from "../../view/components/Relatorios/BarChart";
+
+/**
+ * Uma barra do gráfico: o rótulo e a altura. Fica aqui, e não no componente, porque o service monta
+ * as barras e não pode depender da tela.
+ */
+export interface BarChartItem {
+  x: string;
+  y: number;
+}
 
 /** Uma linha das contagens dos relatórios (src/repository/sql/relatoriosSql.ts): o grupo e quantos. */
 export interface GroupCount<K extends number | string> {

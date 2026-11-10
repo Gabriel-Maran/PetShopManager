@@ -96,7 +96,7 @@ export default function AbaAgendamentoPet({
       {form.remarcAtiva && (
         <>
           <InputSelect
-            image={require("../../../../assets/outros/pacoteRemarcacao.webp")}
+            image={require("../../../../assets/outros/pacoteRemarcacao.png")}
             titleName="Pacote de Remarcação"
             placeholder="Selecione o pacote..."
             itens={pacotesRemarcacaoList}
