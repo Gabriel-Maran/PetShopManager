@@ -5,10 +5,9 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { useState } from "react";
-
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import { useScreen } from "../../../hooks/useScreen";
+import useFormState from "../../../hooks/useFormState";
 
 import { NewOrEditCadastros, Screen } from "../../../config/consts";
 import {
@@ -46,18 +45,20 @@ export default function NewOrEditOwner() {
   const isViewing = params?.mode === "view";
   const isEditing = params?.mode === "edit";
 
-  const [nome, setNome] = useState(params?.owner?.nome ?? "");
-  const [telefone, setTelefone] = useState(params?.owner?.telefone ?? "");
-  const [email, setEmail] = useState(params?.owner?.email ?? "");
-  const [endereco, setEndereco] = useState(params?.owner?.endereco ?? "");
+  const { form, updateField, isDirty } = useFormState({
+    nome: params?.owner?.nome ?? "",
+    telefone: params?.owner?.telefone ?? "",
+    email: params?.owner?.email ?? "",
+    endereco: params?.owner?.endereco ?? "",
+  });
 
   const { run: salvarDono, isRunning: isSalvando } = useAsyncAction(
     async () => {
       const ownerSalvar: Owner = new OwnerBuilder()
-        .withNome(nome)
-        .withTelefone(telefone)
-        .withEmail(email)
-        .withEndereco(endereco)
+        .withNome(form.nome)
+        .withTelefone(form.telefone)
+        .withEmail(form.email)
+        .withEndereco(form.endereco)
         .build();
       if (isEditing) {
         await ownerController.updateOwner(params!.owner?.id!, ownerSalvar);
@@ -87,7 +88,7 @@ export default function NewOrEditOwner() {
         }
         subtitle={"Preencha os dados do responsável"}
         isViewing={isViewing}
-        confirmReturn={!isViewing}
+        hasUnsavedChanges={isDirty}
       />
       <ScrollView
         contentContainerStyle={s.scrollContent}
@@ -100,8 +101,8 @@ export default function NewOrEditOwner() {
           <View style={s.inputs}>
             <InputInfo
               image={require("../../../assets/nav_bar/personAdd.png")}
-              item={nome}
-              setItem={setNome}
+              item={form.nome}
+              setItem={(v) => updateField("nome", v)}
               placeHolder="Digite o nome..."
               titleName="Nome Completo"
               variasLinhas={false}
@@ -111,8 +112,8 @@ export default function NewOrEditOwner() {
             />
             <InputInfo
               image={require("../../../assets/outros/phoneGreen.png")}
-              item={telefone}
-              setItem={(v) => setTelefone(maskPhone(v))}
+              item={form.telefone}
+              setItem={(v) => updateField("telefone", maskPhone(v))}
               placeHolder="(46) 90000-0000"
               titleName="Telefone"
               digitavel={!isViewing}
@@ -127,8 +128,8 @@ export default function NewOrEditOwner() {
           <View style={s.inputs}>
             <InputInfo
               image={require("../../../assets/outros/mailGreen.png")}
-              item={email}
-              setItem={setEmail}
+              item={form.email}
+              setItem={(v) => updateField("email", v)}
               placeHolder="email@exemplo.email"
               titleName="E-mail"
               variasLinhas={false}
@@ -139,8 +140,8 @@ export default function NewOrEditOwner() {
             />
             <InputInfo
               image={require("../../../assets/outros/locationGreen.png")}
-              item={endereco}
-              setItem={setEndereco}
+              item={form.endereco}
+              setItem={(v) => updateField("endereco", v)}
               placeHolder="Rua X, 456"
               titleName="Endereço"
               variasLinhas={true}

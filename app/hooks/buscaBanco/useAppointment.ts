@@ -142,11 +142,13 @@ type AppointmentTypeReturn = {
     field: K,
     value: AppointmentType[K],
   ) => void;
+  /** Se o agendamento mudou desde que a tela abriu, para o voltar pedir confirmação. */
+  isAppointmentDirty: boolean;
 };
 
 export function useAgendamentos(): AppointmentTypeReturn {
   const { params } = useScreen<NewOrEditAppointmentParams>();
-  const { form, updateField } = useFormState<AppointmentType>({
+  const { form, updateField, isDirty } = useFormState<AppointmentType>({
     nome_pet: params?.appointment?.nome_pet ?? "",
     pet_id: params?.appointment?.pet_id ?? 0,
     servico: params?.appointment?.servico ?? "",
@@ -166,5 +168,6 @@ export function useAgendamentos(): AppointmentTypeReturn {
   return {
     appointmentsForm: form,
     updateAppointmentsField: updateField,
+    isAppointmentDirty: isDirty,
   };
 }

@@ -16,6 +16,7 @@ import {
   STATUS_BAR_HEIGHT,
   Screen,
 } from "./app/config/consts";
+import { isTabScreen } from "./app/config/navigation";
 import { useScreen } from "./app/hooks/useScreen";
 import { useAndroidBackButton } from "./app/hooks/useBackNavigation";
 
@@ -89,10 +90,7 @@ function AppContent() {
   return (
     <>
       <AgendamentosProvider>{content}</AgendamentosProvider>
-      {(screen == Screen.Calendario ||
-        screen == Screen.Cadastros ||
-        screen == Screen.Relatorios ||
-        screen == Screen.Configuracoes) && <AppBar />}
+      {isTabScreen(screen) && <AppBar />}
     </>
   );
 }
@@ -138,7 +136,6 @@ function AppInner() {
   );
 }
 
-// ✅ App só monta os providers — sem hooks de tema aqui
 export default function App() {
   return (
     <ThemeProvider>

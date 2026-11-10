@@ -9,13 +9,13 @@ import ConfirmModal from "../ConfirmModal";
 
 /** O título das telas internas, com o voltar. Para onde ele leva fica em config/navigation.ts. */
 export default function TitleBar({
-  confirmReturn = false,
+  hasUnsavedChanges = false,
   title,
   subtitle,
   isViewing,
 }: {
-  /** Pede confirmação antes de sair, nos formulários em que o usuário pode perder o que digitou. */
-  confirmReturn?: boolean;
+  /** Com o formulário mudado, o voltar pede confirmação antes de sair; sem mudança, sai direto. */
+  hasUnsavedChanges?: boolean;
   title: string;
   subtitle: string;
   isViewing?: boolean;
@@ -26,7 +26,7 @@ export default function TitleBar({
   const openConfirm = useCallback(() => setIsConfirmOpen(true), []);
 
   // A guarda vale para o botão da tela e para o do Android, que pedem a mesma confirmação.
-  useBackGuard(confirmReturn ? openConfirm : null);
+  useBackGuard(hasUnsavedChanges ? openConfirm : null);
 
   return (
     <>
