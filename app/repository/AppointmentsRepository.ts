@@ -1,8 +1,8 @@
 import { getDatabase } from "../config/database";
-import { CONCLUDE_APPOINTMENT_SQL, INSERT_APPOINTMENT_SQL, UPDATE_APPOINTMENT_SQL } from "./sql/appointmentsSql";
+import { INSERT_APPOINTMENT_SQL, UPDATE_APPOINTMENT_SQL } from "./sql/appointmentsSql";
 import { Appointment } from "../model/Appointment";
 import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
-import { type IsoDate, todayIso } from "../utils/datas";
+import type { IsoDate } from "../utils/datas";
 
 class AppointmentRepository {
   async getAppointmentById(id: number): Promise<Appointment | null> {
@@ -10,19 +10,6 @@ class AppointmentRepository {
     return db.getFirstAsync<Appointment>(
       `SELECT * FROM appointments WHERE id = ?`,
       [id],
-    );
-  }
-
-  // Retorna todos os agendamentos de uma data específica
-  async getAppointmentsByDate(date: IsoDate): Promise<Appointment[]> {
-    const db = await getDatabase();
-    return db.getAllAsync<Appointment>(
-      `SELECT 
-        * 
-       FROM appointments 
-       WHERE data = ? 
-       ORDER BY ORDER BY AP.concluido, AP.hora ASC`,
-      [date],
     );
   }
 
@@ -57,47 +44,6 @@ class AppointmentRepository {
     return db.getAllAsync<Appointment>(
       `SELECT * FROM appointments WHERE data BETWEEN ? AND ? ORDER BY data ASC`,
       [from, to],
-    );
-  }
-
-  // Retorna agendamentos de um intervalo de datas que não estão concluídos
-  async getAppointmentsByDateRangeNotDone(
-    from: IsoDate,
-    to: IsoDate,
-  ): Promise<Appointment[]> {
-    const db = await getDatabase();
-    return db.getAllAsync<Appointment>(
-      `SELECT 
-        * 
-       FROM 
-       appointments 
-       WHERE data BETWEEN ? AND ? 
-       AND concluido <> 1
-       ORDER BY data ASC`,
-      [from, to],
-    );
-  }
-
-  // Retorna todos os agendamentos de um pet (histórico)
-  async getAppointmentsByPetId(petId: number): Promise<Appointment[]> {
-    const db = await getDatabase();
-    return db.getAllAsync<Appointment>(
-      `SELECT * FROM appointments WHERE pet_id = ? ORDER BY data DESC`,
-      [petId],
-    );
-  }
-
-  // Retorna agendamentos de hoje em diante, não concluídos, de um pet. O "hoje" vem do app, no fuso
-  // do aparelho (BUG-7).
-  async getPendingAppointmentsByPetId(petId: number): Promise<Appointment[]> {
-    const db = await getDatabase();
-    return db.getAllAsync<Appointment>(
-      `SELECT * FROM appointments
-       WHERE pet_id = ?
-         AND concluido = 0
-         AND data >= ?
-       ORDER BY data ASC`,
-      [petId, todayIso()],
     );
   }
 
@@ -139,33 +85,6 @@ class AppointmentRepository {
         appointment.ta_pago,
         id,
       ],
-    );
-  }
-
-  // Conclui um agendamento — dispara trg_ultima_visita e trg_remarcacao_automatica
-  async concludeAppointment(id: number): Promise<void> {
-    const db = await getDatabase();
-    await db.runAsync(CONCLUDE_APPOINTMENT_SQL, [
-      id,
-    ]);
-  }
-
-  async deleteAppointmentById(id: number): Promise<void> {
-    const db = await getDatabase();
-    await db.runAsync(`DELETE FROM appointments WHERE id = ?`, [id]);
-  }
-
-  // Remove todos os agendamentos automáticos futuros de um pet
-  // (alternativa manual ao trigger de desativação)
-  async deleteFutureAutoAppointmentsByPetId(petId: number): Promise<void> {
-    const db = await getDatabase();
-    await db.runAsync(
-      `DELETE FROM appointments
-       WHERE pet_id = ?
-         AND is_auto_agen = 1
-         AND concluido = 0
-         AND data > ?`,
-      [petId, todayIso()],
     );
   }
 }

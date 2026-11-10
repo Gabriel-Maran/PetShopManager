@@ -44,7 +44,6 @@ export function DatePickerInput({
         accessibilityLabel={name ? A11Y_LABELS.field(name, displayText) : displayText}
         accessibilityHint={A11Y_LABELS.datePickerHint}
       >
-        {/* Ícone de calendário (unicode simples — troque por um ícone da sua lib) */}
         {withIcon && (
           <Text style={s.icon} {...HIDDEN_FROM_SCREEN_READER}>
             📅

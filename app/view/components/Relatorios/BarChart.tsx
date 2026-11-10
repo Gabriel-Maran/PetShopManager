@@ -20,8 +20,10 @@ interface BarChartProps {
   suffix?: string;
   color?: string;
   height?: number;
-  verticalLabels?: boolean; // ← labels rotacionadas -40°, ideal para textos longos
-  invertLabelY?: boolean; // ← labels invertidas (suffix e formatted value em ordem contrária)
+  /** Rótulos girados em -40°, para textos longos. */
+  verticalLabels?: boolean;
+  /** Rótulos invertidos: o sufixo e o valor formatado em ordem contrária. */
+  invertLabelY?: boolean;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────

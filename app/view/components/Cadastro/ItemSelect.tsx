@@ -1,9 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../Themes/ThemeProvider";
+import { useTheme } from "../../Themes/ThemeProvider";
 import { touchTargetSlop } from "../Acessibilidade/accessibilityProps";
 
 const PADDING_VERTICAL = 10;
@@ -21,12 +17,11 @@ export default function ItemSelect({
   setValorSelect: (date: boolean) => void;
   title: string;
 }) {
-  const s = useThemedStyles(styles);
   const { colors } = useTheme();
   return (
     <TouchableOpacity
       style={[
-        s.escolhaBtn,
+        styles.escolhaBtn,
         {
           backgroundColor: isThisSelected ? colors.PRIMARY : colors.SURFACE,
         },
@@ -40,7 +35,7 @@ export default function ItemSelect({
     >
       <Text
         style={[
-          s.escolhaText,
+          styles.escolhaText,
           {
             color: isThisSelected ? colors.BACKGROUND : colors.TEXT_PRIMARY,
           },
@@ -52,16 +47,16 @@ export default function ItemSelect({
   );
 }
 
-const styles = (colors: ThemeColors) =>
-  StyleSheet.create({
-    escolhaBtn: {
-      paddingVertical: PADDING_VERTICAL,
-      paddingHorizontal: 30,
-      width: "40%",
-      borderRadius: 20,
-    },
-    escolhaText: {
-      textAlign: "center",
-      lineHeight: LINE_HEIGHT,
-    },
-  });
+// As cores mudam com a aba escolhida e ficam no estilo inline; aqui, só o que não depende do tema.
+const styles = StyleSheet.create({
+  escolhaBtn: {
+    paddingVertical: PADDING_VERTICAL,
+    paddingHorizontal: 30,
+    width: "40%",
+    borderRadius: 20,
+  },
+  escolhaText: {
+    textAlign: "center",
+    lineHeight: LINE_HEIGHT,
+  },
+});

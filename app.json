@@ -27,9 +27,6 @@
       ],
       "package": "com.gabriel98989898.PetShopManager"
     },
-    "web": {
-      "favicon": "./app/assets/logo/iconApp.png"
-    },
     "plugins": ["expo-sqlite"],
     "extra": {
       "eas": {

@@ -2,17 +2,6 @@ import { useCallback, useState } from "react";
 import { DatePickerInput } from "./DatePickerInput";
 import { DatePickerModal } from "./DatePickerModal";
 
-//EX:
-/*
-<DatePicker
-  label="Data do agendamento"
-  value={data}
-  onChange={setData}
-  minDate="2024-01-01"
-  error={erro}
-/>
-*/
-
 interface DatePickerProps {
   isEditavel: boolean;
   withIcon?: boolean;

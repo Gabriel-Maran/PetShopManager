@@ -15,10 +15,7 @@ import {
   toDate,
   updatePet,
 } from "./helpers/database.mjs";
-import {
-  CONCLUDE_APPOINTMENT_SQL,
-  UPDATE_APPOINTMENT_SQL,
-} from "../app/repository/sql/appointmentsSql.ts";
+import { UPDATE_APPOINTMENT_SQL } from "../app/repository/sql/appointmentsSql.ts";
 import { UPDATE_PET_REMARCACAO_SQL } from "../app/repository/sql/petsSql.ts";
 
 /** Os automáticos agrupados por mês, na ordem das datas. */
@@ -37,6 +34,11 @@ function saveAppointment(db, appointment, changes) {
     a.pet_id, a.servico, a.data, a.hora, a.entregar_pet, a.concluido, a.observacao,
     a.valor, a.tipo_pgto, a.ta_pago, a.id,
   );
+}
+
+/** Conclui como o app: salva o formulário com o concluído marcado, o que dispara os triggers. */
+function concludeAppointment(db, appointment) {
+  saveAppointment(db, appointment, { concluido: 1 });
 }
 
 describe("agenda gerada ao cadastrar um pet com pacote", () => {
@@ -156,7 +158,7 @@ describe("conclusão de um agendamento automático", () => {
     const autoCount = appointmentsOf(db, pet.id).length;
     const lastBefore = petRow(db, pet.id).ultimo_visita_data_auto;
 
-    db.prepare(CONCLUDE_APPOINTMENT_SQL).run(first.id);
+    concludeAppointment(db, first);
 
     const agenda = appointmentsOf(db, pet.id);
     assert.equal(agenda.length, autoCount + 1);
@@ -171,7 +173,7 @@ describe("conclusão de um agendamento automático", () => {
     updatePet(db, { ...pet, valor_pacote: 10003 });
     const [first] = pendingAutoOf(db, pet.id);
 
-    db.prepare(CONCLUDE_APPOINTMENT_SQL).run(first.id);
+    concludeAppointment(db, first);
 
     const agenda = appointmentsOf(db, pet.id);
     const newest = agenda.at(-1);
@@ -190,7 +192,7 @@ describe("conclusão de um agendamento automático", () => {
 
   test("BUG-3, corrigido: salvar de novo um automático já concluído não cria outro agendamento", () => {
     const [first] = pendingAutoOf(db, pet.id);
-    db.prepare(CONCLUDE_APPOINTMENT_SQL).run(first.id);
+    concludeAppointment(db, first);
     const agendaBefore = appointmentsOf(db, pet.id);
     const concluded = agendaBefore.find((a) => a.id === first.id);
 
@@ -204,8 +206,8 @@ describe("conclusão de um agendamento automático", () => {
 
   test("salvar de novo um concluído antigo não volta a última visita para a data dele", () => {
     const [first, second] = pendingAutoOf(db, pet.id);
-    db.prepare(CONCLUDE_APPOINTMENT_SQL).run(first.id);
-    db.prepare(CONCLUDE_APPOINTMENT_SQL).run(second.id);
+    concludeAppointment(db, first);
+    concludeAppointment(db, second);
     const concluded = appointmentsOf(db, pet.id).find((a) => a.id === first.id);
 
     saveAppointment(db, concluded, { ta_pago: 1 });
