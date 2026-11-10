@@ -6,9 +6,15 @@
 import type { PacoteRemarcacao } from "../config/petEnums.ts";
 import type { Appointment } from "../model/Appointment.ts";
 import type { Pet } from "../model/Pet.ts";
-import { todayIso, type IsoDate } from "../utils/datas.ts";
 import type { Cents } from "../utils/dinheiro.ts";
-import { addDays, monthOf, sameWeekdayInNextMonth, weekdayOf } from "./isoCalendar.ts";
+import {
+  addDays,
+  monthOf,
+  sameWeekdayInNextMonth,
+  todayIso,
+  weekdayOf,
+  type IsoDate,
+} from "../utils/datas.ts";
 
 /** Até quantos dias depois de hoje a agenda do pacote é gerada: o PERIODO_REMARCACAO da versão 1. */
 export const SCHEDULE_HORIZON_DAYS = 224;

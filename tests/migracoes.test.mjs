@@ -221,7 +221,7 @@ describe("migrações do banco", () => {
     const v3Objects = schemaObjects(db);
     assert.ok(pendingAutoOf(db, pet.id).length > 0, "o trigger da versão 3 gerou a agenda");
 
-    await migrate(db);
+    await migrate(db, MIGRATIONS.slice(0, 4));
 
     assert.equal(userVersion(db), 4);
     for (const [table, tableRows] of Object.entries(before)) {
@@ -250,6 +250,40 @@ describe("migrações do banco", () => {
     assert.ok(agenda.at(-1).data > lastBefore);
     assert.equal(petRow(db, pet.id).ultimo_visita_data_auto, agenda.at(-1).data);
     assert.equal(petRow(db, pet.id).current_ultima_visita_data, first.data, "a última visita segue no trigger");
+  });
+
+  test("banco na versão 4: o horário padrão nulo vira 00:00, e o resto do pet fica igual", async () => {
+    const db = await databaseAt(4);
+    const { pet } = insertOwnerWithPackagePet(db);
+    const comHorario = insertPet(db, { dono_id: pet.dono_id, nome: "Com horário", horario_padrao: "14:30" });
+    db.prepare("UPDATE pets SET horario_padrao = NULL WHERE id = ?").run(pet.id);
+    const before = rows(db, "pets");
+
+    await migrate(db, MIGRATIONS.slice(0, 5));
+
+    assert.equal(userVersion(db), 5);
+    assert.equal(petRow(db, pet.id).horario_padrao, "00:00");
+    assert.equal(petRow(db, comHorario.id).horario_padrao, "14:30", "o horário preenchido não muda");
+    const semHorario = ({ horario_padrao, ...rest }) => rest;
+    assert.deepEqual(rows(db, "pets").map(semHorario), before.map(semHorario));
+  });
+
+  test("o pet antigo sem horário volta a concluir o automático", async () => {
+    const db = await databaseAt(4);
+    const { pet } = insertOwnerWithPackagePet(db);
+    await packageScheduleOf(db).updatePet(pet.id, { ...pet, data_inicio_pacote: isoDate(1) }, new Date());
+    db.prepare("UPDATE pets SET horario_padrao = NULL WHERE id = ?").run(pet.id);
+    const [first] = pendingAutoOf(db, pet.id);
+    await assert.rejects(
+      packageScheduleOf(db).updateAppointment(first.id, { ...first, concluido: 1 }),
+      /NOT NULL/,
+      "antes da versão 5, o nulo quebra a conclusão",
+    );
+
+    await migrate(db);
+    await packageScheduleOf(db).updateAppointment(first.id, { ...first, concluido: 1 });
+
+    assert.equal(pendingAutoOf(db, pet.id).at(-1).hora, "00:00", "o próximo da agenda leva o 00:00");
   });
 
   test("banco de antes das migrações sobe direto para a última versão, sem os triggers da remarcação", async () => {
