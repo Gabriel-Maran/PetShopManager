@@ -2,6 +2,8 @@
 
 Atualizado em 2026-11-09, depois da segunda rodada de quatro agentes em paralelo (PRs #35 a #38).
 
+> **Decidido em 2026-11-09:** as perguntas 14, 17, 19, 20 e 21 da arquitetura estão respondidas, e a Parte 7 não depende mais dos parceiros (ver `decisoes.md`).
+>
 > **Para o próximo chat:** os quatro PRs da segunda rodada em paralelo (#35 a #38) e a documentação (#39) estão no `main`. As sete "Pendências entre áreas" e duas sugestões da varredura estão em revisão no PR de integração (branch `fix/pendencias-das-frentes`, worktree `.claude/worktrees/pendencias-frentes`), feito a pedido do Gabriel em 2026-11-09. O próximo passo é o Gabriel revisar esse PR. Depois vêm o patch do Expo, a partir de 2026-11-10, e as sugestões que sobraram.
 >
 > Em 2026-11-09 entraram no `main`, antes desta rodada: ERRO-1 (PR #22), importação cancelada (#23), BUG-6 (#24), BUG-5 (#25), a ordem da busca (#26), os nomes de desativar (#27), o resto do BKP-1 (#28), REPO-3 (#29), BUG-8 (#30), A11Y-1 (#31), VALID-1 (#32), a documentação da primeira rodada (#33) e as pendências entre áreas (#34). A Parte 3 foi aceita com o merge do PR #21, em 2026-11-08.
@@ -245,9 +247,9 @@ Pronto quando: o APK instala num Android limpo e mostra tudo com um toque, e o p
 
 Pronto quando: `npm run check` passa no CI, e o teste com o TalkBack percorre o app sem botão mudo.
 
-### Parte 7 em diante · Arquitetura (P2, com os parceiros)
+### Parte 7 em diante · Arquitetura (P2)
 
-Um PR por item, nesta ordem: ARQ-1 (pastas e camadas), NOMES-1 (nomes), ARQ-2 (remarcação em TypeScript), DADOS-3 e DADOS-4 (esquema), ARQ-3 (navegação), PERF-1, BUILD-2, TEST-3 e SEG-1. A ordem pode mudar conforme as respostas das perguntas 13 a 21.
+Um PR por item, nesta ordem: ARQ-1 (pastas e camadas), NOMES-1 (nomes), ARQ-2 (remarcação em TypeScript), DADOS-3 e DADOS-4 (esquema), ARQ-3 (navegação), PERF-1, BUILD-2, TEST-3 e SEG-1. As perguntas 13 a 21 estão respondidas desde 2026-11-09: `src/`, nomes em inglês, remarcação em TypeScript, backup automático desligado e tema do sistema na primeira abertura. A Parte 7 é feita só pelo Gabriel e pelo Claude, sem esperar os parceiros (ver `decisoes.md`).
 
 ## No portfólio, depois
 
