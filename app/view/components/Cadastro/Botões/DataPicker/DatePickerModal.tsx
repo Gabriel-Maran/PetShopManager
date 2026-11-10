@@ -14,13 +14,9 @@ import {
   View,
 } from "react-native";
 import { isoToBr } from "../../../../../utils/datas";
-import { A11Y_LABELS } from "../../../../../globals/accessibilityLabels";
-import IconButton from "../../../Acessibilidade/IconButton";
 import { HIDDEN_FROM_SCREEN_READER } from "../../../Acessibilidade/accessibilityProps";
+import CloseButton from "../../../CloseButton";
 import { DatePickerCalendar } from "./DatePickerCalendarProps";
-
-/** Tamanho aproximado do ✕ na tela, para a área de toque do Fechar chegar a 48 dp. */
-const CLOSE_GLYPH_SIZE = 20;
 
 interface DatePickerModalProps {
   visible: boolean;
@@ -69,13 +65,7 @@ export function DatePickerModal({
             <Text style={s.title} accessibilityRole="header">
               {title}
             </Text>
-            <IconButton
-              label={A11Y_LABELS.close}
-              width={CLOSE_GLYPH_SIZE}
-              onPress={onClose}
-            >
-              <Text style={s.closeBtn}>✕</Text>
-            </IconButton>
+            <CloseButton onPress={onClose} />
           </View>
 
           {/* Data selecionada (preview) */}
@@ -161,10 +151,6 @@ const modalStyles = (colors: ThemeColors) =>
       fontSize: 17,
       fontWeight: "700",
       color: colors.TEXT_PRIMARY,
-    },
-    closeBtn: {
-      fontSize: 16,
-      color: colors.TEXT_SECONDARY,
     },
     preview: {
       marginHorizontal: 18,

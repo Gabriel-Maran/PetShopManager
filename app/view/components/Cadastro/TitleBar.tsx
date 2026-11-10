@@ -4,6 +4,7 @@ import ButtonBack from "./Botões/ButtonBack";
 import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
 import { useScreen } from "../../../hooks/useScreen";
 import { useBackGuard } from "../../../hooks/useBackNavigation";
+import { DIALOGS } from "../../../globals/messages";
 import ConfirmModal from "../ConfirmModal";
 
 /** O título das telas internas, com o voltar. Para onde ele leva fica em config/navigation.ts. */
@@ -33,16 +34,18 @@ export default function TitleBar({
         <ButtonBack onPress={requestBack} />
 
         <View>
-          <Text style={s.txtTitle}>{title}</Text>
+          <Text style={s.txtTitle} accessibilityRole="header">
+            {title}
+          </Text>
           {!isViewing && <Text style={s.txtSubTitle}>{subtitle}</Text>}
         </View>
       </View>
       <ConfirmModal
         visible={isConfirmOpen}
         emoji="⚠️"
-        title="Confirma voltar?"
-        message="Você perderá todos os novos dados não salvos."
-        confirmLabel="Voltar"
+        title={DIALOGS.leaveForm.title}
+        message={DIALOGS.leaveForm.message}
+        confirmLabel={DIALOGS.leaveForm.confirmLabel}
         variant="destructive"
         onConfirm={goBack}
         onCancel={() => setIsConfirmOpen(false)}

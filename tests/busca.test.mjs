@@ -6,6 +6,8 @@ import { createDatabase, insertOwner, insertPet } from "./helpers/database.mjs";
 import { DEACTIVATE_OWNER_SQL, searchOwnersSql } from "../app/repository/sql/ownersSql.ts";
 import { DEACTIVATE_PET_SQL, searchPetsSql } from "../app/repository/sql/petsSql.ts";
 import { toSearchPattern } from "../app/repository/sql/searchSql.ts";
+import { countBreedsSql, INSERT_BREED_SQL, listBreedsSql } from "../app/repository/sql/breedsSql.ts";
+import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
 import { validateNameSearch } from "../app/controller/validateNameSearch.ts";
 import { MAX_SEARCH_LENGTH } from "../app/globals/limits.ts";
 import { MESSAGES } from "../app/globals/messages.ts";
@@ -141,6 +143,82 @@ describe("busca de pets", () => {
 
     assert.deepEqual(names(page), ["Rémi"]);
     assert.equal(page.total, 1);
+  });
+});
+
+describe("busca de raças", () => {
+  let db;
+  let speciesId;
+
+  /** Grava a raça com o comando do app, na espécie criada para o teste. */
+  const insertBreed = (nome) =>
+    db.prepare(INSERT_BREED_SQL).run(speciesId, nome, normalizeForSearch(nome));
+
+  /** Roda a página e a contagem como o SpeciesRepository. */
+  function runBreeds(query, { page = 0, limit = 20 } = {}) {
+    const list = listBreedsSql(speciesId, query, page, limit);
+    const count = countBreedsSql(speciesId, query);
+    return {
+      items: db.prepare(list.sql).all(...list.params),
+      total: db.prepare(count.sql).get(...count.params).total,
+    };
+  }
+
+  beforeEach(async () => {
+    db = await createDatabase();
+    // Uma espécie só do teste, para as raças semeadas do cão e do gato não entrarem na conta.
+    speciesId = Number(db.prepare("INSERT INTO species (nome) VALUES ('TESTE')").run().lastInsertRowid);
+  });
+
+  test("sem texto, traz todas as raças da espécie, de A a Z, e só dela", () => {
+    for (const nome of ["Poodle", "Akita", "Beagle"]) insertBreed(nome);
+
+    const page = runBreeds("");
+
+    assert.deepEqual(names(page), ["Akita", "Beagle", "Poodle"]);
+    assert.equal(page.total, 3);
+  });
+
+  test("a busca ignora acento e maiúsculas, e o total acompanha a lista", () => {
+    for (const nome of ["Spitz Alemão", "Pastor Alemão", "Pug"]) insertBreed(nome);
+
+    for (const query of ["alemao", "ALEMÃO", "  Alemão  "]) {
+      const page = runBreeds(query);
+      assert.deepEqual(names(page), ["Pastor Alemão", "Spitz Alemão"], query);
+      assert.equal(page.total, 2, query);
+    }
+  });
+
+  test("% e _ na busca são texto, não coringa", () => {
+    for (const nome of ["Akita", "Mestiço 50%", "Raça_Nova"]) insertBreed(nome);
+
+    const percent = runBreeds("%");
+    assert.deepEqual(names(percent), ["Mestiço 50%"]);
+    assert.equal(percent.total, 1);
+
+    const underscore = runBreeds("_");
+    assert.deepEqual(names(underscore), ["Raça_Nova"]);
+    assert.equal(underscore.total, 1);
+  });
+
+  test("as páginas não repetem nem pulam nenhuma raça", () => {
+    for (let i = 1; i <= 25; i++) insertBreed(`Raça ${String(i).padStart(2, "0")}`);
+
+    const pages = [0, 1, 2].map((page) => runBreeds("", { page, limit: 10 }));
+    const ids = pages.flatMap((page) => page.items.map((item) => item.id));
+
+    assert.deepEqual(pages.map((page) => page.items.length), [10, 10, 5]);
+    assert.equal(new Set(ids).size, 25);
+    assert.ok(pages.every((page) => page.total === 25));
+  });
+
+  test("um comando SQL digitado na busca é só texto", () => {
+    insertBreed("Akita");
+
+    const page = runBreeds("'; DROP TABLE race; --");
+
+    assert.deepEqual(page, { items: [], total: 0 });
+    assert.equal(db.prepare("SELECT COUNT(*) AS total FROM race WHERE especie_id = ?").get(speciesId).total, 1);
   });
 });
 

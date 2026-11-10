@@ -2,13 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import {
   ScrollView,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
   ImageSourcePropType,
   Platform,
   KeyboardAvoidingView,
-  ActivityIndicator,
 } from "react-native";
 
 import {
@@ -44,6 +41,7 @@ import TitleBar from "../../components/Cadastro/TitleBar";
 import DefaultHeader from "../../components/Header/DefaultHeader";
 import ModalSelectList from "../../components/Cadastro/Modal/ModalSelectList";
 import ItemSelect from "../../components/Cadastro/ItemSelect";
+import SaveButton from "../../components/Cadastro/SaveButton";
 import AbaInfoPet, {
   AbrirModalConfig,
 } from "../../components/Cadastro/Tabs/AbaInfoPet";
@@ -123,6 +121,16 @@ export default function NewOrEditPet() {
   // Dentro da ação: um valor digitado fora do formato vira a mensagem de erro da tela.
   const { run: salvarPet, isRunning: isSalvando } = useAsyncAction(
     async () => {
+      // Com a remarcação desligada, o pacote vai vazio: nem a sobra de quando ela estava ligada nem
+      // um valor mal digitado, que nem aparece mais na tela, chegam ao banco.
+      const pacote = form.remarcAtiva
+        ? {
+            tipo: form.pacoteRemarcacao,
+            inicio: form.dataInicioPacote ?? todayIso(),
+            valor: parseMoneyInput(form.valorPacote),
+          }
+        : { tipo: null, inicio: null, valor: null };
+
       const petSalvar = new PetBuilder()
         .withNome(form.nome)
         .withEspecie(form.especie)
@@ -132,10 +140,10 @@ export default function NewOrEditPet() {
         .withObservacoes(form.observacoes)
         .withServicoPadrao(form.servicoPadrao)
         .isRemarcacaoAtiva(form.remarcAtiva ? 1 : 0)
-        .withPacote(form.pacoteRemarcacao ?? undefined)
-        .withInicioPacote(form.dataInicioPacote ?? todayIso())
+        .withPacote(pacote.tipo)
+        .withInicioPacote(pacote.inicio)
         .withHorarioPadrao(form.horario_padrao || "00:00")
-        .withValorPacote(parseMoneyInput(form.valorPacote))
+        .withValorPacote(pacote.valor)
         .build();
 
       if (params?.pet?.id) {
@@ -243,7 +251,7 @@ export default function NewOrEditPet() {
           isViewing={isViewing}
           confirmReturn={!isViewing}
         />
-        <View style={s.escolhaItem}>
+        <View style={s.escolhaItem} accessibilityRole="tablist">
           <ItemSelect
             title="Pet"
             isThisSelected={isCadastroPetSelecte}
@@ -289,19 +297,11 @@ export default function NewOrEditPet() {
           </View>
           {!isViewing && (
             <View style={s.ctnBtnSalvar}>
-              <TouchableOpacity
-                style={[s.btnSalvar, isSalvando && s.btnSalvarDisabled]}
+              <SaveButton
+                isEditing={isEditing}
+                isSaving={isSalvando}
                 onPress={salvarPet}
-                disabled={isSalvando}
-              >
-                {isSalvando ? (
-                  <ActivityIndicator color="#FFF" />
-                ) : (
-                  <Text style={s.txtSalvar}>
-                    {isEditing ? "Salvar alterações" : "Salvar"}
-                  </Text>
-                )}
-              </TouchableOpacity>
+              />
             </View>
           )}
         </View>
@@ -342,18 +342,5 @@ const styles = (colors: ThemeColors) =>
     },
     ctnBtnSalvar: {
       marginTop: 15,
-    },
-    btnSalvar: {
-      paddingVertical: 20,
-      paddingHorizontal: 75,
-      backgroundColor: colors.PRIMARY_VARIANT,
-      borderRadius: 15,
-    },
-    btnSalvarDisabled: {
-      opacity: 0.6,
-    },
-    txtSalvar: {
-      color: colors.BACKGROUND,
-      textAlign: "center",
     },
   });

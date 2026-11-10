@@ -25,7 +25,8 @@ const light = {
   BORDER_LIGHT: "#cccdcf",
 
   MODAL_BACKGROUND: "rgba(0,0,0,0.45)",
-  DESATIVADO: "#CECCC3",
+  /** O trilho do interruptor desligado: 3:1 com o fundo, para ele não sumir na tela. */
+  DESATIVADO: "#8C8A82",
 
   RED_COLOR: "#b71c1c",
   GREEN_COLOR: "#2B7630",
@@ -79,7 +80,7 @@ const dark: ThemeColors = {
   BORDER_LIGHT: "#2A2D35",
 
   MODAL_BACKGROUND: "rgba(0,0,0,0.80)",
-  DESATIVADO: "#3D4148",
+  DESATIVADO: "#646A74",
 
   RED_COLOR: "#e57373",
   GREEN_COLOR: "#81c784",

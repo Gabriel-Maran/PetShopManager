@@ -72,6 +72,16 @@ const TEXT_PAIRS = [
   ["CHART_TEXT_HIGHLIGHT", "SURFACE", "maior valor do gráfico"],
 ];
 
+// O que não é texto, como o trilho do interruptor e o ✕, precisa de 3:1 (WCAG 2.1, critério 1.4.11).
+const MIN_NON_TEXT_CONTRAST = 3;
+
+// Cada par é [cor do componente, cor do fundo, onde aparece].
+const NON_TEXT_PAIRS = [
+  ["DESATIVADO", "BACKGROUND", "trilho do interruptor desligado"],
+  ["PRIMARY", "BACKGROUND", "trilho do interruptor ligado"],
+  ["PRIMARY", "PRIMARY_SOFT", "✕ do Fechar dos modais"],
+];
+
 // Fundos feitos com a própria cor do texto em transparência: [texto, alfa em hex, fundo, onde aparece].
 const TINTED_PAIRS = [
   ["PRIMARY_CONTRAST", "22", "BACKGROUND", "data escolhida no calendário"],
@@ -121,6 +131,16 @@ for (const [themeName, colors] of Object.entries(THEME_COLORS)) {
         assert.ok(
           ratio >= MIN_TEXT_CONTRAST,
           `${colors[text]} sobre ${colors[background]} dá ${ratio.toFixed(2)}:1`,
+        );
+      });
+    }
+
+    for (const [component, background, where] of NON_TEXT_PAIRS) {
+      test(`${component} sobre ${background} (${where})`, () => {
+        const ratio = contrastRatio(colors[component], colors[background]);
+        assert.ok(
+          ratio >= MIN_NON_TEXT_CONTRAST,
+          `${colors[component]} sobre ${colors[background]} dá ${ratio.toFixed(2)}:1`,
         );
       });
     }

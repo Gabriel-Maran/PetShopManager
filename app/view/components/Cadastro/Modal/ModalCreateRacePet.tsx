@@ -21,12 +21,10 @@ import { createRaceService } from "../../../../utils/raceSpecieHelper";
 import InputSelect from "../../InputSelect";
 import { EspeciesAtendidasLabel } from "../../../../config/consts";
 import InputInfo from "../InputInfo";
-import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
-import IconButton from "../../Acessibilidade/IconButton";
+import CloseButton from "../../CloseButton";
+import { MAX_BREED_NAME_LENGTH } from "../../../../globals/limits";
 
 const SUBMIT_LABEL = "Cadastrar";
-/** Tamanho aproximado do ✕ na tela, para a área de toque do Fechar chegar a 48 dp. */
-const CLOSE_GLYPH_SIZE = 16;
 
 interface Especie {
   id: number;
@@ -94,13 +92,7 @@ export default function ModalCadastroRaca({
               <Text style={s.title} accessibilityRole="header">
                 Nova Raça
               </Text>
-              <IconButton
-                label={A11Y_LABELS.close}
-                width={CLOSE_GLYPH_SIZE}
-                onPress={handleClose}
-              >
-                <Text style={s.closeIcon}>✕</Text>
-              </IconButton>
+              <CloseButton onPress={handleClose} />
             </View>
 
             <View style={s.divider} />
@@ -146,7 +138,7 @@ export default function ModalCadastroRaca({
                 variasLinhas={false}
                 digitavel={true}
                 tipoTeclado="default"
-                maximoCaracteres={50}
+                maximoCaracteres={MAX_BREED_NAME_LENGTH}
                 hasBorderBottom={false}
               />
             </View>
@@ -219,11 +211,6 @@ const styles = (colors: ThemeColors) =>
       fontSize: 15,
       fontWeight: "700",
       color: colors.TEXT_PRIMARY,
-    },
-    closeIcon: {
-      fontSize: 13,
-      color: colors.PRIMARY,
-      fontWeight: "600",
     },
     divider: {
       height: 1,

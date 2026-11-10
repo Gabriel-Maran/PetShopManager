@@ -1,5 +1,6 @@
 import { getDatabase } from "../config/database";
 import { EspeciesAtendidas, LIMIT_ITEM_PAGE } from "../config/consts";
+import { countBreedsSql, listBreedsSql } from "./sql/breedsSql";
 
 export type Species = {
   id: number;
@@ -14,65 +15,22 @@ class SpeciesRepository {
     );
   }
 
-  async searchBreedsBySpeciesAndSearchNamePaginated(
+  /** Uma página (a partir de 0) das raças da espécie com `query` no nome. Vazio traz todas. */
+  async searchBreeds(
     speciesId: number,
-    page: number, // 0-indexado
-    normalizedSearch: string,
+    page: number,
+    query: string,
   ): Promise<any[]> {
     const db = await getDatabase();
-    const limit = LIMIT_ITEM_PAGE;
-    const offset = page * limit;
-
-    return db.getAllAsync<any>(
-      `SELECT id, nome_raca AS nome
-       FROM race
-       WHERE especie_id = ? AND nome_raca_normalized LIKE ?
-       ORDER BY nome_raca ASC
-       LIMIT ? OFFSET ?`,
-      [speciesId, `%${normalizedSearch}%`, limit, offset],
-    );
+    const { sql, params } = listBreedsSql(speciesId, query, page, LIMIT_ITEM_PAGE);
+    return db.getAllAsync<any>(sql, params);
   }
 
-  async getBreedsBySpeciesPaginated(
-    speciesId: number,
-    page: number, // 0-indexado
-  ): Promise<any[]> {
+  /** O total da mesma busca, para a paginação. */
+  async countBreeds(speciesId: number, query: string): Promise<number> {
     const db = await getDatabase();
-    const limit = LIMIT_ITEM_PAGE;
-    const offset = page * limit;
-
-    return db.getAllAsync<any>(
-      `SELECT id, nome_raca AS nome
-       FROM race
-       WHERE especie_id = ?
-       ORDER BY nome_raca ASC
-       LIMIT ? OFFSET ?`,
-      [speciesId, limit, offset],
-    );
-  }
-
-  async countBreedsBySpeciesAndSearchName(
-    speciesId: number,
-    normalizedSearch: string,
-  ): Promise<number> {
-    const db = await getDatabase();
-    const result = await db.getFirstAsync<{ total: number }>(
-      `SELECT COUNT(*) AS total
-       FROM race
-       WHERE especie_id = ? AND nome_raca_normalized LIKE ?`,
-      [speciesId, `%${normalizedSearch}%`],
-    );
-    return result?.total ?? 0;
-  }
-
-  async countBreedsBySpecies(speciesId: number): Promise<number> {
-    const db = await getDatabase();
-    const result = await db.getFirstAsync<{ total: number }>(
-      `SELECT COUNT(*) AS total
-       FROM race
-       WHERE especie_id = ?`,
-      [speciesId],
-    );
+    const { sql, params } = countBreedsSql(speciesId, query);
+    const result = await db.getFirstAsync<{ total: number }>(sql, params);
     return result?.total ?? 0;
   }
 }

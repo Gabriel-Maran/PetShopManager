@@ -312,3 +312,75 @@ Motivo:
 - Ler as colunas do esquema do app evita uma lista escrita à mão, que esqueceria uma coluna nova numa próxima versão. Nenhum nome do arquivo importado entra no texto do SQL.
 - Com a contagem de ids do backup, um id apagado no aparelho de origem não volta a ser usado, como na v3.
 - No Android, o `shareAsync` termina quando o menu de compartilhar fecha, mas o Drive ou o WhatsApp podem ler o arquivo depois disso. Apagar na hora poderia fazer o envio falhar; o cache é privado do app.
+
+**Quatro agentes em paralelo.**
+Contexto: o Gabriel pediu vários agentes ao mesmo tempo, cada um na sua branch e com o seu PR, sem um mexer no código do outro.
+Decisão:
+- Um worktree e uma branch por item: BUG-8 (PR #30), REPO-3 (#29), A11Y-1 (#31) e VALID-1 (#32).
+- Cada agente tem uma zona de arquivos só dele. O que precisava mudar fora da zona foi anotado para o coordenador, e não feito.
+- A documentação vem num PR próprio, para os quatro não disputarem os mesmos arquivos de `docs/`.
+Motivo: PRs independentes, que o Gabriel revisa e mescla em qualquer ordem. Nenhum arquivo apareceu em dois PRs, e o VALID-1 entrou sobre os outros três sem conflito.
+
+**Validação com Zod (VALID-1, pergunta 13).**
+Contexto: parte da entrada era validada à mão nos controllers, parte não (horário "9", e-mail sem formato, texto sem `trim`).
+Decisão do Gabriel: Zod. A versão é a 4.6.7, instalada em 2026-11-09 com a liberação dele, só daquela vez. Conferido antes:
+- licença MIT, sem dependências e sem script de instalação;
+- assinatura do registro e proveniência SLSA do GitHub Actions do próprio repositório do Zod;
+- nenhum alerta do GitHub para a 4.6.7 (o alerta alto do Zod vai até a 4.6.5);
+- o zod 3 continua só dentro do `expo`, que ainda exige essa versão.
+
+Decisão do PR #32:
+- Os schemas ficam em `app/validation/`, um por entidade, montados com os campos de `fields.ts` (texto com `trim` e tamanho máximo, id, data real, horário `HH:MM`, centavos, sim ou não). O `parseInput` converte a falha no `AppError` com a mensagem de `messages.ts`. Nenhuma mensagem do Zod chega à tela.
+- A validação fica no controller, que já validava. No service, a consulta de existência viria antes, e um pet sem dono mostraria "Dono não encontrado" em vez de "Escolha o dono do pet".
+- Os services recebem os tipos derivados dos schemas (`OwnerData`, `PetData`, `AppointmentData`). Os modelos de `app/model/` não mudam, porque descrevem a linha do banco, que pode ter dado antigo.
+- Id fora do formato responde como "não encontrado". Tipo errado ou campo ausente mostram a mensagem genérica de entrada inválida, e o erro do Zod vai para o log pelo `cause`.
+- O `createPetSchemas` recebe os enums do pet, porque o `consts.ts` importa o React Native e não roda no Node.
+- E-mail, endereço e observações vazios passam a gravar `null`, e o horário padrão vazio vira `00:00`.
+
+Motivo: a regra do Gabriel pede schema em toda entrada, tipos derivados da fonte e mensagem por falha em `globals`. O preço é o pacote: o JavaScript do Android foi de 2,78 MB para 3,46 MB, e cerca de 340 KB são as traduções do Zod, que o app não usa.
+
+**Voltar do Android (BUG-8, pergunta 16).**
+Contexto: a navegação é própria e não tratava o `BackHandler`, então o voltar do sistema fechava o app em qualquer tela.
+Decisão do Gabriel: o `BackHandler` agora, e a biblioteca de navegação no ARQ-3.
+
+Decisão do PR #30:
+- O mapa de qual tela volta para qual fica em `app/config/navigation.ts` (`backRouteOf`), e a `TitleBar` deixou de receber o destino.
+- Há um listener só, na raiz (`useAndroidBackButton`, no `App.tsx`). O botão da tela e o do Android chamam o mesmo `requestBack()` do `ScreenController`.
+- O formulário em edição registra uma guarda (`useBackGuard`), que abre a mesma confirmação nos dois botões. Sem guarda, vale o mapa. No Calendário, o voltar fecha o app.
+- O `Screen` virou objeto `as const`, para os testes do Node lerem o mapa.
+- O `ButtonBack` ganhou papel e rótulo, sem `hitSlop`, porque já mede 50 dp.
+
+Motivo: um caminho só para os dois botões. Os relatórios ficam sem a `TitleBar` enquanto carregam, e o listener na raiz cobre esse momento. A guarda tem o mesmo papel do `usePreventRemove` do React Navigation, o que facilita o ARQ-3.
+
+**Acessibilidade (A11Y-1).**
+Contexto: botões de ícone sem nome para o leitor de tela, o `Toggle` mudo, áreas de toque de 38 dp e o texto branco sobre o verde com contraste de 3,4:1.
+Decisão do PR #31:
+- Botão só com ícone usa o `IconButton` (ou o `ActionIconButton`, que juntou editar, desativar e reativar), com papel, rótulo obrigatório e área de 48 dp.
+- Os rótulos ficam em `app/globals/accessibilityLabels.ts` (`A11Y_LABELS`), e os enfeites usam `HIDDEN_FROM_SCREEN_READER`.
+- Os verdes do tema claro escureceram até passar de 4,5:1. No tema escuro, o texto sobre cor cheia usa a cor de fundo. Texto cinza usa o `TEXT_MUTED`, nunca cor de borda nem opacidade.
+- A paleta saiu do `ThemeProvider` para `app/view/Themes/colors.ts`, para o teste conferir o contraste no Node. Um par novo de texto e fundo entra na lista do teste.
+
+Motivo: as diretrizes de acessibilidade do Android (48 dp e 4,5:1), num padrão só, que um teste protege.
+
+**Limpeza (REPO-3).**
+Decisão do PR #29:
+- Sai só o que nada usa, conferido por busca no repositório inteiro, com o `app.json` e os testes.
+- Os métodos de repository que um service ainda chama ficam até saírem das três camadas juntos.
+- As sobras em arquivos de outras áreas ficaram anotadas em `proximos-passos.md`.
+
+Motivo: sem mudar comportamento, e sem mexer nos arquivos dos outros três PRs que rodavam ao mesmo tempo.
+
+**Pendências entre áreas dos PRs #29 a #32.**
+Contexto: os quatro agentes anotaram o que acharam fora da própria zona, em cinco itens, mais as sugestões das varreduras.
+Decisão do Gabriel: os itens 1 a 3 (voltar com modal aberto, validação e acessibilidade dos formulários) num PR só, com três sugestões: os textos do modal de voltar em `messages.ts`, o contraste do `Toggle` desligado e um `CloseButton` para os três modais. A limpeza (item 4) e o tamanho do pacote com o Zod (item 5) ficam para depois.
+
+Decisão do PR #34:
+- Os três modais do item 1 já tinham `onRequestClose` desde o PR #31; saiu só o `screenBack` morto do `DefaultHeader`.
+- Os textos do voltar ficam em `DIALOGS`, no `messages.ts`, e não em `MESSAGES`: o teste do ERRO-1 exige que toda mensagem de `MESSAGES` seja uma frase terminada em ponto, e o título do modal é uma pergunta e o botão é um rótulo.
+- A busca de raças ganhou um SQL só para a página e a contagem (`breedsSql.ts`). Sem texto, o padrão `%%` traz todas as raças, e o repository ficou com dois métodos em vez de quatro.
+- Com a remarcação desligada, o pacote, o início e o valor do pet vão como `null`, como o trigger de desativar o pet já faz com o início.
+- O `CloseButton` usa o círculo do seletor de lista, e o ✕ do calendário e o da nova raça mudaram de cara.
+- O trilho do `Toggle` desligado (`DESATIVADO`) chegou a 3:1 com o fundo nos dois temas, o mínimo da WCAG para o que não é texto (critério 1.4.11). O teste de contraste ganhou uma lista de pares de 3:1.
+- Os botões Salvar dos três formulários viraram o `SaveButton`, e os títulos "DADOS…", o `FormSectionTitle`.
+
+Motivo: as regras do Gabriel pedem limites e textos num lugar só, entrada validada por schema e código repetido extraído. Um componente por botão e por título faz os ajustes de acessibilidade valerem nos três formulários de uma vez.

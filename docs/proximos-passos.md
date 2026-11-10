@@ -1,16 +1,66 @@
 # Próximos passos
 
-Atualizado em 2026-11-09, depois do resto do BKP-1, a quinta etapa da Parte 4.
+Atualizado em 2026-11-09, depois das pendências entre áreas dos quatro agentes em paralelo (PR #34).
 
-> **Para o próximo chat:** o resto do BKP-1 está em revisão no PR #28, branch `fix/backup-confiavel`, no worktree `.claude/worktrees/backup-confiavel`. Depois do merge, o que falta da Parte 4 depende do Gabriel: o VALID-1 espera a pergunta 13 (Zod ou validadores próprios), e o BUG-8, a pergunta 16 (navegação). Sem as respostas, pergunte a ele se segue para outra parte. Os roteiros para conferir no aparelho estão nos PRs #22 (ERRO-1), #24 (BUG-6), #25 (BUG-5), #26 (ordem da busca) e #28 (BKP-1).
+> **Para o próximo chat:** os itens 1 a 3 das "Pendências entre áreas" e três "Sugestões das varreduras", escolhidos pelo Gabriel, estão em revisão no PR #34 (branch `fix/pendencias-entre-areas`, worktree `.claude/worktrees/pendencias`). A documentação dos quatro agentes está em revisão no PR #33 (branch `docs/agentes-em-paralelo`, worktree `.claude/worktrees/docs-paralelos`), e o `proximos-passos.md` e o `decisoes.md` do #34 partem da versão do #33. Por isso o #33 entra antes; depois, a branch do #34 é atualizada com o `main`, ficando com a versão do #34 nesses dois arquivos. A Parte 4 está completa no código desde o PR #32 (VALID-1); falta o Gabriel conferir no aparelho. O próximo passo é o Gabriel revisar o #34 e escolher entre a limpeza (item 4), as sugestões que sobraram e o patch do Expo, a partir de 2026-11-10. O tamanho do pacote com o Zod (item 5) ficou para depois.
 >
-> Em 2026-11-09 entraram no `main`: ERRO-1 (PR #22), importação cancelada (#23), BUG-6 (#24), BUG-5 (#25), a ordem da busca (#26) e os nomes de desativar (#27). A Parte 3 foi aceita com o merge do PR #21, em 2026-11-08.
+> Em 2026-11-09 entraram no `main`: ERRO-1 (PR #22), importação cancelada (#23), BUG-6 (#24), BUG-5 (#25), a ordem da busca (#26), os nomes de desativar (#27), o resto do BKP-1 (#28), REPO-3 (#29), BUG-8 (#30), A11Y-1 (#31) e VALID-1 (#32). Os quatro últimos rodaram ao mesmo tempo, cada um numa zona de arquivos só dele (ver `decisoes.md`). O README do Zod entrou pelo PR #33, porque o #32 foi mesclado antes desse commit. A Parte 3 foi aceita com o merge do PR #21, em 2026-11-08.
 >
-> A branch remota `fix/contagem-de-cadastros` voltou por engano depois do merge do PR #25, com um commit que já entrou pelo PR #26. O Gabriel pode apagá-la no GitHub.
+> Os roteiros para conferir no aparelho estão nos PRs #22 (ERRO-1), #24 (BUG-6), #25 (BUG-5), #26 (ordem da busca), #28 (BKP-1), #29 (REPO-3), #30 (BUG-8), #31 (A11Y-1, com o TalkBack), #32 (VALID-1) e #34 (pendências entre áreas).
 >
-> O clone do Gabriel estava no `8004a1a`, atrás do `main`. Antes de testar, `git pull` no `main`: os PRs #18 a #27 não mexem no `package-lock.json` alterado.
+> O clone do Gabriel está no `0b0aaf0`, atrás do `main`. O #32 muda o `package-lock.json`, que está alterado no clone desde o `audit fix` de 2026-11-08. Antes do `git pull`, descarte a mudança local com `git checkout -- package-lock.json`. Depois do pull, rode `npm i`. O `node_modules` do clone já tem o zod 4.6.7, instalado em 2026-11-09 sem mudar o `package.json`. O `@expo/config` e o `@expo/fingerprint` do `audit fix` voltam a ser conferidos no PR do patch do Expo.
 >
-> Limpeza de 2026-11-09: saíram os worktrees `backup-3c` (PR #21) e `erros-centralizados` (PRs #22 e #23), e a pasta vazia `dados-1`. As branches locais ficaram. A pasta vazia `.claude/worktrees/erros-centralizados` continua presa por outro processo; apague quando ela soltar. O worktree `acoes-de-cadastros` (PR #27, já no `main`) pode sair: primeiro a junction, com `cmd /c rmdir`, e depois `git worktree remove`.
+> Duas branches remotas voltaram por engano depois do merge, e o Gabriel pode apagá-las no GitHub:
+> - `fix/contagem-de-cadastros`, depois do PR #25, com um commit que já entrou pelo PR #26;
+> - `feat/validacao-com-zod`, depois do PR #32, com o commit do README, que entrou pelo PR #33.
+>
+> Limpeza de 2026-11-09: saíram os worktrees `backup-3c`, `erros-centralizados`, `acoes-de-cadastros`, `backup-confiavel`, `limpeza`, `botao-voltar`, `acessibilidade` e `validacao-zod`, todos com o PR já no `main`, e a pasta vazia `dados-1`. As branches locais ficaram. A pasta vazia `.claude/worktrees/erros-centralizados` continua presa por outro processo; apague quando ela soltar. Para tirar um worktree, primeiro a junction, com `cmd /c rmdir`, e depois `git worktree remove`.
+
+## Pendências entre áreas (2026-11-09)
+
+Ajustes que os agentes acharam fora da própria zona e não fizeram. Os itens 1 a 3 estão no PR #34, escolhidos pelo Gabriel em 2026-11-09; os itens 4 e 5 ficam para depois.
+
+1. **Voltar com modal aberto (BUG-8), no PR #34:** o `ConfirmModal`, o `ModalConfDelete` e o `ErrorModal` já tinham `onRequestClose` desde o PR #31. Saiu o `screenBack` morto do `DefaultHeader`, com o ícone `back.png`, que ficou sem uso.
+2. **Validação (VALID-1), no PR #34:**
+   - o `createRaceService` (`raceSpecieHelper.ts`) passa pelo `breedSchema`, com o limite de 50;
+   - as telas usam o `limits.ts`, que ganhou o `MAX_TIME_LENGTH` e o `MAX_MONEY_INPUT_LENGTH` para o horário e o valor;
+   - o `NewOrEditPet`, com a remarcação desligada, manda `null` no pacote, no início e no valor;
+   - a busca de raças usa o `toSearchPattern` com `ESCAPE`, num SQL só para a página e a contagem (`app/repository/sql/breedsSql.ts`), com 5 testes.
+3. **Acessibilidade nos formulários (A11Y-1), no PR #34:** os seis ajustes. Os botões Salvar viraram o `SaveButton`, e os títulos "DADOS…", o `FormSectionTitle`.
+4. **Limpeza (REPO-3):**
+   - os métodos sem uso nas três camadas de agendamento, dono e pet, como o `getAppointmentsByDate`, que tem SQL inválido; a lista com as linhas está no relatório do PR #29;
+   - o import do `OwnerBuilder`, a classe `ConfigBuilder` e o enum `ORDER`;
+   - os imports e as variáveis sem uso em cerca de 20 componentes (o `LOGO` do `DefaultHeader` já saiu no PR #34);
+   - os comentários de conversa nos componentes, no `App.tsx`, no `ButtonBack` e no `NewOrEditPet`;
+   - o bloco `web` do `app.json` e o comentário do template em `index.ts`.
+5. **Tamanho do pacote:** o Zod somou 680 KB ao JavaScript do Android (de 2,78 MB para 3,46 MB). Cerca de 340 KB são traduções que o app não usa. Avaliar o `zod/mini` ou o tree shaking do Expo. Deixado para depois pelo Gabriel em 2026-11-09.
+
+## Sugestões das varreduras (2026-11-09)
+
+Não aplicadas, menos as três que o Gabriel escolheu, que estão no PR #34: os textos do modal de voltar (em `DIALOGS`, no `messages.ts`), o contraste do `Toggle` desligado (3:1) e o `CloseButton` dos três modais.
+
+- **Navegação:**
+  - pedir confirmação só quando o formulário mudou;
+  - na Home, o voltar recolher a agenda em tela cheia antes de sair;
+  - um `TAB_SCREENS` em `navigation.ts` para o `App.tsx` e a `AppBar`.
+- **Acessibilidade e tema:**
+  - a animação do `Toggle` não acompanha o `value` mudado por fora;
+  - no tema escuro, a bolinha branca do `Toggle` ligado tem 2,56:1 sobre o verde (varredura do PR #34);
+  - as cores fixas fora do tema, no `ThemeToggle`, nos cartões de Relatórios e no fundo dos modais, que deveria usar o `MODAL_BACKGROUND`;
+  - um `withAlpha` no tema, no lugar de juntar "10" ao hex.
+- **Validação:**
+  - os enums do pet num módulo sem React Native, como o `Screen`;
+  - a checagem de dia real no `isIsoDate` de `datas.ts`;
+  - conferir no app que a raça é da espécie escolhida;
+  - `CHECK` no banco numa versão 4 do esquema, tratando antes o dado antigo;
+  - a raça repetida passa quando só o acento muda: o `findRaceByNome` compara em minúsculas, mas com acento, então "Pastor Alemao" entra ao lado de "Pastor Alemão" (varredura do PR #34).
+- **Limpeza:**
+  - o `useServicos` e o `useTiposPagamento` chamam o repository direto e repetem o `useAsyncData`;
+  - o `createRaceService` é um service dentro de `utils/`, e a `AbaInfoPet` chama o `raceRepository` direto; os dois deveriam passar pelo controller e pelo service, como o resto (varredura do PR #34);
+  - um tipo `Breed` no lugar dos `any[]` do `SpeciesRepository`;
+  - o SQL dos relatórios com `?` em vez de valor no texto, e com testes;
+  - campos dos relatórios que nenhuma tela lê;
+  - ligar `noUnusedLocals` e `noUnusedParameters` no `tsconfig.json`, depois das sobras do item 4.
 
 ## Em andamento: segurança e configuração do repositório
 
@@ -53,7 +103,7 @@ Falta, nesta ordem:
    - avisar os parceiros que o `main` agora só recebe PR, com squash e o CI verde;
    - decidir sobre os e-mails dos commits (ver a auditoria acima). O recomendado é cada um ativar no GitHub "Keep my email addresses private" e "Block command line pushes that expose my email" e usar o e-mail `noreply` no Git. Reescrever o histórico não compensa: exige force push no `main` e quebra os clones, e os e-mails antigos já podem estar em cópias.
 2. A partir de 2026-11-10, quando passam da espera de 7 dias, `npm i -E expo@58.0.23 expo-sharing@58.0.22 expo-sqlite@58.0.15`.
-   - Em 2026-11-08, um `npm audit fix` no clone já subiu o `@expo/config` para 58.0.10 e o `@expo/fingerprint` para 0.21.8, os dois de 2026-10-31. O `package-lock.json` alterado ficou sem commit no clone e entra no PR do patch.
+   - Em 2026-11-08, um `npm audit fix` no clone já subiu o `@expo/config` para 58.0.10 e o `@expo/fingerprint` para 0.21.8, os dois de 2026-10-31. O `package-lock.json` alterado ficou sem commit no clone. Como o PR #32 (zod) também muda esse arquivo, a mudança local é descartada antes do `git pull` (ver o topo), e o PR do patch confere se as duas versões entram.
    - O `@expo/config` novo deixa de usar o `deepmerge`, o que fecha um alerta.
    - Numa simulação, sobram os alertas moderados de `glob` e `minimatch` e o do `zod`, todos nas ferramentas de build, que nem o Expo mais novo corrigiu.
    - Conferido em 2026-11-08: o GitHub mostra 4 alertas abertos, os mesmos daqui (`zod` alto, `glob` e `minimatch` moderados, `deepmerge` baixo). Todos vêm do `@expo/cli`, do `@expo/config` e do Metro, e nenhum entra no APK. O do `deepmerge` fecha com este patch.
@@ -77,8 +127,8 @@ Falta, nesta ordem:
 - A auditoria do código foi feita sobre o commit `e1d5f2f` do `main`.
 - O plano está em [`plano-de-melhorias.md`](plano-de-melhorias.md), com 35 itens: 9 P0, 16 P1 e 10 P2.
 - A arquitetura de hoje está em [`arquitetura.md`](arquitetura.md), e as respostas do checklist, em [`auditoria.md`](auditoria.md).
-- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só), #23 (importação cancelada), #24 (ações de Cadastros), #25 (busca com o mesmo filtro), #26 (ordem da busca), #27 (nomes de desativar) e #28 (resto do BKP-1, em revisão). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
-- Da Parte 1, falta o que depende das perguntas em aberto. As Partes 2 e 3 estão completas e aceitas. A Parte 4 começou em 2026-11-09, com o ERRO-1, o BUG-6, o BUG-5 e o BKP-1, e as Partes 5 em diante ainda não começaram.
+- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só), #23 (importação cancelada), #24 (ações de Cadastros), #25 (busca com o mesmo filtro), #26 (ordem da busca), #27 (nomes de desativar), #28 (resto do BKP-1), #29 (REPO-3), #30 (BUG-8), #31 (A11Y-1) e #32 (VALID-1); o #34 (pendências entre áreas) está em revisão. O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
+- Da Parte 1, falta o que depende das perguntas em aberto. As Partes 2 e 3 estão completas e aceitas. A Parte 4 começou e ficou completa no código em 2026-11-09, com o PR #32 (VALID-1); falta o Gabriel conferir no aparelho. Da Parte 6, o A11Y-1 e parte do REPO-3 foram adiantados no mesmo dia. A Parte 5 ainda não começou.
 - Falta o Gabriel responder [`perguntas-em-aberto.md`](perguntas-em-aberto.md). Várias partes abaixo dependem dessas respostas.
 
 ## Partes de execução
@@ -175,7 +225,12 @@ Em andamento desde 2026-11-09, uma etapa por PR e um chat por etapa:
    - `app/config/schema.ts`: o `trusted_schema` desligado em todas as conexões;
    - `app/service/BackupService.ts`: a exportação grava `petshop-AAAA-MM-DD.db` em `backups/`, no cache, e cada exportação apaga as cópias anteriores. Decisão do Gabriel: não apagar logo depois de compartilhar, porque o Drive ou o WhatsApp podem ler o arquivo depois que o menu fecha;
    - verificado: typecheck limpo, 142 testes passando (6 novos em `tests/backup.test.mjs`, entre eles arquivo danificado, coluna faltando e função insegura no esquema) e o pacote Android gerado. Cada correção tem um teste que falha sem ela. O roteiro para conferir no aparelho está no PR #28.
-6. O VALID-1 espera a pergunta 13 (Zod ou validadores próprios), e o BUG-8, a pergunta 16 (navegação). São o que falta da Parte 4.
+6. BUG-8, no `main` desde o PR #30, em 2026-11-09 (pergunta 16: o `BackHandler` agora):
+   - o botão da tela e o do Android chamam o mesmo `requestBack()`; o destino vem do `backRouteOf` (`app/config/navigation.ts`), e o formulário em edição registra uma guarda (`useBackGuard`) que abre a confirmação. Só no Calendário o voltar fecha o app;
+   - verificado: typecheck limpo, 154 testes passando (12 novos em `tests/navegacao.test.mjs`) e o pacote Android gerado. O roteiro para conferir no aparelho está no PR #30.
+7. VALID-1, no `main` desde o PR #32, em 2026-11-09, com o Zod 4.6.7 (pergunta 13):
+   - um schema por entidade em `app/validation/`, chamado pelos controllers com o `parseInput`, que converte a falha no `AppError` com a mensagem de `messages.ts`; os services recebem os tipos derivados dos schemas;
+   - verificado: typecheck limpo, 280 testes passando (55 novos em `tests/validacao.test.mjs`) e o pacote Android gerado, 680 KB maior. O roteiro para conferir no aparelho está no PR #32.
 
 - ERRO-1: módulo de erros, mensagens em `globals` e hook de ação assíncrona.
 - BUG-5: contagem com o mesmo filtro da lista.
@@ -199,9 +254,9 @@ Pronto quando: o APK instala num Android limpo e mostra tudo com um toque, e o p
 ### Parte 6 · Qualidade contínua (P1)
 
 - TEST-2: lint, Prettier e o script `check` no CI, depois do aval das instalações.
-- A11Y-1: rótulos, papéis, áreas de toque e contraste.
+- A11Y-1: rótulos, papéis, áreas de toque e contraste. No `main` desde o PR #31, em 2026-11-09, adiantado; falta o teste com o TalkBack. Os ajustes dos formulários e o contraste do `Toggle` estão em revisão no PR #34.
 - TEMA-1: tokens de espaço, raio, tipografia e cores de gráfico.
-- REPO-3: limpeza de código, imagens e comentários.
+- REPO-3: limpeza de código, imagens e comentários. Em parte no `main` desde o PR #29, em 2026-11-09, adiantado; o resto está em "Pendências entre áreas".
 - REPO-4: ruleset no `main`, se os parceiros concordarem.
 
 Pronto quando: `npm run check` passa no CI, e o teste com o TalkBack percorre o app sem botão mudo.
