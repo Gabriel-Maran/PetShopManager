@@ -1,47 +1,59 @@
 import { getDatabase } from "../config/database";
+import { LIMIT_ITEM_PAGE } from "../config/consts";
+import type { Breed, BreedRecord } from "../model/Breed";
 import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
-import { INSERT_BREED_SQL } from "./sql/breedsSql";
+import {
+  countBreedsSql,
+  FIND_BREED_SQL,
+  INSERT_BREED_SQL,
+  LIST_BREED_NAMES_SQL,
+  listBreedsSql,
+} from "./sql/breedsSql";
 
-class RaceTypeRepository {
-  async createRace(especieId: number, nomeRaca: string): Promise<number> {
+class RaceRepository {
+  async createBreed(especieId: number, nomeRaca: string): Promise<number> {
     const db = await getDatabase();
-    const nomeNormalizado = normalizeForSearch(nomeRaca);
     const result = await db.runAsync(INSERT_BREED_SQL, [
       especieId,
       nomeRaca,
-      nomeNormalizado,
+      normalizeForSearch(nomeRaca),
     ]);
     return result.lastInsertRowId;
   }
 
-  async findRaceById(
-    id: number,
-  ): Promise<{ id: number; especie_id: number; nome_raca: string } | null> {
+  async findBreedById(id: number): Promise<BreedRecord | null> {
     const db = await getDatabase();
-    const result = await db.getFirstAsync<{
-      id: number;
-      especie_id: number;
-      nome_raca: string;
-    }>(`SELECT id, especie_id, nome_raca FROM race WHERE id = ?`, [id]);
-    return result ?? null;
+    return db.getFirstAsync<BreedRecord>(FIND_BREED_SQL, [id]);
   }
 
-  async findRaceByNome(
-    nomeRaca: string,
-  ): Promise<{ id: number; especie_id: number; nome_raca: string }[]> {
+  /** Os nomes de todas as raças da espécie, para conferir a raça repetida. */
+  async listBreedNames(especieId: number): Promise<string[]> {
     const db = await getDatabase();
-    const nomeNormalizado = normalizeForSearch(nomeRaca);
-
-    const result = await db.getAllAsync<{
-      id: number;
-      especie_id: number;
-      nome_raca: string;
-    }>(
-      `SELECT id, especie_id, nome_raca FROM race WHERE nome_raca_normalized LIKE ?`,
-      [`%${nomeNormalizado}%`],
+    const rows = await db.getAllAsync<Pick<BreedRecord, "nome_raca">>(
+      LIST_BREED_NAMES_SQL,
+      [especieId],
     );
-    return result ?? [];
+    return rows.map((row) => row.nome_raca);
+  }
+
+  /** Uma página (a partir de 0) das raças da espécie com `query` no nome. Vazio traz todas. */
+  async searchBreeds(
+    especieId: number,
+    page: number,
+    query: string,
+  ): Promise<Breed[]> {
+    const db = await getDatabase();
+    const { sql, params } = listBreedsSql(especieId, query, page, LIMIT_ITEM_PAGE);
+    return db.getAllAsync<Breed>(sql, params);
+  }
+
+  /** O total da mesma busca, para a paginação. */
+  async countBreeds(especieId: number, query: string): Promise<number> {
+    const db = await getDatabase();
+    const { sql, params } = countBreedsSql(especieId, query);
+    const result = await db.getFirstAsync<{ total: number }>(sql, params);
+    return result?.total ?? 0;
   }
 }
 
-export const raceRepository = new RaceTypeRepository();
+export const raceRepository = new RaceRepository();
