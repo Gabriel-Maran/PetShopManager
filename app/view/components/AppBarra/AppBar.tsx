@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
-import { Screen, APP_BAR_HEIGHT } from "../../../config/consts";
-import { IMAGENS_NAMES } from "../../../config/consts";
+import { APP_BAR_HEIGHT, IMAGENS_NAMES } from "../../../config/consts";
+import { TAB_SCREENS } from "../../../config/navigation";
 import IconDePesquisa from "./IconDePesquisa";
 import { useTheme } from "../../Themes/ThemeProvider";
 
@@ -12,26 +12,14 @@ export default function AppBar() {
       style={[styles.container, { backgroundColor: colors.BACKGROUND }]}
       accessibilityRole="tablist"
     >
-      <IconDePesquisa
-        imgName={IMAGENS_NAMES.CALENDARIO}
-        titleText="Calendário"
-        screenName={Screen.Calendario}
-      />
-      <IconDePesquisa
-        imgName={IMAGENS_NAMES.PESSOA_ADD}
-        titleText="Cadastros"
-        screenName={Screen.Cadastros}
-      />
-      <IconDePesquisa
-        imgName={IMAGENS_NAMES.ARTIGO}
-        titleText="Relatórios"
-        screenName={Screen.Relatorios}
-      />
-      <IconDePesquisa
-        imgName={IMAGENS_NAMES.CONFIGURACOES}
-        titleText="Configurações"
-        screenName={Screen.Configuracoes}
-      />
+      {TAB_SCREENS.map((tab) => (
+        <IconDePesquisa
+          key={tab.screen}
+          imgName={IMAGENS_NAMES[tab.icon]}
+          titleText={tab.title}
+          screenName={tab.screen}
+        />
+      ))}
     </View>
   );
 }

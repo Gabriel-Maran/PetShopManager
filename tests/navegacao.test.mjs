@@ -1,9 +1,17 @@
 // Botão voltar (BUG-8): para onde o voltar leva a partir de cada tela, e o caminho único que o botão
-// da tela e o do Android seguem, com a guarda que pede confirmação nos formulários.
+// da tela e o do Android seguem, com a guarda que pede confirmação nos formulários mudados e recolhe
+// a agenda em tela cheia. Também as abas da barra de baixo.
 import { beforeEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { backRouteOf, HOME_SCREEN, Screen } from "../app/config/navigation.ts";
+import {
+  backRouteOf,
+  HOME_SCREEN,
+  isTabScreen,
+  Screen,
+  TAB_SCREENS,
+} from "../app/config/navigation.ts";
 import { ScreenController } from "../app/controller/ScreenController.ts";
+import { isFormDirty, isSameFieldValue } from "../app/utils/formDirty.ts";
 
 const ALL_SCREENS = Object.values(Screen);
 
@@ -17,8 +25,8 @@ describe("mapa do voltar", () => {
   });
 
   test("as abas principais voltam para o Calendário", () => {
-    for (const tab of [Screen.Cadastros, Screen.Relatorios, Screen.Configuracoes]) {
-      assert.deepEqual(backRouteOf(tab), { screen: Screen.Calendario }, tab);
+    for (const { screen } of TAB_SCREENS.filter((tab) => tab.screen !== HOME_SCREEN)) {
+      assert.deepEqual(backRouteOf(screen), { screen: Screen.Calendario }, screen);
     }
   });
 
@@ -116,5 +124,155 @@ describe("voltar pelo ScreenController", () => {
     controller.requestBack();
     assert.equal(confirmations, 1);
     assert.equal(controller.getCurrentScreen(), Screen.NewOrEditPet);
+  });
+});
+
+describe("abas da barra de baixo", () => {
+  test("são as quatro telas principais, na ordem da barra, a começar pela inicial", () => {
+    assert.deepEqual(
+      TAB_SCREENS.map((tab) => tab.screen),
+      [Screen.Calendario, Screen.Cadastros, Screen.Relatorios, Screen.Configuracoes],
+    );
+    assert.equal(TAB_SCREENS[0].screen, HOME_SCREEN);
+  });
+
+  test("cada aba tem nome e ícone, sem tela nem ícone repetido", () => {
+    for (const tab of TAB_SCREENS) {
+      assert.ok(tab.title.trim(), tab.screen);
+      assert.ok(tab.icon, tab.screen);
+    }
+    assert.equal(new Set(TAB_SCREENS.map((tab) => tab.screen)).size, TAB_SCREENS.length);
+    assert.equal(new Set(TAB_SCREENS.map((tab) => tab.icon)).size, TAB_SCREENS.length);
+  });
+
+  test("a barra aparece só nas abas, e não nos formulários nem no relatório aberto", () => {
+    for (const screen of ALL_SCREENS) {
+      const isTab = TAB_SCREENS.some((tab) => tab.screen === screen);
+      assert.equal(isTabScreen(screen), isTab, screen);
+    }
+    assert.equal(isTabScreen(Screen.NewOrEditPet), false);
+    assert.equal(isTabScreen(Screen.RelatorioView), false);
+  });
+});
+
+describe("formulário mudado (isFormDirty)", () => {
+  const newOwner = { nome: "", telefone: "", email: "", endereco: "" };
+  const loadedPet = {
+    nome: "Rex",
+    especie: 1,
+    dono_id: 3,
+    dono_nome: "",
+    raca_nome: "Vira-lata",
+    remarcAtiva: true,
+    observacoes: null,
+  };
+  const DERIVED_FIELDS = ["dono_nome", "raca_nome"];
+
+  test("sem mexer, o cadastro novo e a edição carregada não mudaram", () => {
+    assert.equal(isFormDirty(newOwner, { ...newOwner }), false);
+    assert.equal(isFormDirty(loadedPet, { ...loadedPet }), false);
+  });
+
+  test("um campo digitado ou trocado conta como mudança", () => {
+    assert.equal(isFormDirty(newOwner, { ...newOwner, nome: "Ana" }), true);
+    assert.equal(isFormDirty(loadedPet, { ...loadedPet, especie: 2 }), true);
+    assert.equal(isFormDirty(loadedPet, { ...loadedPet, remarcAtiva: false }), true);
+  });
+
+  test("na edição compara com o estado carregado, e não com o vazio", () => {
+    const emptyPet = { ...loadedPet, nome: "", especie: 0, dono_id: 0 };
+    assert.equal(isFormDirty(loadedPet, { ...loadedPet }), false);
+    assert.equal(isFormDirty(loadedPet, emptyPet), true);
+  });
+
+  test("editar e desfazer volta a não ter mudança", () => {
+    const typed = { ...loadedPet, nome: "Rexx" };
+    const undone = { ...typed, nome: "Rex" };
+    assert.equal(isFormDirty(loadedPet, typed), true);
+    assert.equal(isFormDirty(loadedPet, undone), false);
+  });
+
+  test("campo vazio continua vazio, seja null, undefined ou texto vazio", () => {
+    assert.equal(isFormDirty(loadedPet, { ...loadedPet, observacoes: "" }), false);
+    assert.equal(isFormDirty(loadedPet, { ...loadedPet, observacoes: undefined }), false);
+    assert.equal(isFormDirty({ pacote: undefined }, { pacote: null }), false);
+  });
+
+  test("os campos derivados, como os nomes buscados pelo id, não contam como mudança", () => {
+    const afterLoad = { ...loadedPet, dono_nome: "Ana", raca_nome: "" };
+    assert.equal(isFormDirty(loadedPet, afterLoad), true);
+    assert.equal(isFormDirty(loadedPet, afterLoad, DERIVED_FIELDS), false);
+    assert.equal(isFormDirty(loadedPet, { ...afterLoad, dono_id: 4 }, DERIVED_FIELDS), true);
+  });
+
+  test("um campo que só existe de um lado conta como mudança, se tiver valor", () => {
+    assert.equal(isFormDirty({ nome: "Rex" }, { nome: "Rex", extra: "x" }), true);
+    assert.equal(isFormDirty({ nome: "Rex" }, { nome: "Rex", extra: "" }), false);
+  });
+
+  test("formulário sem campos não muda", () => {
+    assert.equal(isFormDirty({}, {}), false);
+  });
+});
+
+describe("valor de campo igual (isSameFieldValue)", () => {
+  test("null, undefined e texto vazio são o mesmo vazio", () => {
+    for (const a of [null, undefined, ""]) {
+      for (const b of [null, undefined, ""]) {
+        assert.equal(isSameFieldValue(a, b), true, `${a} e ${b}`);
+      }
+    }
+  });
+
+  test("zero, false e espaço não são vazios", () => {
+    assert.equal(isSameFieldValue(0, ""), false);
+    assert.equal(isSameFieldValue(false, null), false);
+    assert.equal(isSameFieldValue(" ", ""), false);
+  });
+
+  test("compara pelo valor, sem converter o tipo", () => {
+    assert.equal(isSameFieldValue("1", 1), false);
+    assert.equal(isSameFieldValue(1, 1), true);
+    assert.equal(isSameFieldValue(Number.NaN, Number.NaN), true);
+  });
+});
+
+describe("ordem do voltar", () => {
+  let controller;
+
+  beforeEach(() => {
+    controller = new ScreenController();
+  });
+
+  test("na Home com a agenda em tela cheia, o voltar recolhe a agenda e não fecha o app", () => {
+    let collapsed = 0;
+    const removeGuard = controller.setBackGuard(() => {
+      collapsed++;
+      removeGuard();
+    });
+
+    assert.equal(controller.requestBack(), true);
+    assert.equal(collapsed, 1);
+    assert.equal(controller.getCurrentScreen(), HOME_SCREEN);
+
+    // Com a agenda recolhida a guarda sai, e o voltar seguinte fecha o app.
+    assert.equal(controller.requestBack(), false);
+    assert.equal(collapsed, 1);
+  });
+
+  test("formulário sem mudança não põe guarda: o voltar sai direto", () => {
+    controller.setCurrentScreen(Screen.NewOrEditOwner, { type: "DONO", mode: "edit" });
+
+    assert.equal(controller.requestBack(), true);
+    assert.equal(controller.getCurrentScreen(), Screen.Cadastros);
+  });
+
+  test("formulário mudado e depois desfeito tira a guarda e volta direto", () => {
+    controller.setCurrentScreen(Screen.NewOrEditAppointment);
+    const removeGuard = controller.setBackGuard(() => assert.fail("o formulário já foi desfeito"));
+    removeGuard();
+
+    assert.equal(controller.requestBack(), true);
+    assert.equal(controller.getCurrentScreen(), Screen.Calendario);
   });
 });
