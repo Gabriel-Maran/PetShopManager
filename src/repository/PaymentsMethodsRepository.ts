@@ -1,13 +1,12 @@
 import { getDatabase } from "../config/database";
 import { PaymentsMethod } from "../model/PaymentMethod";
+import { LIST_PAYMENT_METHODS_SQL } from "./sql/listsSql";
 
 class PaymentMethodRepository {
   async getAllPaymentMethod(): Promise<PaymentsMethod[]> {
     const db = await getDatabase();
 
-    return db.getAllAsync<PaymentsMethod>(
-      `SELECT id, tipo_pgto FROM payment_methods ORDER BY id ASC`,
-    );
+    return db.getAllAsync<PaymentsMethod>(LIST_PAYMENT_METHODS_SQL);
   }
 }
 

@@ -26,6 +26,8 @@ import {
   upgradeBackup,
 } from "../src/config/backupRestore.ts";
 import { BACKUP_TABLES } from "../src/repository/sql/backupSql.ts";
+import { LIST_APPOINTMENTS_BETWEEN_SQL } from "../src/repository/sql/appointmentsSql.ts";
+import { FIND_PET_SQL } from "../src/repository/sql/petsSql.ts";
 import { MESSAGES } from "../src/globals/messages.ts";
 import { AppError } from "../src/errors/AppError.ts";
 
@@ -197,7 +199,8 @@ describe("restauração de backup", () => {
 
     await importBackup(app, { uri, backup });
 
-    const appColumns = "SELECT id, pet_id, servico, data, hora, valor, concluido FROM appointments ORDER BY id";
+    const appColumns =
+      "SELECT id, pet_id, servico_id, data, hora, valor, concluido, tipo_pgto_id FROM appointments ORDER BY id";
     assert.deepEqual(app.prepare(appColumns).all(), backup.prepare(appColumns).all());
     backup.close();
   });
@@ -252,10 +255,59 @@ describe("backup de versão anterior", () => {
     await importBackup(app, { uri, backup });
 
     assert.equal(userVersion(app), LATEST);
-    assert.deepEqual(rows(app, "appointments"), agendaBefore, "a agenda vem como estava");
+    // Desde a versão 6, o serviço vai pelo id (o "Banho" é o 1 da carga inicial), e o "0" do DEFAULT
+    // antigo do pagamento é a forma não informada.
+    const inV6 = ({ servico, tipo_pgto, ...rest }) => ({ ...rest, servico_id: 1, tipo_pgto_id: null });
+    assert.deepEqual(
+      rows(app, "appointments").map((row) => ({ ...row })),
+      agendaBefore.map(inV6),
+      "a agenda vem como estava",
+    );
     assert.equal(petRow(app, pet.id).ultimo_visita_data_auto, pendingAutoOf(backup, pet.id).at(-1).data);
     const triggers = appTriggers(app).map(({ name }) => name);
     assert.ok(!triggers.includes("trg_pet_remarcacao_insert") && !triggers.includes("trg_remarcacao_automatica"));
+    backup.close();
+  });
+
+  test("um backup da versão 5 entra com o serviço e o pagamento pelo id, mesmo com outra lista", async () => {
+    const uri = backupUri();
+    const backup = await databaseAt(5, uri);
+    // A carga de maio de 2026 tinha o PIX no 3 e o Dinheiro no 4; o app de hoje tem o PIX no 4.
+    backup.exec(`
+      UPDATE payment_methods SET tipo_pgto = 'PIX' WHERE id = 3;
+      UPDATE payment_methods SET tipo_pgto = 'Dinheiro' WHERE id = 4;
+    `);
+    const pet = insertPet(backup, {
+      dono_id: insertOwner(backup, { nome: "Dono do backup da versão 5" }),
+      porte: "Médio",
+      servico_padrao: "Banho e Tosa",
+      horario_padrao: null,
+    });
+    const insert = backup.prepare(
+      "INSERT INTO appointments (pet_id, servico, data, hora, valor, tipo_pgto, concluido) VALUES (?, ?, ?, ?, ?, ?, 1)",
+    );
+    insert.run(pet.id, "Banho e Tosa", isoDate(-7), "9:30", 9500, "PIX");
+    insert.run(pet.id, "Hidratação", isoDate(-3), "15:00", 4000, "Vale-presente");
+    const app = await appWithData();
+
+    await importBackup(app, { uri, backup });
+
+    assert.equal(userVersion(app), LATEST);
+    // A lista de pagamento vem junto do backup: sem ela, o id 3 seria o Dinheiro do app.
+    assert.deepEqual(rows(app, "payment_methods"), rows(backup, "payment_methods"));
+    const shown = app
+      .prepare(LIST_APPOINTMENTS_BETWEEN_SQL)
+      .all(isoDate(-10), isoDate(0))
+      .map(({ servico, tipo_pgto, hora, valor }) => ({ servico, tipo_pgto, hora, valor }));
+    assert.deepEqual(shown, [
+      { servico: "Banho e Tosa", tipo_pgto: "PIX", hora: "09:30", valor: 9500 },
+      { servico: "Hidratação", tipo_pgto: "Vale-presente", hora: "15:00", valor: 4000 },
+    ]);
+    const restoredPet = app.prepare(FIND_PET_SQL).get(pet.id);
+    assert.deepEqual(
+      [restoredPet.porte, restoredPet.servico_padrao, restoredPet.horario_padrao],
+      ["MEDIO", "Banho e Tosa", "00:00"],
+    );
     backup.close();
   });
 

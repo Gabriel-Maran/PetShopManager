@@ -34,16 +34,16 @@ export interface ScheduleDatabase extends MigrationDatabase {
   getAllAsync<T>(sql: string, ...params: SqlValue[]): Promise<T[]>;
 }
 
-/** O que a conclusão de um agendamento olha antes e depois de salvar. */
+/** O que a conclusão de um agendamento olha antes e depois de salvar, com o serviço pelo id. */
 export type AppointmentState = Pick<
   Appointment,
-  "pet_id" | "servico" | "data" | "entregar_pet" | "concluido" | "observacao" | "is_auto_agen"
->;
+  "pet_id" | "data" | "entregar_pet" | "concluido" | "observacao" | "is_auto_agen"
+> & { servico_id: number };
 
 /** Um atendimento da agenda do pacote, pronto para gravar. */
 export interface PackageVisitRow {
   petId: number;
-  service: string;
+  serviceId: number;
   date: IsoDate;
   time: string | null | undefined;
   deliverPet: number;
@@ -138,7 +138,7 @@ export class PackageScheduleRepository {
       await this.db.runAsync(
         INSERT_PACKAGE_VISIT_SQL,
         visit.petId,
-        visit.service,
+        visit.serviceId,
         visit.date,
         visit.time ?? null,
         visit.deliverPet,

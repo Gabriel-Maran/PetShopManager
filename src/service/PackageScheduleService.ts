@@ -101,7 +101,7 @@ export class PackageScheduleService {
 /** O que todo atendimento gerado pelo pacote leva do pet: serviço e horário padrão, sem táxi dog. */
 const defaultVisitOf = (petId: number, pet: PetPackage) => ({
   petId,
-  service: pet.servico_padrao,
+  serviceId: pet.servico_padrao_id,
   time: pet.horario_padrao,
   deliverPet: 0,
   notes: null,
@@ -153,7 +153,7 @@ async function scheduleNextVisit(
     await repository.insertVisits([
       {
         petId,
-        service: concluded.servico,
+        serviceId: concluded.servico_id,
         date,
         time: pet.horario_padrao,
         deliverPet: concluded.entregar_pet,

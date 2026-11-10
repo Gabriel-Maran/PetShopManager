@@ -132,7 +132,7 @@ const SERVICE_PRICE: Record<ServiceName, number> = {
   "Banho e Higiênica": 7500,
 };
 
-// Os nomes de payment_methods, que o agendamento grava como texto.
+// Os nomes de payment_methods. O agendamento grava o id, achado pelo nome (versão 6 do esquema).
 const PAYMENT_METHODS = ["PIX", "Cartão de Débito", "Dinheiro", "Cartão de Crédito"];
 
 // Horários do histórico. A ordem fixa espalha as visitas pelo dia sem precisar de sorteio.
@@ -167,6 +167,8 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
   const phoneOf = (ownerIndex: number) => `(44) 99911-${1111 + ownerIndex}`;
   const ownerId = (ownerIndex: number) => `(SELECT id FROM owners WHERE telefone = ${text(phoneOf(ownerIndex))})`;
   const petId = (petName: string) => `(SELECT id FROM pets WHERE nome_normalizado = ${text(normalize(petName))})`;
+  const serviceId = (service: string) => `(SELECT id FROM service_type WHERE servico = ${text(service)})`;
+  const paymentMethodId = (method: string) => `(SELECT id FROM payment_methods WHERE tipo_pgto = ${text(method)})`;
 
   const owners = DEMO_OWNERS.map((owner, index) => {
     const email = `${normalize(owner.name).replaceAll(" ", ".")}@example.com`;
@@ -182,30 +184,30 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
     const start = pkg ? toIsoDate(addDays(today, -pkg.startDaysAgo)) : null;
     const visits = pkg && start ? packageVisits(pkg, start, clock) : [];
     const lastAuto = visits.filter((visit) => visit.auto).at(-1)?.date;
-    const insertPet = `INSERT INTO pets (nome, nome_normalizado, especie, porte, raca, observacoes, dono_id, servico_padrao,
+    const insertPet = `INSERT INTO pets (nome, nome_normalizado, especie, porte, raca, observacoes, dono_id, servico_padrao_id,
       remarcacao_ativa, pacote_remarcacao, valor_pacote, data_inicio_pacote, horario_padrao, is_ativo,
       ultimo_visita_data_auto)
       VALUES (${text(pet.name)}, ${text(normalize(pet.name))}, ${speciesId}, ${text(pet.size)}, ${raceId},
-      ${text(pet.notes)}, ${ownerId(pet.owner)}, ${text(pet.service)}, ${flag(Boolean(pkg))},
+      ${text(pet.notes)}, ${ownerId(pet.owner)}, ${serviceId(pet.service)}, ${flag(Boolean(pkg))},
       ${pkg ? pkg.visitsPerMonth : "NULL"}, ${pkg ? pkg.price : 0},
       ${start ? text(start) : "NULL"}, ${text(pkg ? pkg.time : "00:00")},
       ${flag(pet.active !== false)}, ${lastAuto ? text(lastAuto) : "NULL"});`;
     if (!pkg || visits.length === 0) return insertPet;
     const rows = visits.map(
       (visit) =>
-        `(${petId(pet.name)}, ${text(pet.service)}, ${text(visit.date)}, ${text(pkg.time)}, 0, ${flag(visit.auto)}, ${visit.cents})`,
+        `(${petId(pet.name)}, ${serviceId(pet.service)}, ${text(visit.date)}, ${text(pkg.time)}, 0, ${flag(visit.auto)}, ${visit.cents})`,
     );
     return `${insertPet}
-    INSERT INTO appointments (pet_id, servico, data, hora, entregar_pet, is_auto_agen, valor) VALUES
+    INSERT INTO appointments (pet_id, servico_id, data, hora, entregar_pet, is_auto_agen, valor) VALUES
       ${rows.join(",\n      ")};`;
   });
 
   const appointments: string[] = [];
   let paymentIndex = 0;
   const appointment = (pet: DemoPet, date: Date, time: string, done: boolean, taxiDog: boolean) => {
-    const payment = done ? PAYMENT_METHODS[paymentIndex++ % PAYMENT_METHODS.length] : "";
+    const payment = done ? paymentMethodId(PAYMENT_METHODS[paymentIndex++ % PAYMENT_METHODS.length]) : "NULL";
     appointments.push(
-      `(${petId(pet.name)}, ${text(pet.service)}, ${text(toIsoDate(date))}, ${text(time)}, ${flag(taxiDog)}, ${flag(done)}, NULL, 0, ${SERVICE_PRICE[pet.service]}, ${text(payment)}, ${flag(done)})`,
+      `(${petId(pet.name)}, ${serviceId(pet.service)}, ${text(toIsoDate(date))}, ${text(time)}, ${flag(taxiDog)}, ${flag(done)}, NULL, 0, ${SERVICE_PRICE[pet.service]}, ${payment}, ${flag(done)})`,
     );
   };
 
@@ -234,14 +236,19 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
 
     ${pets.join("\n\n    ")}
 
-    INSERT INTO appointments (pet_id, servico, data, hora, entregar_pet, concluido, observacao,
-      is_auto_agen, valor, tipo_pgto, ta_pago) VALUES
+    INSERT INTO appointments (pet_id, servico_id, data, hora, entregar_pet, concluido, observacao,
+      is_auto_agen, valor, tipo_pgto_id, ta_pago) VALUES
       ${appointments.join(",\n      ")};
 
     -- Os atendimentos passados dos pacotes, que a remarcação gera como manuais, ficam concluídos e pagos.
     UPDATE appointments
     SET concluido = 1, ta_pago = 1,
-        tipo_pgto = CASE id % 4 WHEN 0 THEN 'PIX' WHEN 1 THEN 'Cartão de Débito' WHEN 2 THEN 'Dinheiro' ELSE 'Cartão de Crédito' END
+        tipo_pgto_id = (
+          SELECT pm.id FROM payment_methods pm
+          WHERE pm.tipo_pgto = CASE appointments.id % 4
+            WHEN 0 THEN 'PIX' WHEN 1 THEN 'Cartão de Débito' WHEN 2 THEN 'Dinheiro' ELSE 'Cartão de Crédito'
+          END
+        )
     WHERE concluido = 0 AND is_auto_agen = 0 AND data < ${todayDate};
 
     -- A última visita de cada pet é a data do último atendimento concluído.

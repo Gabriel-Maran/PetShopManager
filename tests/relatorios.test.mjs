@@ -29,7 +29,7 @@ import { lastMonthsRange, nextMonthsRange } from "../src/utils/relatorios/meses.
 
 /** Agendamento com os parâmetros na ordem do INSERT_APPOINTMENT_SQL. */
 function insertAppointment(db, petId, data, { concluido = 0, hora = "10:00", automatico = 0 } = {}) {
-  db.prepare(INSERT_APPOINTMENT_SQL).run(petId, "Banho", data, hora, 0, concluido, null, automatico, 5000, "Pix", 0);
+  db.prepare(INSERT_APPOINTMENT_SQL).run(petId, "Banho", data, hora, 0, concluido, null, automatico, 5000, "PIX", 0);
 }
 
 const setPet = (db, id, column, value) =>

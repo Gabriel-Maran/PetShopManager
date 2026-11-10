@@ -3,6 +3,9 @@ import type { AppointmentData } from "../validation/appointmentSchema";
 import { appointmentsRepository } from "../repository/AppointmentsRepository";
 import type { IsoDate } from "../utils/datas";
 import { PackageScheduleService } from "./PackageScheduleService";
+import { assertAppointmentChoices } from "./appointmentRules";
+import { paymentMethodService } from "./PaymentMethodService";
+import { serviceTypeService } from "./ServiceTypeService";
 
 // Concluir um automático cria o próximo da agenda do pacote, na mesma transação.
 const packageSchedule = new PackageScheduleService(getDatabase);
@@ -20,13 +23,24 @@ class AppointmentsService {
     return appointmentsRepository.getAppointmentsByDateRange(from, to);
   }
 
-  createAppointment(appointment: AppointmentData) {
+  async createAppointment(appointment: AppointmentData) {
+    await assertChoicesExist(appointment);
     return appointmentsRepository.createAppointment(appointment);
   }
 
-  updateAppointment(id: number, appointment: AppointmentData) {
+  async updateAppointment(id: number, appointment: AppointmentData) {
+    await assertChoicesExist(appointment);
     return packageSchedule.updateAppointment(id, appointment);
   }
+}
+
+// O banco grava o serviço e a forma de pagamento pelo id, achado pelo nome que a tela escolheu.
+async function assertChoicesExist(appointment: AppointmentData): Promise<void> {
+  const [services, paymentMethods] = await Promise.all([
+    serviceTypeService.getAllServiceTypes(),
+    paymentMethodService.getAllPaymentMethods(),
+  ]);
+  assertAppointmentChoices(appointment, { services, paymentMethods });
 }
 
 export const appointmentsService = new AppointmentsService();

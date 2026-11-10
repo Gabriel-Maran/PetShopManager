@@ -14,6 +14,7 @@ import {
 } from "../src/config/demoData.ts";
 import { normalizeForSearch } from "../src/utils/formatadores/normalizaNome.ts";
 import { packagePlanOf, scheduleClockOf, scheduleForNewPet } from "../src/domain/packageSchedule.ts";
+import { FIND_PET_SQL } from "../src/repository/sql/petsSql.ts";
 
 const today = new Date();
 const todayDate = `'${isoDate(0)}'`;
@@ -92,7 +93,8 @@ describe("dados de exemplo", () => {
         expected,
         pet.nome,
       );
-      assert.ok(agenda.every((a) => a.hora === pet.horario_padrao && a.servico === pet.servico_padrao));
+      const { servico_padrao } = db.prepare(FIND_PET_SQL).get(id);
+      assert.ok(agenda.every((a) => a.hora === pet.horario_padrao && a.servico === servico_padrao));
       assert.equal(pet.ultimo_visita_data_auto, expected.filter((visit) => visit.auto).at(-1).date);
     }
   });

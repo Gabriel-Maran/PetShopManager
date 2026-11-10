@@ -1,9 +1,13 @@
 // A remarcação em TypeScript (versão 4 do esquema, ARQ-2) contra os triggers da versão 3, que eram a
 // regra até ali. Os mesmos passos rodam nos dois bancos, cada um pelo caminho da sua época, e as
-// tabelas de pets e agendamentos precisam terminar iguais, linha a linha e com os mesmos ids.
+// tabelas de pets e agendamentos precisam terminar iguais, linha a linha e com os mesmos ids. O banco
+// da versão 3 sobe para a última no fim, pelas migrações do app, porque desde a versão 6 o serviço e a
+// forma de pagamento são gravados pelo id: assim, o teste também confere a conversão da versão 6.
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  appointmentsOf,
+  asMigrationDatabase,
   createDatabase,
   createPet,
   databaseAt,
@@ -15,9 +19,15 @@ import {
   savePet,
   updatePet,
 } from "./helpers/database.mjs";
-import { UPDATE_APPOINTMENT_SQL } from "../src/repository/sql/appointmentsSql.ts";
+import { migrateDatabase } from "../src/config/migrator.ts";
+import { MIGRATIONS } from "../src/config/schema.ts";
 import { ACTIVATE_PET_SQL, DEACTIVATE_PET_SQL } from "../src/repository/sql/petsSql.ts";
 import { DEACTIVATE_OWNER_SQL } from "../src/repository/sql/ownersSql.ts";
+
+/** O UPDATE do agendamento da época da versão 3, com o serviço e o pagamento pelo nome. */
+const UPDATE_APPOINTMENT_V3_SQL = `UPDATE appointments SET pet_id = ?, servico = ?, data = ?, hora = ?,
+  entregar_pet = ?, concluido = ?, observacao = ?, valor = ?, tipo_pgto = ?, ta_pago = ?
+  WHERE id = ?`;
 
 /** Versão 3: o app só gravava, e os triggers faziam a agenda. */
 const BY_TRIGGERS = {
@@ -27,7 +37,7 @@ const BY_TRIGGERS = {
     db.prepare(ACTIVATE_PET_SQL).run(id);
   },
   saveAppointment: async (db, a) => {
-    db.prepare(UPDATE_APPOINTMENT_SQL).run(
+    db.prepare(UPDATE_APPOINTMENT_V3_SQL).run(
       a.pet_id, a.servico, a.data, a.hora, a.entregar_pet, a.concluido, a.observacao,
       a.valor, a.tipo_pgto, a.ta_pago, a.id,
     );
@@ -45,13 +55,14 @@ const BY_SERVICE = {
 const rows = (db, table) => db.prepare(`SELECT * FROM ${table} ORDER BY id`).all();
 
 /**
- * Roda o cenário no banco da versão 3 e no da versão 4 e confere que os dois terminam iguais. O
- * cenário recebe o banco, o dono e os passos da época.
+ * Roda o cenário no banco da versão 3 e no da última versão e confere que os dois terminam iguais,
+ * depois de o da versão 3 subir pelas migrações. O cenário recebe o banco, o dono e os passos da época.
  */
 async function assertSameOutcome(scenario) {
   const outcomes = [];
   for (const [db, steps] of [[await databaseAt(3), BY_TRIGGERS], [await createDatabase(), BY_SERVICE]]) {
     await scenario(db, insertOwner(db), steps);
+    await migrateDatabase(asMigrationDatabase(db), MIGRATIONS);
     outcomes.push({ pets: rows(db, "pets"), appointments: rows(db, "appointments") });
   }
   const [byTriggers, byService] = outcomes;
@@ -117,10 +128,10 @@ describe("remarcação em TypeScript igual à dos triggers da versão 3", () => 
   test("salvar de novo um concluído e concluir um manual não criam nada", async () => {
     await assertSameOutcome(async (db, dono_id, steps) => {
       const pet = await steps.createPet(db, { ...PACKAGE, dono_id, data_inicio_pacote: isoDate(-30) });
-      const [manual] = rows(db, "appointments").filter((a) => a.is_auto_agen === 0);
+      const [manual] = appointmentsOf(db, pet.id).filter((a) => a.is_auto_agen === 0);
       await steps.saveAppointment(db, { ...manual, concluido: 1 });
       await concludeNext(db, steps, pet.id, 1);
-      const [concluded] = rows(db, "appointments").filter((a) => a.is_auto_agen === 1 && a.concluido === 1);
+      const [concluded] = appointmentsOf(db, pet.id).filter((a) => a.is_auto_agen === 1 && a.concluido === 1);
       await steps.saveAppointment(db, { ...concluded, ta_pago: 1, tipo_pgto: "PIX" });
     });
   });

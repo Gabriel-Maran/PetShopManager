@@ -11,6 +11,7 @@ import { normalizeForSearch } from "../../src/utils/formatadores/normalizaNome.t
 import { todayIso } from "../../src/utils/datas.ts";
 import { INSERT_OWNER_SQL } from "../../src/repository/sql/ownersSql.ts";
 import { INSERT_PET_SQL, UPDATE_PET_SQL } from "../../src/repository/sql/petsSql.ts";
+import { APPOINTMENT_COLUMNS, APPOINTMENTS_WITH_NAMES } from "../../src/repository/sql/appointmentsSql.ts";
 import { PackageScheduleService } from "../../src/service/PackageScheduleService.ts";
 
 /** Conexão aberta como o getDatabase do app abre, ainda sem as migrações. */
@@ -54,6 +55,12 @@ export async function databaseAt(version, path = ":memory:") {
 
 /** Banco novo, igual ao da primeira abertura do app: as mesmas migrações, pelo mesmo código. */
 export const createDatabase = (path = ":memory:") => databaseAt(MIGRATIONS.length, path);
+
+/** A versão do esquema gravada no banco. */
+export const schemaVersion = (db) => db.prepare("PRAGMA user_version").get().user_version;
+
+/** A versão em que o serviço e a forma de pagamento passaram a ser gravados pelo id (DADOS-4). */
+const LIST_IDS_VERSION = 6;
 
 /** Banco como o app criava antes das migrações: o mesmo SQL da versão 1, sem marcar a versão. */
 export function createLegacyDatabase(path = ":memory:") {
@@ -104,6 +111,19 @@ const DEFAULT_PET = {
   valor_pacote: 0, // centavos
 };
 
+// Até a versão 5, o pet gravava o nome do serviço padrão. São os comandos do app daquela época, com os
+// mesmos parâmetros do INSERT_PET_SQL e do UPDATE_PET_SQL de hoje, para montar um banco antigo.
+const LEGACY_INSERT_PET_SQL = `INSERT INTO pets (nome, nome_normalizado, especie, porte, raca, observacoes,
+  dono_id, servico_padrao, remarcacao_ativa, pacote_remarcacao, data_inicio_pacote, horario_padrao, valor_pacote)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+const LEGACY_UPDATE_PET_SQL = `UPDATE pets SET nome = ?, nome_normalizado = ?, especie = ?, porte = ?,
+  raca = ?, observacoes = ?, dono_id = ?, servico_padrao = ?, remarcacao_ativa = ?, pacote_remarcacao = ?,
+  data_inicio_pacote = ?, horario_padrao = ?, valor_pacote = ?
+  WHERE id = ?`;
+
+const isLegacy = (db) => schemaVersion(db) < LIST_IDS_VERSION;
+
 // Os parâmetros na ordem do INSERT_PET_SQL e do UPDATE_PET_SQL, como o PetRepository monta.
 const petParams = (pet) => [
   pet.nome,
@@ -126,17 +146,18 @@ export const newPet = (fields) => ({ ...DEFAULT_PET, ...fields });
 
 /**
  * Só o INSERT do pet, sem passar pela remarcação. Serve para quem não olha a agenda e para os bancos
- * das versões 1 a 3, em que os triggers ainda geravam a agenda. Devolve o pet completo.
+ * das versões 1 a 3, em que os triggers ainda geravam a agenda. Num banco até a versão 5, usa o comando
+ * da época. Devolve o pet completo.
  */
 export function insertPet(db, fields) {
   const pet = newPet(fields);
-  const result = db.prepare(INSERT_PET_SQL).run(...petParams(pet));
+  const result = db.prepare(isLegacy(db) ? LEGACY_INSERT_PET_SQL : INSERT_PET_SQL).run(...petParams(pet));
   return { ...pet, id: Number(result.lastInsertRowid) };
 }
 
 /** Só o UPDATE do formulário do pet, sem passar pela remarcação, como o insertPet. */
 export function updatePet(db, pet) {
-  db.prepare(UPDATE_PET_SQL).run(...petParams(pet), pet.id);
+  db.prepare(isLegacy(db) ? LEGACY_UPDATE_PET_SQL : UPDATE_PET_SQL).run(...petParams(pet), pet.id);
 }
 
 /** Cadastra um pet como o app faz, pela remarcação. Devolve o pet completo, para editar com savePet. */
@@ -151,8 +172,16 @@ export const savePet = (db, pet, now = new Date()) => packageScheduleOf(db).upda
 
 export const petRow = (db, id) => db.prepare("SELECT * FROM pets WHERE id = ?").get(id);
 
+/**
+ * Os agendamentos do pet. Desde a versão 6, com as colunas que as telas leem (o serviço e a forma de
+ * pagamento pelo nome), prontos para salvar de novo pela remarcação; antes, a linha como está no banco.
+ */
 export const appointmentsOf = (db, petId) =>
-  db.prepare("SELECT * FROM appointments WHERE pet_id = ? ORDER BY data, id").all(petId);
+  isLegacy(db)
+    ? db.prepare("SELECT * FROM appointments WHERE pet_id = ? ORDER BY data, id").all(petId)
+    : db
+        .prepare(`SELECT ${APPOINTMENT_COLUMNS} FROM ${APPOINTMENTS_WITH_NAMES} WHERE AP.pet_id = ? ORDER BY AP.data, AP.id`)
+        .all(petId);
 
 export const pendingAutoOf = (db, petId) =>
   appointmentsOf(db, petId).filter((a) => a.is_auto_agen === 1 && a.concluido === 0);
