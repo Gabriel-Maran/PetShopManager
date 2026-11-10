@@ -3,9 +3,9 @@
 import { beforeEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { createDatabase, insertOwner, insertPet, isoDate } from "./helpers/database.mjs";
-import { INSERT_APPOINTMENT_SQL } from "../app/repository/sql/appointmentsSql.ts";
-import { DEACTIVATE_PET_SQL } from "../app/repository/sql/petsSql.ts";
-import { APPOINTMENTS_BY_MONTH_SQL, PETS_AUSENTES_SQL } from "../app/repository/sql/relatoriosSql.ts";
+import { INSERT_APPOINTMENT_SQL } from "../src/repository/sql/appointmentsSql.ts";
+import { DEACTIVATE_PET_SQL } from "../src/repository/sql/petsSql.ts";
+import { APPOINTMENTS_BY_MONTH_SQL, PETS_AUSENTES_SQL } from "../src/repository/sql/relatoriosSql.ts";
 
 /** Agendamento manual, com os parâmetros na ordem do INSERT_APPOINTMENT_SQL. */
 function insertAppointment(db, petId, data, { concluido = 0 } = {}) {

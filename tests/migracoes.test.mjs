@@ -19,12 +19,12 @@ import {
 import {
   migrateDatabase,
   recreateDatabase,
-} from "../app/config/migrator.ts";
-import { MESSAGES } from "../app/globals/messages.ts";
-import { AppError } from "../app/errors/AppError.ts";
-import { MIGRATIONS } from "../app/config/schema.ts";
-import { buildDemoDataSql, DEMO_DATA_SUMMARY } from "../app/config/demoData.ts";
-import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
+} from "../src/config/migrator.ts";
+import { MESSAGES } from "../src/globals/messages.ts";
+import { AppError } from "../src/errors/AppError.ts";
+import { MIGRATIONS } from "../src/config/schema.ts";
+import { buildDemoDataSql, DEMO_DATA_SUMMARY } from "../src/config/demoData.ts";
+import { normalizeForSearch } from "../src/utils/formatadores/normalizaNome.ts";
 
 const LATEST = MIGRATIONS.length;
 

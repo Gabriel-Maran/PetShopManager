@@ -1,5 +1,5 @@
 // SQL da restauração de backup sem depender do Expo: o BackupService e os testes executam os mesmos
-// comandos (app/config/backupRestore.ts). O banco importado fica anexado como "src".
+// comandos (src/config/backupRestore.ts). O banco importado fica anexado como "src".
 //
 // Os nomes de tabela, coluna e trigger que entram no texto dos comandos vêm desta lista ou do esquema
 // do próprio app ("main"), nunca do arquivo importado.

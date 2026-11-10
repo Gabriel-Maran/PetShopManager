@@ -1,15 +1,15 @@
 // Apoio dos testes do banco: cria o esquema real do app num SQLite em memória e grava com os mesmos
-// comandos SQL dos repositories (app/repository/sql). Nada é gravado em disco.
+// comandos SQL dos repositories (src/repository/sql). Nada é gravado em disco.
 //
 // Os triggers comparam datas com o relógio do SQLite ('now', no fuso local), que não dá para fixar. Por
 // isso as datas dos testes são relativas ao dia de verdade e ficam longe da virada do dia.
 import { DatabaseSync } from "node:sqlite";
-import { MIGRATIONS, SQL_CONNECTION_PRAGMAS } from "../../app/config/schema.ts";
-import { migrateDatabase } from "../../app/config/migrator.ts";
-import { normalizeForSearch } from "../../app/utils/formatadores/normalizaNome.ts";
-import { todayIso } from "../../app/utils/datas.ts";
-import { INSERT_OWNER_SQL } from "../../app/repository/sql/ownersSql.ts";
-import { INSERT_PET_SQL, UPDATE_PET_SQL } from "../../app/repository/sql/petsSql.ts";
+import { MIGRATIONS, SQL_CONNECTION_PRAGMAS } from "../../src/config/schema.ts";
+import { migrateDatabase } from "../../src/config/migrator.ts";
+import { normalizeForSearch } from "../../src/utils/formatadores/normalizaNome.ts";
+import { todayIso } from "../../src/utils/datas.ts";
+import { INSERT_OWNER_SQL } from "../../src/repository/sql/ownersSql.ts";
+import { INSERT_PET_SQL, UPDATE_PET_SQL } from "../../src/repository/sql/petsSql.ts";
 
 /** Conexão aberta como o getDatabase do app abre, ainda sem as migrações. */
 export function openConnection(path = ":memory:") {

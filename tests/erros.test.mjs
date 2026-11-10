@@ -2,8 +2,8 @@
 // de globals. Só o AppError leva a própria mensagem à tela; qualquer outro erro vira a genérica.
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { AppError, isAppError, logError, toUserMessage } from "../app/errors/AppError.ts";
-import { MESSAGES } from "../app/globals/messages.ts";
+import { AppError, isAppError, logError, toUserMessage } from "../src/errors/AppError.ts";
+import { MESSAGES } from "../src/globals/messages.ts";
 
 /** Todas as frases fixas de MESSAGES, com o caminho de cada uma. */
 function fixedMessages(group = MESSAGES, path = "MESSAGES") {

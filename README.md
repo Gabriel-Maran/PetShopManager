@@ -43,7 +43,7 @@ Prints com os dados de exemplo do próprio app.
 
 ## Como funciona por dentro
 
-- **Camadas:** telas → controllers (validação pelos schemas de `app/validation/`) → services → repositories (SQL com parâmetros) → SQLite.
+- **Camadas:** telas → controllers (validação pelos schemas de `src/validation/`) → services → repositories (SQL com parâmetros) → SQLite.
 - **Banco:**
   - oito tabelas: donos, pets, agendamentos, serviços, formas de pagamento, espécies, raças e configurações;
   - desativar é exclusão lógica;

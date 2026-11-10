@@ -9,8 +9,8 @@ import {
   pendingAutoOf,
   petRow,
 } from "./helpers/database.mjs";
-import { DEACTIVATE_OWNER_SQL } from "../app/repository/sql/ownersSql.ts";
-import { ACTIVATE_PET_SQL, DEACTIVATE_PET_SQL } from "../app/repository/sql/petsSql.ts";
+import { DEACTIVATE_OWNER_SQL } from "../src/repository/sql/ownersSql.ts";
+import { ACTIVATE_PET_SQL, DEACTIVATE_PET_SQL } from "../src/repository/sql/petsSql.ts";
 
 const ownerActive = (db, id) => db.prepare("SELECT is_ativo FROM owners WHERE id = ?").get(id).is_ativo;
 
