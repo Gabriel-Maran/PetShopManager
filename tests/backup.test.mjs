@@ -8,6 +8,7 @@ import {
   asMigrationDatabase,
   createDatabase,
   createLegacyDatabase,
+  createPet,
   databaseAt,
   insertOwner,
   insertPet,
@@ -157,16 +158,16 @@ describe("restauração de backup", () => {
     backup.close();
   });
 
-  test("depois da importação, o cadastro de um pet com pacote volta a gerar a agenda", async () => {
+  test("depois da importação, o cadastro de um pet com pacote gera a agenda", async () => {
     const { uri, backup } = await createBackup();
     const app = await createDatabase();
     await importBackup(app, { uri, backup });
 
     const dono_id = insertOwner(app, { nome: "Dono novo" });
-    const pet = insertPet(app, { dono_id, remarcacao_ativa: 1, pacote_remarcacao: 2, data_inicio_pacote: isoDate(1) });
+    const pet = await createPet(app, { dono_id, remarcacao_ativa: 1, pacote_remarcacao: 2, data_inicio_pacote: isoDate(1) });
 
     const agenda = pendingAutoOf(app, pet.id);
-    assert.ok(agenda.length > 0, "o trigger de cadastro voltou");
+    assert.ok(agenda.length > 0, "a remarcação gera a agenda no banco restaurado");
     assert.equal(petRow(app, pet.id).ultimo_visita_data_auto, agenda.at(-1).data);
     backup.close();
   });
@@ -234,6 +235,27 @@ describe("backup de versão anterior", () => {
     // A agenda do pacote volta como a do backup, convertida, e não como o trigger do app a faria.
     assert.deepEqual(rows(app, "appointments"), rows(backup, "appointments"));
     assert.deepEqual(rows(app, "pets"), rows(backup, "pets"));
+    backup.close();
+  });
+
+  test("um backup da versão 3, com a agenda feita pelos triggers, entra igual e sem eles", async () => {
+    const uri = backupUri();
+    const backup = await databaseAt(3, uri);
+    const dono_id = insertOwner(backup, { nome: "Dono do backup da versão 3" });
+    const pet = insertPet(backup, {
+      dono_id, remarcacao_ativa: 1, pacote_remarcacao: 2, data_inicio_pacote: isoDate(-20), valor_pacote: 20001,
+    });
+    const agendaBefore = rows(backup, "appointments");
+    assert.ok(agendaBefore.length > 0, "o trigger da versão 3 gerou a agenda");
+    const app = await appWithData();
+
+    await importBackup(app, { uri, backup });
+
+    assert.equal(userVersion(app), LATEST);
+    assert.deepEqual(rows(app, "appointments"), agendaBefore, "a agenda vem como estava");
+    assert.equal(petRow(app, pet.id).ultimo_visita_data_auto, pendingAutoOf(backup, pet.id).at(-1).data);
+    const triggers = appTriggers(app).map(({ name }) => name);
+    assert.ok(!triggers.includes("trg_pet_remarcacao_insert") && !triggers.includes("trg_remarcacao_automatica"));
     backup.close();
   });
 

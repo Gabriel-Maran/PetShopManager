@@ -1,6 +1,11 @@
+import { getDatabase } from "../config/database";
 import type { AppointmentData } from "../validation/appointmentSchema";
 import { appointmentsRepository } from "../repository/AppointmentsRepository";
 import type { IsoDate } from "../utils/datas";
+import { PackageScheduleService } from "./PackageScheduleService";
+
+// Concluir um automático cria o próximo da agenda do pacote, na mesma transação.
+const packageSchedule = new PackageScheduleService(getDatabase);
 
 class AppointmentsService {
   getAppointmentById(id: number) {
@@ -20,7 +25,7 @@ class AppointmentsService {
   }
 
   updateAppointment(id: number, appointment: AppointmentData) {
-    return appointmentsRepository.updateAppointment(id, appointment);
+    return packageSchedule.updateAppointment(id, appointment);
   }
 }
 
