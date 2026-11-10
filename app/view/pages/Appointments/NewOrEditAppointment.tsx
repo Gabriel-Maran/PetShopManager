@@ -74,7 +74,8 @@ export default function NewOrEditAppointment() {
   const [appointmentSelected, setAppointmentSelected] = useState(true);
   const [modalConfig, setModalConfig] = useState<ModalConfig>(MODAL_INICIAL);
 
-  const { appointmentsForm, updateAppointmentsField } = useAgendamentos();
+  const { appointmentsForm, updateAppointmentsField, isAppointmentDirty } =
+    useAgendamentos();
   const { servicesForm } = useServicos();
   const { pgtosForm } = useTiposPagamento();
 
@@ -82,16 +83,14 @@ export default function NewOrEditAppointment() {
     modalConfig.visivel,
   );
 
-  // --- Sincroniza lista do modal quando petsForm.pets muda (busca/paginação) ---
-  // Sem isso, modalConfig.lista fica congelada no momento em que o modal abriu
+  // Sem isso, a lista do modal fica congelada no momento em que ele abriu, sem a busca nem a paginação.
   useEffect(() => {
     if (modalConfig.visivel) {
       setModalConfig((prev) => ({ ...prev, lista: petsForm.pets ?? [] }));
     }
   }, [petsForm.pets]);
 
-  // --- Salvar agendamento, com proteção contra duplo clique ---
-  // Dentro da ação: um valor digitado fora do formato vira a mensagem de erro da tela.
+  // Com proteção contra duplo clique. Dentro da ação: um valor digitado fora do formato vira a mensagem de erro da tela.
   const { run: salvarAgendamento, isRunning: isSalvando } = useAsyncAction(
     async () => {
       const appointmentSalvar = new AppointmentBuilder()
@@ -238,7 +237,7 @@ export default function NewOrEditAppointment() {
       <TitleBar
         title={isEditing ? "Editar Agendamento" : "Novo Agendamento"}
         subtitle="Preencha as informações"
-        confirmReturn={true}
+        hasUnsavedChanges={isAppointmentDirty}
       />
       <View style={s.escolhaItem} accessibilityRole="tablist">
         <ItemSelect

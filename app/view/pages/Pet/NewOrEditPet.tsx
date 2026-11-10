@@ -52,6 +52,9 @@ const portesList = Object.keys(PorteAnimalLabel).map((key) => ({
   nome: PorteAnimalLabel[key as keyof typeof PorteAnimalLabel],
 }));
 
+// Os nomes do dono e da raça são buscados a partir dos ids ao abrir a edição; mudam sem o usuário mexer.
+const DERIVED_FIELDS = ["dono_nome", "raca_nome"] as const;
+
 const MODAL_INICIAL = {
   visivel: false,
   titulo: "",
@@ -72,32 +75,33 @@ export default function NewOrEditPet() {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
 
-  const { form, updateField } = useFormState({
-    nome: params?.pet?.nome ?? "",
-    especie: params?.pet?.especie ?? 0,
-    dono_id: params?.pet?.dono_id ?? 0,
-    dono_nome: "",
-    raca: params?.pet?.raca ?? 0,
-    raca_nome: params?.pet?.raca_nome ?? "",
-    observacoes: params?.pet?.observacoes ?? "",
-    servicoPadrao: params?.pet?.servico_padrao ?? TipoServico.Banho,
-    remarcAtiva: Boolean(params?.pet?.remarcacao_ativa ?? false),
-    valorPacote: formatMoneyInput(params?.pet?.valor_pacote),
-    porte:
-      params?.pet?.porte && params.pet?.porte in PorteAnimal
-        ? (params.pet?.porte as PorteAnimal)
-        : PorteAnimal.MEDIO,
-    pacoteRemarcacao:
-      params?.pet?.pacote_remarcacao &&
-      params.pet?.pacote_remarcacao in PacoteRemarcacao
-        ? (params.pet?.pacote_remarcacao as PacoteRemarcacao)
-        : undefined,
-    dataInicioPacote: params?.pet?.data_inicio_pacote ?? todayIso(),
-    horario_padrao: params?.pet?.horario_padrao ?? "",
-  });
+  const { form, updateField, isDirty } = useFormState(
+    {
+      nome: params?.pet?.nome ?? "",
+      especie: params?.pet?.especie ?? 0,
+      dono_id: params?.pet?.dono_id ?? 0,
+      dono_nome: "",
+      raca: params?.pet?.raca ?? 0,
+      raca_nome: params?.pet?.raca_nome ?? "",
+      observacoes: params?.pet?.observacoes ?? "",
+      servicoPadrao: params?.pet?.servico_padrao ?? TipoServico.Banho,
+      remarcAtiva: Boolean(params?.pet?.remarcacao_ativa ?? false),
+      valorPacote: formatMoneyInput(params?.pet?.valor_pacote),
+      porte:
+        params?.pet?.porte && params.pet?.porte in PorteAnimal
+          ? (params.pet?.porte as PorteAnimal)
+          : PorteAnimal.MEDIO,
+      pacoteRemarcacao:
+        params?.pet?.pacote_remarcacao &&
+        params.pet?.pacote_remarcacao in PacoteRemarcacao
+          ? (params.pet?.pacote_remarcacao as PacoteRemarcacao)
+          : undefined,
+      dataInicioPacote: params?.pet?.data_inicio_pacote ?? todayIso(),
+      horario_padrao: params?.pet?.horario_padrao ?? "",
+    },
+    { ignoredWhenComparing: DERIVED_FIELDS },
+  );
 
-  // ─── Fonte única de dados: um único hook para raças e espécies ───────────────
-  // racasList, page, setPage, setSearchTxt e total controlam o modal de raças
   const {
     racasList,
     especiesList,
@@ -117,7 +121,6 @@ export default function NewOrEditPet() {
 
   const [modalConfig, setModalConfig] = useState(MODAL_INICIAL);
 
-  // --- Salvar pet ---
   // Dentro da ação: um valor digitado fora do formato vira a mensagem de erro da tela.
   const { run: salvarPet, isRunning: isSalvando } = useAsyncAction(
     async () => {
@@ -158,7 +161,6 @@ export default function NewOrEditPet() {
     },
   );
 
-  // --- Abre o modal (DONO ou RACA) ---
   const abrirModal = useCallback(
     ({
       titulo,
@@ -186,21 +188,19 @@ export default function NewOrEditPet() {
     setModalConfig((prev) => ({ ...prev, visivel: false }));
   }, []);
 
-  // --- Sincroniza lista do modal de DONO quando owners mudam (paginação/busca) ---
+  // Sem isso, a lista do modal fica congelada no momento em que ele abriu, sem a busca nem a paginação.
   useEffect(() => {
     if (modalConfig.visivel && modalConfig.tipoModal === "DONO") {
       setModalConfig((prev) => ({ ...prev, lista: owners ?? [] }));
     }
   }, [owners]);
 
-  // --- Sincroniza lista do modal de RACA quando racasList mudam (paginação/busca) ---
   useEffect(() => {
     if (modalConfig.visivel && modalConfig.tipoModal === "RACA") {
       setModalConfig((prev) => ({ ...prev, lista: racasList ?? [] }));
     }
   }, [racasList]);
 
-  // --- Busca no modal: server-side para DONO, server-side para RACA também ---
   const handleSetSearch = useCallback(
     (txt: string) => {
       if (modalConfig.tipoModal === "DONO") {
@@ -208,7 +208,7 @@ export default function NewOrEditPet() {
         setDonoSearchTxt(txt);
       } else if (modalConfig.tipoModal === "RACA") {
         setRacaPage(0);
-        setRacaSearchTxt(txt); // dispara o hook → racasList atualiza → useEffect acima sincroniza o modal
+        setRacaSearchTxt(txt);
       }
     },
     [
@@ -249,7 +249,7 @@ export default function NewOrEditPet() {
           }
           subtitle="Preencha os dados do pet"
           isViewing={isViewing}
-          confirmReturn={!isViewing}
+          hasUnsavedChanges={isDirty}
         />
         <View style={s.escolhaItem} accessibilityRole="tablist">
           <ItemSelect

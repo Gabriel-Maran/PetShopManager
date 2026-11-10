@@ -1,4 +1,3 @@
-// view/components/ErrorModal.tsx
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
 import { HIDDEN_FROM_SCREEN_READER } from "../Acessibilidade/accessibilityProps";
@@ -44,7 +43,7 @@ const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     overlay: {
       flex: 1,
-      backgroundColor: "rgba(0,0,0,0.45)",
+      backgroundColor: colors.MODAL_BACKGROUND,
       justifyContent: "center",
       alignItems: "center",
       padding: 32,
