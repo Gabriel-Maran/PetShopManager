@@ -384,3 +384,21 @@ Decisão do PR #34:
 - Os botões Salvar dos três formulários viraram o `SaveButton`, e os títulos "DADOS…", o `FormSectionTitle`.
 
 Motivo: as regras do Gabriel pedem limites e textos num lugar só, entrada validada por schema e código repetido extraído. Um componente por botão e por título faz os ajustes de acessibilidade valerem nos três formulários de uma vez.
+
+**Segunda rodada de quatro agentes em paralelo (PRs #35 a #38).**
+Contexto: o Gabriel escolheu quatro frentes das pendências e das sugestões das varreduras: limpeza (REPO-3), tema e `Toggle`, validação e raças, e navegação.
+Decisão:
+- Como na primeira rodada, cada frente teve um worktree, uma branch e uma zona de arquivos só dela. A novidade: a limpeza de imports, variáveis e comentários sem uso dentro de um arquivo coube ao dono da zona, e não ao agente de limpeza. Assim nenhum arquivo apareceu em dois PRs.
+- O coordenador juntou as quatro branches num worktree local e rodou o conjunto: typecheck limpo, 331 testes passando, e o `tsc --noUnusedLocals --noUnusedParameters` sem nenhum erro. Essas flags ficam para depois do merge dos quatro, porque cada branch sozinha ainda falha nas zonas dos outros.
+- Esta documentação vem num PR próprio, como na primeira rodada.
+
+Decisões dos PRs:
+- PR #35, tema: no tema escuro, a bolinha do `Toggle` ligado ficou escura (`#0F1115`), como no Material 3, porque nem o branco passa de 2,54:1 sobre o verde. O `withAlpha` lança erro com cor ou opacidade inválida, porque isso é bug de código e não entrada do usuário.
+- PR #36, navegação: o formulário compara o estado atual com o que abriu, campo a campo, e `null`, `undefined` e `""` contam como o mesmo vazio. O nome do dono e o da raça ficam fora da comparação, porque a tela os busca pelo id ao abrir. A prop `confirmReturn` do `TitleBar` virou `hasUnsavedChanges`.
+- PR #37, limpeza: o `ConfigBuilder` e oito métodos sem uso de agendamento e dono saíram, entre eles o `getAppointmentsByDate`, que tinha SQL inválido. O `OwnerBuilder` continua, porque o formulário de dono usa. O `CONCLUDE_APPOINTMENT_SQL` também saiu, e os testes de remarcação concluem o agendamento pelo `UPDATE_APPOINTMENT_SQL`, como o app faz. Por isso a lista de 2026-11-08 ("concluir") não vale mais.
+- PR #38, validação e raças:
+  - a raça repetida é comparada no código, pelo nome sem acento, e não pela coluna `nome_raca_normalized`. Motivo: a carga inicial tirou a pontuação dessa coluna ("vira-lata srd"), e o app não tira. Assim não foi preciso migração;
+  - os valores do pet saíram para `petEnums.ts`, como objetos `as const`, que rodam no Node. O `createPetSchemas` deixou de receber os enums, e a nota do PR #32 sobre isso não vale mais;
+  - o enum `ORDER` saiu.
+
+Motivo: a mesma da primeira rodada. Os PRs são independentes, e o Gabriel revisa e mescla em qualquer ordem.
