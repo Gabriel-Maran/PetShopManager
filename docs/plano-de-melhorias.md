@@ -175,6 +175,8 @@ Parte do app feita em 2026-11-08: o "hoje" e as conversões de data estão em `a
 
 ### BUG-8 · Botão voltar do Android fecha o app (provável)
 
+Feito em 2026-11-09, no PR #30 (pergunta 16: o `BackHandler` agora). O botão da tela e o do Android chamam o mesmo `requestBack()`. O destino vem de um mapa só (`backRouteOf`, em `app/config/navigation.ts`), e o formulário em edição registra uma guarda (`useBackGuard`) que abre a confirmação. Verificado: typecheck limpo, 154 testes passando (12 novos em `tests/navegacao.test.mjs`) e o pacote Android gerado. Falta o Gabriel conferir no aparelho, com o roteiro do PR. Os modais ainda não fecham com o voltar (ver `proximos-passos.md`).
+
 - **Por quê:** a navegação é própria e não trata o `BackHandler`. No Android, o botão voltar sai do app em qualquer tela, inclusive no meio de um formulário, sem a confirmação que o botão da tela já pede.
 - **O que muda:** o botão voltar segue o mesmo caminho do botão da `TitleBar`, com confirmação nos formulários, e só sai do app na tela inicial. A troca por uma biblioteca de navegação é o ARQ-3.
 - **Pronto quando:** testado num aparelho: voltar num formulário pede confirmação, e nas abas principais leva ao calendário.
@@ -201,6 +203,8 @@ Feito em 2026-11-09, no PR #28 (Parte 4):
 - **Pronto quando:** testes mostram que exportar e importar devolve o mesmo banco, e que um arquivo inválido é recusado com uma mensagem clara.
 
 ### VALID-1 · Validação de entrada completa
+
+Feito em 2026-11-09, no PR #32, com o Zod 4.6.7 (pergunta 13). Os schemas ficam em `app/validation/`, e os controllers chamam o `parseInput`, que converte a falha no `AppError` com a mensagem de `messages.ts`. Os limites de tamanho ficam em `globals/limits.ts`. Verificado: typecheck limpo, 280 testes passando (55 novos em `tests/validacao.test.mjs`) e o pacote Android gerado, que cresceu 680 KB com o Zod. Falta o Gabriel conferir no aparelho, com o roteiro do PR. O cadastro de raça pelo `raceSpecieHelper` e os limites escritos à mão nas telas ainda não usam os schemas (ver `proximos-passos.md`).
 
 - **Por quê:** parte da entrada é validada, parte não. O horário aceita "9" (sem minutos), a data só é checada por ser número, o valor pode ficar vazio, o e-mail não tem formato conferido e os textos não levam `trim` em todo lugar. O salvamento do dono não protege contra toque duplo, ao contrário dos de pet e agendamento.
 - **O que muda:** um schema por entidade (dono, pet, agendamento, raça) com os formatos (`HH:MM`, data real, valor, e-mail, telefone), `trim` e tamanho máximo, usado pelo serviço antes de gravar. As mensagens ficam em `globals` (ver ERRO-1). A escolha entre Zod e validadores próprios está em `perguntas-em-aberto.md`.
@@ -231,6 +235,13 @@ Preparado em 2026-11-08, sem migração: a máscara e a conversão para centavos
 
 ### A11Y-1 · Acessibilidade
 
+Feito em 2026-11-09, no PR #31:
+- botão de ícone pelo `IconButton` ou `ActionIconButton`, com papel, rótulo de `A11Y_LABELS` e área de 48 dp;
+- `Toggle` como interruptor e enfeites escondidos do leitor;
+- verdes do tema claro escurecidos para 4,5:1, com a paleta em `Themes/colors.ts` e o contraste conferido por teste nos dois temas.
+
+Verificado: typecheck limpo, 213 testes passando (71 novos em `tests/acessibilidade.test.mjs`) e o pacote Android gerado. Falta o teste com o TalkBack, pelo roteiro do PR. Os formulários `NewOrEdit*` e a `TitleBar` ainda têm ajustes (ver `proximos-passos.md`).
+
 - **Por quê:** há 53 botões tocáveis e só 4 propriedades de acessibilidade no app. Botões só com ícone (adicionar, expandir, editar, excluir, voltar, filtro) não têm nome para o leitor de tela. O interruptor próprio (`Toggle`) não é anunciado como interruptor. Botões de ícone com 38 dp ficam abaixo dos 48 dp recomendados no Android. O texto branco sobre o verde `#1D9E75` dos botões tem contraste de cerca de 3,4:1, abaixo dos 4,5:1 pedidos para texto normal. Os emojis do backup são lidos em voz alta.
 - **O que muda:** `accessibilityLabel` e `accessibilityRole` em todo botão de ícone, `Toggle` com papel de `switch` e estado `checked` (ou o `Switch` nativo), área de toque mínima de 48 dp com `hitSlop`, cores de texto revisadas no tema e imagens decorativas escondidas do leitor.
 - **Pronto quando:** um teste com o TalkBack percorre as quatro abas e os formulários sem botão mudo, e as cores do tema passam no contraste.
@@ -242,6 +253,16 @@ Preparado em 2026-11-08, sem migração: a máscara e a conversão para centavos
 - **Pronto quando:** uma busca por cor ou `fontSize` literal fora do tema não acha nada.
 
 ### REPO-3 · Limpeza do repositório
+
+Em parte feito em 2026-11-09, no PR #29:
+- saíram o `ScreenService`, 11 imagens sem uso (1,6 MB; as do plano, mais `crud/personAdd.png` e `setas/setaDireita.png`), o script `web`, funções sem uso do `useFormState` e os comentários de conversa de `utils` e `hooks`;
+- o `intParaHifen`, os `PetListModal`/`OwnerListModal` e o `inserts.txt` já tinham saído antes.
+
+Falta, porque estava na área de outros PRs:
+- os métodos sem uso nas três camadas (o `getAppointmentsByDate` e outros, que um service ainda chama);
+- os comentários e imports que sobram nas telas e nos componentes.
+
+A lista está em `proximos-passos.md`.
 
 - **Por quê:** quem abre o código encontra sobras do desenvolvimento.
 - **O que muda:**
