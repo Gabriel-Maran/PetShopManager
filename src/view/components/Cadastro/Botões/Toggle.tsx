@@ -18,6 +18,7 @@ import {
   HIDDEN_FROM_SCREEN_READER,
   touchTargetSlop,
 } from "../../Acessibilidade/accessibilityProps";
+import { FONT_SIZE, RADIUS, SPACING } from "../../../Themes/tokens";
 
 const SWITCH_WIDTH = 50;
 const SWITCH_HEIGHT = 30;
@@ -116,24 +117,24 @@ const styles = (colors: ThemeColors) =>
       justifyContent: "space-between",
       borderWidth: 1.5,
       borderColor: colors.BORDER_STRONG,
-      padding: 10,
-      paddingLeft: 15,
-      borderRadius: 10,
+      padding: SPACING[10],
+      paddingLeft: SPACING[15],
+      borderRadius: RADIUS[10],
     },
     subtitle: {
-      fontSize: 15,
+      fontSize: FONT_SIZE.BODY_LARGE,
       color: colors.TEXT_SECONDARY,
     },
     switchContainer: {
       width: SWITCH_WIDTH,
       height: SWITCH_HEIGHT,
-      borderRadius: 15,
+      borderRadius: RADIUS[15],
       justifyContent: "center",
     },
     thumb: {
       width: 26,
       height: 26,
-      borderRadius: 13,
+      borderRadius: RADIUS[13],
       backgroundColor: colors.TOGGLE_THUMB,
       elevation: 3,
       shadowColor: colors.SHADOW,

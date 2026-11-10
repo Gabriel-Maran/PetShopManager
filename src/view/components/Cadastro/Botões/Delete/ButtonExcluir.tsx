@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import ActionIconButton from "../ActionIconButton";
+import { SPACING } from "../../../../Themes/tokens";
 
 export default function ButtonExcluir({
   onDeactivate,
@@ -30,6 +31,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   button: {
-    marginLeft: 10,
+    marginLeft: SPACING[10],
   },
 });

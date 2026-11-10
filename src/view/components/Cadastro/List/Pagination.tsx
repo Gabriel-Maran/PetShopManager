@@ -2,6 +2,13 @@ import { StyleSheet, Text, View } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
 import IconButton from "../../Acessibilidade/IconButton";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  LINE_HEIGHTS,
+  RADIUS,
+  SPACING,
+} from "../../../Themes/tokens";
 
 const BUTTON_SIZE = 36;
 
@@ -90,13 +97,13 @@ const styles = (colors: ThemeColors) =>
       flexDirection: "row",
       justifyContent: "center",
       alignItems: "center",
-      gap: 6,
-      paddingVertical: 12,
+      gap: SPACING[6],
+      paddingVertical: SPACING[12],
     },
     btn: {
       width: BUTTON_SIZE,
       height: BUTTON_SIZE,
-      borderRadius: 8,
+      borderRadius: RADIUS[8],
       justifyContent: "center",
       alignItems: "center",
       borderWidth: 1,
@@ -112,16 +119,16 @@ const styles = (colors: ThemeColors) =>
     },
     txt: {
       color: colors.TEXT_MUTED,
-      fontSize: 14,
+      fontSize: FONT_SIZE.BODY,
     },
     // Texto sobre o verde cheio usa a cor do fundo, como nos botões Salvar: passa 4,5:1 nos dois temas.
     txtActive: {
       color: colors.BACKGROUND,
-      fontWeight: "600",
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
     },
     arrow: {
-      fontSize: 20,
+      fontSize: FONT_SIZE.TITLE,
       color: colors.TEXT_MUTED,
-      lineHeight: 22,
+      lineHeight: LINE_HEIGHTS[22],
     },
   });

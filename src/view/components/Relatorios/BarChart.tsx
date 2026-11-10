@@ -7,6 +7,7 @@ import {
 import { formatValue } from "../../../utils/formatadores/formaterHelper";
 import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
 import type { BarChartItem } from "../../../utils/relatorios/graficos";
+import { FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "../../Themes/tokens";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -57,7 +58,10 @@ export default function BarChart({
         horizontal
         showsHorizontalScrollIndicator={false}
         style={s.scroll}
-        contentContainerStyle={[s.scrollContent, verticalLabels && { gap: 20 }]}
+        contentContainerStyle={[
+          s.scrollContent,
+          verticalLabels && { gap: SPACING[20] },
+        ]}
       >
         {data.map((item, index) => {
           const ratio = maxY > 0 ? item.y / maxY : 0;
@@ -136,25 +140,25 @@ export default function BarChart({
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     card: {
-      borderRadius: 14,
-      padding: 16,
+      borderRadius: RADIUS[14],
+      padding: SPACING[16],
       alignSelf: "flex-start",
     },
     scroll: {
       flexGrow: 0,
     },
     title: {
-      fontSize: 14,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.BODY,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.TEXT_PRIMARY,
-      marginBottom: 16,
+      marginBottom: SPACING[16],
     },
     scrollContent: {
       flexDirection: "row",
       justifyContent: "space-evenly",
       minWidth: "100%",
-      paddingHorizontal: 8,
-      gap: 15,
+      paddingHorizontal: SPACING[8],
+      gap: SPACING[15],
     },
     barWrapper: {
       alignItems: "center",
@@ -163,18 +167,18 @@ const styles = (colors: ThemeColors) =>
       maxWidth: 80,
     },
     valueLabel: {
-      fontSize: 11,
-      fontWeight: "500",
+      fontSize: FONT_SIZE.CAPTION,
+      fontWeight: FONT_WEIGHT.MEDIUM,
       color: colors.TEXT_MUTED,
-      marginBottom: 4,
+      marginBottom: SPACING[4],
       textAlign: "justify",
     },
     valueLabelMax: {
       color: colors.CHART_TEXT_HIGHLIGHT,
-      fontWeight: "700",
+      fontWeight: FONT_WEIGHT.BOLD,
     },
     suffix: {
-      fontSize: 10,
+      fontSize: FONT_SIZE.OVERLINE,
     },
     barArea: {
       justifyContent: "flex-end",
@@ -182,17 +186,17 @@ const styles = (colors: ThemeColors) =>
     },
     bar: {
       width: "100%",
-      borderRadius: 6,
+      borderRadius: RADIUS[6],
     },
     labelArea: {
       width: "100%",
       alignItems: "center",
       justifyContent: "flex-start",
       overflow: "visible",
-      marginTop: 6,
+      marginTop: SPACING[6],
     },
     xLabel: {
-      fontSize: 11,
+      fontSize: FONT_SIZE.CAPTION,
       color: colors.TEXT_MUTED,
       textAlign: "center",
       maxWidth: 60,
@@ -205,15 +209,15 @@ const styles = (colors: ThemeColors) =>
     baseline: {
       height: 1,
       backgroundColor: colors.BORDER_MID,
-      marginTop: 4,
-      marginHorizontal: 2,
+      marginTop: SPACING[4],
+      marginHorizontal: SPACING[2],
     },
     empty: {
-      padding: 24,
+      padding: SPACING[24],
       alignItems: "center",
     },
     emptyTxt: {
       color: colors.TEXT_MUTED,
-      fontSize: 14,
+      fontSize: FONT_SIZE.BODY,
     },
   });

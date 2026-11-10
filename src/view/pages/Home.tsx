@@ -9,6 +9,7 @@ import {
   useTheme,
   useThemedStyles,
 } from "../Themes/ThemeProvider";
+import { SPACING } from "../Themes/tokens";
 
 export default function Home() {
   const s = useThemedStyles(styles);
@@ -26,7 +27,7 @@ export default function Home() {
       <View
         style={{
           flex: 1,
-          padding: 15,
+          padding: SPACING[15],
           backgroundColor: colors.THIRD_BACKGROUND,
         }}
       >

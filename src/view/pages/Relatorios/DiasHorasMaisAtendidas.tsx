@@ -9,6 +9,7 @@ import BarChart from "../../components/Relatorios/BarChart";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import { reportsService } from "../../../service/ReportsService";
 import { useAsyncData } from "../../../hooks/useAsyncData";
+import { RADIUS, SPACING } from "../../Themes/tokens";
 
 export default function DiasHorasMaisAtendidas() {
   const { data, loading } = useAsyncData(() =>
@@ -88,15 +89,15 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.BACKGROUND,
     },
     scrollContent: {
-      padding: 16, // Espaçamento nas bordas da tela
+      padding: SPACING[16], // Espaçamento nas bordas da tela
       alignItems: "center",
     },
     card: {
       width: "100%",
       backgroundColor: colors.SURFACE,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 20,
+      borderRadius: RADIUS[12],
+      padding: SPACING[16],
+      marginBottom: SPACING[20],
       // Sombra leve para dar profundidade
       elevation: 3,
       shadowColor: colors.SHADOW,

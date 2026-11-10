@@ -22,6 +22,7 @@ import type { PorteAnimal } from "../../../../config/petEnums";
 import type { Breed } from "../../../../model/Breed";
 import type { Species } from "../../../../repository/SpeciesRepository";
 import type { PetForm } from "../../../pages/Pet/petForm";
+import { RADIUS, SPACING } from "../../../Themes/tokens";
 
 export type TipoModal = "DONO" | "RACA";
 
@@ -194,7 +195,7 @@ export default function AbaInfoPet({
 
   const renderEspecieItem = useCallback(
     (item: any) => (
-      <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+      <Text style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}>
         {
           EspeciesAtendidasLabel[
             item.nome as keyof typeof EspeciesAtendidasLabel
@@ -207,7 +208,7 @@ export default function AbaInfoPet({
 
   const renderPorteItem = useCallback(
     (item: any) => (
-      <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+      <Text style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}>
         {item.nome}
       </Text>
     ),
@@ -322,7 +323,7 @@ const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     inputs: {
       width: "100%",
-      borderRadius: 10,
+      borderRadius: RADIUS[10],
       borderWidth: 1,
       borderColor: colors.BORDER_LIGHT,
       backgroundColor: colors.BACKGROUND,

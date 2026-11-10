@@ -1,6 +1,7 @@
 import { Image, StyleSheet, TouchableOpacity } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
 import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
+import { RADIUS, SPACING } from "../../../Themes/tokens";
 
 export default function ButtonBack({ onPress }: { onPress: () => void }) {
   const s = useThemedStyles(styles);
@@ -32,8 +33,8 @@ const styles = (colors: ThemeColors) =>
     btnBack: {
       borderColor: colors.BORDER_MID,
       borderWidth: 1,
-      padding: 4,
-      borderRadius: 15,
+      padding: SPACING[4],
+      borderRadius: RADIUS[15],
       justifyContent: "center",
     },
   });

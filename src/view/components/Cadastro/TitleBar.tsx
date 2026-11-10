@@ -6,6 +6,7 @@ import { useScreen } from "../../../hooks/useScreen";
 import { useBackGuard } from "../../../hooks/useBackNavigation";
 import { DIALOGS } from "../../../globals/messages";
 import ConfirmModal from "../ConfirmModal";
+import { FONT_SIZE, FONT_WEIGHT, SPACING } from "../../Themes/tokens";
 
 /** O título das telas internas, com o voltar. Para onde ele leva fica em config/navigation.ts. */
 export default function TitleBar({
@@ -60,17 +61,17 @@ const styles = (colors: ThemeColors) =>
       flexDirection: "row",
       borderWidth: 1,
       borderColor: colors.BORDER_MID,
-      padding: 20,
+      padding: SPACING[20],
       alignItems: "center",
-      gap: 15,
+      gap: SPACING[15],
     },
     txtTitle: {
-      fontSize: 20,
-      fontWeight: "bold",
+      fontSize: FONT_SIZE.TITLE,
+      fontWeight: FONT_WEIGHT.BOLD,
       color: colors.TEXT_PRIMARY,
     },
     txtSubTitle: {
-      fontSize: 14,
+      fontSize: FONT_SIZE.BODY,
       color: colors.TEXT_MUTED,
     },
   });

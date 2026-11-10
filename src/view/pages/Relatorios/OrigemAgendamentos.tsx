@@ -9,6 +9,7 @@ import BarChart from "../../components/Relatorios/BarChart";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import { reportsService } from "../../../service/ReportsService";
 import { useAsyncData } from "../../../hooks/useAsyncData";
+import { RADIUS, SPACING } from "../../Themes/tokens";
 
 export default function OrigemAgendamentos() {
   const { data, loading } = useAsyncData(() =>
@@ -84,16 +85,16 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.BACKGROUND,
     },
     scrollContent: {
-      padding: 16,
+      padding: SPACING[16],
       alignItems: "center",
     },
     card: {
       width: "100%",
       backgroundColor: colors.SURFACE,
-      borderRadius: 12,
-      paddingVertical: 16,
-      paddingHorizontal: 6,
-      marginBottom: 20,
+      borderRadius: RADIUS[12],
+      paddingVertical: SPACING[16],
+      paddingHorizontal: SPACING[6],
+      marginBottom: SPACING[20],
       elevation: 3,
       shadowColor: colors.SHADOW,
       shadowOffset: { width: 0, height: 2 },

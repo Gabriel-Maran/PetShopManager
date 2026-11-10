@@ -47,6 +47,7 @@ import AbaInfoPet, {
 } from "../../components/Cadastro/Tabs/AbaInfoPet";
 import AbaAgendamentoPet from "../../components/Cadastro/Tabs/AbaAgendamentoPet";
 import type { PetForm } from "./petForm";
+import { SPACING } from "../../Themes/tokens";
 
 const portesList = Object.values(PorteAnimal).map((porte) => ({
   id: porte,
@@ -329,15 +330,15 @@ const styles = (colors: ThemeColors) =>
     },
     ctnCadastro: {
       flex: 1,
-      padding: 20,
+      padding: SPACING[20],
       alignItems: "center",
     },
     escolhaItem: {
       flexDirection: "row",
       justifyContent: "space-around",
-      paddingVertical: 10,
+      paddingVertical: SPACING[10],
     },
     ctnBtnSalvar: {
-      marginTop: 15,
+      marginTop: SPACING[15],
     },
   });

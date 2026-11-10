@@ -20,6 +20,13 @@ import {
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import ConfirmModal from "./ConfirmModal";
 import { HIDDEN_FROM_SCREEN_READER } from "./Acessibilidade/accessibilityProps";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  LINE_HEIGHTS,
+  RADIUS,
+  SPACING,
+} from "../Themes/tokens";
 
 interface DemoDataLoaderProps {
   onLoaded?: () => void;
@@ -154,15 +161,15 @@ export function DemoDataLoader({ onLoaded }: DemoDataLoaderProps) {
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     container: {
-      paddingHorizontal: 20,
-      paddingTop: 20,
+      paddingHorizontal: SPACING[20],
+      paddingTop: SPACING[20],
     },
     card: {
       flexDirection: "row",
       alignItems: "center",
-      borderRadius: 12,
-      padding: 16,
-      gap: 14,
+      borderRadius: RADIUS[12],
+      padding: SPACING[16],
+      gap: SPACING[14],
       borderWidth: 1,
       backgroundColor: colors.EDITAR_BACKGROUND_COLOR,
       borderColor: colors.EDITAR_BORDER_COLOR,
@@ -174,7 +181,7 @@ const styles = (colors: ThemeColors) =>
     cardIcon: {
       width: 44,
       height: 44,
-      borderRadius: 22,
+      borderRadius: RADIUS[22],
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: colors.PRIMARY_SOFT,
@@ -183,23 +190,23 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.EXCLUIR_BACKGROUND_COLOR,
     },
     icon: {
-      fontSize: 22,
+      fontSize: FONT_SIZE.TITLE_LARGE,
     },
     cardText: {
       flex: 1,
     },
     cardTitle: {
-      fontSize: 15,
-      fontWeight: "600",
-      marginBottom: 2,
+      fontSize: FONT_SIZE.BODY_LARGE,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
+      marginBottom: SPACING[2],
       color: colors.EDITAR_MAIN_COLOR,
     },
     cardTitleDestructive: {
       color: colors.EXCLUIR_MAIN_COLOR,
     },
     cardDescription: {
-      fontSize: 13,
+      fontSize: FONT_SIZE.BODY_SMALL,
       color: colors.TEXT_MUTED,
-      lineHeight: 18,
+      lineHeight: LINE_HEIGHTS[18],
     },
   });

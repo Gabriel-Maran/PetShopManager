@@ -2,6 +2,7 @@ import { Image, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { IMAGENS_BY_NAME, IMAGENS_NAMES, Screen } from "../../../config/consts";
 import { useScreen } from "../../../hooks/useScreen";
 import { useThemedStyles, ThemeColors } from "../../Themes/ThemeProvider";
+import { FONT_SIZE, FONT_WEIGHT, SPACING } from "../../Themes/tokens";
 
 export default function IconDePesquisa({
   imgName,
@@ -40,7 +41,7 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.BACKGROUND,
       justifyContent: "center",
       alignItems: "center",
-      paddingBottom: 5,
+      paddingBottom: SPACING[5],
       height: "100%",
     },
     containerActive: {
@@ -57,8 +58,8 @@ const styles = (colors: ThemeColors) =>
       tintColor: colors.TEXT_MUTED,
     },
     title: {
-      fontSize: 13,
-      fontWeight: "bold",
+      fontSize: FONT_SIZE.BODY_SMALL,
+      fontWeight: FONT_WEIGHT.BOLD,
       color: colors.PRIMARY,
       backgroundColor: colors.BACKGROUND,
     },

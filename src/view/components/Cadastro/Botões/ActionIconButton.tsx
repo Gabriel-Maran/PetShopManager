@@ -7,9 +7,10 @@ import {
 } from "react-native";
 import { ThemeColors, useTheme } from "../../../Themes/ThemeProvider";
 import IconButton from "../../Acessibilidade/IconButton";
+import { RADIUS, SPACING } from "../../../Themes/tokens";
 
 const ICON_SIZE = 28;
-const PADDING = 8;
+const PADDING = SPACING[8];
 const BORDER_WIDTH = 1;
 /** Tamanho do botão na tela: o ícone, o espaço em volta e a borda dos dois lados. */
 const BUTTON_SIZE = ICON_SIZE + 2 * (PADDING + BORDER_WIDTH);
@@ -83,7 +84,7 @@ export default function ActionIconButton({
 const styles = StyleSheet.create({
   button: {
     padding: PADDING,
-    borderRadius: 15,
+    borderRadius: RADIUS[15],
     borderWidth: BORDER_WIDTH,
   },
   icon: {
