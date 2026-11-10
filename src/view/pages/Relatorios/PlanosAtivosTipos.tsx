@@ -8,14 +8,16 @@ import BarChart from "../../components/Relatorios/BarChart";
 import TitleBar from "../../components/Cadastro/TitleBar";
 
 import { useAsyncData } from "../../../hooks/useAsyncData";
-import {
-  getPetsPorPlano,
-  getPlanosAtivos,
-} from "../../../utils/relatorios/getPetsPorPlano";
+import { reportsService } from "../../../service/ReportsService";
+import { PacoteRemarcacao } from "../../../config/consts";
 
 export default function PlanosAtivos() {
   const { data, loading } = useAsyncData(() =>
-    Promise.all([getPlanosAtivos(), getPetsPorPlano(2), getPetsPorPlano(4)]),
+    Promise.all([
+      reportsService.getActivePackages(),
+      reportsService.getPetsInPackage(PacoteRemarcacao.Quinzenal),
+      reportsService.getPetsInPackage(PacoteRemarcacao.Mensal),
+    ]),
   );
 
   const { colors } = useTheme();
@@ -67,10 +69,7 @@ export default function PlanosAtivos() {
         {quinzenal.length > 0 && (
           <View style={s.card}>
             <BarChart
-              data={quinzenal.map((p) => ({
-                x: p.petNome,
-                y: p.pacote,
-              }))}
+              data={quinzenal}
               title={`Quinzenal · 2x/mês  (${quinzenal.length})`}
               suffix="x/mês"
               height={120}
@@ -82,10 +81,7 @@ export default function PlanosAtivos() {
         {semanal.length > 0 && (
           <View style={s.card}>
             <BarChart
-              data={semanal.map((p) => ({
-                x: p.petNome,
-                y: p.pacote,
-              }))}
+              data={semanal}
               title={`Semanal · 4x/mês  (${semanal.length})`}
               suffix="x/mês"
               height={120}
