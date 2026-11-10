@@ -1,4 +1,4 @@
-import { Appointment } from "../model/Appointment";
+import type { AppointmentData } from "../validation/appointmentSchema";
 import { appointmentsRepository } from "../repository/AppointmentsRepository";
 import type { IsoDate } from "../utils/datas";
 
@@ -31,11 +31,11 @@ class AppointmentsService {
     return appointmentsRepository.getPendingAppointmentsByPetId(petId);
   }
 
-  createAppointment(appointment: Appointment) {
+  createAppointment(appointment: AppointmentData) {
     return appointmentsRepository.createAppointment(appointment);
   }
 
-  updateAppointment(id: number, appointment: Appointment) {
+  updateAppointment(id: number, appointment: AppointmentData) {
     return appointmentsRepository.updateAppointment(id, appointment);
   }
 
