@@ -15,13 +15,18 @@ import {
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import ConfirmModal from "./ConfirmModal";
 import { HIDDEN_FROM_SCREEN_READER } from "./Acessibilidade/accessibilityProps";
+import { DIALOGS } from "../../globals/messages";
+import { A11Y_LABELS } from "../../globals/accessibilityLabels";
+
+/** O modal aberto: um só por vez, e as duas ações só começam depois da confirmação. */
+type PendingDialog = "export" | "import" | null;
 
 interface DatabaseTransferProps {
   onImportSuccess?: () => void;
 }
 
 export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
-  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [pendingDialog, setPendingDialog] = useState<PendingDialog>(null);
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
@@ -32,8 +37,15 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
   });
   const loading = exportAction.isRunning || importAction.isRunning;
 
+  const closeDialog = () => setPendingDialog(null);
+
+  function runExport() {
+    closeDialog();
+    exportAction.run();
+  }
+
   function runImport() {
-    setConfirmVisible(false);
+    closeDialog();
     importAction.run();
   }
 
@@ -50,10 +62,11 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
 
       <TouchableOpacity
         style={[s.card, s.cardExport]}
-        onPress={() => exportAction.run()}
+        onPress={() => setPendingDialog("export")}
         disabled={loading}
         activeOpacity={0.75}
         accessibilityRole="button"
+        accessibilityHint={A11Y_LABELS.backup.exportHint}
         accessibilityState={{ busy: exportAction.isRunning }}
       >
         <View
@@ -75,10 +88,11 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
 
       <TouchableOpacity
         style={[s.card, s.cardImport]}
-        onPress={() => setConfirmVisible(true)}
+        onPress={() => setPendingDialog("import")}
         disabled={loading}
         activeOpacity={0.75}
         accessibilityRole="button"
+        accessibilityHint={A11Y_LABELS.backup.importHint}
         accessibilityState={{ busy: importAction.isRunning }}
       >
         <View
@@ -109,14 +123,24 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
       </View>
 
       <ConfirmModal
-        visible={confirmVisible}
+        visible={pendingDialog === "export"}
+        emoji="🔒"
+        title={DIALOGS.exportBackup.title}
+        message={DIALOGS.exportBackup.message}
+        confirmLabel={DIALOGS.exportBackup.confirmLabel}
+        onConfirm={runExport}
+        onCancel={closeDialog}
+      />
+
+      <ConfirmModal
+        visible={pendingDialog === "import"}
         emoji="📥"
-        title="Importar banco de dados"
-        message="Isso substituirá TODOS os dados atuais. Esta ação não pode ser desfeita."
-        confirmLabel="Importar"
+        title={DIALOGS.importBackup.title}
+        message={DIALOGS.importBackup.message}
+        confirmLabel={DIALOGS.importBackup.confirmLabel}
         variant="destructive"
         onConfirm={runImport}
-        onCancel={() => setConfirmVisible(false)}
+        onCancel={closeDialog}
       />
     </View>
   );
