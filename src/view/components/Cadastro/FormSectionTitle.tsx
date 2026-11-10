@@ -1,5 +1,6 @@
 import { StyleSheet, Text } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
+import { FONT_WEIGHT, SPACING } from "../../Themes/tokens";
 
 /**
  * O título de um grupo de campos do formulário, como "DADOS OBRIGATÓRIOS". Na tela vai em maiúsculas;
@@ -19,7 +20,7 @@ const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     title: {
       color: colors.PRIMARY_VARIANT,
-      fontWeight: "500",
-      marginBottom: 8,
+      fontWeight: FONT_WEIGHT.MEDIUM,
+      marginBottom: SPACING[8],
     },
   });

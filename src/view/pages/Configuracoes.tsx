@@ -10,6 +10,13 @@ import { DatabaseTransfer } from "../components/DatabaseTransfer";
 import { DemoDataLoader } from "../components/DemoDataLoader";
 import { useScreen } from "../../hooks/useScreen";
 import { APP_BAR_HEIGHT, Screen } from "../../config/consts";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  LETTER_SPACINGS,
+  RADIUS,
+  SPACING,
+} from "../Themes/tokens";
 
 export default function Configuracoes() {
   const { colors } = useTheme();
@@ -57,27 +64,27 @@ const styles = (colors: ThemeColors) =>
       marginBottom: APP_BAR_HEIGHT,
     },
     scroll: {
-      paddingHorizontal: 16,
-      paddingBottom: 32,
-      gap: 8,
+      paddingHorizontal: SPACING[16],
+      paddingBottom: SPACING[32],
+      gap: SPACING[8],
     },
 
     // Section
     // Os textos de apoio usam TEXT_MUTED em vez de opacidade, que deixava o contraste abaixo de 4,5:1.
     sectionLabel: {
-      fontSize: 11,
-      fontWeight: "700",
-      letterSpacing: 1.2,
+      fontSize: FONT_SIZE.CAPTION,
+      fontWeight: FONT_WEIGHT.BOLD,
+      letterSpacing: LETTER_SPACINGS.LABEL,
       color: colors.TEXT_MUTED,
-      marginTop: 24,
-      marginBottom: 4,
-      marginLeft: 4,
+      marginTop: SPACING[24],
+      marginBottom: SPACING[4],
+      marginLeft: SPACING[4],
     },
 
     // Card
     card: {
       backgroundColor: colors.BACKGROUND,
-      borderRadius: 16,
+      borderRadius: RADIUS[16],
       overflow: "hidden",
       // sombra sutil
       shadowColor: colors.SHADOW,
@@ -92,21 +99,21 @@ const styles = (colors: ThemeColors) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      paddingHorizontal: 16,
-      paddingVertical: 14,
+      paddingHorizontal: SPACING[16],
+      paddingVertical: SPACING[14],
     },
     rowText: {
       flex: 1,
-      marginRight: 12,
+      marginRight: SPACING[12],
     },
     rowTitle: {
-      fontSize: 15,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.BODY_LARGE,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.TEXT_PRIMARY,
     },
     rowSubtitle: {
-      fontSize: 12,
+      fontSize: FONT_SIZE.SMALL,
       color: colors.TEXT_MUTED,
-      marginTop: 2,
+      marginTop: SPACING[2],
     },
   });

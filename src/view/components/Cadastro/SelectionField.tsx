@@ -11,9 +11,16 @@ import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
 import InputWrapper from "../../components/Cadastro/InputWrapper";
 import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
 import { touchTargetSlop } from "../Acessibilidade/accessibilityProps";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  LINE_HEIGHTS,
+  RADIUS,
+  SPACING,
+} from "../../Themes/tokens";
 
 /** Altura fixa da linha de "Cadastrar nova raça", para a área de toque chegar a 48 dp. */
-const NEW_BREED_LINE_HEIGHT = 20;
+const NEW_BREED_LINE_HEIGHT = LINE_HEIGHTS[20];
 
 export default function SelectionField({
   isEditavel = true,
@@ -49,7 +56,12 @@ export default function SelectionField({
     >
       {selectedReg ? (
         <View style={s.regSelecionado}>
-          <View style={[s.caixaReg, isEditavel ? { marginRight: 10 } : {}]}>
+          <View
+            style={[
+              s.caixaReg,
+              isEditavel ? { marginRight: SPACING[10] } : {},
+            ]}
+          >
             <Text style={s.txtReg} numberOfLines={1}>
               {selectedReg}
             </Text>
@@ -103,41 +115,42 @@ const styles = (colors: ThemeColors) =>
     caixaReg: {
       borderWidth: 1.5,
       flex: 1,
-      paddingHorizontal: 15,
-      paddingVertical: 12,
-      borderRadius: 10,
-      fontSize: 20,
+      paddingHorizontal: SPACING[15],
+      paddingVertical: SPACING[12],
+      borderRadius: RADIUS[10],
+      fontSize: FONT_SIZE.TITLE,
       minHeight: 45,
       borderColor: colors.BORDER_STRONG,
     },
     txtReg: {
-      fontSize: 15,
+      fontSize: FONT_SIZE.BODY_LARGE,
       color: colors.TEXT_PRIMARY,
     },
     containerAcoes: {
       width: "100%",
-      gap: 8, // Cria um espaçamento vertical automático entre o botão e o rótulo
+      // Espaçamento vertical automático entre o botão e o rótulo
+      gap: SPACING[8],
     },
     btnSalvar: {
       width: "100%",
       height: 50,
       backgroundColor: colors.PRIMARY_VARIANT,
-      borderRadius: 15,
+      borderRadius: RADIUS[15],
       display: "flex",
       justifyContent: "center",
     },
     txtSalvar: {
       color: colors.BACKGROUND,
       textAlign: "center",
-      fontSize: 15,
+      fontSize: FONT_SIZE.BODY_LARGE,
     },
     btnRotuloCadastro: {
       alignSelf: "flex-start", // Não deixa o botão ocupar a largura inteira
     },
     txtRotuloCadastro: {
       color: colors.TEXT_PRIMARY,
-      fontSize: 14,
+      fontSize: FONT_SIZE.BODY,
       lineHeight: NEW_BREED_LINE_HEIGHT,
-      fontWeight: "500",
+      fontWeight: FONT_WEIGHT.MEDIUM,
     },
   });

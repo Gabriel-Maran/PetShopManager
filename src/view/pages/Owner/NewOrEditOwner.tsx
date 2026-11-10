@@ -25,6 +25,7 @@ import InputInfo from "../../components/Cadastro/InputInfo";
 import FormSectionTitle from "../../components/Cadastro/FormSectionTitle";
 import SaveButton from "../../components/Cadastro/SaveButton";
 import { ThemeColors, useThemedStyles } from "../../Themes/ThemeProvider";
+import { RADIUS, SPACING } from "../../Themes/tokens";
 
 const maskPhone = (v: string) => {
   const d = v.replace(/\D/g, "");
@@ -173,21 +174,21 @@ const styles = (colors: ThemeColors) =>
     },
     ctnCadastro: {
       flex: 1,
-      padding: 20,
+      padding: SPACING[20],
       alignItems: "center",
     },
     viewDataReq: { width: "100%" },
     viewDataNotReq: {
       width: "100%",
-      marginTop: 20,
+      marginTop: SPACING[20],
     },
     inputs: {
       width: "100%",
-      borderRadius: 10,
+      borderRadius: RADIUS[10],
       borderWidth: 1,
       borderColor: colors.BORDER_LIGHT,
       backgroundColor: colors.BACKGROUND,
       overflow: "hidden",
     },
-    ctnBtnSalvar: { marginTop: 25 },
+    ctnBtnSalvar: { marginTop: SPACING[25] },
   });

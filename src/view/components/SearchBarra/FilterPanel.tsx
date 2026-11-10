@@ -8,6 +8,14 @@ import { StatusFiltro } from "../../../config/consts";
 import { TINT_OPACITY, withAlpha } from "../../Themes/alpha";
 import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
 import { touchTargetSlop } from "../Acessibilidade/accessibilityProps";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  LETTER_SPACINGS,
+  LINE_HEIGHTS,
+  RADIUS,
+  SPACING,
+} from "../../Themes/tokens";
 
 interface FilterPanelProps {
   value: StatusFiltro;
@@ -24,9 +32,9 @@ const OPCOES: { val: StatusFiltro; label: string; accent: AccentColor }[] = [
 // O fundo da opção escolhida é a cor dela com 6% de opacidade; o teste de contraste confere o texto
 // sobre esse fundo.
 
-const CHIP_PADDING_VERTICAL = 7;
+const CHIP_PADDING_VERTICAL = SPACING[7];
 const CHIP_BORDER_WIDTH = 1.5;
-const CHIP_LINE_HEIGHT = 18;
+const CHIP_LINE_HEIGHT = LINE_HEIGHTS[18];
 const CHIP_HEIGHT =
   CHIP_LINE_HEIGHT + 2 * (CHIP_PADDING_VERTICAL + CHIP_BORDER_WIDTH);
 
@@ -75,7 +83,7 @@ export default function FilterPanel({
                   s.dot,
                   {
                     // Destaque do círculo interno
-                    backgroundColor: active ? accent : "transparent",
+                    backgroundColor: active ? accent : colors.TRANSPARENT,
                     borderColor: active ? accent : colors.BORDER_STRONG,
                   },
                 ]}
@@ -84,7 +92,7 @@ export default function FilterPanel({
                 style={[
                   s.chipLabel,
                   // Destaque do texto
-                  active && { color: accent, fontWeight: "700" },
+                  active && { color: accent, fontWeight: FONT_WEIGHT.BOLD },
                 ]}
               >
                 {op.label}
@@ -101,44 +109,44 @@ const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     container: {
       backgroundColor: colors.THIRD_BACKGROUND,
-      borderRadius: 12,
+      borderRadius: RADIUS[12],
       borderWidth: 1,
       borderColor: colors.BORDER_STRONG,
-      paddingHorizontal: 14,
-      paddingVertical: 12,
-      gap: 10,
+      paddingHorizontal: SPACING[14],
+      paddingVertical: SPACING[12],
+      gap: SPACING[10],
       flex: 1,
     },
     title: {
-      fontSize: 10,
-      fontWeight: "700",
+      fontSize: FONT_SIZE.OVERLINE,
+      fontWeight: FONT_WEIGHT.BOLD,
       color: colors.TEXT_MUTED,
-      letterSpacing: 1.2,
+      letterSpacing: LETTER_SPACINGS.LABEL,
     },
     row: {
       flexDirection: "row",
-      gap: 8,
+      gap: SPACING[8],
     },
     chip: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 7,
+      gap: SPACING[7],
       paddingVertical: CHIP_PADDING_VERTICAL,
-      paddingHorizontal: 13,
-      borderRadius: 99,
+      paddingHorizontal: SPACING[13],
+      borderRadius: RADIUS.PILL,
       borderWidth: CHIP_BORDER_WIDTH,
       borderColor: colors.BORDER_STRONG,
     },
     dot: {
       width: 7,
       height: 7,
-      borderRadius: 99,
+      borderRadius: RADIUS.PILL,
       borderWidth: 1.5,
     },
     chipLabel: {
-      fontSize: 13,
+      fontSize: FONT_SIZE.BODY_SMALL,
       lineHeight: CHIP_LINE_HEIGHT,
-      fontWeight: "500",
+      fontWeight: FONT_WEIGHT.MEDIUM,
       color: colors.TEXT_MUTED,
     },
   });

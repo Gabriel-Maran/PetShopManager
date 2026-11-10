@@ -21,6 +21,7 @@ import InputDataPicker from "../Botões/DataPicker/InputDataPicker";
 import InputInfo from "../InputInfo";
 import InputSelect from "../../InputSelect";
 import Toggle from "../Botões/Toggle";
+import { RADIUS, SPACING } from "../../../Themes/tokens";
 
 
 const tiposServicoList = Object.values(TipoServico).map((v) => ({
@@ -75,7 +76,9 @@ export default function AbaAgendamentoPet({
         labelExtractor={(item) => item.nome}
         onChange={(item) => updateField("servicoPadrao", item.id)}
         renderItem={(item) => (
-          <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+          <Text
+            style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}
+          >
             {item.nome}
           </Text>
         )}
@@ -106,7 +109,9 @@ export default function AbaAgendamentoPet({
             labelExtractor={(item) => item.nome}
             onChange={(item) => updateField("pacoteRemarcacao", item.id)}
             renderItem={(item) => (
-              <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+              <Text
+                style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}
+              >
                 {item.nome}
               </Text>
             )}
@@ -155,7 +160,7 @@ const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     inputs: {
       width: "100%",
-      borderRadius: 10,
+      borderRadius: RADIUS[10],
       borderWidth: 1,
       borderColor: colors.BORDER_LIGHT,
       backgroundColor: colors.BACKGROUND,

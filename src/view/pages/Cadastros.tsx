@@ -29,6 +29,7 @@ import ModalConfDelete from "../components/Cadastro/Botões/Delete/ModalConfDele
 import IconButton from "../components/Acessibilidade/IconButton";
 import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
 import { A11Y_LABELS } from "../../globals/accessibilityLabels";
+import { SPACING } from "../Themes/tokens";
 
 type CadastroItem = Owner | PetWithSpecieRaceAndOwner;
 
@@ -212,7 +213,7 @@ const styles = (colors: ThemeColors) =>
       flexDirection: "row",
       justifyContent: "space-evenly",
       width: "100%",
-      marginTop: 15,
+      marginTop: SPACING[15],
     },
     ctnBtnAdd: {
       position: "absolute",

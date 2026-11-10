@@ -5,6 +5,12 @@ import {
   useThemedStyles,
 } from "../../../../Themes/ThemeProvider";
 import { HIDDEN_FROM_SCREEN_READER } from "../../../Acessibilidade/accessibilityProps";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  RADIUS,
+  SPACING,
+} from "../../../../Themes/tokens";
 
 interface Props {
   message: string | null;
@@ -72,48 +78,48 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.MODAL_BACKGROUND,
       justifyContent: "center",
       alignItems: "center",
-      padding: 16,
+      padding: SPACING[16],
     },
     box: {
       width: "100%",
       backgroundColor: colors.BACKGROUND,
-      borderRadius: 16,
-      padding: 24,
+      borderRadius: RADIUS[16],
+      padding: SPACING[24],
       alignItems: "center",
-      gap: 25,
+      gap: SPACING[25],
     },
     emoji: {
-      fontSize: 40,
+      fontSize: FONT_SIZE.DISPLAY,
     },
     messageTop: {
-      gap: 5,
+      gap: SPACING[5],
       color: colors.TEXT_PRIMARY,
     },
     title: {
-      fontSize: 16,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.SUBTITLE,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.TEXT_PRIMARY,
     },
     message: {
-      fontSize: 14,
+      fontSize: FONT_SIZE.BODY,
       color: colors.EXCLUIR_MAIN_COLOR,
-      fontWeight: "500",
+      fontWeight: FONT_WEIGHT.MEDIUM,
       textAlign: "center",
     },
     btns: {
       flexDirection: "row",
     },
     btn: {
-      marginTop: 8,
-      paddingVertical: 12,
-      marginHorizontal: 10,
-      borderRadius: 12,
+      marginTop: SPACING[8],
+      paddingVertical: SPACING[12],
+      marginHorizontal: SPACING[10],
+      borderRadius: RADIUS[12],
       flex: 1,
       alignItems: "center",
     },
     btnTxt: {
       color: colors.BACKGROUND,
-      fontWeight: "600",
-      fontSize: 14,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
+      fontSize: FONT_SIZE.BODY,
     },
   });

@@ -8,11 +8,12 @@ import { useRef } from "react";
 import { configsController } from "../../controller/ConfigsController";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import { A11Y_LABELS } from "../../globals/accessibilityLabels";
+import { RADIUS, SPACING } from "../Themes/tokens";
 
 const THUMB_SIZE = 40;
 const SWITCH_WIDTH = 140;
-const PADDING = 16;
-const WRAPPER_PADDING = 6;
+const PADDING = SPACING[16];
+const WRAPPER_PADDING = SPACING[6];
 
 const THUMB_OFF = PADDING - WRAPPER_PADDING;
 const THUMB_ON = SWITCH_WIDTH - THUMB_SIZE - PADDING - WRAPPER_PADDING;
@@ -124,20 +125,20 @@ const styles = (colors: ThemeColors) =>
     track: {
       width: SWITCH_WIDTH,
       height: THUMB_SIZE + PADDING * 2,
-      borderRadius: 99,
+      borderRadius: RADIUS.PILL,
       overflow: "hidden",
       backgroundColor: colors.THEME_TOGGLE_SKY,
     },
     thumbWrapper: {
       position: "absolute",
       top: PADDING - WRAPPER_PADDING,
-      borderRadius: 99,
+      borderRadius: RADIUS.PILL,
       padding: WRAPPER_PADDING,
     },
     thumb: {
       width: THUMB_SIZE,
       height: THUMB_SIZE,
-      borderRadius: 99,
+      borderRadius: RADIUS.PILL,
       backgroundColor: colors.THEME_TOGGLE_THUMB,
     },
   });

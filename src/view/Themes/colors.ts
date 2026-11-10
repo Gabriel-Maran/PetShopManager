@@ -8,6 +8,9 @@ const light = {
   PRIMARY_SOFT: "#E1F5EE",
   PRIMARY_CONTRAST: "#0B7377",
 
+  /** Sem cor: deixa aparecer o que está atrás. */
+  TRANSPARENT: "transparent",
+
   BACKGROUND: "#ffffff",
   SECOND_BACKGROUND: "#b5b5b5",
   THIRD_BACKGROUND: "#f3f3f4",
@@ -77,6 +80,8 @@ const dark: ThemeColors = {
   PRIMARY_VARIANT: "#0E996D",
   PRIMARY_SOFT: "#1A2E26",
   PRIMARY_CONTRAST: "#2DD4BF",
+
+  TRANSPARENT: "transparent",
 
   BACKGROUND: "#0F1115",
   SECOND_BACKGROUND: "#1C1E23",

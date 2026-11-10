@@ -23,6 +23,12 @@ import { EspeciesAtendidasLabel } from "../../../../config/consts";
 import InputInfo from "../InputInfo";
 import CloseButton from "../../CloseButton";
 import { MAX_BREED_NAME_LENGTH } from "../../../../globals/limits";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  RADIUS,
+  SPACING,
+} from "../../../Themes/tokens";
 
 const SUBMIT_LABEL = "Cadastrar";
 
@@ -116,7 +122,12 @@ export default function ModalCadastroRaca({
                 onChange={setEspecieSelecionada}
                 renderItem={(item) => (
                   <>
-                    <Text style={{ padding: 15, color: colors.TEXT_PRIMARY }}>
+                    <Text
+                      style={{
+                        padding: SPACING[15],
+                        color: colors.TEXT_PRIMARY,
+                      }}
+                    >
                       {
                         EspeciesAtendidasLabel[
                           item.nome as keyof typeof EspeciesAtendidasLabel
@@ -187,12 +198,12 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.MODAL_BACKGROUND,
       justifyContent: "center",
       alignItems: "center",
-      paddingHorizontal: 20,
+      paddingHorizontal: SPACING[20],
     },
     card: {
       width: "100%",
       backgroundColor: colors.BACKGROUND,
-      borderRadius: 16,
+      borderRadius: RADIUS[16],
       overflow: "hidden",
       elevation: 8,
       shadowColor: colors.SHADOW,
@@ -204,12 +215,12 @@ const styles = (colors: ThemeColors) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      paddingHorizontal: 16,
-      paddingVertical: 14,
+      paddingHorizontal: SPACING[16],
+      paddingVertical: SPACING[14],
     },
     title: {
-      fontSize: 15,
-      fontWeight: "700",
+      fontSize: FONT_SIZE.BODY_LARGE,
+      fontWeight: FONT_WEIGHT.BOLD,
       color: colors.TEXT_PRIMARY,
     },
     divider: {
@@ -217,33 +228,33 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.BORDER_MID,
     },
     body: {
-      paddingVertical: 8,
+      paddingVertical: SPACING[8],
     },
 
     footer: {
       flexDirection: "row",
-      paddingHorizontal: 16,
-      paddingVertical: 14,
-      gap: 10,
+      paddingHorizontal: SPACING[16],
+      paddingVertical: SPACING[14],
+      gap: SPACING[10],
     },
     cancelBtn: {
       flex: 1,
       height: 46,
-      borderRadius: 10,
+      borderRadius: RADIUS[10],
       borderWidth: 1.5,
       borderColor: colors.BORDER_MID,
       justifyContent: "center",
       alignItems: "center",
     },
     cancelText: {
-      fontSize: 14,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.BODY,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.TEXT_MUTED,
     },
     submitBtn: {
       flex: 2,
       height: 46,
-      borderRadius: 10,
+      borderRadius: RADIUS[10],
       backgroundColor: colors.PRIMARY,
       justifyContent: "center",
       alignItems: "center",
@@ -252,8 +263,8 @@ const styles = (colors: ThemeColors) =>
       opacity: 0.7,
     },
     submitText: {
-      fontSize: 15,
-      fontWeight: "700",
+      fontSize: FONT_SIZE.BODY_LARGE,
+      fontWeight: FONT_WEIGHT.BOLD,
       color: colors.BACKGROUND,
     },
   });

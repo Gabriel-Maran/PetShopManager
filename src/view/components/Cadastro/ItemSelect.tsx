@@ -1,9 +1,10 @@
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import { useTheme } from "../../Themes/ThemeProvider";
 import { touchTargetSlop } from "../Acessibilidade/accessibilityProps";
+import { LINE_HEIGHTS, RADIUS, SPACING } from "../../Themes/tokens";
 
-const PADDING_VERTICAL = 10;
-const LINE_HEIGHT = 20;
+const PADDING_VERTICAL = SPACING[10];
+const LINE_HEIGHT = LINE_HEIGHTS[20];
 
 /** Uma aba de escolha, como Donos ou Pets. Quem usa põe as abas num contêiner com papel "tablist". */
 export default function ItemSelect({
@@ -51,9 +52,9 @@ export default function ItemSelect({
 const styles = StyleSheet.create({
   escolhaBtn: {
     paddingVertical: PADDING_VERTICAL,
-    paddingHorizontal: 30,
+    paddingHorizontal: SPACING[30],
     width: "40%",
-    borderRadius: 20,
+    borderRadius: RADIUS[20],
   },
   escolhaText: {
     textAlign: "center",

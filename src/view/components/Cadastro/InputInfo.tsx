@@ -10,6 +10,7 @@ import {
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
 import InputWrapper from "../../components/Cadastro/InputWrapper";
+import { FONT_SIZE, RADIUS, SPACING } from "../../Themes/tokens";
 
 export default function InputInfo({
   image,
@@ -65,11 +66,11 @@ const styles = (colors: ThemeColors) =>
       width: "100%",
       minHeight: 45,
       maxHeight: 90,
-      fontSize: 16,
+      fontSize: FONT_SIZE.SUBTITLE,
       borderWidth: 1.5,
-      borderRadius: 10,
-      paddingHorizontal: 15,
-      paddingVertical: 5,
+      borderRadius: RADIUS[10],
+      paddingHorizontal: SPACING[15],
+      paddingVertical: SPACING[5],
       borderColor: colors.BORDER_STRONG,
     },
   });

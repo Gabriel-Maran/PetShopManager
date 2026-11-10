@@ -9,6 +9,7 @@ import {
   useTheme,
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
+import { RADIUS, SPACING } from "../../Themes/tokens";
 
 /**
  * O botão Salvar dos formulários. Enquanto salva, o texto dá lugar ao indicador de carregamento; o
@@ -48,10 +49,10 @@ export default function SaveButton({
 const styles = (colors: ThemeColors) =>
   StyleSheet.create({
     button: {
-      paddingVertical: 20,
-      paddingHorizontal: 75,
+      paddingVertical: SPACING[20],
+      paddingHorizontal: SPACING[75],
       backgroundColor: colors.PRIMARY_VARIANT,
-      borderRadius: 15,
+      borderRadius: RADIUS[15],
     },
     buttonBusy: {
       opacity: 0.6,

@@ -12,6 +12,7 @@ import { appointmentController } from "../../controller/AppointmentsController";
 
 import { dateToIso, todayIso } from "../../utils/datas";
 import { useAgendamentos } from "../contexts/agendamentos";
+import { FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "../Themes/tokens";
 
 // Configuração do calendário para português do Brasil
 LocaleConfig.locales["pt-br"] = {
@@ -136,8 +137,8 @@ export default function Calendario() {
       <Text
         accessibilityRole="header"
         style={{
-          fontSize: 20,
-          fontWeight: "bold",
+          fontSize: FONT_SIZE.TITLE,
+          fontWeight: FONT_WEIGHT.BOLD,
           color: colors.TEXT_PRIMARY,
         }}
       >
@@ -168,7 +169,7 @@ export default function Calendario() {
                 width: 40,
                 height: 40,
                 backgroundColor: colors.PRIMARY_CONTRAST,
-                borderRadius: 2,
+                borderRadius: RADIUS[2],
                 alignItems: "center",
                 justifyContent: "center",
                 margin: 0,
@@ -177,7 +178,7 @@ export default function Calendario() {
               text: {
                 // A cor do fundo sobre o teal cheio: branco no claro, escuro no escuro; passa 4,5:1 nos dois.
                 color: colors.BACKGROUND,
-                fontWeight: "bold",
+                fontWeight: FONT_WEIGHT.BOLD,
                 includeFontPadding: false,
                 textAlignVertical: "center",
               },
@@ -193,9 +194,9 @@ export default function Calendario() {
                   width: 40,
                   height: 40,
                   borderColor: colors.PRIMARY_CONTRAST,
-                  backgroundColor: "transparent",
+                  backgroundColor: colors.TRANSPARENT,
                   borderWidth: 2.5,
-                  borderRadius: 2,
+                  borderRadius: RADIUS[2],
                   alignItems: "center",
                   justifyContent: "center",
                   margin: 0,
@@ -217,16 +218,16 @@ export default function Calendario() {
             calendarBackground: colors.BACKGROUND,
 
             // Texto do mês/ano no topo
-            textMonthFontSize: 18,
-            textMonthFontWeight: "600",
+            textMonthFontSize: FONT_SIZE.TITLE_SMALL,
+            textMonthFontWeight: FONT_WEIGHT.SEMIBOLD,
             monthTextColor: colors.TEXT_SECONDARY,
 
             // Cabeçalho (Dom, Seg, Ter...)
-            textDayHeaderFontSize: 13,
+            textDayHeaderFontSize: FONT_SIZE.BODY_SMALL,
             textSectionTitleColor: colors.TEXT_PRIMARY,
 
             // Números dos dias
-            textDayFontSize: 18,
+            textDayFontSize: FONT_SIZE.TITLE_SMALL,
             dayTextColor: colors.TEXT_SECONDARY,
 
             // Dia selecionado
@@ -258,7 +259,7 @@ export default function Calendario() {
               },
               text: {
                 marginTop: 0,
-                fontSize: 18,
+                fontSize: FONT_SIZE.TITLE_SMALL,
                 color: colors.TEXT_SECONDARY,
                 includeFontPadding: false,
                 textAlignVertical: "center",
@@ -284,9 +285,9 @@ const styles = (colors: ThemeColors) =>
       width: "100%",
       justifyContent: "center",
       alignSelf: "center",
-      padding: 10,
+      padding: SPACING[10],
       borderColor: colors.BORDER_STRONG,
       borderWidth: 1,
-      borderRadius: 15,
+      borderRadius: RADIUS[15],
     },
   });

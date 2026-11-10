@@ -15,6 +15,14 @@ import { useScreen } from "../../hooks/useScreen";
 import { APP_BAR_HEIGHT, RelatorioType, Screen } from "../../config/consts";
 import { NewOrEditAppointmentParams } from "../../model/Appointment";
 import { HIDDEN_FROM_SCREEN_READER } from "../components/Acessibilidade/accessibilityProps";
+import {
+  FONT_SIZE,
+  FONT_WEIGHT,
+  LETTER_SPACINGS,
+  LINE_HEIGHTS,
+  RADIUS,
+  SPACING,
+} from "../Themes/tokens";
 
 type ReportAccent = Extract<keyof ThemeColors, `REPORT_ACCENT_${string}`>;
 
@@ -151,29 +159,29 @@ const styles = (colors: ThemeColors) =>
       marginBottom: APP_BAR_HEIGHT,
     },
     content: {
-      paddingHorizontal: 16,
-      paddingTop: 28,
-      paddingBottom: 40,
-      gap: 28,
+      paddingHorizontal: SPACING[16],
+      paddingTop: SPACING[28],
+      paddingBottom: SPACING[40],
+      gap: SPACING[28],
     },
     pageTitle: {
-      fontSize: 26,
-      fontWeight: "700",
+      fontSize: FONT_SIZE.HEADLINE,
+      fontWeight: FONT_WEIGHT.BOLD,
       color: colors.TEXT_PRIMARY,
-      letterSpacing: -0.5,
+      letterSpacing: LETTER_SPACINGS.TIGHT,
     },
     section: {
-      gap: 8,
+      gap: SPACING[8],
     },
     sectionLabel: {
-      fontSize: 10,
-      fontWeight: "700",
-      letterSpacing: 1.3,
+      fontSize: FONT_SIZE.OVERLINE,
+      fontWeight: FONT_WEIGHT.BOLD,
+      letterSpacing: LETTER_SPACINGS.LABEL_LG,
       color: colors.TEXT_MUTED,
-      marginLeft: 2,
+      marginLeft: SPACING[2],
     },
     cardList: {
-      borderRadius: 12,
+      borderRadius: RADIUS[12],
       borderWidth: 1,
       borderColor: colors.BORDER_STRONG,
       overflow: "hidden",
@@ -182,11 +190,11 @@ const styles = (colors: ThemeColors) =>
     card: {
       flexDirection: "row",
       alignItems: "center",
-      paddingVertical: 14,
-      paddingRight: 16,
+      paddingVertical: SPACING[14],
+      paddingRight: SPACING[16],
       borderBottomWidth: 1,
       borderBottomColor: colors.BORDER_STRONG,
-      gap: 12,
+      gap: SPACING[12],
     },
     cardLast: {
       borderBottomWidth: 0,
@@ -194,26 +202,26 @@ const styles = (colors: ThemeColors) =>
     cardAccent: {
       width: 3,
       height: 36,
-      borderRadius: 99,
-      marginLeft: 14,
+      borderRadius: RADIUS.PILL,
+      marginLeft: SPACING[14],
     },
     cardBody: {
       flex: 1,
-      gap: 2,
+      gap: SPACING[2],
     },
     cardTitle: {
-      fontSize: 14,
-      fontWeight: "600",
+      fontSize: FONT_SIZE.BODY,
+      fontWeight: FONT_WEIGHT.SEMIBOLD,
       color: colors.TEXT_PRIMARY,
     },
     cardSubtitle: {
-      fontSize: 12,
+      fontSize: FONT_SIZE.SMALL,
       color: colors.TEXT_MUTED,
     },
     cardArrow: {
-      fontSize: 20,
+      fontSize: FONT_SIZE.TITLE,
       color: colors.TEXT_MUTED,
-      fontWeight: "300",
-      lineHeight: 22,
+      fontWeight: FONT_WEIGHT.LIGHT,
+      lineHeight: LINE_HEIGHTS[22],
     },
   });
