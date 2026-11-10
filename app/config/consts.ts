@@ -20,11 +20,15 @@ export const IMAGENS_BY_NAME = {
 // As telas vivem em navigation.ts, que roda nos testes; o reexport mantém os imports de consts.
 export { Screen } from "./navigation";
 
-export enum TipoServico {
-  Banho = "Banho",
-  BanhoETosa = "Banho e Tosa",
-  BanhoEHigienica = "Banho e Higiênica",
-}
+// Os valores do pet vivem em petEnums.ts, que roda nos testes; o reexport mantém os imports de consts.
+export {
+  EspeciesAtendidas,
+  EspeciesAtendidasLabel,
+  PacoteRemarcacao,
+  PorteAnimal,
+  PorteAnimalLabel,
+  TipoServico,
+} from "./petEnums";
 
 export enum IMAGENS_NAMES {
   ARTIGO = "ARTIGO",
@@ -38,42 +42,6 @@ export type NewOrEditCadastros = {
   pet?: Pet | PetWithSpecieRaceAndOwner;
   type: "DONO" | "PET";
 };
-
-export enum PacoteRemarcacao {
-  Mensal = 4,
-  Quinzenal = 2,
-}
-
-export enum EspeciesAtendidas {
-  CAO = "CAO",
-  GATO = "GATO",
-  OUTRO = "OUTRO",
-}
-
-export const EspeciesAtendidasLabel: Record<EspeciesAtendidas, string> = {
-  [EspeciesAtendidas.CAO]: "Cão",
-  [EspeciesAtendidas.GATO]: "Gato",
-  [EspeciesAtendidas.OUTRO]: "Outro",
-};
-
-export enum PorteAnimal {
-  PEQUENO = "PEQUENO",
-  MEDIO = "MEDIO",
-  GRANDE = "GRANDE",
-  GRANDAO = "GRANDAO",
-}
-
-export const PorteAnimalLabel = {
-  PEQUENO: "Pequeno",
-  MEDIO: "Médio",
-  GRANDE: "Grande",
-  GRANDAO: "Grandão",
-};
-
-export enum ORDER {
-  ASC = "ASC",
-  DESC = "DESC",
-}
 
 export enum RelatorioType {
   DiasHorasMovimentados = "DiasHorasMovimentados",

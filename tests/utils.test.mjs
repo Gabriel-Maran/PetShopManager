@@ -48,6 +48,31 @@ describe("datas", () => {
     }
   });
 
+  test("só passa um dia que existe no calendário, com o 29 de fevereiro dos anos bissextos", () => {
+    for (const entrada of ["2024-02-29", "2000-02-29", "2026-01-31", "2026-04-30", "2026-12-31"]) {
+      assert.equal(isIsoDate(entrada), true, entrada);
+    }
+    for (const entrada of ["2025-02-29", "1900-02-29", "2026-02-30", "2026-04-31", "2026-13-01", "2026-00-10", "2026-01-00", "2026-01-32"]) {
+      assert.equal(isIsoDate(entrada), false, entrada);
+    }
+  });
+
+  test("a data é conferida pelo texto, e o fuso do aparelho não muda a resposta", () => {
+    for (const zone of ["America/Sao_Paulo", "Pacific/Kiritimati", "Pacific/Pago_Pago", "UTC"]) {
+      withTimeZone(zone, () => {
+        assert.equal(isIsoDate("2024-02-29"), true, zone);
+        assert.equal(isIsoDate("2026-03-01"), true, zone);
+        assert.equal(isIsoDate("2026-02-29"), false, zone);
+      });
+    }
+  });
+
+  test("entrada maliciosa ou fora do tipo não passa como data", () => {
+    for (const entrada of ["2026-11-08'; DROP TABLE pets; --", "2026-11-08\n", "２０２６-11-08", "9999-99-99", { toString: () => "2026-11-08" }, ["2026-11-08"]]) {
+      assert.equal(isIsoDate(entrada), false, String(entrada));
+    }
+  });
+
   test("BUG-7: às 22h em Brasília, hoje ainda é o mesmo dia, e não o de amanhã em UTC", () => {
     withTimeZone("America/Sao_Paulo", () => {
       const twentyTwoHours = new Date("2026-11-08T22:30:00-03:00");

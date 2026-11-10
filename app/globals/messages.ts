@@ -48,6 +48,7 @@ export const MESSAGES = {
     speciesRequired: "Escolha a espécie do pet.",
     ownerRequired: "Escolha o dono do pet.",
     breedRequired: "Escolha a raça do pet.",
+    breedOfOtherSpecies: "A raça escolhida é de outra espécie. Escolha a raça de novo.",
     packageRequired: "Escolha o pacote de remarcação.",
     packageValueRequired: "Informe o valor do pacote, no formato 120,00.",
     packageStartRequired: "Escolha no calendário a data de início do pacote.",
@@ -62,7 +63,12 @@ export const MESSAGES = {
     timeInvalid: "Horário inválido. Use horas e minutos, como 09:30.",
   },
 
+  species: {
+    notFound: "Espécie não encontrada.",
+  },
+
   breed: {
+    notFound: "Raça não encontrada.",
     speciesRequired: "Selecione a espécie do animal.",
     nameRequired: "Informe o nome da raça.",
     nameTooShort: "O nome da raça deve ter pelo menos 2 caracteres.",

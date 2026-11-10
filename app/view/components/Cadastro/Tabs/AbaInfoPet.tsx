@@ -14,7 +14,7 @@ import InputSelect from "../../InputSelect";
 import SelectionField from "../../Cadastro/SelectionField";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ownerController } from "../../../../controller/OwnerController";
-import { raceRepository } from "../../../../repository/RaceRepository";
+import { speciesController } from "../../../../controller/SpeciesController";
 import ModalCadastroRaca from "../Modal/ModalCreateRacePet";
 import { useError } from "../../../../hooks/useError";
 
@@ -47,7 +47,6 @@ interface AbaInfoPetProps {
   updateField: (field: string, value: any) => void;
   abrirModal: (config: AbrirModalConfig) => void;
   especiesList: any[];
-  // racasList vem do pai — fonte única de verdade, sem hook duplicado
   racasList: any[];
   portesList: { id: string; nome: string }[];
   salvarPet: () => void;
@@ -96,12 +95,10 @@ export default function AbaInfoPet({
 
     let cancelled = false;
 
-    raceRepository
-      .findRaceById(form.raca)
-      .then((resultado) => {
-        if (!cancelled && resultado?.nome_raca) {
-          updateField("raca_nome", resultado.nome_raca);
-        }
+    speciesController
+      .getBreedById(form.raca)
+      .then((raca) => {
+        if (!cancelled) updateField("raca_nome", raca.nome_raca);
       })
       .catch(showError);
 
@@ -122,7 +119,6 @@ export default function AbaInfoPet({
     updateField("raca_nome", "");
   }, [form.especie]);
 
-  // --- Itens selecionados memoizados ---
   const especieSelecionada = useMemo(
     () => especiesList.find((e) => e.id === form.especie),
     [especiesList, form.especie],
@@ -133,7 +129,6 @@ export default function AbaInfoPet({
     [portesList, form.porte],
   );
 
-  // --- Handlers memoizados ---
   const handleSelecionarDono = useCallback(
     (item: any) => {
       updateField("dono_id", item.id);
@@ -170,7 +165,6 @@ export default function AbaInfoPet({
     updateField("raca_nome", "");
   }, [updateField]);
 
-  // racasList vem do pai — sempre atualizada pela paginação/busca do modal
   const handleAbrirModalRaca = useCallback(() => {
     abrirModal({
       titulo: "Selecionar Raça",
@@ -182,7 +176,7 @@ export default function AbaInfoPet({
   }, [abrirModal, racasList, handleSelecionarRaca]);
 
   const handleRacaCriada = useCallback(
-    (id: number, nomeRaca: string, _especieId: number) => {
+    (id: number, nomeRaca: string) => {
       updateField("raca", id);
       updateField("raca_nome", nomeRaca);
       setRacaModalAberto(false);
