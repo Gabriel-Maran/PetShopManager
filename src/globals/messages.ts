@@ -113,4 +113,23 @@ export const DIALOGS = {
     message: "Você perderá todos os novos dados não salvos.",
     confirmLabel: "Voltar",
   },
+
+  /**
+   * Antes de abrir o compartilhamento do backup (SEG-1). O arquivo sai da área privada do app sem
+   * senha, então quem exporta precisa saber o que vai dentro dele antes de escolher o destino.
+   */
+  exportBackup: {
+    title: "O backup tem dados pessoais",
+    message:
+      "O arquivo não tem senha e traz o nome, o telefone, o e-mail e o endereço dos clientes. " +
+      "Guarde-o num lugar seguro e só compartilhe com quem pode ver esses dados.",
+    confirmLabel: "Exportar",
+  },
+
+  /** Antes de escolher o arquivo a importar, que substitui tudo o que está no app. */
+  importBackup: {
+    title: "Importar banco de dados",
+    message: "Isso substituirá TODOS os dados atuais. Esta ação não pode ser desfeita.",
+    confirmLabel: "Importar",
+  },
 } as const;
