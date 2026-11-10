@@ -4,16 +4,16 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import * as z from "zod";
-import { parseInput, parseRecordId } from "../app/validation/parseInput.ts";
-import { ownerSchema } from "../app/validation/ownerSchema.ts";
-import { petSchema } from "../app/validation/petSchema.ts";
-import { isPacoteRemarcacao, PacoteRemarcacao, PorteAnimal, TipoServico } from "../app/config/petEnums.ts";
-import { appointmentSchema } from "../app/validation/appointmentSchema.ts";
-import { breedSchema } from "../app/validation/breedSchema.ts";
-import { breedCountSchema, breedSearchSchema, nameSearchSchema } from "../app/validation/searchSchema.ts";
-import { configUpdateSchema } from "../app/validation/configSchema.ts";
-import { AppError, logError } from "../app/errors/AppError.ts";
-import { MESSAGES } from "../app/globals/messages.ts";
+import { parseInput, parseRecordId } from "../src/validation/parseInput.ts";
+import { ownerSchema } from "../src/validation/ownerSchema.ts";
+import { petSchema } from "../src/validation/petSchema.ts";
+import { isPacoteRemarcacao, PacoteRemarcacao, PorteAnimal, TipoServico } from "../src/config/petEnums.ts";
+import { appointmentSchema } from "../src/validation/appointmentSchema.ts";
+import { breedSchema } from "../src/validation/breedSchema.ts";
+import { breedCountSchema, breedSearchSchema, nameSearchSchema } from "../src/validation/searchSchema.ts";
+import { configUpdateSchema } from "../src/validation/configSchema.ts";
+import { AppError, logError } from "../src/errors/AppError.ts";
+import { MESSAGES } from "../src/globals/messages.ts";
 import {
   MAX_ADDRESS_LENGTH,
   MAX_BREED_NAME_LENGTH,
@@ -24,10 +24,10 @@ import {
   MAX_PET_NAME_LENGTH,
   MAX_PHONE_LENGTH,
   MAX_SEARCH_LENGTH,
-} from "../app/globals/limits.ts";
+} from "../src/globals/limits.ts";
 import { createDatabase } from "./helpers/database.mjs";
-import { INSERT_OWNER_SQL } from "../app/repository/sql/ownersSql.ts";
-import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
+import { INSERT_OWNER_SQL } from "../src/repository/sql/ownersSql.ts";
+import { normalizeForSearch } from "../src/utils/formatadores/normalizaNome.ts";
 
 // ─── Apoio ──────────────────────────────────────────────────────────────────
 

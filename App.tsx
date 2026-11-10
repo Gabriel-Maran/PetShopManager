@@ -7,38 +7,38 @@ import {
 } from "react-native";
 import { useEffect, useState, ReactNode } from "react";
 
-import { initDatabase } from "./app/config/database";
-import { logError, toUserMessage } from "./app/errors/AppError";
-import { MESSAGES } from "./app/globals/messages";
+import { initDatabase } from "./src/config/database";
+import { logError, toUserMessage } from "./src/errors/AppError";
+import { MESSAGES } from "./src/globals/messages";
 import {
   RelatorioParams,
   RelatorioType,
   STATUS_BAR_HEIGHT,
   Screen,
-} from "./app/config/consts";
-import { isTabScreen } from "./app/config/navigation";
-import { useScreen } from "./app/hooks/useScreen";
-import { useAndroidBackButton } from "./app/hooks/useBackNavigation";
+} from "./src/config/consts";
+import { isTabScreen } from "./src/config/navigation";
+import { useScreen } from "./src/hooks/useScreen";
+import { useAndroidBackButton } from "./src/hooks/useBackNavigation";
 
 import {
   ThemeColors,
   ThemeProvider,
   useTheme,
   useThemedStyles,
-} from "./app/view/Themes/ThemeProvider";
+} from "./src/view/Themes/ThemeProvider";
 
-import { ErrorProvider } from "./app/view/components/Error/ErrorProvider";
-import AppBar from "./app/view/components/AppBarra/AppBar";
+import { ErrorProvider } from "./src/view/components/Error/ErrorProvider";
+import AppBar from "./src/view/components/AppBarra/AppBar";
 
-import Home from "./app/view/pages/Home";
-import Cadastros from "./app/view/pages/Cadastros";
-import Relatorios from "./app/view/pages/Relatorios";
-import NewOrEditOwner from "./app/view/pages/Owner/NewOrEditOwner";
-import NewOrEditPet from "./app/view/pages/Pet/NewOrEditPet";
-import NewOrEditAppointment from "./app/view/pages/Appointments/NewOrEditAppointment";
-import Configuracoes from "./app/view/pages/Configuracoes";
-import { AgendamentosProvider } from "./app/view/contexts/agendamentos";
-import RelatorioView from "./app/view/pages/Relatorios/Render/RelatorioView";
+import Home from "./src/view/pages/Home";
+import Cadastros from "./src/view/pages/Cadastros";
+import Relatorios from "./src/view/pages/Relatorios";
+import NewOrEditOwner from "./src/view/pages/Owner/NewOrEditOwner";
+import NewOrEditPet from "./src/view/pages/Pet/NewOrEditPet";
+import NewOrEditAppointment from "./src/view/pages/Appointments/NewOrEditAppointment";
+import Configuracoes from "./src/view/pages/Configuracoes";
+import { AgendamentosProvider } from "./src/view/contexts/agendamentos";
+import RelatorioView from "./src/view/pages/Relatorios/Render/RelatorioView";
 
 function AppContent() {
   const { screen, params } = useScreen<RelatorioParams>();

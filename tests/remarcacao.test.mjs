@@ -15,7 +15,7 @@ import {
   toDate,
   updatePet,
 } from "./helpers/database.mjs";
-import { UPDATE_APPOINTMENT_SQL } from "../app/repository/sql/appointmentsSql.ts";
+import { UPDATE_APPOINTMENT_SQL } from "../src/repository/sql/appointmentsSql.ts";
 
 /**
  * Só o pacote do pet, sem o resto do cadastro, para o teste mexer apenas nas colunas que o trigger olha.

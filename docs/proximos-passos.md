@@ -157,18 +157,18 @@ Pronto quando: `npm test` passa no CI, e cada bug provável está confirmado ou 
 Em andamento desde 2026-11-08, com o aval do Gabriel:
 - BUG-3 e BUG-4 no `main` desde o PR #16, como a versão 2 do esquema;
 - pergunta 15 respondida: o DADOS-2 e o DADOS-3 entram juntos, em três etapas, uma por PR:
-  1. datas do app num lugar só (`app/utils/datas.ts`), com o "hoje" no fuso do aparelho, a parte do BUG-7 sem migração. No `main` desde o PR #17;
-  2. dinheiro do app num lugar só (`app/utils/dinheiro.ts`), sem migração. No `main` desde o PR #18;
+  1. datas do app num lugar só (`src/utils/datas.ts`), com o "hoje" no fuso do aparelho, a parte do BUG-7 sem migração. No `main` desde o PR #17;
+  2. dinheiro do app num lugar só (`src/utils/dinheiro.ts`), sem migração. No `main` desde o PR #18;
   3. versão 3 do esquema: centavos, datas em texto, triggers e `DEFAULT` com `'localtime'` (o resto do BUG-7), e a importação de backup de versão anterior, em três partes, um chat por parte:
-     - decidido pelo Gabriel em 2026-11-08: os primeiros atendimentos do mês ficam com o centavo a mais; um backup antigo é atualizado pelas migrações antes da cópia; cada versão do esquema fica num arquivo de `app/config/migrations/`;
+     - decidido pelo Gabriel em 2026-11-08: os primeiros atendimentos do mês ficam com o centavo a mais; um backup antigo é atualizado pelas migrações antes da cópia; cada versão do esquema fica num arquivo de `src/config/migrations/`;
      - 3a, o banco: a `v3.ts`, os dados de exemplo em centavos e datas em texto, e os testes. No `main` desde o PR #19, que entrou antes da 3b (ver o aviso no topo);
      - 3b, o app no formato novo. No `main` desde o PR #20:
        - `datas.ts` com o tipo `IsoDate` e `dinheiro.ts` com o `Cents`, o `parseMoneyInput` e o `formatMoneyInput`; saíram as conversões do número `AAAAMMDD`;
        - modelos, repositories, services, controllers (que validam `isIsoDate` e `isValidCents`), formulários, calendário e relatórios;
-       - o SQL do comparativo mensal e dos pets ausentes foi para `app/repository/sql/relatoriosSql.ts`, com testes;
+       - o SQL do comparativo mensal e dos pets ausentes foi para `src/repository/sql/relatoriosSql.ts`, com testes;
        - verificado: typecheck limpo, 105 testes passando e o pacote Android gerado. Falta o Gabriel conferir no aparelho, com o roteiro do PR;
      - 3c, backup de versão anterior. Em revisão no PR #21 (branch `feat/backup-de-versao-anterior`), feito em 2026-11-08:
-       - a cópia do arquivo importado passa pelas migrações numa conexão só dela, antes de entrar no app (`app/config/backupRestore.ts`, chamado pelo `database.ts`);
+       - a cópia do arquivo importado passa pelas migrações numa conexão só dela, antes de entrar no app (`src/config/backupRestore.ts`, chamado pelo `database.ts`);
        - um arquivo sem as tabelas do app, corrompido ou de versão mais nova é recusado sem mexer nos dados; a cópia temporária é apagada com qualquer resultado; o `ATTACH` recebe o caminho como parâmetro;
        - os testes do backup rodam o código do app, com backups da versão 2 e de antes das migrações, e as recusas: 111 testes no total;
        - verificado: typecheck limpo, 111 testes passando e o pacote Android gerado. Falta o Gabriel conferir no aparelho, com o roteiro do PR;
@@ -184,8 +184,8 @@ Pronto quando: os testes da Parte 2 passam com o comportamento novo, e um banco 
 
 Em andamento desde 2026-11-09, uma etapa por PR e um chat por etapa:
 1. ERRO-1, no `main` desde o PR #22:
-   - `app/errors/AppError.ts`: o `AppError` (código e mensagem), o `toUserMessage` (só o `AppError` mostra a própria mensagem; o resto vira "Algo deu errado. Tente de novo.") e o `logError`;
-   - `app/globals/messages.ts`: as mensagens do app, uma por falha. O dono separa nome, telefone vazio e telefone inválido; o agendamento separa pet, serviço, data, horário e valor;
+   - `src/errors/AppError.ts`: o `AppError` (código e mensagem), o `toUserMessage` (só o `AppError` mostra a própria mensagem; o resto vira "Algo deu errado. Tente de novo.") e o `logError`;
+   - `src/globals/messages.ts`: as mensagens do app, uma por falha. O dono separa nome, telefone vazio e telefone inválido; o agendamento separa pet, serviço, data, horário e valor;
    - o `showError` recebe o erro como veio. Os hooks `useAsyncAction` (salvar, importar, carregar o exemplo, cadastrar raça, com a trava do toque duplo) e `useAsyncData` (os seis relatórios) ligam o carregamento e o modal;
    - o backup, os dados de exemplo e o cadastro de raça usam o `ErrorProvider`; saiu o `handleError` copiado em 8 arquivos;
    - da varredura, aprovado pelo Gabriel, no PR #23: cancelar a escolha do arquivo na importação não leva mais ao calendário, porque o `importDatabase` devolve se importou;
@@ -195,10 +195,10 @@ Em andamento desde 2026-11-09, uma etapa por PR e um chat por etapa:
    - o nome do modal de desativar vem da própria lista. Saiu a busca no banco do `handleDeleteSelected`, que podia falhar sem aviso;
    - verificado: typecheck limpo, 123 testes passando e o pacote Android gerado. Sem teste novo, porque a tela não roda no Node (os testes de componentes são o TEST-3). O roteiro para conferir no aparelho, com a falha simulada, está no PR #24.
 3. BUG-5, no `main` desde o PR #25, em 2026-11-09, com as duas primeiras sugestões da varredura do PR #24, aprovadas pelo Gabriel:
-   - `pagedNameSearch` (`app/repository/sql/searchSql.ts`) monta a página e a contagem com o mesmo FROM e o mesmo filtro (status e `nome_normalizado`). O repository devolve `{ items, total }` (`searchOwnersPage` e `searchPetsPage`), e saíram as buscas e contagens antigas;
+   - `pagedNameSearch` (`src/repository/sql/searchSql.ts`) monta a página e a contagem com o mesmo FROM e o mesmo filtro (status e `nome_normalizado`). O repository devolve `{ items, total }` (`searchOwnersPage` e `searchPetsPage`), e saíram as buscas e contagens antigas;
    - o hook `useSearchPage` descarta a resposta atrasada e recarrega a página depois de uma ação. Vale para Cadastros e para os seletores de dono (cadastro de pet) e de pet (agendamento);
    - Cadastros recarrega depois de desativar ou reativar, volta à página 1 ao trocar o status e volta uma página se a última esvaziar;
-   - o id desempata a ordem; `%` e `_` na busca são texto; o `validateNameSearch` confere status, página, limite e o texto até 100 caracteres (`app/globals/limits.ts`);
+   - o id desempata a ordem; `%` e `_` na busca são texto; o `validateNameSearch` confere status, página, limite e o texto até 100 caracteres (`src/globals/limits.ts`);
    - da varredura do PR #25, aprovado pelo Gabriel, no PR #26: com texto, a busca sai em ordem alfabética (antes, de Z a A); sem texto, os mais novos primeiro. A ordem deixou de ser parâmetro, e nada do usuário entra no texto do SQL. A aba ou o modal que fecha limpa a lista, para não reabrir com a da última vez;
    - verificado: typecheck limpo, 136 testes passando (13 novos, em `tests/busca.test.mjs`) e o pacote Android gerado. O roteiro para conferir no aparelho está no PR #25.
 4. Nomes de desativar, no `main` desde o PR #27, em 2026-11-09, a terceira sugestão da varredura do PR #24, aprovada pelo Gabriel. Um pedaço do NOMES-1, adiantado:
@@ -207,15 +207,15 @@ Em andamento desde 2026-11-09, uma etapa por PR e um chat por etapa:
    - os nomes dos arquivos (`ButtonExcluir`, `ModalConfDelete`, `ButtonAtivar`) e a pasta `Botões` ficam para o NOMES-1;
    - verificado: typecheck limpo, 136 testes passando e o pacote Android gerado. Sem mudança de comportamento.
 5. Resto do BKP-1, em revisão no PR #28 (branch `fix/backup-confiavel`), feito em 2026-11-09:
-   - `app/config/backupRestore.ts`: o `integrity_check` é a primeira leitura da cópia (mensagem nova para o backup danificado); a cópia vai pelo nome das colunas do app, e um backup sem alguma delas é recusado antes de mexer nos dados; os triggers do app saem durante a cópia e voltam iguais, na mesma transação, então o ponteiro da remarcação e a agenda entram como estão no backup; a contagem de ids também vem do backup;
-   - `app/config/schema.ts`: o `trusted_schema` desligado em todas as conexões;
-   - `app/service/BackupService.ts`: a exportação grava `petshop-AAAA-MM-DD.db` em `backups/`, no cache, e cada exportação apaga as cópias anteriores. Decisão do Gabriel: não apagar logo depois de compartilhar, porque o Drive ou o WhatsApp podem ler o arquivo depois que o menu fecha;
+   - `src/config/backupRestore.ts`: o `integrity_check` é a primeira leitura da cópia (mensagem nova para o backup danificado); a cópia vai pelo nome das colunas do app, e um backup sem alguma delas é recusado antes de mexer nos dados; os triggers do app saem durante a cópia e voltam iguais, na mesma transação, então o ponteiro da remarcação e a agenda entram como estão no backup; a contagem de ids também vem do backup;
+   - `src/config/schema.ts`: o `trusted_schema` desligado em todas as conexões;
+   - `src/service/BackupService.ts`: a exportação grava `petshop-AAAA-MM-DD.db` em `backups/`, no cache, e cada exportação apaga as cópias anteriores. Decisão do Gabriel: não apagar logo depois de compartilhar, porque o Drive ou o WhatsApp podem ler o arquivo depois que o menu fecha;
    - verificado: typecheck limpo, 142 testes passando (6 novos em `tests/backup.test.mjs`, entre eles arquivo danificado, coluna faltando e função insegura no esquema) e o pacote Android gerado. Cada correção tem um teste que falha sem ela. O roteiro para conferir no aparelho está no PR #28.
 6. BUG-8, no `main` desde o PR #30, em 2026-11-09 (pergunta 16: o `BackHandler` agora):
-   - o botão da tela e o do Android chamam o mesmo `requestBack()`; o destino vem do `backRouteOf` (`app/config/navigation.ts`), e o formulário em edição registra uma guarda (`useBackGuard`) que abre a confirmação. Só no Calendário o voltar fecha o app;
+   - o botão da tela e o do Android chamam o mesmo `requestBack()`; o destino vem do `backRouteOf` (`src/config/navigation.ts`), e o formulário em edição registra uma guarda (`useBackGuard`) que abre a confirmação. Só no Calendário o voltar fecha o app;
    - verificado: typecheck limpo, 154 testes passando (12 novos em `tests/navegacao.test.mjs`) e o pacote Android gerado. O roteiro para conferir no aparelho está no PR #30.
 7. VALID-1, no `main` desde o PR #32, em 2026-11-09, com o Zod 4.6.7 (pergunta 13):
-   - um schema por entidade em `app/validation/`, chamado pelos controllers com o `parseInput`, que converte a falha no `AppError` com a mensagem de `messages.ts`; os services recebem os tipos derivados dos schemas;
+   - um schema por entidade em `src/validation/`, chamado pelos controllers com o `parseInput`, que converte a falha no `AppError` com a mensagem de `messages.ts`; os services recebem os tipos derivados dos schemas;
    - verificado: typecheck limpo, 280 testes passando (55 novos em `tests/validacao.test.mjs`) e o pacote Android gerado, 680 KB maior. O roteiro para conferir no aparelho está no PR #32.
 
 - ERRO-1: módulo de erros, mensagens em `globals` e hook de ação assíncrona.

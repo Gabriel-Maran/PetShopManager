@@ -1,4 +1,4 @@
-// SQL dos relatórios sem depender do Expo: os relatórios (app/utils/relatorios) e os testes executam
+// SQL dos relatórios sem depender do Expo: os relatórios (src/utils/relatorios) e os testes executam
 // os mesmos comandos. Desde a versão 3 do esquema, as datas são texto "AAAA-MM-DD", que se compara e
 // se ordena como texto e entra direto nas funções de data do SQLite.
 

@@ -91,13 +91,13 @@ Feito em 2026-11-08: seis prints em `docs/imagens/`, com os dados de exemplo, co
 
 ### BUG-1 · Typecheck quebrado
 
-- **Por quê:** `tsc --noEmit` falha em [`PetListModal.tsx:2`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/view/components/Cadastro/Modal/PetListModal.tsx#L2), que importa o tipo `PetWithSpecieAndRace`, que não existe mais. O `PetListModal` e o `OwnerListModal` não são usados em lugar nenhum.
+- **Por quê:** `tsc --noEmit` falha em [`PetListModal.tsx:2`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/src/view/components/Cadastro/Modal/PetListModal.tsx#L2), que importa o tipo `PetWithSpecieAndRace`, que não existe mais. O `PetListModal` e o `OwnerListModal` não são usados em lugar nenhum.
 - **O que muda:** apagar os dois componentes e criar o script `typecheck` no `package.json`.
 - **Pronto quando:** `npm run typecheck` passa sem erros.
 
 ### BUG-2 · Arquivo com maiúscula diferente do import
 
-- **Por quê:** o Git guarda `app/utils/relatorios/Remarcacoes.ts`, mas [`RemarcacoesIntervals.tsx:12`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/view/pages/Relatorios/RemarcacoesIntervals.tsx#L12) importa `remarcacoes`. No Windows funciona. No Linux, que diferencia maiúsculas (servidor do EAS, CI, clone de outra pessoa), o import não acha o arquivo.
+- **Por quê:** o Git guarda `src/utils/relatorios/Remarcacoes.ts`, mas [`RemarcacoesIntervals.tsx:12`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/src/view/pages/Relatorios/RemarcacoesIntervals.tsx#L12) importa `remarcacoes`. No Windows funciona. No Linux, que diferencia maiúsculas (servidor do EAS, CI, clone de outra pessoa), o import não acha o arquivo.
 - **O que muda:** renomear no Git com `git mv` para `remarcacoes.ts`.
 - **Pronto quando:** um clone novo num sistema que diferencia maiúsculas resolve o import (o CI do TEST-2 passa a garantir isso).
 
@@ -107,7 +107,7 @@ Confirmado em 2026-11-08 por teste (`tests/remarcacao.test.mjs`): marcar como pa
 
 Corrigido em 2026-11-08 na versão 2 do esquema: o `trg_remarcacao_automatica` e o `trg_ultima_visita` só agem na passagem de `concluido` de 0 para 1.
 
-- **Por quê:** o `trg_remarcacao_automatica` ([`database.ts:274`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/config/database.ts#L274)) dispara em `UPDATE OF concluido` sempre que o valor novo é 1. No SQLite, isso vale para todo `UPDATE` que cita a coluna, mesmo sem mudar o valor. O `updateAppointment` sempre cita `concluido`. Então, editar um agendamento automático já concluído (por exemplo, para marcar como pago) deve criar mais um agendamento futuro.
+- **Por quê:** o `trg_remarcacao_automatica` ([`database.ts:274`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/src/config/database.ts#L274)) dispara em `UPDATE OF concluido` sempre que o valor novo é 1. No SQLite, isso vale para todo `UPDATE` que cita a coluna, mesmo sem mudar o valor. O `updateAppointment` sempre cita `concluido`. Então, editar um agendamento automático já concluído (por exemplo, para marcar como pago) deve criar mais um agendamento futuro.
 - **O que muda:** primeiro, um teste que reproduz (TEST-1). Depois, a condição passa a ser `OLD.concluido = 0 AND NEW.concluido = 1`, aplicada por migração (DADOS-1), porque os aparelhos já têm o trigger antigo. O mesmo ajuste vale para o `trg_ultima_visita`.
 - **Pronto quando:** o teste mostra que salvar de novo um concluído não cria agendamento, e que concluir um pendente ainda cria o próximo.
 
@@ -117,13 +117,13 @@ Confirmado em 2026-11-08 por teste (`tests/remarcacao.test.mjs`): mudar só a ob
 
 Corrigido em 2026-11-08 na versão 2 do esquema: o `trg_pet_remarcacao_ativar` só refaz a agenda quando muda de fato um campo que entra nela (pacote ligado, pacote, início, horário, serviço, valor ou reativação). Ao refazer, apaga e gera só os automáticos pendentes de hoje em diante.
 
-- **Por quê:** o `trg_pet_remarcacao_ativar` ([`database.ts:477`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/config/database.ts#L477)) dispara quando o `UPDATE` cita os campos do pacote, e o `updatePet` sempre os cita. Então, qualquer edição de um pet com pacote (mudar a observação, por exemplo) apaga os agendamentos automáticos pendentes e gera tudo de novo a partir da data de início. Efeitos esperados: horários ajustados à mão se perdem, e datas passadas não concluídas são criadas outra vez como manuais, duplicadas.
+- **Por quê:** o `trg_pet_remarcacao_ativar` ([`database.ts:477`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/src/config/database.ts#L477)) dispara quando o `UPDATE` cita os campos do pacote, e o `updatePet` sempre os cita. Então, qualquer edição de um pet com pacote (mudar a observação, por exemplo) apaga os agendamentos automáticos pendentes e gera tudo de novo a partir da data de início. Efeitos esperados: horários ajustados à mão se perdem, e datas passadas não concluídas são criadas outra vez como manuais, duplicadas.
 - **O que muda:** teste que reproduz (TEST-1). Depois, o trigger só refaz a agenda quando um campo do pacote muda de fato (`OLD.campo IS NOT NEW.campo`) e não recria datas que já passaram. Aplicado por migração (DADOS-1).
 - **Pronto quando:** os testes mostram que editar outro campo não mexe na agenda, e que trocar o pacote refaz só os pendentes futuros.
 
 ### DADOS-1 · Versão de esquema e migrações
 
-Feito em 2026-11-08: a versão fica no `PRAGMA user_version`, e a lista `MIGRATIONS` (`app/config/schema.ts`) é aplicada pelo `migrateDatabase` (`app/config/migrator.ts`) numa transação só. A versão 1 é o esquema de antes e recria os triggers. São 11 testes em `tests/migracoes.test.mjs`, e o bloco de `DROP` saiu do `database.ts`.
+Feito em 2026-11-08: a versão fica no `PRAGMA user_version`, e a lista `MIGRATIONS` (`src/config/schema.ts`) é aplicada pelo `migrateDatabase` (`src/config/migrator.ts`) numa transação só. A versão 1 é o esquema de antes e recria os triggers. São 11 testes em `tests/migracoes.test.mjs`, e o bloco de `DROP` saiu do `database.ts`.
 
 - **Por quê:** o banco é criado com `IF NOT EXISTS` e não tem versão. Um trigger corrigido no código não chega aos aparelhos que já têm o antigo, e o backup importado não diz de qual versão veio. Hoje, mudar o esquema exige colar um bloco de `DROP` no `database.ts`, o que apaga os dados.
 - **O que muda:** a versão fica em `PRAGMA user_version`. Uma lista ordenada de migrações roda numa transação na abertura do app, cada uma subindo uma versão. A versão 1 é o esquema atual, e as correções de trigger viram migrações seguintes. O bloco de `DROP` comentado sai.
@@ -131,7 +131,7 @@ Feito em 2026-11-08: a versão fica no `PRAGMA user_version`, e a lista `MIGRATI
 
 ### TEST-1 · Testes das regras e dos triggers
 
-Feito em 2026-11-08: 44 testes com `node:test` e `node:sqlite`, rodando no CI. Cobrem a agenda dos pacotes 2 e 4, a virada de mês, a conclusão de automático, a edição de pet, a cascata, a restauração de backup e as funções de data, máscara, valor e normalização. Os testes usam o mesmo SQL do app (`app/config/schema.ts` e `app/repository/sql/`). BUG-3, BUG-4 e o ponteiro do BKP-1 ficaram confirmados.
+Feito em 2026-11-08: 44 testes com `node:test` e `node:sqlite`, rodando no CI. Cobrem a agenda dos pacotes 2 e 4, a virada de mês, a conclusão de automático, a edição de pet, a cascata, a restauração de backup e as funções de data, máscara, valor e normalização. Os testes usam o mesmo SQL do app (`src/config/schema.ts` e `src/repository/sql/`). BUG-3, BUG-4 e o ponteiro do BKP-1 ficaram confirmados.
 
 Achado novo: no campo de horário, um quinto dígito apaga o campo inteiro (`mascararHorario("09300")` devolve vazio), em vez de ser ignorado.
 
@@ -145,7 +145,7 @@ Achado novo: no campo de horário, um quinto dígito apaga o campo inteiro (`mas
 
 Feito em 2026-11-09, no PR #25, com o ajuste da ordem no PR #26: a página e a contagem saem da mesma função (`pagedNameSearch`), com o mesmo FROM e o mesmo filtro, e o repository devolve os dois juntos. Os seletores de dono e de pet usam a mesma busca, e uma resposta atrasada é descartada. Há teste nos dois status, com e sem acento. Falta o Gabriel conferir no aparelho, com o roteiro do PR.
 
-- **Por quê:** em [`Cadastros.tsx:60`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/view/pages/Cadastros.tsx#L60), a contagem ignora o filtro de ativos e inativos e não roda de novo quando ele muda. A contagem de donos busca em `nome` ([`OwnerRepository.ts:65`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/repository/OwnerRepository.ts#L65)), enquanto a lista busca em `nome_normalizado`. Resultado: na aba de inativos, o total é o de ativos; e uma busca por "joao" lista o João, mas conta zero e esconde a paginação.
+- **Por quê:** em [`Cadastros.tsx:60`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/src/view/pages/Cadastros.tsx#L60), a contagem ignora o filtro de ativos e inativos e não roda de novo quando ele muda. A contagem de donos busca em `nome` ([`OwnerRepository.ts:65`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/src/repository/OwnerRepository.ts#L65)), enquanto a lista busca em `nome_normalizado`. Resultado: na aba de inativos, o total é o de ativos; e uma busca por "joao" lista o João, mas conta zero e esconde a paginação.
 - **O que muda:** contagem e lista usam o mesmo filtro (ativo e nome normalizado), de preferência na mesma função do repository.
 - **Pronto quando:** total e páginas batem com a lista nos dois filtros e em buscas com e sem acento, com teste.
 
@@ -158,8 +158,8 @@ Conferido no ERRO-1, em 2026-11-09: o `console.log` da validação do pet já n�
 O resto foi feito em 2026-11-09, no PR #24: desativar e reativar em Cadastros passam pelo `useAsyncAction`, e o item só sai da lista depois que o banco confirma. O `handleDeleteSelected` deixou de ir ao banco: o nome do modal vem da própria lista. Falta o Gabriel conferir no aparelho, com o roteiro do PR.
 
 - **Por quê:**
-  - `initDatabase` captura qualquer erro com `console.log` ([`database.ts:687`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/config/database.ts#L687)), e o app abre como se o banco estivesse certo.
-  - Em Cadastros, desativar e reativar chamam o controller sem `await` ([`Cadastros.tsx:92`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/view/pages/Cadastros.tsx#L92)). O `try` não pega a falha, e o item sai da lista mesmo se der erro.
+  - `initDatabase` captura qualquer erro com `console.log` ([`database.ts:687`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/src/config/database.ts#L687)), e o app abre como se o banco estivesse certo.
+  - Em Cadastros, desativar e reativar chamam o controller sem `await` ([`Cadastros.tsx:92`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/src/view/pages/Cadastros.tsx#L92)). O `try` não pega a falha, e o item sai da lista mesmo se der erro.
   - `handleDeleteSelected` não trata erro nenhum.
   - Sobrou um `console.log` na validação do pet.
 - **O que muda:** a falha na abertura do banco mostra a tela de erro que já existe no `App.tsx`. As ações aguardam o resultado antes de mexer na lista e mostram o erro pelo `useError`.
@@ -167,7 +167,7 @@ O resto foi feito em 2026-11-09, no PR #24: desativar e reativar em Cadastros pa
 
 ### BUG-7 · Fuso horário misturado nas datas
 
-Parte do app feita em 2026-11-08: o "hoje" e as conversões de data estão em `app/utils/datas.ts`, no fuso do aparelho, e o SQL do app recebe o "hoje" como parâmetro. Há um teste com o relógio às 22h. Os triggers e o `DEFAULT` do `criado_em` passaram a usar `'localtime'` na versão 3 do esquema (PR #19), e o app passou a ler o formato novo na etapa 3b (PR #20).
+Parte do app feita em 2026-11-08: o "hoje" e as conversões de data estão em `src/utils/datas.ts`, no fuso do aparelho, e o SQL do app recebe o "hoje" como parâmetro. Há um teste com o relógio às 22h. Os triggers e o `DEFAULT` do `criado_em` passaram a usar `'localtime'` na versão 3 do esquema (PR #19), e o app passou a ler o formato novo na etapa 3b (PR #20).
 
 - **Por quê:** o SQLite usa `'now'` (UTC) em uns lugares e `'now', 'localtime'` em outros, e o app usa o fuso de São Paulo fixo em três lugares. Entre 21h e meia-noite no horário de Brasília, o "hoje" do SQL já é amanhã. Isso afeta a data de cadastro (`criado_em`), se um agendamento de hoje entra como automático ou manual e os dias de ausência.
 - **O que muda:** o "hoje" é calculado num lugar só, no fuso do aparelho, e passado ao SQL como parâmetro. Os triggers e o `DEFAULT` de `criado_em` passam a usar `'localtime'` (por migração).
@@ -175,7 +175,7 @@ Parte do app feita em 2026-11-08: o "hoje" e as conversões de data estão em `a
 
 ### BUG-8 · Botão voltar do Android fecha o app (provável)
 
-Feito em 2026-11-09, no PR #30 (pergunta 16: o `BackHandler` agora). O botão da tela e o do Android chamam o mesmo `requestBack()`. O destino vem de um mapa só (`backRouteOf`, em `app/config/navigation.ts`), e o formulário em edição registra uma guarda (`useBackGuard`) que abre a confirmação. Verificado: typecheck limpo, 154 testes passando (12 novos em `tests/navegacao.test.mjs`) e o pacote Android gerado. Falta o Gabriel conferir no aparelho, com o roteiro do PR. Os modais ainda não fecham com o voltar (ver `proximos-passos.md`).
+Feito em 2026-11-09, no PR #30 (pergunta 16: o `BackHandler` agora). O botão da tela e o do Android chamam o mesmo `requestBack()`. O destino vem de um mapa só (`backRouteOf`, em `src/config/navigation.ts`), e o formulário em edição registra uma guarda (`useBackGuard`) que abre a confirmação. Verificado: typecheck limpo, 154 testes passando (12 novos em `tests/navegacao.test.mjs`) e o pacote Android gerado. Falta o Gabriel conferir no aparelho, com o roteiro do PR. Os modais ainda não fecham com o voltar (ver `proximos-passos.md`).
 
 - **Por quê:** a navegação é própria e não trata o `BackHandler`. No Android, o botão voltar sai do app em qualquer tela, inclusive no meio de um formulário, sem a confirmação que o botão da tela já pede.
 - **O que muda:** o botão voltar segue o mesmo caminho do botão da `TitleBar`, com confirmação nos formulários, e só sai do app na tela inicial. A troca por uma biblioteca de navegação é o ARQ-3.
@@ -204,7 +204,7 @@ Feito em 2026-11-09, no PR #28 (Parte 4):
 
 ### VALID-1 · Validação de entrada completa
 
-Feito em 2026-11-09, no PR #32, com o Zod 4.6.7 (pergunta 13). Os schemas ficam em `app/validation/`, e os controllers chamam o `parseInput`, que converte a falha no `AppError` com a mensagem de `messages.ts`. Os limites de tamanho ficam em `globals/limits.ts`. Verificado: typecheck limpo, 280 testes passando (55 novos em `tests/validacao.test.mjs`) e o pacote Android gerado, que cresceu 680 KB com o Zod. Falta o Gabriel conferir no aparelho, com o roteiro do PR. O cadastro de raça pelo `raceSpecieHelper` e os limites escritos à mão nas telas ainda não usam os schemas (ver `proximos-passos.md`).
+Feito em 2026-11-09, no PR #32, com o Zod 4.6.7 (pergunta 13). Os schemas ficam em `src/validation/`, e os controllers chamam o `parseInput`, que converte a falha no `AppError` com a mensagem de `messages.ts`. Os limites de tamanho ficam em `globals/limits.ts`. Verificado: typecheck limpo, 280 testes passando (55 novos em `tests/validacao.test.mjs`) e o pacote Android gerado, que cresceu 680 KB com o Zod. Falta o Gabriel conferir no aparelho, com o roteiro do PR. O cadastro de raça pelo `raceSpecieHelper` e os limites escritos à mão nas telas ainda não usam os schemas (ver `proximos-passos.md`).
 
 - **Por quê:** parte da entrada é validada, parte não. O horário aceita "9" (sem minutos), a data só é checada por ser número, o valor pode ficar vazio, o e-mail não tem formato conferido e os textos não levam `trim` em todo lugar. O salvamento do dono não protege contra toque duplo, ao contrário dos de pet e agendamento.
 - **O que muda:** um schema por entidade (dono, pet, agendamento, raça) com os formatos (`HH:MM`, data real, valor, e-mail, telefone), `trim` e tamanho máximo, usado pelo serviço antes de gravar. As mensagens ficam em `globals` (ver ERRO-1). A escolha entre Zod e validadores próprios está em `perguntas-em-aberto.md`.
@@ -213,7 +213,7 @@ Feito em 2026-11-09, no PR #32, com o Zod 4.6.7 (pergunta 13). Os schemas ficam 
 
 ### ERRO-1 · Tratamento de erros centralizado
 
-Feito em 2026-11-09: o `AppError`, o `toUserMessage` e o `logError` ficam em `app/errors/AppError.ts`, e as mensagens, em `app/globals/messages.ts`, uma por falha. O `showError` recebe o erro como veio, e os hooks `useAsyncAction` e `useAsyncData` ligam o carregamento e o modal de erro. O backup, os dados de exemplo e o cadastro de raça passaram a usar o `ErrorProvider`. Um erro que não é `AppError` mostra a mensagem genérica, e o detalhe vai só para o log. Os relatórios deixaram de chamar o `showError` durante o render: pela leitura do código, o modal voltava a abrir a cada vez que era fechado (provável).
+Feito em 2026-11-09: o `AppError`, o `toUserMessage` e o `logError` ficam em `src/errors/AppError.ts`, e as mensagens, em `src/globals/messages.ts`, uma por falha. O `showError` recebe o erro como veio, e os hooks `useAsyncAction` e `useAsyncData` ligam o carregamento e o modal de erro. O backup, os dados de exemplo e o cadastro de raça passaram a usar o `ErrorProvider`. Um erro que não é `AppError` mostra a mensagem genérica, e o detalhe vai só para o log. Os relatórios deixaram de chamar o `showError` durante o render: pela leitura do código, o modal voltava a abrir a cada vez que era fechado (provável).
 
 - **Por quê:** o mesmo `handleError` foi copiado em 8 arquivos, e a conversão `e instanceof Error ? e.message : ...` aparece 12 vezes. O `DatabaseTransfer` tem o próprio modal de erro. As mensagens ficam espalhadas pelos controllers, e uma delas diz "Nome e telefone são obrigatórios" também quando o telefone só é inválido.
 - **O que muda:** um módulo de erros com um `AppError` (código e mensagem), as mensagens em `globals/messages`, uma função que converte qualquer erro em texto para o usuário e um hook (por exemplo, `useAsyncAction`) que já liga o carregamento e o `showError`. O backup passa a usar o `ErrorProvider`.
@@ -221,7 +221,7 @@ Feito em 2026-11-09: o `AppError`, o `toUserMessage` e o `logError` ficam em `ap
 
 ### DADOS-2 · Dinheiro em centavos inteiros
 
-Preparado em 2026-11-08, sem migração: a máscara e a conversão para centavos estão em `app/utils/dinheiro.ts`. As colunas viraram centavos na versão 3 do esquema (PR #19), com a sobra da divisão do pacote nos primeiros atendimentos do mês. Na etapa 3b (PR #20), os modelos passaram a usar centavos, e o texto com vírgula ficou só nos campos das telas. Na etapa 3c, um backup de versão anterior passa pelas migrações antes de entrar.
+Preparado em 2026-11-08, sem migração: a máscara e a conversão para centavos estão em `src/utils/dinheiro.ts`. As colunas viraram centavos na versão 3 do esquema (PR #19), com a sobra da divisão do pacote nos primeiros atendimentos do mês. Na etapa 3b (PR #20), os modelos passaram a usar centavos, e o texto com vírgula ficou só nos campos das telas. Na etapa 3c, um backup de versão anterior passa pelas migrações antes de entrar.
 
 - **Por quê:** valores são texto com vírgula (`"12,50"`), e o trigger divide o valor do pacote em `REAL`. Com um pacote de 99,99 em 4 vezes, cada atendimento vira 25,00 e a soma dá 100,00.
 - **O que muda:** colunas `INTEGER` em centavos, com migração dos dados (DADOS-1), e a divisão do pacote distribui a sobra de centavos. A conversão para "12,50" acontece só na tela, num util.
@@ -266,7 +266,7 @@ A lista está em `proximos-passos.md`.
 
 - **Por quê:** quem abre o código encontra sobras do desenvolvimento.
 - **O que muda:**
-  - Código sem uso: `ScreenService`, `PetListModal`, `OwnerListModal`, `intParaHifen` e os métodos de repository que nenhuma tela chama, como `getAppointmentsByDate`, que tem SQL inválido ([`AppointmentsRepository.ts:22`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/app/repository/AppointmentsRepository.ts#L22)).
+  - Código sem uso: `ScreenService`, `PetListModal`, `OwnerListModal`, `intParaHifen` e os métodos de repository que nenhuma tela chama, como `getAppointmentsByDate`, que tem SQL inválido ([`AppointmentsRepository.ts:22`](https://github.com/Gabriel-Maran/PetShopManager/blob/e1d5f2f/src/repository/AppointmentsRepository.ts#L22)).
   - Imagens sem uso, cerca de 1,6 MB: as duas cópias `"- Copy.png"`, `moon.png`, `sun.png`, `editCampo.png` e a pasta `default_react`.
   - Comentários de conversa ("ESSE BICHÃO", "CORRIGIDO: estava sem []", "era o que faltava") viram comentários de porquê, ou saem.
   - O `inserts.txt` vira o carregador do DEMO-1.

@@ -3,15 +3,15 @@
 import { beforeEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { createDatabase, insertOwner, insertPet } from "./helpers/database.mjs";
-import { DEACTIVATE_OWNER_SQL, searchOwnersSql } from "../app/repository/sql/ownersSql.ts";
-import { DEACTIVATE_PET_SQL, searchPetsSql } from "../app/repository/sql/petsSql.ts";
-import { toSearchPattern } from "../app/repository/sql/searchSql.ts";
-import { countBreedsSql, INSERT_BREED_SQL, listBreedsSql } from "../app/repository/sql/breedsSql.ts";
-import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
-import { validateNameSearch } from "../app/controller/validateNameSearch.ts";
-import { MAX_SEARCH_LENGTH } from "../app/globals/limits.ts";
-import { MESSAGES } from "../app/globals/messages.ts";
-import { AppError } from "../app/errors/AppError.ts";
+import { DEACTIVATE_OWNER_SQL, searchOwnersSql } from "../src/repository/sql/ownersSql.ts";
+import { DEACTIVATE_PET_SQL, searchPetsSql } from "../src/repository/sql/petsSql.ts";
+import { toSearchPattern } from "../src/repository/sql/searchSql.ts";
+import { countBreedsSql, INSERT_BREED_SQL, listBreedsSql } from "../src/repository/sql/breedsSql.ts";
+import { normalizeForSearch } from "../src/utils/formatadores/normalizaNome.ts";
+import { validateNameSearch } from "../src/controller/validateNameSearch.ts";
+import { MAX_SEARCH_LENGTH } from "../src/globals/limits.ts";
+import { MESSAGES } from "../src/globals/messages.ts";
+import { AppError } from "../src/errors/AppError.ts";
 
 /** A busca como a tela monta, com o que o teste quiser trocar. */
 const nameSearch = (fields = {}) => ({ query: "", ativo: 1, page: 0, limit: 20, ...fields });

@@ -1,4 +1,4 @@
-// Limites de entrada do app, num lugar só: a tela usa no campo, e o schema de app/validation confere
+// Limites de entrada do app, num lugar só: a tela usa no campo, e o schema de src/validation confere
 // de novo antes de gravar (VALID-1).
 
 /** O tamanho máximo do texto de uma busca por nome. */

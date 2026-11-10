@@ -2,7 +2,7 @@
 import { beforeEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { createDatabase, insertOwner, insertPet, isoDate } from "./helpers/database.mjs";
-import { FIND_PET_SQL } from "../app/repository/sql/petsSql.ts";
+import { FIND_PET_SQL } from "../src/repository/sql/petsSql.ts";
 
 describe("FIND_PET_SQL", () => {
   let db;

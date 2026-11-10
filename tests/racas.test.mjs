@@ -10,13 +10,13 @@ import {
   INSERT_BREED_SQL,
   LIST_BREED_NAMES_SQL,
   listBreedsSql,
-} from "../app/repository/sql/breedsSql.ts";
-import { assertBreedOfSpecies, assertNewBreedName, breedNameKey } from "../app/service/breedRules.ts";
-import { breedSchema } from "../app/validation/breedSchema.ts";
-import { parseInput } from "../app/validation/parseInput.ts";
-import { normalizeForSearch } from "../app/utils/formatadores/normalizaNome.ts";
-import { AppError } from "../app/errors/AppError.ts";
-import { MESSAGES } from "../app/globals/messages.ts";
+} from "../src/repository/sql/breedsSql.ts";
+import { assertBreedOfSpecies, assertNewBreedName, breedNameKey } from "../src/service/breedRules.ts";
+import { breedSchema } from "../src/validation/breedSchema.ts";
+import { parseInput } from "../src/validation/parseInput.ts";
+import { normalizeForSearch } from "../src/utils/formatadores/normalizaNome.ts";
+import { AppError } from "../src/errors/AppError.ts";
+import { MESSAGES } from "../src/globals/messages.ts";
 
 // Da carga inicial do esquema.
 const CAO = 1;
