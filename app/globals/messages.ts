@@ -67,6 +67,8 @@ export const MESSAGES = {
   backup: {
     notABackup:
       "Este arquivo não é um backup do PetShop Manager. Escolha um arquivo exportado pelo app.",
+    damaged:
+      "Este backup está danificado e não pode ser importado. Exporte um backup novo pelo app.",
     newerVersion: "Este backup é de uma versão mais nova do app. Atualize o app para importá-lo.",
     wrongExtension: "Arquivo inválido. Selecione um arquivo .db válido.",
     fileNotFound: "Arquivo selecionado não encontrado ou inacessível.",

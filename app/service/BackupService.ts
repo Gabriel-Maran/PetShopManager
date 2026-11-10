@@ -9,11 +9,24 @@ import {
 } from "../config/database";
 import { AppError } from "../errors/AppError";
 import { MESSAGES } from "../globals/messages";
+import { todayIso } from "../utils/datas";
 
 // A pasta onde o expo-sqlite abre os bancos pelo nome.
 const SQLITE_DIRECTORY = `${FileSystem.documentDirectory}SQLite/`;
 const DB_PATH = `${SQLITE_DIRECTORY}${DATABASE_NAME}`;
-const BACKUP_PATH = `${FileSystem.cacheDirectory}${DATABASE_NAME}`;
+
+/** A extensão que a exportação grava e a importação aceita. */
+const BACKUP_EXTENSION = ".db";
+
+// As cópias exportadas ficam numa pasta só delas no cache. O compartilhamento termina quando o menu
+// fecha, mas o app de destino (Drive, WhatsApp) pode ler o arquivo depois disso. Por isso a cópia não
+// é apagada logo depois de compartilhar, e sim na exportação seguinte: fica no máximo uma.
+const EXPORT_DIRECTORY = `${FileSystem.cacheDirectory}backups/`;
+// Onde as versões anteriores do app deixavam a cópia, com nome fixo.
+const LEGACY_EXPORT_PATH = `${FileSystem.cacheDirectory}${DATABASE_NAME}`;
+
+/** "petshop-2026-11-09.db": a data ajuda a achar o backup certo entre vários. */
+const exportFileName = () => `petshop-${todayIso()}${BACKUP_EXTENSION}`;
 
 // A cópia do arquivo importado, na pasta dos bancos, para o expo-sqlite conseguir abri-la.
 const IMPORT_NAME = "import_temp.db";
@@ -39,18 +52,21 @@ export async function exportDatabase(): Promise<void> {
     throw new AppError("UNAVAILABLE", MESSAGES.backup.sharingUnavailable);
   }
 
-  const backupInfo = await FileSystem.getInfoAsync(BACKUP_PATH);
-  if (backupInfo.exists) {
-    await FileSystem.deleteAsync(BACKUP_PATH, { idempotent: true });
-  }
+  await deletePreviousExports();
+  await FileSystem.makeDirectoryAsync(EXPORT_DIRECTORY, { intermediates: true });
+  const exportPath = `${EXPORT_DIRECTORY}${exportFileName()}`;
+  await FileSystem.copyAsync({ from: DB_PATH, to: exportPath });
 
-  await FileSystem.copyAsync({ from: DB_PATH, to: BACKUP_PATH });
-
-  await Sharing.shareAsync(BACKUP_PATH, {
+  await Sharing.shareAsync(exportPath, {
     mimeType: "application/octet-stream",
     dialogTitle: "Exportar banco de dados",
     UTI: "public.database",
   });
+}
+
+async function deletePreviousExports(): Promise<void> {
+  await FileSystem.deleteAsync(EXPORT_DIRECTORY, { idempotent: true });
+  await FileSystem.deleteAsync(LEGACY_EXPORT_PATH, { idempotent: true });
 }
 
 // ─── IMPORTAR ────────────────────────────────────────────────────────────────
@@ -66,7 +82,7 @@ export async function importDatabase(): Promise<boolean> {
 
   const file = result.assets[0];
 
-  if (!file.name.endsWith(".db")) {
+  if (!file.name.endsWith(BACKUP_EXTENSION)) {
     throw new AppError("INVALID_BACKUP", MESSAGES.backup.wrongExtension);
   }
 

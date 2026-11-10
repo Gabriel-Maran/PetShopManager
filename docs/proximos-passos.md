@@ -1,16 +1,16 @@
 # Próximos passos
 
-Atualizado em 2026-11-09, depois do BUG-5, a terceira etapa da Parte 4.
+Atualizado em 2026-11-09, depois do resto do BKP-1, a quinta etapa da Parte 4.
 
-> **Para o próximo chat:** a troca dos nomes de desativar está em revisão no PR #27, branch `refactor/nomes-de-desativar`, no worktree `.claude/worktrees/acoes-de-cadastros` (o nome da pasta ficou da etapa do BUG-6). Depois do merge, a próxima etapa é o resto do BKP-1 (ver "Parte 4" em "Partes de execução" e o BKP-1 no plano). Os roteiros para conferir no aparelho estão nos PRs #22 (ERRO-1), #24 (BUG-6), #25 (BUG-5) e #26 (ordem da busca).
+> **Para o próximo chat:** o resto do BKP-1 está em revisão no PR #28, branch `fix/backup-confiavel`, no worktree `.claude/worktrees/backup-confiavel`. Depois do merge, o que falta da Parte 4 depende do Gabriel: o VALID-1 espera a pergunta 13 (Zod ou validadores próprios), e o BUG-8, a pergunta 16 (navegação). Sem as respostas, pergunte a ele se segue para outra parte. Os roteiros para conferir no aparelho estão nos PRs #22 (ERRO-1), #24 (BUG-6), #25 (BUG-5), #26 (ordem da busca) e #28 (BKP-1).
 >
-> Em 2026-11-09 entraram no `main`: ERRO-1 (PR #22), importação cancelada (#23), BUG-6 (#24), BUG-5 (#25) e a ordem da busca (#26). A Parte 3 foi aceita com o merge do PR #21, em 2026-11-08.
+> Em 2026-11-09 entraram no `main`: ERRO-1 (PR #22), importação cancelada (#23), BUG-6 (#24), BUG-5 (#25), a ordem da busca (#26) e os nomes de desativar (#27). A Parte 3 foi aceita com o merge do PR #21, em 2026-11-08.
 >
 > A branch remota `fix/contagem-de-cadastros` voltou por engano depois do merge do PR #25, com um commit que já entrou pelo PR #26. O Gabriel pode apagá-la no GitHub.
 >
 > O clone do Gabriel estava no `8004a1a`, atrás do `main`. Antes de testar, `git pull` no `main`: os PRs #18 a #27 não mexem no `package-lock.json` alterado.
 >
-> Limpeza de 2026-11-09: saíram os worktrees `backup-3c` (PR #21) e `erros-centralizados` (PRs #22 e #23), e a pasta vazia `dados-1`. As branches locais ficaram. A pasta vazia `.claude/worktrees/erros-centralizados` continua presa por outro processo; apague quando ela soltar.
+> Limpeza de 2026-11-09: saíram os worktrees `backup-3c` (PR #21) e `erros-centralizados` (PRs #22 e #23), e a pasta vazia `dados-1`. As branches locais ficaram. A pasta vazia `.claude/worktrees/erros-centralizados` continua presa por outro processo; apague quando ela soltar. O worktree `acoes-de-cadastros` (PR #27, já no `main`) pode sair: primeiro a junction, com `cmd /c rmdir`, e depois `git worktree remove`.
 
 ## Em andamento: segurança e configuração do repositório
 
@@ -77,8 +77,8 @@ Falta, nesta ordem:
 - A auditoria do código foi feita sobre o commit `e1d5f2f` do `main`.
 - O plano está em [`plano-de-melhorias.md`](plano-de-melhorias.md), com 35 itens: 9 P0, 16 P1 e 10 P2.
 - A arquitetura de hoje está em [`arquitetura.md`](arquitetura.md), e as respostas do checklist, em [`auditoria.md`](auditoria.md).
-- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só), #23 (importação cancelada), #24 (ações de Cadastros), #25 (busca com o mesmo filtro), #26 (ordem da busca) e #27 (nomes de desativar, em revisão). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
-- Da Parte 1, falta o que depende das perguntas em aberto. As Partes 2 e 3 estão completas e aceitas. A Parte 4 começou em 2026-11-09, com o ERRO-1, o BUG-6 e o BUG-5, e as Partes 5 em diante ainda não começaram.
+- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só), #23 (importação cancelada), #24 (ações de Cadastros), #25 (busca com o mesmo filtro), #26 (ordem da busca), #27 (nomes de desativar) e #28 (resto do BKP-1, em revisão). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
+- Da Parte 1, falta o que depende das perguntas em aberto. As Partes 2 e 3 estão completas e aceitas. A Parte 4 começou em 2026-11-09, com o ERRO-1, o BUG-6, o BUG-5 e o BKP-1, e as Partes 5 em diante ainda não começaram.
 - Falta o Gabriel responder [`perguntas-em-aberto.md`](perguntas-em-aberto.md). Várias partes abaixo dependem dessas respostas.
 
 ## Partes de execução
@@ -165,20 +165,24 @@ Em andamento desde 2026-11-09, uma etapa por PR e um chat por etapa:
    - o id desempata a ordem; `%` e `_` na busca são texto; o `validateNameSearch` confere status, página, limite e o texto até 100 caracteres (`app/globals/limits.ts`);
    - da varredura do PR #25, aprovado pelo Gabriel, no PR #26: com texto, a busca sai em ordem alfabética (antes, de Z a A); sem texto, os mais novos primeiro. A ordem deixou de ser parâmetro, e nada do usuário entra no texto do SQL. A aba ou o modal que fecha limpa a lista, para não reabrir com a da última vez;
    - verificado: typecheck limpo, 136 testes passando (13 novos, em `tests/busca.test.mjs`) e o pacote Android gerado. O roteiro para conferir no aparelho está no PR #25.
-4. Nomes de desativar, em revisão no PR #27 (branch `refactor/nomes-de-desativar`), feito em 2026-11-09, a terceira sugestão da varredura do PR #24, aprovada pelo Gabriel. Um pedaço do NOMES-1, adiantado:
+4. Nomes de desativar, no `main` desde o PR #27, em 2026-11-09, a terceira sugestão da varredura do PR #24, aprovada pelo Gabriel. Um pedaço do NOMES-1, adiantado:
    - `deactivateOwner`, `activateOwner`, `deactivatePet` e `activatePet` no controller, no service e no repository, no lugar de `delete*` e `active*`;
    - as listas e os botões recebem `onDeactivate` e `onActivate`, e o `ModalConfDelete`, `onConfirm`. Saiu o `type` do modal, que só era usado para desativar, e os estilos e o import sem uso;
    - os nomes dos arquivos (`ButtonExcluir`, `ModalConfDelete`, `ButtonAtivar`) e a pasta `Botões` ficam para o NOMES-1;
    - verificado: typecheck limpo, 136 testes passando e o pacote Android gerado. Sem mudança de comportamento.
-5. Próxima, sugerida: o resto do BKP-1. Não depende de pergunta.
-6. O VALID-1 espera a pergunta 13 (Zod ou validadores próprios), e o BUG-8, a pergunta 16 (navegação).
+5. Resto do BKP-1, em revisão no PR #28 (branch `fix/backup-confiavel`), feito em 2026-11-09:
+   - `app/config/backupRestore.ts`: o `integrity_check` é a primeira leitura da cópia (mensagem nova para o backup danificado); a cópia vai pelo nome das colunas do app, e um backup sem alguma delas é recusado antes de mexer nos dados; os triggers do app saem durante a cópia e voltam iguais, na mesma transação, então o ponteiro da remarcação e a agenda entram como estão no backup; a contagem de ids também vem do backup;
+   - `app/config/schema.ts`: o `trusted_schema` desligado em todas as conexões;
+   - `app/service/BackupService.ts`: a exportação grava `petshop-AAAA-MM-DD.db` em `backups/`, no cache, e cada exportação apaga as cópias anteriores. Decisão do Gabriel: não apagar logo depois de compartilhar, porque o Drive ou o WhatsApp podem ler o arquivo depois que o menu fecha;
+   - verificado: typecheck limpo, 142 testes passando (6 novos em `tests/backup.test.mjs`, entre eles arquivo danificado, coluna faltando e função insegura no esquema) e o pacote Android gerado. Cada correção tem um teste que falha sem ela. O roteiro para conferir no aparelho está no PR #28.
+6. O VALID-1 espera a pergunta 13 (Zod ou validadores próprios), e o BUG-8, a pergunta 16 (navegação). São o que falta da Parte 4.
 
 - ERRO-1: módulo de erros, mensagens em `globals` e hook de ação assíncrona.
 - BUG-5: contagem com o mesmo filtro da lista.
 - BUG-6: falhas que hoje somem passam a aparecer.
 - BUG-8: `BackHandler`.
 - VALID-1: schema por entidade.
-- BKP-1: importação validada, colunas nomeadas e cópia temporária apagada. A versão, as tabelas e a cópia temporária já entraram na 3c; falta o resto (ver o plano).
+- BKP-1: importação validada, colunas nomeadas e cópia temporária apagada. A versão, as tabelas e a cópia temporária entraram na 3c, e o resto no PR #28.
 
 Pronto quando: cada caminho de erro tem teste ou foi conferido no aparelho, e os bugs da parte estão fechados.
 

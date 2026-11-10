@@ -296,3 +296,19 @@ Motivo:
 Contexto: na varredura do PR #24, o `deleteOwner`, o `deletePet` e o `onConfirmDelete` desativam, e não apagam, e o `activeOwner` e o `activePet` reativam. O Gabriel aprovou trocar os nomes antes do NOMES-1, que é da Parte 7 e envolve os parceiros.
 Decisão: um PR `refactor` só com os identificadores (`deactivate*`, `activate*`, `onDeactivate`, `onActivate`, `onConfirm`) e o que ficou sem uso (o `type` do modal, estilos e um import). Os nomes dos arquivos e a pasta `Botões` ficam para o NOMES-1.
 Motivo: o nome errado leva quem lê a pensar que o registro some. Renomear arquivos mexe em mais imports e combina melhor com o resto do NOMES-1, conversado com os parceiros.
+
+**Resto do BKP-1: backup e restauração confiáveis.**
+Contexto: a 3c já conferia a versão e as tabelas. Faltava a integridade do arquivo, o `trusted_schema`, a cópia pelo nome das colunas (era `SELECT *`) e o ponteiro da remarcação, que o trigger de cadastro do pet refazia na cópia. A exportação deixava a cópia no cache com nome fixo.
+Decisão:
+- O `PRAGMA integrity_check(1)` é a primeira leitura da cópia. Um arquivo que nem abre, ou com esquema barrado pelo `trusted_schema`, continua com a mensagem "não é um backup"; um arquivo danificado ganhou a sua ("Este backup está danificado"), e o problema achado vai para o log pelo `cause`.
+- O `trusted_schema` fica desligado em todas as conexões, no `SQL_CONNECTION_PRAGMAS`, e não só na importação. O esquema do app só usa as funções do SQLite, e os 136 testes que já existiam passaram com ele desligado.
+- As colunas copiadas vêm do esquema do app (`pragma_table_info('tabela', 'main')`), sem a coluna gerada. Um backup sem alguma delas é recusado antes da transação; uma coluna a mais fica de fora.
+- Os triggers do app saem durante a cópia e voltam pelo comando guardado no próprio banco do app, na mesma ordem e dentro da mesma transação. Assim a agenda e o ponteiro entram como estão no backup, e uma falha no meio traz os triggers de volta com o `ROLLBACK`.
+- A contagem de ids (`sqlite_sequence`) das sete tabelas também vem do backup.
+- Decisão do Gabriel: a exportação grava `petshop-AAAA-MM-DD.db` numa pasta própria do cache (`backups/`), e cada exportação apaga as cópias anteriores, inclusive a de nome fixo das versões antigas. A cópia não é apagada logo depois de compartilhar.
+
+Motivo:
+- Desligar os triggers é o que o plano pedia ("triggers de remarcação sem efeito durante a restauração") e vale para qualquer trigger novo. Corrigir só o ponteiro depois da cópia dependeria de saber o que cada trigger mexe, e a agenda gerada à toa ainda gastava ids.
+- Ler as colunas do esquema do app evita uma lista escrita à mão, que esqueceria uma coluna nova numa próxima versão. Nenhum nome do arquivo importado entra no texto do SQL.
+- Com a contagem de ids do backup, um id apagado no aparelho de origem não volta a ser usado, como na v3.
+- No Android, o `shareAsync` termina quando o menu de compartilhar fecha, mas o Drive ou o WhatsApp podem ler o arquivo depois disso. Apagar na hora poderia fazer o envio falhar; o cache é privado do app.
