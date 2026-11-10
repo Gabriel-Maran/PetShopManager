@@ -72,13 +72,6 @@ export default function NewOrEditOwner() {
     >
       <DefaultHeader />
       <TitleBar
-        returnTo={Screen.Cadastros}
-        params={
-          {
-            type: "DONO",
-            mode: "view",
-          } as NewOrEditCadastros
-        }
         title={
           isViewing
             ? "Visualizando Dono"

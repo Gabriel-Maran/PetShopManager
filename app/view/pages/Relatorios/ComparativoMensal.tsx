@@ -4,7 +4,6 @@ import {
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
-import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
 import BarChart from "../../components/Relatorios/BarChart";
 import { useAsyncData } from "../../../hooks/useAsyncData";
@@ -23,7 +22,6 @@ export default function ComparativoMensal() {
 
   const titleBar = (
     <TitleBar
-      returnTo={Screen.Relatorios}
       title="Comparativo Mensal"
       subtitle="Últimos 12 meses"
     />

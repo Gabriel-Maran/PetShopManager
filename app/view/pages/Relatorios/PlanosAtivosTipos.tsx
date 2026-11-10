@@ -5,7 +5,6 @@ import {
   useThemedStyles,
 } from "../../Themes/ThemeProvider";
 import BarChart from "../../components/Relatorios/BarChart";
-import { Screen } from "../../../config/consts";
 import TitleBar from "../../components/Cadastro/TitleBar";
 
 import { useAsyncData } from "../../../hooks/useAsyncData";
@@ -24,7 +23,6 @@ export default function PlanosAtivos() {
 
   const titleBar = (
     <TitleBar
-      returnTo={Screen.Relatorios}
       title="Planos Ativos"
       subtitle="Quinzenal e semanal"
     />
@@ -48,7 +46,6 @@ export default function PlanosAtivos() {
   return (
     <View style={s.mainContainer}>
       <TitleBar
-        returnTo={Screen.Relatorios}
         title="Planos Ativos"
         subtitle={`${planos.reduce((acc, p) => acc + p.y, 0)} pets com remarcação automática`}
       />
