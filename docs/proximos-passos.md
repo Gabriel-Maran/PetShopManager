@@ -2,24 +2,26 @@
 
 Atualizado em 2026-11-09, depois dos quatro agentes em paralelo (BUG-8, REPO-3, A11Y-1 e VALID-1).
 
-> **Para o próximo chat:** o VALID-1 está em revisão no PR #32 (branch `feat/validacao-com-zod`, worktree `.claude/worktrees/validacao-zod`), e esta documentação, no PR da branch `docs/agentes-em-paralelo` (worktree `.claude/worktrees/docs-paralelos`, sem junction). Com o #32, a Parte 4 fica completa no código. O próximo passo é o Gabriel escolher o que aplicar das "Pendências entre áreas" e das "Sugestões das varreduras", abaixo, e o patch do Expo a partir de 2026-11-10.
+> **Para o próximo chat:** esta documentação está em revisão no PR #33 (branch `docs/agentes-em-paralelo`, worktree `.claude/worktrees/docs-paralelos`). A Parte 4 está completa no código desde o PR #32 (VALID-1); falta o Gabriel conferir no aparelho. O próximo passo é o Gabriel escolher o que aplicar das "Pendências entre áreas" e das "Sugestões das varreduras", abaixo, e o patch do Expo a partir de 2026-11-10.
 >
-> Em 2026-11-09 entraram no `main`: ERRO-1 (PR #22), importação cancelada (#23), BUG-6 (#24), BUG-5 (#25), a ordem da busca (#26), os nomes de desativar (#27), o resto do BKP-1 (#28), REPO-3 (#29), BUG-8 (#30) e A11Y-1 (#31). Os quatro últimos rodaram ao mesmo tempo, cada um numa zona de arquivos só dele (ver `decisoes.md`). A Parte 3 foi aceita com o merge do PR #21, em 2026-11-08.
+> Em 2026-11-09 entraram no `main`: ERRO-1 (PR #22), importação cancelada (#23), BUG-6 (#24), BUG-5 (#25), a ordem da busca (#26), os nomes de desativar (#27), o resto do BKP-1 (#28), REPO-3 (#29), BUG-8 (#30), A11Y-1 (#31) e VALID-1 (#32). Os quatro últimos rodaram ao mesmo tempo, cada um numa zona de arquivos só dele (ver `decisoes.md`). O README do Zod entrou pelo PR #33, porque o #32 foi mesclado antes desse commit. A Parte 3 foi aceita com o merge do PR #21, em 2026-11-08.
 >
 > Os roteiros para conferir no aparelho estão nos PRs #22 (ERRO-1), #24 (BUG-6), #25 (BUG-5), #26 (ordem da busca), #28 (BKP-1), #29 (REPO-3), #30 (BUG-8), #31 (A11Y-1, com o TalkBack) e #32 (VALID-1).
 >
 > O clone do Gabriel está no `0b0aaf0`, atrás do `main`. O #32 muda o `package-lock.json`, que está alterado no clone desde o `audit fix` de 2026-11-08. Antes do `git pull`, descarte a mudança local com `git checkout -- package-lock.json`. Depois do pull, rode `npm i`. O `node_modules` do clone já tem o zod 4.6.7, instalado em 2026-11-09 sem mudar o `package.json`. O `@expo/config` e o `@expo/fingerprint` do `audit fix` voltam a ser conferidos no PR do patch do Expo.
 >
-> A branch remota `fix/contagem-de-cadastros` voltou por engano depois do merge do PR #25, com um commit que já entrou pelo PR #26. O Gabriel pode apagá-la no GitHub.
+> Duas branches remotas voltaram por engano depois do merge, e o Gabriel pode apagá-las no GitHub:
+> - `fix/contagem-de-cadastros`, depois do PR #25, com um commit que já entrou pelo PR #26;
+> - `feat/validacao-com-zod`, depois do PR #32, com o commit do README, que entrou pelo PR #33.
 >
-> Limpeza de 2026-11-09: saíram os worktrees `backup-3c`, `erros-centralizados`, `acoes-de-cadastros`, `backup-confiavel`, `limpeza`, `botao-voltar` e `acessibilidade`, todos com o PR já no `main`, e a pasta vazia `dados-1`. As branches locais ficaram. A pasta vazia `.claude/worktrees/erros-centralizados` continua presa por outro processo; apague quando ela soltar. Para tirar um worktree, primeiro a junction, com `cmd /c rmdir`, e depois `git worktree remove`.
+> Limpeza de 2026-11-09: saíram os worktrees `backup-3c`, `erros-centralizados`, `acoes-de-cadastros`, `backup-confiavel`, `limpeza`, `botao-voltar`, `acessibilidade` e `validacao-zod`, todos com o PR já no `main`, e a pasta vazia `dados-1`. As branches locais ficaram. A pasta vazia `.claude/worktrees/erros-centralizados` continua presa por outro processo; apague quando ela soltar. Para tirar um worktree, primeiro a junction, com `cmd /c rmdir`, e depois `git worktree remove`.
 
 ## Pendências entre áreas (2026-11-09)
 
 Ajustes que os agentes acharam fora da própria zona e não fizeram. Nada aplicado; o Gabriel escolhe.
 
 1. **Voltar com modal aberto (BUG-8):** o `ConfirmModal`, o `ModalConfDelete` e o `ErrorModal` não têm `onRequestClose`. Com um deles aberto, o voltar do Android não faz nada; deveria cancelar ou fechar. O `screenBack` do `DefaultHeader` nunca é passado e é código morto.
-2. **Validação (VALID-1, depois do #32):**
+2. **Validação (VALID-1):**
    - o `raceSpecieHelper.ts` ainda valida a raça à mão, sem o limite de 50; deve usar o `breedSchema`;
    - as telas escrevem o tamanho máximo à mão (`NewOrEditOwner`, `AbaInfoPet`, `NewOrEditAppointment` e `ModalCreateRacePet`); devem usar o `limits.ts`;
    - o `NewOrEditPet`, com a remarcação desligada, deve mandar `null` no pacote, no início e no valor;
@@ -130,8 +132,8 @@ Falta, nesta ordem:
 - A auditoria do código foi feita sobre o commit `e1d5f2f` do `main`.
 - O plano está em [`plano-de-melhorias.md`](plano-de-melhorias.md), com 35 itens: 9 P0, 16 P1 e 10 P2.
 - A arquitetura de hoje está em [`arquitetura.md`](arquitetura.md), e as respostas do checklist, em [`auditoria.md`](auditoria.md).
-- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só), #23 (importação cancelada), #24 (ações de Cadastros), #25 (busca com o mesmo filtro), #26 (ordem da busca), #27 (nomes de desativar), #28 (resto do BKP-1), #29 (REPO-3), #30 (BUG-8), #31 (A11Y-1) e #32 (VALID-1, em revisão). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
-- Da Parte 1, falta o que depende das perguntas em aberto. As Partes 2 e 3 estão completas e aceitas. A Parte 4 começou em 2026-11-09 e fica completa no código com o PR #32 (VALID-1); falta o Gabriel conferir no aparelho. Da Parte 6, o A11Y-1 e parte do REPO-3 foram adiantados no mesmo dia. A Parte 5 ainda não começou.
+- O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só), #23 (importação cancelada), #24 (ações de Cadastros), #25 (busca com o mesmo filtro), #26 (ordem da busca), #27 (nomes de desativar), #28 (resto do BKP-1), #29 (REPO-3), #30 (BUG-8), #31 (A11Y-1) e #32 (VALID-1). O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
+- Da Parte 1, falta o que depende das perguntas em aberto. As Partes 2 e 3 estão completas e aceitas. A Parte 4 começou e ficou completa no código em 2026-11-09, com o PR #32 (VALID-1); falta o Gabriel conferir no aparelho. Da Parte 6, o A11Y-1 e parte do REPO-3 foram adiantados no mesmo dia. A Parte 5 ainda não começou.
 - Falta o Gabriel responder [`perguntas-em-aberto.md`](perguntas-em-aberto.md). Várias partes abaixo dependem dessas respostas.
 
 ## Partes de execução
@@ -231,7 +233,7 @@ Em andamento desde 2026-11-09, uma etapa por PR e um chat por etapa:
 6. BUG-8, no `main` desde o PR #30, em 2026-11-09 (pergunta 16: o `BackHandler` agora):
    - o botão da tela e o do Android chamam o mesmo `requestBack()`; o destino vem do `backRouteOf` (`app/config/navigation.ts`), e o formulário em edição registra uma guarda (`useBackGuard`) que abre a confirmação. Só no Calendário o voltar fecha o app;
    - verificado: typecheck limpo, 154 testes passando (12 novos em `tests/navegacao.test.mjs`) e o pacote Android gerado. O roteiro para conferir no aparelho está no PR #30.
-7. VALID-1, em revisão no PR #32 (branch `feat/validacao-com-zod`), feito em 2026-11-09 com o Zod 4.6.7 (pergunta 13):
+7. VALID-1, no `main` desde o PR #32, em 2026-11-09, com o Zod 4.6.7 (pergunta 13):
    - um schema por entidade em `app/validation/`, chamado pelos controllers com o `parseInput`, que converte a falha no `AppError` com a mensagem de `messages.ts`; os services recebem os tipos derivados dos schemas;
    - verificado: typecheck limpo, 280 testes passando (55 novos em `tests/validacao.test.mjs`) e o pacote Android gerado, 680 KB maior. O roteiro para conferir no aparelho está no PR #32.
 
