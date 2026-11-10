@@ -1,5 +1,6 @@
 import { Image, StyleSheet, TouchableOpacity } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../../Themes/ThemeProvider";
+import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
 
 export default function ButtonBack({ onPress }: { onPress: () => void }) {
   const s = useThemedStyles(styles);
@@ -9,7 +10,7 @@ export default function ButtonBack({ onPress }: { onPress: () => void }) {
       onPress={onPress}
       style={s.btnBack}
       accessibilityRole="button"
-      accessibilityLabel="Voltar"
+      accessibilityLabel={A11Y_LABELS.back}
     >
       <Image
         style={s.imgBack}
