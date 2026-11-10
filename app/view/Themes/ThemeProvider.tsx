@@ -1,17 +1,11 @@
-// ThemeContext.tsx
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import {
-  ImageStyle,
-  TextStyle,
-  useColorScheme,
-  ViewStyle,
-} from "react-native";
+import { ImageStyle, TextStyle, ViewStyle } from "react-native";
 import { configsController } from "../../controller/ConfigsController";
 import { logError } from "../../errors/AppError";
 import { THEME_COLORS, type ThemeColors } from "./colors";
 
-//USE: const { colors, isDark, trocarTheme } = useTheme();
-//USE: const s = useThemedStyles(styles);
+// Nos componentes: `const { colors, isDark, trocarTheme } = useTheme();` e
+// `const s = useThemedStyles(styles);`.
 export type { ThemeColors };
 
 type ThemeContextType = {
@@ -37,11 +31,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       // Sem o tema salvo, o app abre no claro; o ErrorProvider fica dentro deste provider.
       .catch((error) => logError(error, "tema"))
       .finally(() => {
-        setTemaCarregado(true); // sempre libera, mesmo se der erro
+        setTemaCarregado(true);
       });
   }, []);
 
-  if (!temaCarregado) return null; // aguarda sem renderizar nada
+  // Sem tela até ler o tema salvo, para o app não piscar no claro antes de abrir no escuro.
+  if (!temaCarregado) return null;
 
   return (
     <ThemeContext.Provider
