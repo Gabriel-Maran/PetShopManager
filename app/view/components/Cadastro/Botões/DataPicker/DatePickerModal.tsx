@@ -1,10 +1,9 @@
-// ─── DatePickerModal ──────────────────────────────────────────────────────────
-
 import {
   ThemeColors,
   useTheme,
   useThemedStyles,
 } from "../../../../Themes/ThemeProvider";
+import { TINT_OPACITY, withAlpha } from "../../../../Themes/alpha";
 import {
   Modal,
   Pressable,
@@ -119,7 +118,7 @@ const modalStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     backdrop: {
       ...StyleSheet.absoluteFill,
-      backgroundColor: "rgba(0,0,0,0.55)",
+      backgroundColor: colors.MODAL_BACKGROUND,
     },
     centeredView: {
       flex: 1,
@@ -134,7 +133,7 @@ const modalStyles = (colors: ThemeColors) =>
       borderRadius: 16,
       overflow: "hidden",
       elevation: 8,
-      shadowColor: "#000",
+      shadowColor: colors.SHADOW,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.25,
       shadowRadius: 12,
@@ -157,7 +156,10 @@ const modalStyles = (colors: ThemeColors) =>
       marginBottom: 4,
       paddingVertical: 8,
       paddingHorizontal: 14,
-      backgroundColor: colors.PRIMARY_CONTRAST + "22", // 13% opacidade
+      backgroundColor: withAlpha(
+        colors.PRIMARY_CONTRAST,
+        TINT_OPACITY.SELECTED_DATE,
+      ),
       borderRadius: 8,
       alignItems: "center",
     },

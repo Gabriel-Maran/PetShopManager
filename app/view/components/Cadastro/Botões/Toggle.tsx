@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   View,
   TouchableOpacity,
@@ -21,6 +21,7 @@ import {
 
 const SWITCH_WIDTH = 50;
 const SWITCH_HEIGHT = 30;
+const ANIMATION_DURATION_MS = 200;
 
 export default function Toggle({
   hasBorderBottom = false,
@@ -39,28 +40,31 @@ export default function Toggle({
   value: number;
   noEdit?: boolean;
 }) {
-  const { colors } = useTheme(); // ← para as cores animadas (interpolate)
+  const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
 
-  const toggleSwitch = () => {
-    const newValue = !value;
-    onChange?.(newValue ? 1 : 0); // onChange era opcional mas chamado sem verificar
-
-    Animated.timing(animatedValue, {
-      toValue: newValue ? 1 : 0,
-      duration: 200,
+  // A animação segue o `value`, e não o toque: assim ela acompanha também o valor que muda por fora,
+  // como o formulário que carrega um pet com a remarcação ligada.
+  useEffect(() => {
+    const animation = Animated.timing(animatedValue, {
+      toValue: value ? 1 : 0,
+      duration: ANIMATION_DURATION_MS,
       useNativeDriver: false,
-    }).start();
-  };
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [value, animatedValue]);
+
+  const toggleSwitch = () => onChange?.(value ? 0 : 1);
 
   const moveThumb = animatedValue.interpolate({
     inputRange: [0, 1],
     outputRange: [2, 22],
   });
 
-  // cores animadas precisam vir do useTheme diretamente (não do StyleSheet)
+  // A cor animada sai do `interpolate`, por isso vem do useTheme, e não do StyleSheet.
   const backgroundColor = animatedValue.interpolate({
     inputRange: [0, 1],
     outputRange: [colors.DESATIVADO, colors.PRIMARY],
@@ -116,13 +120,6 @@ const styles = (colors: ThemeColors) =>
       paddingLeft: 15,
       borderRadius: 10,
     },
-    toggleESubtitleNoEdit: {
-      width: "90%",
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: 15,
-    },
     subtitle: {
       fontSize: 15,
       color: colors.TEXT_SECONDARY,
@@ -137,16 +134,11 @@ const styles = (colors: ThemeColors) =>
       width: 26,
       height: 26,
       borderRadius: 13,
-      backgroundColor: "white",
+      backgroundColor: colors.TOGGLE_THUMB,
       elevation: 3,
-      shadowColor: "#000",
+      shadowColor: colors.SHADOW,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.2,
       shadowRadius: 2,
-    },
-    txtInput: {
-      color: colors.TEXT_MUTED,
-      fontWeight: "bold",
-      fontSize: 12,
     },
   });

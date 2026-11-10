@@ -80,14 +80,7 @@ export default function ThemeToggle() {
       accessibilityLabel={A11Y_LABELS.theme.darkMode}
       accessibilityState={{ checked: isDark }}
     >
-      <View
-        style={[
-          s.track,
-          isDark
-            ? { backgroundColor: "#03045E" }
-            : { backgroundColor: "#4CC9F0" },
-        ]}
-      >
+      <View style={s.track}>
         {/* Background: afternoon (claro) */}
         <Animated.Image
           source={require("../../assets/color_modes/afternoon.png")}
@@ -114,15 +107,7 @@ export default function ThemeToggle() {
         <Animated.View
           style={[s.thumbWrapper, { transform: [{ translateX: moveThumb }] }]}
         >
-          <Animated.View
-            style={[
-              s.thumb,
-              { opacity: thumbFadeAnim },
-              isDark
-                ? { backgroundColor: "#DEDEDA" } // lua
-                : { backgroundColor: "#FFDF22" }, // sol
-            ]}
-          />
+          <Animated.View style={[s.thumb, { opacity: thumbFadeAnim }]} />
         </Animated.View>
       </View>
     </TouchableOpacity>
@@ -136,6 +121,7 @@ const styles = (colors: ThemeColors) =>
       height: THUMB_SIZE + PADDING * 2,
       borderRadius: 99,
       overflow: "hidden",
+      backgroundColor: colors.THEME_TOGGLE_SKY,
     },
     thumbWrapper: {
       position: "absolute",
@@ -147,5 +133,6 @@ const styles = (colors: ThemeColors) =>
       width: THUMB_SIZE,
       height: THUMB_SIZE,
       borderRadius: 99,
+      backgroundColor: colors.THEME_TOGGLE_THUMB,
     },
   });
