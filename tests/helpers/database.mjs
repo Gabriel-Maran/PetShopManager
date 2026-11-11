@@ -13,11 +13,18 @@ import { INSERT_OWNER_SQL } from "../../src/repository/sql/ownersSql.ts";
 import { INSERT_PET_SQL, UPDATE_PET_SQL } from "../../src/repository/sql/petsSql.ts";
 import {
   APPOINTMENT_COLUMNS,
-  APPOINTMENTS_WITH_NAMES,
+  APPOINTMENTS_TABLE,
+  FIND_APPOINTMENT_SQL,
   INSERT_APPOINTMENT_SQL,
   insertAppointmentParams,
 } from "../../src/repository/sql/appointmentsSql.ts";
+import { FIND_PET_SQL } from "../../src/repository/sql/petsSql.ts";
+import { LIST_PAYMENT_METHODS_SQL, LIST_SERVICE_TYPES_SQL } from "../../src/repository/sql/listsSql.ts";
 import { PackageScheduleService } from "../../src/service/PackageScheduleService.ts";
+import { assertAppointmentChoices, storedChoicesOf } from "../../src/service/appointmentRules.ts";
+import { appointmentSchemaFor } from "../../src/validation/appointmentSchema.ts";
+import { petSchemaFor } from "../../src/validation/petSchema.ts";
+import { parseInput } from "../../src/validation/parseInput.ts";
 
 /** Conexão aberta como o getDatabase do app abre, ainda sem as migrações. */
 export function openConnection(path = ":memory:") {
@@ -190,6 +197,29 @@ export function insertAppointment(db, petId, fields = {}) {
   return Number(result.lastInsertRowid);
 }
 
+/**
+ * Salva a edição de um agendamento pelo caminho do app: o controller confere o schema com o que está
+ * gravado, o service confere as listas com o que está gravado, e a remarcação grava. Devolve nada; um
+ * valor recusado lança o AppError.
+ */
+export async function editAppointmentLikeTheApp(db, id, fields) {
+  const stored = db.prepare(FIND_APPOINTMENT_SQL).get(id);
+  const appointment = parseInput(appointmentSchemaFor(stored), { ...stored, ...fields });
+  assertAppointmentChoices(
+    appointment,
+    { services: db.prepare(LIST_SERVICE_TYPES_SQL).all(), paymentMethods: db.prepare(LIST_PAYMENT_METHODS_SQL).all() },
+    storedChoicesOf(stored),
+  );
+  await packageScheduleOf(db).updateAppointment(id, appointment);
+}
+
+/** Salva a edição de um pet pelo caminho do app (schema com o gravado, depois a remarcação). */
+export async function editPetLikeTheApp(db, id, fields, now = new Date()) {
+  const stored = db.prepare(FIND_PET_SQL).get(id);
+  const pet = parseInput(petSchemaFor(stored), { ...stored, ...fields });
+  await packageScheduleOf(db).updatePet(id, pet, now);
+}
+
 export const petRow = (db, id) => db.prepare("SELECT * FROM pets WHERE id = ?").get(id);
 
 /**
@@ -200,7 +230,7 @@ export const appointmentsOf = (db, petId) =>
   isLegacy(db)
     ? db.prepare("SELECT * FROM appointments WHERE pet_id = ? ORDER BY data, id").all(petId)
     : db
-        .prepare(`SELECT ${APPOINTMENT_COLUMNS} FROM ${APPOINTMENTS_WITH_NAMES} WHERE AP.pet_id = ? ORDER BY AP.data, AP.id`)
+        .prepare(`SELECT ${APPOINTMENT_COLUMNS} FROM ${APPOINTMENTS_TABLE} WHERE AP.pet_id = ? ORDER BY AP.data, AP.id`)
         .all(petId);
 
 export const pendingAutoOf = (db, petId) =>

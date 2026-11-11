@@ -221,10 +221,17 @@ export default function NewOrEditAppointment() {
 
   // O nome gravado no agendamento pode não estar mais na lista ativa (a migração oculta o que não era
   // da lista). O formulário mostra o nome em vez do aviso de "selecione", e salvar sem trocar vale.
-  const servicoForaDaLista = appointmentsForm.servico
+  // O campo não corta a observação já gravada: com a nota da migração ela pode passar do limite. Ela
+  // abre inteira, e salvar sem mudar vale; o que for editado volta a respeitar o limite (schema).
+  const observationMaxLength = Math.max(
+    MAX_NOTES_LENGTH,
+    params?.appointment?.observacao?.length ?? 0,
+  );
+
+  const storedService = appointmentsForm.servico
     ? { id: 0, servico: appointmentsForm.servico }
     : undefined;
-  const pgtoForaDaLista = appointmentsForm.tipo_pgto
+  const storedPaymentMethod = appointmentsForm.tipo_pgto
     ? { id: 0, tipo_pgto: appointmentsForm.tipo_pgto }
     : undefined;
 
@@ -293,7 +300,7 @@ export default function NewOrEditAppointment() {
                   itemSelected={
                     servicesForm.servico.find(
                       (e) => e.servico === appointmentsForm.servico,
-                    ) ?? servicoForaDaLista
+                    ) ?? storedService
                   }
                   labelExtractor={(item) => item.servico}
                   onChange={handleChangeServico}
@@ -336,7 +343,7 @@ export default function NewOrEditAppointment() {
                   placeHolder="Uma observação adicional..."
                   titleName="Observações"
                   variasLinhas={true}
-                  maximoCaracteres={MAX_NOTES_LENGTH}
+                  maximoCaracteres={observationMaxLength}
                   hasBorderBottom={true}
                 />
                 {isEditing && (
@@ -414,7 +421,7 @@ export default function NewOrEditAppointment() {
                 itemSelected={
                   pgtosForm.tipos_pgto.find(
                     (e) => e.tipo_pgto === appointmentsForm.tipo_pgto,
-                  ) ?? pgtoForaDaLista
+                  ) ?? storedPaymentMethod
                 }
                 labelExtractor={(item) => item.tipo_pgto}
                 onChange={handleChangeTipoPgto}

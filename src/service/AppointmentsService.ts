@@ -3,7 +3,7 @@ import type { AppointmentData } from "../validation/appointmentSchema";
 import { appointmentsRepository } from "../repository/AppointmentsRepository";
 import type { IsoDate } from "../utils/datas";
 import { PackageScheduleService } from "./PackageScheduleService";
-import { assertAppointmentChoices } from "./appointmentRules";
+import { assertAppointmentChoices, storedChoicesOf, type StoredChoices } from "./appointmentRules";
 import { paymentMethodService } from "./PaymentMethodService";
 import { serviceTypeService } from "./ServiceTypeService";
 
@@ -30,8 +30,8 @@ class AppointmentsService {
 
   async updateAppointment(id: number, appointment: AppointmentData) {
     // O que está gravado vale mesmo fora da lista ativa (nome oculto pela migração).
-    const current = await this.getAppointmentById(id);
-    await assertChoicesExist(appointment, current ?? undefined);
+    const current = storedChoicesOf(await this.getAppointmentById(id));
+    await assertChoicesExist(appointment, current);
     return packageSchedule.updateAppointment(id, appointment);
   }
 }
@@ -39,7 +39,7 @@ class AppointmentsService {
 // O banco grava o serviço e a forma de pagamento pelo id, achado pelo nome ativo que a tela escolheu.
 async function assertChoicesExist(
   appointment: AppointmentData,
-  current?: Pick<AppointmentData, "servico" | "tipo_pgto">,
+  current?: StoredChoices,
 ): Promise<void> {
   const [services, paymentMethods] = await Promise.all([
     serviceTypeService.getAllServiceTypes(),

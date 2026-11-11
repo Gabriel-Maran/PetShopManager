@@ -10,6 +10,7 @@ import {
   createLegacyDatabase,
   createPet,
   databaseAt,
+  editAppointmentLikeTheApp,
   insertOwner,
   insertPet,
   isoDate,
@@ -29,8 +30,6 @@ import { BACKUP_TABLES } from "../src/repository/sql/backupSql.ts";
 import {
   FIND_APPOINTMENT_SQL,
   LIST_APPOINTMENTS_BETWEEN_SQL,
-  UPDATE_APPOINTMENT_SQL,
-  updateAppointmentParams,
 } from "../src/repository/sql/appointmentsSql.ts";
 import { LIST_PAYMENT_METHODS_SQL, LIST_SERVICE_TYPES_SQL } from "../src/repository/sql/listsSql.ts";
 import { FIND_PET_SQL } from "../src/repository/sql/petsSql.ts";
@@ -360,11 +359,11 @@ describe("backup de versão anterior", () => {
     const restoredPet = app.prepare(FIND_PET_SQL).get(pet.id);
     assert.deepEqual(
       [restoredPet.porte, restoredPet.horario_padrao, restoredPet.valor_pacote, restoredPet.servico_padrao],
-      ["MEDIO", "00:00", 0, "Hidratação"],
+      ["MEDIO", "00:00", 0, "Banho"],
     );
     assert.equal(
       restoredPet.observacoes,
-      'Observação do pet\nPorte antigo: "xyz". Horário padrão antigo: "25:00". Valor do pacote antigo: "-11,50".',
+      'Observação do pet\nPorte antigo: "xyz". Serviço padrão antigo: "Hidratação". Horário padrão antigo: "25:00". Valor do pacote antigo: "-11,50".',
     );
     const stored = (id) =>
       ({ ...app.prepare("SELECT servico_nome, tipo_pgto_id, tipo_pgto_nome, hora, valor, observacao FROM appointments WHERE id = ?").get(id) });
@@ -382,11 +381,14 @@ describe("backup de versão anterior", () => {
 
     // Editar o oculto sem trocar funciona, e renomear depois da restauração não muda o histórico.
     const before = { ...app.prepare("SELECT servico_id, tipo_pgto_id FROM appointments WHERE id = ?").get(hidden) };
-    const old = app.prepare(FIND_APPOINTMENT_SQL).get(hidden);
-    app.prepare(UPDATE_APPOINTMENT_SQL).run(...updateAppointmentParams({ ...old, ta_pago: 1 }, hidden));
+    // Pelo caminho do app (schema, conferência das listas e remarcação), com o "Vale-presente" e o
+    // "Hidratação" ocultos vindos da migração.
+    await editAppointmentLikeTheApp(app, hidden, { ta_pago: 1, observacao: "Editei depois de restaurar" });
+    assert.equal(app.prepare(FIND_APPOINTMENT_SQL).get(hidden).observacao, "Editei depois de restaurar");
     assert.deepEqual({ ...app.prepare("SELECT servico_id, tipo_pgto_id FROM appointments WHERE id = ?").get(hidden) }, before);
     app.prepare("UPDATE service_type SET servico = 'Hidratação premium' WHERE servico = 'Hidratação'").run();
     app.prepare("UPDATE payment_methods SET tipo_pgto = 'Pix' WHERE tipo_pgto = 'PIX'").run();
+    app.prepare("UPDATE payment_methods SET tipo_pgto = 'Vale' WHERE tipo_pgto = 'Vale-presente'").run();
     const shown = app.prepare(LIST_APPOINTMENTS_BETWEEN_SQL).all(isoDate(-10), isoDate(0));
     assert.deepEqual(
       shown.map(({ servico, tipo_pgto }) => ({ servico, tipo_pgto })),

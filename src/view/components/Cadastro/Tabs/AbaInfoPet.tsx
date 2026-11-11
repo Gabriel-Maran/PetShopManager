@@ -63,6 +63,10 @@ export default function AbaInfoPet({
 
   const [racaModalAberto, setRacaModalAberto] = useState(false);
 
+  // O campo não corta a observação já gravada: com a nota da migração ela pode passar do limite. Ela
+  // abre inteira, e salvar sem mudar vale; o que for editado volta a respeitar o limite (schema).
+  const [notesMaxLength] = useState(() => Math.max(MAX_NOTES_LENGTH, form.observacoes.length));
+
   // --- Busca nome do dono quando não é novo pet e dono_id muda ---
   useEffect(() => {
     if (isNewPet || !form.dono_id) return;
@@ -304,7 +308,7 @@ export default function AbaInfoPet({
           titleName="Observações"
           variasLinhas={true}
           digitavel={isEditavel}
-          maximoCaracteres={MAX_NOTES_LENGTH}
+          maximoCaracteres={notesMaxLength}
           hasBorderBottom={false}
         />
       </View>

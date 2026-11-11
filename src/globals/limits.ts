@@ -26,6 +26,12 @@ export const MAX_NOTES_LENGTH = 250;
 export const MIN_BREED_NAME_LENGTH = 2;
 export const MAX_BREED_NAME_LENGTH = 50;
 
+/**
+ * O teto do texto que já estava gravado e segue igual numa edição: a observação com a nota da migração
+ * ou o nome de um item oculto pode passar do limite normal. Só protege contra entrada gigante.
+ */
+export const MAX_STORED_TEXT_LENGTH = 1000;
+
 /** O nome de um item escolhido numa lista do app, como o serviço e o tipo de pagamento. */
 export const MAX_LIST_ITEM_LENGTH = 50;
 

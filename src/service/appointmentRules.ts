@@ -12,6 +12,15 @@ export interface AppointmentChoices {
   paymentMethods: readonly PaymentsMethod[];
 }
 
+/** O serviço e a forma de pagamento gravados num agendamento: o que a edição deixa passar sem trocar. */
+export type StoredChoices = Pick<AppointmentData, "servico" | "tipo_pgto">;
+
+/** Os nomes gravados do agendamento que está sendo editado; sem ele (id que não existe), nada vale. */
+export const storedChoicesOf = (
+  stored: StoredChoices | null | undefined,
+): StoredChoices | undefined =>
+  stored ? { servico: stored.servico, tipo_pgto: stored.tipo_pgto } : undefined;
+
 /**
  * O serviço e a forma de pagamento escolhidos precisam estar nas listas ativas. Desde a versão 6 do
  * esquema, o banco grava o id achado pelo nome: sem esta conferência, um serviço fora da lista cairia
@@ -26,7 +35,7 @@ export interface AppointmentChoices {
 export function assertAppointmentChoices(
   appointment: Pick<AppointmentData, "servico" | "tipo_pgto">,
   { services, paymentMethods }: AppointmentChoices,
-  current?: Pick<AppointmentData, "servico" | "tipo_pgto">,
+  current?: StoredChoices,
 ): void {
   const service = appointment.servico;
   if (service !== current?.servico && !services.some(({ servico }) => servico === service)) {

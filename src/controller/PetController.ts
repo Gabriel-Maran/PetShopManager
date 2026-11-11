@@ -3,7 +3,7 @@ import { Pet, PetWithSpecieRaceAndOwner } from "../model/Pet";
 import { AppError } from "../errors/AppError";
 import { MESSAGES } from "../globals/messages";
 import type { NameSearch, Page } from "../model/Search";
-import { petSchema } from "../validation/petSchema";
+import { petSchema, petSchemaFor } from "../validation/petSchema";
 import { parseInput, parseRecordId } from "../validation/parseInput";
 import { validateNameSearch } from "./validateNameSearch";
 import { ownerController } from "./OwnerController";
@@ -32,8 +32,9 @@ class PetController {
   }
 
   async updatePet(id: number, input: Pet): Promise<void> {
-    const pet = parseInput(petSchema, input);
-    await this.getPetById(id);
+    // O gravado vem antes da validação: o limite da observação vale só para o que mudou.
+    const stored = await this.getPetById(id);
+    const pet = parseInput(petSchemaFor(stored), input);
     await ownerController.getOwnerById(pet.dono_id);
     await petService.updatePet(id, pet);
   }

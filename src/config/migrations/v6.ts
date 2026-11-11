@@ -17,11 +17,14 @@
 //
 // O dado antigo que violaria um CHECK é corrigido na cópia, pela regra que o app já usa: flag diferente
 // de zero é ligado (os builders), horário vazio é "00:00" (versão 5) e porte vazio é o "MEDIO" do
-// formulário. Quando a correção joga fora um valor que alguém digitou (porte que não é porte, horário
-// fora do formato, dinheiro negativo), o original vai para o fim da observação do pet ou do agendamento,
-// numa nota, e a observação que já existia fica intacta. O nome de serviço ou de pagamento que não
-// estiver na lista entra nela, oculto, para nenhum agendamento perder o que tinha. Um backup antigo
-// passa por esta mesma migração.
+// formulário. O serviço padrão do pet também é um valor do formulário, que só oferece os três de
+// TipoServico: o pet com outro serviço passa a apontar para o "Banho". Quando a correção joga fora um
+// valor que alguém digitou (porte que não é porte, serviço padrão fora dos três, horário fora do
+// formato, dinheiro negativo), o original vai para o fim da observação do pet ou do agendamento,
+// numa nota, e a observação que já existia fica intacta. O nome de serviço ou de pagamento que algum
+// agendamento usa e que não estiver na lista entra nela, oculto, para nenhum agendamento perder o que
+// tinha. O pet guarda a configuração de hoje, e não histórico, por isso o serviço dele não vira nome
+// gravado nem item oculto. Um backup antigo passa por esta mesma migração.
 //
 // Como as versões 2 e 3, esta traz o texto inteiro do que cria, sem reaproveitar as constantes das
 // versões anteriores. As chaves estrangeiras ficam desligadas durante as migrações (migrator.ts).
@@ -73,6 +76,14 @@ const isPorteLost = (column: string) =>
   `(COALESCE(trim(${column}), '') <> '' AND ${porteKey(column)} NOT IN ${PORTES})`;
 
 const serviceIdOf = (name: string) => `(SELECT id FROM service_type WHERE servico = ${name})`;
+
+/** Os serviços que o formulário do pet oferece (TipoServico): sempre na lista, ativos. */
+const DEFAULT_SERVICES = ["Banho", "Banho e Tosa", "Banho e Higiênica"] as const;
+const DEFAULT_SERVICES_SQL = `(${DEFAULT_SERVICES.map((name) => `'${name}'`).join(", ")})`;
+
+/** O serviço padrão do pet que o formulário não oferece (o vazio vira "Banho" sem perder nada). */
+const isPetServiceLost = (column: string) =>
+  `(COALESCE(trim(${column}), '') <> '' AND trim(${column}) NOT IN ${DEFAULT_SERVICES_SQL})`;
 
 // ── Notas com o valor antigo ──────────────────────────────────────────────
 
@@ -163,20 +174,18 @@ export const SQL_UNIQUE_PAYMENT_METHODS_V6 = `
 // oculto.
 export const SQL_ENSURE_DEFAULT_SERVICES_V6 = `
   INSERT INTO service_type (servico)
-    SELECT column1 FROM (VALUES ('Banho'), ('Banho e Tosa'), ('Banho e Higiênica'))
+    SELECT column1 FROM (VALUES ${DEFAULT_SERVICES.map((name) => `('${name}')`).join(", ")})
     WHERE column1 NOT IN (SELECT servico FROM service_type);
 `;
 
-// Um nome que não está na lista (gravado por uma versão antiga ou por um backup) entra nela, oculto. O
-// vazio fica de fora: no pagamento, ele e o "0" do DEFAULT antigo querem dizer "não informado".
+// O nome que algum agendamento usa e que não está na lista (gravado por uma versão antiga ou por um
+// backup) entra nela, oculto, para o histórico continuar mostrando. O serviço padrão do pet fica de
+// fora: ele aponta para um dos três (ver SQL_REBUILD_PETS_V6). O vazio também: no pagamento, ele e o
+// "0" do DEFAULT antigo querem dizer "não informado".
 export const SQL_KEEP_UNKNOWN_NAMES_V6 = `
   INSERT INTO service_type (servico, is_ativo)
-    SELECT name, 0 FROM (
-      SELECT trim(servico_padrao) AS name FROM pets
-      UNION
-      SELECT trim(servico) FROM appointments
-    )
-    WHERE name <> '' AND name NOT IN (SELECT servico FROM service_type);
+    SELECT DISTINCT trim(servico), 0 FROM appointments
+    WHERE trim(servico) <> '' AND trim(servico) NOT IN (SELECT servico FROM service_type);
 
   INSERT INTO payment_methods (tipo_pgto, is_ativo)
     SELECT DISTINCT trim(tipo_pgto), 0 FROM appointments
@@ -216,8 +225,9 @@ export const SQL_REBUILD_OWNERS_V6 = rebuildTable(
   { is_ativo: flagFrom("is_ativo") },
 );
 
-// Sem nome de serviço, o pet fica com o "Banho", o DEFAULT da coluna de texto. O porte, o horário
-// padrão e o valor do pacote que a conversão joga fora vão para a observação.
+// Sem serviço, ou com um serviço fora dos três do formulário, o pet fica com o "Banho", o DEFAULT da
+// coluna de texto. O porte, o serviço padrão, o horário padrão e o valor do pacote que a conversão joga
+// fora vão para a observação.
 export const SQL_REBUILD_PETS_V6 = rebuildTable(
   "pets",
   `
@@ -253,10 +263,13 @@ export const SQL_REBUILD_PETS_V6 = rebuildTable(
     porte: porteFrom("porte"),
     observacoes: withNotes("observacoes", [
       textNote(isPorteLost("porte"), "Porte antigo", "porte"),
+      textNote(isPetServiceLost("servico_padrao"), "Serviço padrão antigo", "servico_padrao"),
       textNote(isTimeLost("horario_padrao"), "Horário padrão antigo", "horario_padrao"),
       negativeMoneyNote("Valor do pacote antigo", "valor_pacote"),
     ]),
-    servico_padrao_id: `COALESCE(${serviceIdOf("trim(pets.servico_padrao)")}, ${serviceIdOf("'Banho'")})`,
+    servico_padrao_id: serviceIdOf(
+      `CASE WHEN trim(pets.servico_padrao) IN ${DEFAULT_SERVICES_SQL} THEN trim(pets.servico_padrao) ELSE 'Banho' END`,
+    ),
     remarcacao_ativa: flagFrom("remarcacao_ativa"),
     valor_pacote: moneyFrom("valor_pacote"),
     horario_padrao: timeFrom("horario_padrao"),
