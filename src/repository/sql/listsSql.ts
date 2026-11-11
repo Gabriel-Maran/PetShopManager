@@ -4,15 +4,31 @@
 // Desde a versão 6 do esquema (DADOS-4), o pet e o agendamento apontam para essas listas pelo id, mas
 // as telas escolhem e mostram o nome. Os comandos de gravação acham o id pelo nome com as subconsultas
 // abaixo, cada uma com um `?` para o nome.
+//
+// Um item fora da lista (is_ativo = 0) é o nome que a migração manteve para o histórico: as listas do
+// formulário não o oferecem, e o agendamento novo ou com a escolha trocada não o aceita.
 
-/** Os serviços em ordem alfabética, como o formulário do agendamento lista. */
-export const LIST_SERVICE_TYPES_SQL = "SELECT id, servico FROM service_type ORDER BY servico ASC";
+/** Os serviços ativos em ordem alfabética, como o formulário do agendamento lista. */
+export const LIST_SERVICE_TYPES_SQL =
+  "SELECT id, servico FROM service_type WHERE is_ativo = 1 ORDER BY servico ASC";
 
-/** As formas de pagamento na ordem da carga inicial. */
-export const LIST_PAYMENT_METHODS_SQL = "SELECT id, tipo_pgto FROM payment_methods ORDER BY id ASC";
+/** As formas de pagamento ativas na ordem da carga inicial. */
+export const LIST_PAYMENT_METHODS_SQL =
+  "SELECT id, tipo_pgto FROM payment_methods WHERE is_ativo = 1 ORDER BY id ASC";
 
-/** O id do serviço pelo nome. Um nome fora da lista dá nulo, e o NOT NULL da coluna recusa. */
+/**
+ * O id do serviço pelo nome, ativo ou não: o pet guarda o serviço padrão que a migração manteve. Um
+ * nome fora da lista dá nulo, e o NOT NULL da coluna recusa.
+ */
 export const SERVICE_ID_BY_NAME_SQL = "(SELECT id FROM service_type WHERE servico = ?)";
 
-/** O id da forma de pagamento pelo nome. O texto vazio, "não informada", dá nulo. */
-export const PAYMENT_METHOD_ID_BY_NAME_SQL = "(SELECT id FROM payment_methods WHERE tipo_pgto = ?)";
+/** O id do serviço ativo pelo nome, para o agendamento novo ou com o serviço trocado. */
+export const ACTIVE_SERVICE_ID_BY_NAME_SQL =
+  "(SELECT id FROM service_type WHERE servico = ? AND is_ativo = 1)";
+
+/**
+ * O id da forma de pagamento ativa pelo nome. O texto vazio, "não informada", dá nulo; um nome oculto
+ * também, e o CHECK do agendamento (id e nome nulos juntos) recusa.
+ */
+export const ACTIVE_PAYMENT_METHOD_ID_BY_NAME_SQL =
+  "(SELECT id FROM payment_methods WHERE tipo_pgto = ? AND is_ativo = 1)";

@@ -26,7 +26,13 @@ import {
   upgradeBackup,
 } from "../src/config/backupRestore.ts";
 import { BACKUP_TABLES } from "../src/repository/sql/backupSql.ts";
-import { LIST_APPOINTMENTS_BETWEEN_SQL } from "../src/repository/sql/appointmentsSql.ts";
+import {
+  FIND_APPOINTMENT_SQL,
+  LIST_APPOINTMENTS_BETWEEN_SQL,
+  UPDATE_APPOINTMENT_SQL,
+  updateAppointmentParams,
+} from "../src/repository/sql/appointmentsSql.ts";
+import { LIST_PAYMENT_METHODS_SQL, LIST_SERVICE_TYPES_SQL } from "../src/repository/sql/listsSql.ts";
 import { FIND_PET_SQL } from "../src/repository/sql/petsSql.ts";
 import { MESSAGES } from "../src/globals/messages.ts";
 import { AppError } from "../src/errors/AppError.ts";
@@ -255,9 +261,11 @@ describe("backup de versão anterior", () => {
     await importBackup(app, { uri, backup });
 
     assert.equal(userVersion(app), LATEST);
-    // Desde a versão 6, o serviço vai pelo id (o "Banho" é o 1 da carga inicial), e o "0" do DEFAULT
-    // antigo do pagamento é a forma não informada.
-    const inV6 = ({ servico, tipo_pgto, ...rest }) => ({ ...rest, servico_id: 1, tipo_pgto_id: null });
+    // Desde a versão 6, o serviço vai pelo id (o "Banho" é o 1 da carga inicial) e pelo nome da época,
+    // e o "0" do DEFAULT antigo do pagamento é a forma não informada.
+    const inV6 = ({ servico, tipo_pgto, ...rest }) => ({
+      ...rest, servico_id: 1, servico_nome: "Banho", tipo_pgto_id: null, tipo_pgto_nome: null,
+    });
     assert.deepEqual(
       rows(app, "appointments").map((row) => ({ ...row })),
       agendaBefore.map(inV6),
@@ -308,6 +316,90 @@ describe("backup de versão anterior", () => {
       [restoredPet.porte, restoredPet.servico_padrao, restoredPet.horario_padrao],
       ["MEDIO", "Banho e Tosa", "00:00"],
     );
+    backup.close();
+  });
+
+  test("um backup da versão 5 com dado ruim entra com notas, ocultos, nomes e serviços padrão corretos", async () => {
+    const uri = backupUri();
+    const backup = await databaseAt(5, uri);
+    // O backup tem outra lista de pagamento (o PIX no 3) e nem tem o "Banho" na lista de serviços.
+    backup.exec(`
+      UPDATE payment_methods SET tipo_pgto = 'PIX' WHERE id = 3;
+      UPDATE payment_methods SET tipo_pgto = 'Dinheiro' WHERE id = 4;
+      DELETE FROM service_type WHERE servico = 'Banho';
+    `);
+    const pet = insertPet(backup, {
+      dono_id: insertOwner(backup, { nome: "Dono do backup da versão 5 com dado ruim" }),
+      porte: "xyz",
+      servico_padrao: "Hidratação",
+      observacoes: "Observação do pet",
+      horario_padrao: "25:00",
+      valor_pacote: -1150,
+    });
+    const insert = backup.prepare(
+      `INSERT INTO appointments (pet_id, servico, data, hora, valor, tipo_pgto, observacao, concluido)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+    );
+    const textOnly = Number(insert.run(pet.id, "Banho", isoDate(-7), "9:30", 6000, "PIX", null).lastInsertRowid);
+    const hidden = Number(
+      insert.run(pet.id, "Hidratação", isoDate(-3), "abc", -50, "Vale-presente", "Já tinha observação").lastInsertRowid,
+    );
+    const app = await appWithData();
+
+    await importBackup(app, { uri, backup });
+
+    // As listas vêm do backup, com o "Banho" ativo e os desconhecidos ocultos.
+    assert.deepEqual(rows(app, "payment_methods"), rows(backup, "payment_methods"));
+    assert.deepEqual(rows(app, "service_type"), rows(backup, "service_type"));
+    const active = (sql, column) => app.prepare(sql).all().map((row) => row[column]);
+    assert.ok(active(LIST_SERVICE_TYPES_SQL, "servico").includes("Banho"));
+    assert.ok(!active(LIST_SERVICE_TYPES_SQL, "servico").includes("Hidratação"));
+    assert.ok(!active(LIST_PAYMENT_METHODS_SQL, "tipo_pgto").includes("Vale-presente"));
+
+    // As notas, os nomes da época e os ids de pagamento da lista do backup.
+    const restoredPet = app.prepare(FIND_PET_SQL).get(pet.id);
+    assert.deepEqual(
+      [restoredPet.porte, restoredPet.horario_padrao, restoredPet.valor_pacote, restoredPet.servico_padrao],
+      ["MEDIO", "00:00", 0, "Hidratação"],
+    );
+    assert.equal(
+      restoredPet.observacoes,
+      'Observação do pet\nPorte antigo: "xyz". Horário padrão antigo: "25:00". Valor do pacote antigo: "-11,50".',
+    );
+    const stored = (id) =>
+      ({ ...app.prepare("SELECT servico_nome, tipo_pgto_id, tipo_pgto_nome, hora, valor, observacao FROM appointments WHERE id = ?").get(id) });
+    assert.deepEqual(stored(textOnly), {
+      servico_nome: "Banho", tipo_pgto_id: 3, tipo_pgto_nome: "PIX", hora: "09:30", valor: 6000, observacao: null,
+    });
+    assert.deepEqual(stored(hidden), {
+      servico_nome: "Hidratação",
+      tipo_pgto_id: backup.prepare("SELECT id FROM payment_methods WHERE tipo_pgto = 'Vale-presente'").get().id,
+      tipo_pgto_nome: "Vale-presente",
+      hora: "00:00",
+      valor: 0,
+      observacao: 'Já tinha observação\nHorário antigo: "abc". Valor antigo: "-0,50".',
+    });
+
+    // Editar o oculto sem trocar funciona, e renomear depois da restauração não muda o histórico.
+    const before = { ...app.prepare("SELECT servico_id, tipo_pgto_id FROM appointments WHERE id = ?").get(hidden) };
+    const old = app.prepare(FIND_APPOINTMENT_SQL).get(hidden);
+    app.prepare(UPDATE_APPOINTMENT_SQL).run(...updateAppointmentParams({ ...old, ta_pago: 1 }, hidden));
+    assert.deepEqual({ ...app.prepare("SELECT servico_id, tipo_pgto_id FROM appointments WHERE id = ?").get(hidden) }, before);
+    app.prepare("UPDATE service_type SET servico = 'Hidratação premium' WHERE servico = 'Hidratação'").run();
+    app.prepare("UPDATE payment_methods SET tipo_pgto = 'Pix' WHERE tipo_pgto = 'PIX'").run();
+    const shown = app.prepare(LIST_APPOINTMENTS_BETWEEN_SQL).all(isoDate(-10), isoDate(0));
+    assert.deepEqual(
+      shown.map(({ servico, tipo_pgto }) => ({ servico, tipo_pgto })),
+      [{ servico: "Banho", tipo_pgto: "PIX" }, { servico: "Hidratação", tipo_pgto: "Vale-presente" }],
+    );
+
+    // O esquema é o de um banco novo, e os dados de exemplo carregam sobre ele.
+    const schema = (db) => db.prepare("SELECT type, name, sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type, name").all();
+    assert.deepEqual(schema(app), schema(await createDatabase()));
+    app.exec("DELETE FROM owners;");
+    app.exec(buildDemoDataSql({ today: new Date(), normalize: normalizeForSearch }));
+    const demo = app.prepare("SELECT COUNT(*) AS total, SUM(servico_nome IS NULL) AS unnamed FROM appointments").get();
+    assert.ok(demo.total > 0 && demo.unnamed === 0);
     backup.close();
   });
 

@@ -219,6 +219,15 @@ export default function NewOrEditAppointment() {
     [colors.TEXT_PRIMARY],
   );
 
+  // O nome gravado no agendamento pode não estar mais na lista ativa (a migração oculta o que não era
+  // da lista). O formulário mostra o nome em vez do aviso de "selecione", e salvar sem trocar vale.
+  const servicoForaDaLista = appointmentsForm.servico
+    ? { id: 0, servico: appointmentsForm.servico }
+    : undefined;
+  const pgtoForaDaLista = appointmentsForm.tipo_pgto
+    ? { id: 0, tipo_pgto: appointmentsForm.tipo_pgto }
+    : undefined;
+
   const BtnSalvar = (
     <View style={s.ctnBtnSalvar}>
       <SaveButton
@@ -281,9 +290,11 @@ export default function NewOrEditAppointment() {
                   titleName="Serviço"
                   placeholder="Selecione o serviço..."
                   itens={servicesForm.servico}
-                  itemSelected={servicesForm.servico.find(
-                    (e) => e.servico === appointmentsForm.servico,
-                  )}
+                  itemSelected={
+                    servicesForm.servico.find(
+                      (e) => e.servico === appointmentsForm.servico,
+                    ) ?? servicoForaDaLista
+                  }
                   labelExtractor={(item) => item.servico}
                   onChange={handleChangeServico}
                   renderItem={renderServicoItem}
@@ -400,9 +411,11 @@ export default function NewOrEditAppointment() {
                 titleName="Tipo de Pagamento"
                 placeholder="Selecione o tipo de pgto..."
                 itens={pgtosForm.tipos_pgto}
-                itemSelected={pgtosForm.tipos_pgto.find(
-                  (e) => e.tipo_pgto === appointmentsForm.tipo_pgto,
-                )}
+                itemSelected={
+                  pgtosForm.tipos_pgto.find(
+                    (e) => e.tipo_pgto === appointmentsForm.tipo_pgto,
+                  ) ?? pgtoForaDaLista
+                }
                 labelExtractor={(item) => item.tipo_pgto}
                 onChange={handleChangeTipoPgto}
                 renderItem={renderPgtoItem}

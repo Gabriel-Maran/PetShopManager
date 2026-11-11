@@ -11,7 +11,12 @@ import { normalizeForSearch } from "../../src/utils/formatadores/normalizaNome.t
 import { todayIso } from "../../src/utils/datas.ts";
 import { INSERT_OWNER_SQL } from "../../src/repository/sql/ownersSql.ts";
 import { INSERT_PET_SQL, UPDATE_PET_SQL } from "../../src/repository/sql/petsSql.ts";
-import { APPOINTMENT_COLUMNS, APPOINTMENTS_WITH_NAMES } from "../../src/repository/sql/appointmentsSql.ts";
+import {
+  APPOINTMENT_COLUMNS,
+  APPOINTMENTS_WITH_NAMES,
+  INSERT_APPOINTMENT_SQL,
+  insertAppointmentParams,
+} from "../../src/repository/sql/appointmentsSql.ts";
 import { PackageScheduleService } from "../../src/service/PackageScheduleService.ts";
 
 /** Conexão aberta como o getDatabase do app abre, ainda sem as migrações. */
@@ -169,6 +174,21 @@ export async function createPet(db, fields, now = new Date()) {
 
 /** Salva o formulário de edição do pet como o app faz: regrava todos os campos, pela remarcação. */
 export const savePet = (db, pet, now = new Date()) => packageScheduleOf(db).updatePet(pet.id, pet, now);
+
+const DEFAULT_APPOINTMENT = {
+  servico: "Banho", data: null, hora: "10:00", entregar_pet: 0, concluido: 0, observacao: null,
+  is_auto_agen: 0, valor: 6000, tipo_pgto: "", ta_pago: 0,
+};
+
+/**
+ * Cria um agendamento pelo comando do app (INSERT_APPOINTMENT_SQL), com o serviço e a forma de pagamento
+ * pelo nome. Só vale num banco da versão 6 em diante. Devolve o id.
+ */
+export function insertAppointment(db, petId, fields = {}) {
+  const appointment = { ...DEFAULT_APPOINTMENT, data: isoDate(2), ...fields, pet_id: petId };
+  const result = db.prepare(INSERT_APPOINTMENT_SQL).run(...insertAppointmentParams(appointment));
+  return Number(result.lastInsertRowid);
+}
 
 export const petRow = (db, id) => db.prepare("SELECT * FROM pets WHERE id = ?").get(id);
 

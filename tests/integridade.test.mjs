@@ -1,6 +1,7 @@
 // Integridade no próprio banco (DADOS-4, versão 6 do esquema): os CHECKs dos flags, do porte e dos
-// horários, o serviço e a forma de pagamento pelo id, com chave estrangeira, e a migração de um banco da
-// versão 5 com dado antigo fora do domínio, que precisa subir sem perder nenhum registro.
+// horários, o dinheiro sem valor negativo, o serviço e a forma de pagamento pelo id (com chave estrangeira e
+// com o nome da época no agendamento), os itens ocultos das listas e a migração de um banco da versão 5 com
+// dado antigo fora do domínio, que precisa subir sem perder nenhum registro e anotando o que perde.
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -8,20 +9,24 @@ import {
   createDatabase,
   createPet,
   databaseAt,
+  appointmentsOf,
+  insertAppointment,
   insertOwner,
   insertPet,
   isoDate,
   packageScheduleOf,
   pendingAutoOf,
+  petRow,
+  savePet,
 } from "./helpers/database.mjs";
 import { migrateDatabase } from "../src/config/migrator.ts";
 import { MIGRATIONS } from "../src/config/schema.ts";
 import { PorteAnimal, TipoServico } from "../src/config/petEnums.ts";
 import {
   FIND_APPOINTMENT_SQL,
-  INSERT_APPOINTMENT_SQL,
   LIST_APPOINTMENTS_BETWEEN_SQL,
   UPDATE_APPOINTMENT_SQL,
+  updateAppointmentParams,
 } from "../src/repository/sql/appointmentsSql.ts";
 import { FIND_PET_SQL } from "../src/repository/sql/petsSql.ts";
 import { LIST_PAYMENT_METHODS_SQL, LIST_SERVICE_TYPES_SQL } from "../src/repository/sql/listsSql.ts";
@@ -40,17 +45,12 @@ const rows = (db, table) => db.prepare(`SELECT * FROM ${table} ORDER BY id`).all
 const idOf = (db, table, column, value) =>
   db.prepare(`SELECT id FROM ${table} WHERE ${column} = ?`).get(value)?.id;
 
-/** Os parâmetros do INSERT_APPOINTMENT_SQL, na ordem, com o serviço e o pagamento pelo nome. */
-function insertAppointment(db, petId, fields = {}) {
-  const a = {
-    servico: "Banho", data: isoDate(2), hora: "10:00", entregar_pet: 0, observacao: null,
-    valor: 6000, tipo_pgto: "", ta_pago: 0, ...fields,
-  };
-  const result = db
-    .prepare(INSERT_APPOINTMENT_SQL)
-    .run(petId, a.servico, a.data, a.hora, a.entregar_pet, 0, a.observacao, 0, a.valor, a.tipo_pgto, a.ta_pago);
-  return Number(result.lastInsertRowid);
-}
+const saveAppointment = (db, id, fields) => {
+  const current = db.prepare(FIND_APPOINTMENT_SQL).get(id);
+  db.prepare(UPDATE_APPOINTMENT_SQL).run(...updateAppointmentParams({ ...current, ...fields }, id));
+};
+const storedNames = (db, id) =>
+  ({ ...db.prepare("SELECT servico_id, servico_nome, tipo_pgto_id, tipo_pgto_nome FROM appointments WHERE id = ?").get(id) });
 
 /** Um banco novo com um dono, um pet e um agendamento, para tentar gravar valores fora do domínio. */
 async function databaseWithAppointment() {
@@ -131,7 +131,10 @@ describe("o banco recusa valores fora do domínio", () => {
     const { db, petId, appointmentId } = await databaseWithAppointment();
 
     assert.throws(() => db.prepare("UPDATE appointments SET servico_id = 999 WHERE id = ?").run(appointmentId), FOREIGN_KEY_FAILED);
-    assert.throws(() => db.prepare("UPDATE appointments SET tipo_pgto_id = 999 WHERE id = ?").run(appointmentId), FOREIGN_KEY_FAILED);
+    assert.throws(
+      () => db.prepare("UPDATE appointments SET tipo_pgto_id = 999, tipo_pgto_nome = 'PIX' WHERE id = ?").run(appointmentId),
+      FOREIGN_KEY_FAILED,
+    );
     assert.throws(() => db.prepare("UPDATE pets SET servico_padrao_id = 999 WHERE id = ?").run(petId), FOREIGN_KEY_FAILED);
     // Gravar pelo nome: o nome fora da lista não acha id, e o NOT NULL recusa.
     assert.throws(() => insertAppointment(db, petId, { servico: "Tosa na máquina" }), /NOT NULL constraint failed/);
@@ -140,7 +143,7 @@ describe("o banco recusa valores fora do domínio", () => {
 
   test("um serviço ou forma de pagamento em uso não pode ser apagado", async () => {
     const { db, appointmentId } = await databaseWithAppointment();
-    db.prepare(UPDATE_APPOINTMENT_SQL).run(1, "Banho e Tosa", isoDate(2), "10:00", 0, 0, null, 6000, "PIX", 1, appointmentId);
+    saveAppointment(db, appointmentId, { servico: "Banho e Tosa", tipo_pgto: "PIX", ta_pago: 1 });
 
     assert.throws(() => db.prepare("DELETE FROM service_type WHERE servico = 'Banho e Tosa'").run(), FOREIGN_KEY_FAILED);
     assert.throws(() => db.prepare("DELETE FROM payment_methods WHERE tipo_pgto = 'PIX'").run(), FOREIGN_KEY_FAILED);
@@ -181,9 +184,12 @@ describe("o serviço e a forma de pagamento pelo nome, como as telas usam", () =
     const { db, petId } = await databaseWithAppointment();
     const id = insertAppointment(db, petId, { servico: "Banho e Higiênica", tipo_pgto: "Cartão de Débito" });
 
-    const raw = db.prepare("SELECT servico_id, tipo_pgto_id FROM appointments WHERE id = ?").get(id);
-    assert.equal(raw.servico_id, idOf(db, "service_type", "servico", "Banho e Higiênica"));
-    assert.equal(raw.tipo_pgto_id, idOf(db, "payment_methods", "tipo_pgto", "Cartão de Débito"));
+    assert.deepEqual(storedNames(db, id), {
+      servico_id: idOf(db, "service_type", "servico", "Banho e Higiênica"),
+      servico_nome: "Banho e Higiênica",
+      tipo_pgto_id: idOf(db, "payment_methods", "tipo_pgto", "Cartão de Débito"),
+      tipo_pgto_nome: "Cartão de Débito",
+    });
     const shown = db.prepare(FIND_APPOINTMENT_SQL).get(id);
     assert.equal(shown.servico, "Banho e Higiênica");
     assert.equal(shown.tipo_pgto, "Cartão de Débito");
@@ -192,16 +198,10 @@ describe("o serviço e a forma de pagamento pelo nome, como as telas usam", () =
   test("sem forma de pagamento, grava nulo e a tela lê o texto vazio", async () => {
     const { db, appointmentId } = await databaseWithAppointment();
 
-    assert.equal(db.prepare("SELECT tipo_pgto_id FROM appointments WHERE id = ?").get(appointmentId).tipo_pgto_id, null);
+    const stored = storedNames(db, appointmentId);
+    assert.deepEqual([stored.tipo_pgto_id, stored.tipo_pgto_nome], [null, null]);
     assert.equal(db.prepare(FIND_APPOINTMENT_SQL).get(appointmentId).tipo_pgto, "");
     assert.equal(db.prepare(LIST_APPOINTMENTS_BETWEEN_SQL).all(isoDate(0), isoDate(9))[0].tipo_pgto, "");
-  });
-
-  test("renomear um item da lista muda o nome em todos os agendamentos, que apontam pelo id", async () => {
-    const { db, appointmentId } = await databaseWithAppointment();
-    db.prepare("UPDATE service_type SET servico = 'Banho completo' WHERE servico = 'Banho'").run();
-
-    assert.equal(db.prepare(FIND_APPOINTMENT_SQL).get(appointmentId).servico, "Banho completo");
   });
 
   test("o pet guarda o serviço padrão pelo id, e a remarcação usa o mesmo serviço na agenda", async () => {
@@ -245,6 +245,130 @@ describe("o serviço e a forma de pagamento pelo nome, como as telas usam", () =
         tipo_pgto,
       );
     }
+  });
+});
+
+describe("o agendamento guarda o nome da época (histórico)", () => {
+  test("criar grava o nome do serviço e da forma de pagamento escolhidos", async () => {
+    const { db, petId } = await databaseWithAppointment();
+    const id = insertAppointment(db, petId, { servico: "Banho e Tosa", tipo_pgto: "Dinheiro" });
+
+    const stored = storedNames(db, id);
+    assert.deepEqual([stored.servico_nome, stored.tipo_pgto_nome], ["Banho e Tosa", "Dinheiro"]);
+    assert.equal(stored.servico_id, idOf(db, "service_type", "servico", "Banho e Tosa"));
+    assert.equal(stored.tipo_pgto_id, idOf(db, "payment_methods", "tipo_pgto", "Dinheiro"));
+  });
+
+  test("renomear o serviço ou a forma de pagamento não muda os agendamentos antigos", async () => {
+    const { db, petId } = await databaseWithAppointment();
+    const old = insertAppointment(db, petId, { servico: "Banho e Tosa", tipo_pgto: "PIX" });
+    db.prepare("UPDATE service_type SET servico = 'Banho e Tosa Premium' WHERE servico = 'Banho e Tosa'").run();
+    db.prepare("UPDATE payment_methods SET tipo_pgto = 'Pix' WHERE tipo_pgto = 'PIX'").run();
+
+    const shown = db.prepare(FIND_APPOINTMENT_SQL).get(old);
+    assert.deepEqual([shown.servico, shown.tipo_pgto], ["Banho e Tosa", "PIX"], "o histórico mostra o nome da época");
+    assert.equal(db.prepare(LIST_APPOINTMENTS_BETWEEN_SQL).all(isoDate(0), isoDate(9)).at(-1).servico, "Banho e Tosa");
+
+    // A lista oferece só o nome novo, e o agendamento novo grava o nome novo.
+    const services = db.prepare(LIST_SERVICE_TYPES_SQL).all().map(({ servico }) => servico);
+    assert.ok(services.includes("Banho e Tosa Premium") && !services.includes("Banho e Tosa"));
+    const created = insertAppointment(db, petId, { servico: "Banho e Tosa Premium", tipo_pgto: "Pix" });
+    const createdNames = storedNames(db, created);
+    assert.deepEqual([createdNames.servico_nome, createdNames.tipo_pgto_nome], ["Banho e Tosa Premium", "Pix"]);
+    assert.equal(createdNames.servico_id, storedNames(db, old).servico_id, "o mesmo item da lista");
+    assert.throws(() => insertAppointment(db, petId, { servico: "Banho e Tosa" }), /NOT NULL constraint failed/);
+  });
+
+  test("editar sem trocar mantém o id e o nome, mesmo depois de renomear; trocar grava o nome novo", async () => {
+    const { db, petId } = await databaseWithAppointment();
+    const id = insertAppointment(db, petId, { servico: "Banho", tipo_pgto: "PIX" });
+    const before = storedNames(db, id);
+    db.prepare("UPDATE service_type SET servico = 'Banho completo' WHERE servico = 'Banho'").run();
+    db.prepare("UPDATE payment_methods SET tipo_pgto = 'Pix' WHERE tipo_pgto = 'PIX'").run();
+
+    saveAppointment(db, id, { valor: 7000, observacao: "Só mudei o valor" });
+    assert.deepEqual(storedNames(db, id), before, "editar outro campo não troca o item");
+
+    saveAppointment(db, id, { servico: "Banho completo", tipo_pgto: "Pix" });
+    assert.deepEqual(
+      storedNames(db, id),
+      { servico_id: before.servico_id, servico_nome: "Banho completo", tipo_pgto_id: before.tipo_pgto_id, tipo_pgto_nome: "Pix" },
+      "escolher o nome novo do mesmo item atualiza o nome",
+    );
+
+    saveAppointment(db, id, { servico: "Banho e Tosa", tipo_pgto: "Dinheiro" });
+    assert.deepEqual(storedNames(db, id), {
+      servico_id: idOf(db, "service_type", "servico", "Banho e Tosa"),
+      servico_nome: "Banho e Tosa",
+      tipo_pgto_id: idOf(db, "payment_methods", "tipo_pgto", "Dinheiro"),
+      tipo_pgto_nome: "Dinheiro",
+    });
+
+    const chosen = storedNames(db, id);
+    assert.throws(() => saveAppointment(db, id, { servico: "Spa" }), /NOT NULL constraint failed/);
+    assert.throws(() => saveAppointment(db, id, { tipo_pgto: "Cheque" }), CHECK_FAILED);
+    assert.deepEqual(storedNames(db, id), chosen, "a troca recusada não muda nada");
+  });
+
+  test("pagamento vazio fica com id e nome nulos", async () => {
+    const { db, petId } = await databaseWithAppointment();
+    const id = insertAppointment(db, petId, { tipo_pgto: "PIX" });
+
+    saveAppointment(db, id, { tipo_pgto: "" });
+
+    const stored = storedNames(db, id);
+    assert.deepEqual([stored.tipo_pgto_id, stored.tipo_pgto_nome], [null, null]);
+    assert.equal(db.prepare(FIND_APPOINTMENT_SQL).get(id).tipo_pgto, "");
+  });
+
+  test("o CHECK recusa id sem nome, nome sem id e serviço sem nome", async () => {
+    const { db, appointmentId } = await databaseWithAppointment();
+    const set = (assignments) => () =>
+      db.prepare(`UPDATE appointments SET ${assignments} WHERE id = ?`).run(appointmentId);
+
+    assert.throws(set("tipo_pgto_id = 4"), CHECK_FAILED, "id sem nome");
+    assert.throws(set("tipo_pgto_nome = 'PIX'"), CHECK_FAILED, "nome sem id");
+    for (const blank of ["''", "'   '"]) assert.throws(set(`servico_nome = ${blank}`), CHECK_FAILED, blank);
+    assert.throws(set("servico_nome = NULL"), /NOT NULL constraint failed/);
+
+    assert.doesNotThrow(set("tipo_pgto_id = 4, tipo_pgto_nome = 'PIX'"));
+    assert.doesNotThrow(set("tipo_pgto_id = NULL, tipo_pgto_nome = NULL"));
+  });
+
+  test("concluir um automático cria o próximo com o nome atual do id", async () => {
+    const db = await createDatabase();
+    const pet = await createPet(db, {
+      dono_id: insertOwner(db), servico_padrao: "Banho", remarcacao_ativa: 1, pacote_remarcacao: 4,
+      data_inicio_pacote: isoDate(1), valor_pacote: 32000,
+    });
+    const [first] = pendingAutoOf(db, pet.id);
+    assert.equal(first.servico, "Banho");
+    db.prepare("UPDATE service_type SET servico = 'Banho completo' WHERE servico = 'Banho'").run();
+
+    await packageScheduleOf(db).updateAppointment(first.id, { ...first, concluido: 1 });
+
+    const next = pendingAutoOf(db, pet.id).at(-1);
+    assert.equal(next.servico, "Banho completo", "o próximo é novo, então leva o nome de hoje");
+    assert.equal(storedNames(db, next.id).servico_id, storedNames(db, first.id).servico_id);
+    assert.equal(db.prepare(FIND_APPOINTMENT_SQL).get(first.id).servico, "Banho", "o concluído guarda o da época");
+  });
+});
+
+describe("o dinheiro não aceita valor negativo", () => {
+  test("o valor do agendamento e o do pacote do pet recusam negativo e aceitam zero (o pacote, também nulo)", async () => {
+    const { db, petId, appointmentId } = await databaseWithAppointment();
+
+    for (const invalid of [-1, -1150, -100_000_000]) {
+      assert.throws(() => db.prepare("UPDATE appointments SET valor = ? WHERE id = ?").run(invalid, appointmentId), CHECK_FAILED, `valor ${invalid}`);
+      assert.throws(() => db.prepare("UPDATE pets SET valor_pacote = ? WHERE id = ?").run(invalid, petId), CHECK_FAILED, `pacote ${invalid}`);
+    }
+    assert.throws(() => insertAppointment(db, petId, { valor: -1 }), CHECK_FAILED);
+    assert.throws(() => insertPet(db, { dono_id: insertOwner(db), valor_pacote: -1 }), CHECK_FAILED);
+
+    db.prepare("UPDATE appointments SET valor = 0 WHERE id = ?").run(appointmentId);
+    db.prepare("UPDATE pets SET valor_pacote = 0 WHERE id = ?").run(petId);
+    db.prepare("UPDATE pets SET valor_pacote = NULL WHERE id = ?").run(petId);
+    assert.throws(() => db.prepare("UPDATE appointments SET valor = NULL WHERE id = ?").run(appointmentId), /NOT NULL constraint failed/);
   });
 });
 
@@ -309,7 +433,7 @@ describe("migração para a versão 6", () => {
     const tables = ["configs", "owners", "pets", "appointments", "service_type", "payment_methods"];
     const idsBefore = Object.fromEntries(tables.map((table) => [table, rows(db, table).map(({ id }) => id)]));
     const sequencesBefore = db.prepare("SELECT name, seq FROM sqlite_sequence ORDER BY name").all();
-    const kept = ["id", "pet_id", "data", "observacao", "valor", "criado_em"];
+    const kept = ["id", "pet_id", "data", "valor", "criado_em"];
     const keptOf = (db) => rows(db, "appointments").map((row) => Object.fromEntries(kept.map((c) => [c, row[c]])));
     const appointmentsBefore = keptOf(db);
     const problemsBefore = foreignKeyProblems(db);
@@ -350,10 +474,14 @@ describe("migração para a versão 6", () => {
     assert.equal(petService(pets.mel), "Hidratação");
     assert.equal(petService(pets.thor), "Banho", "sem serviço, o Banho do DEFAULT antigo");
 
-    const services = db.prepare(LIST_SERVICE_TYPES_SQL).all().map(({ servico }) => servico);
-    assert.deepEqual(services, ["Banho", "Banho e Higiênica", "Banho e Tosa", "Hidratação"]);
-    const methods = db.prepare(LIST_PAYMENT_METHODS_SQL).all().map(({ tipo_pgto }) => tipo_pgto);
-    assert.deepEqual(methods, ["Cartão de Crédito", "Cartão de Débito", "Dinheiro", "PIX", "Outro", "Vale-presente"]);
+    // O que não estava na lista entra nela, mas oculto: o formulário não oferece (ver "itens ocultos").
+    const everyService = db.prepare("SELECT servico FROM service_type ORDER BY servico").all().map(({ servico }) => servico);
+    assert.deepEqual(everyService, ["Banho", "Banho e Higiênica", "Banho e Tosa", "Hidratação"]);
+    const everyMethod = db.prepare("SELECT tipo_pgto FROM payment_methods ORDER BY id").all().map(({ tipo_pgto }) => tipo_pgto);
+    assert.deepEqual(everyMethod, ["Cartão de Crédito", "Cartão de Débito", "Dinheiro", "PIX", "Outro", "Vale-presente"]);
+    assert.equal(storedNames(db, appointments.unknown).servico_nome, "Hidratação");
+    assert.equal(storedNames(db, appointments.unknown).tipo_pgto_nome, "Vale-presente");
+    assert.equal(storedNames(db, appointments.blank).servico_nome, "Banho e Tosa");
   });
 
   test("o porte, os horários e os flags fora do domínio seguem as regras do app", async () => {
@@ -409,5 +537,235 @@ describe("migração para a versão 6", () => {
 
     const saved = db.prepare(FIND_APPOINTMENT_SQL).get(old.id);
     assert.deepEqual([saved.servico, saved.tipo_pgto, saved.concluido], ["Hidratação", "Vale-presente", 1]);
+  });
+});
+
+// ── Itens ocultos, serviços padrão e notas da migração ────────────────────
+
+const notFoundError = (message) => ({ name: "AppError", code: "NOT_FOUND", message });
+const namesOf = (db, sql, column) => db.prepare(sql).all().map((row) => row[column]);
+const OBSERVATION_COLUMN = { pets: "observacoes", appointments: "observacao" };
+const observationOf = (db, table, id) =>
+  db.prepare(`SELECT ${OBSERVATION_COLUMN[table]} AS text FROM ${table} WHERE id = ?`).get(id).text;
+
+describe("itens ocultos da migração", () => {
+  test("as listas do formulário não trazem os ocultos, e o histórico mostra o nome", async () => {
+    const { db, appointments } = await v5WithOldData();
+    await migrate(db);
+
+    assert.deepEqual(namesOf(db, LIST_SERVICE_TYPES_SQL, "servico"), ["Banho", "Banho e Higiênica", "Banho e Tosa"]);
+    assert.deepEqual(
+      namesOf(db, LIST_PAYMENT_METHODS_SQL, "tipo_pgto"),
+      ["Cartão de Crédito", "Cartão de Débito", "Dinheiro", "PIX", "Outro"],
+    );
+    assert.deepEqual(namesOf(db, "SELECT servico FROM service_type WHERE is_ativo = 0", "servico"), ["Hidratação"]);
+    assert.deepEqual(namesOf(db, "SELECT tipo_pgto FROM payment_methods WHERE is_ativo = 0", "tipo_pgto"), ["Vale-presente"]);
+
+    const shown = db.prepare(FIND_APPOINTMENT_SQL).get(appointments.unknown);
+    assert.deepEqual([shown.servico, shown.tipo_pgto], ["Hidratação", "Vale-presente"]);
+    const inRange = db.prepare(LIST_APPOINTMENTS_BETWEEN_SQL).all(isoDate(-4), isoDate(-2));
+    assert.ok(inRange.some((a) => a.servico === "Hidratação" && a.tipo_pgto === "Vale-presente"));
+  });
+
+  test("o item que já estava na lista continua ativo", async () => {
+    const { db } = await v5WithOldData();
+    await migrate(db);
+
+    assert.deepEqual(
+      namesOf(db, "SELECT servico FROM service_type WHERE is_ativo = 1 ORDER BY id", "servico"),
+      ["Banho", "Banho e Tosa", "Banho e Higiênica"],
+    );
+    assert.equal(db.prepare("SELECT COUNT(*) AS total FROM payment_methods WHERE is_ativo = 1").get().total, 5);
+  });
+
+  test("a conferência aceita o oculto igual ao gravado e recusa o oculto na criação e na troca", async () => {
+    const { db } = await v5WithOldData();
+    await migrate(db);
+    const choices = {
+      services: db.prepare(LIST_SERVICE_TYPES_SQL).all(),
+      paymentMethods: db.prepare(LIST_PAYMENT_METHODS_SQL).all(),
+    };
+    const hidden = { servico: "Hidratação", tipo_pgto: "Vale-presente" };
+    const regular = { servico: "Banho", tipo_pgto: "PIX" };
+    const serviceNotFound = notFoundError(MESSAGES.appointment.serviceNotFound);
+    const paymentNotFound = notFoundError(MESSAGES.appointment.paymentMethodNotFound);
+
+    // Editar o que está gravado, sem trocar o serviço nem a forma de pagamento.
+    assert.doesNotThrow(() => assertAppointmentChoices(hidden, choices, hidden));
+    assert.doesNotThrow(() => assertAppointmentChoices({ ...hidden, tipo_pgto: "PIX" }, choices, hidden), "trocou só o pagamento");
+    assert.doesNotThrow(() => assertAppointmentChoices({ ...hidden, servico: "Banho" }, choices, hidden), "trocou só o serviço");
+    // Criar: só item ativo.
+    assert.throws(() => assertAppointmentChoices(hidden, choices), serviceNotFound);
+    assert.throws(() => assertAppointmentChoices({ servico: "Banho", tipo_pgto: "Vale-presente" }, choices), paymentNotFound);
+    // Trocar o gravado por um oculto: recusado.
+    assert.throws(() => assertAppointmentChoices({ ...regular, servico: "Hidratação" }, choices, regular), serviceNotFound);
+    assert.throws(() => assertAppointmentChoices({ ...regular, tipo_pgto: "Vale-presente" }, choices, regular), paymentNotFound);
+    // O oculto de outro agendamento não vale: só o gravado neste.
+    assert.throws(() => assertAppointmentChoices(hidden, choices, { servico: "Hidratação", tipo_pgto: "" }), paymentNotFound);
+  });
+
+  test("gravar com um nome oculto é recusado, e is_ativo só aceita 0 ou 1", async () => {
+    const { db, pets } = await v5WithOldData();
+    await migrate(db);
+
+    assert.throws(() => insertAppointment(db, pets.pacoca.id, { servico: "Hidratação" }), /NOT NULL constraint failed: appointments.servico_id/);
+    assert.throws(() => insertAppointment(db, pets.pacoca.id, { tipo_pgto: "Vale-presente" }), CHECK_FAILED);
+    for (const table of ["service_type", "payment_methods"]) {
+      for (const invalid of [2, -1, "sim", null]) {
+        assert.throws(() => db.prepare(`UPDATE ${table} SET is_ativo = ? WHERE id = 1`).run(invalid), invalid === null ? /NOT NULL/ : CHECK_FAILED, `${table} ${invalid}`);
+      }
+    }
+  });
+
+  test("editar o agendamento com item oculto, sem trocá-lo, funciona e mantém o id, mesmo renomeado", async () => {
+    const { db, appointments } = await v5WithOldData();
+    await migrate(db);
+    const before = storedNames(db, appointments.unknown);
+    db.prepare("UPDATE service_type SET servico = 'Hidratação premium' WHERE servico = 'Hidratação'").run();
+
+    saveAppointment(db, appointments.unknown, { observacao: "Editei", concluido: 1, ta_pago: 1 });
+
+    assert.deepEqual(storedNames(db, appointments.unknown), before);
+    const saved = db.prepare(FIND_APPOINTMENT_SQL).get(appointments.unknown);
+    assert.deepEqual([saved.servico, saved.tipo_pgto, saved.concluido, saved.observacao], ["Hidratação", "Vale-presente", 1, "Editei"]);
+    // Trocar para um item ativo funciona; voltar ao oculto, não.
+    saveAppointment(db, appointments.unknown, { servico: "Banho", tipo_pgto: "PIX" });
+    assert.throws(() => saveAppointment(db, appointments.unknown, { servico: "Hidratação premium" }), /NOT NULL constraint failed/);
+  });
+});
+
+describe("serviços padrão garantidos pela migração", () => {
+  test("uma versão 5 sem o Banho recebe o Banho ativo, mesmo com ele só no texto dos agendamentos", async () => {
+    const db = await databaseAt(5);
+    db.prepare("DELETE FROM service_type WHERE servico = 'Banho'").run();
+    const ownerId = insertOwner(db);
+    const withoutService = insertPet(db, { dono_id: ownerId, nome: "Sem serviço", servico_padrao: "" });
+    const onlyInText = insertV5Appointment(db, withoutService.id, { servico: "Banho" });
+    db.exec("PRAGMA foreign_keys = OFF;");
+    const orphan = insertV5Appointment(db, 999, { servico: "" });
+    db.exec("PRAGMA foreign_keys = ON;");
+
+    await migrate(db);
+
+    const banho = db.prepare("SELECT id, is_ativo FROM service_type WHERE servico = 'Banho'").all();
+    assert.equal(banho.length, 1);
+    assert.equal(banho[0].is_ativo, 1, "ativo, e não oculto como um nome desconhecido");
+    assert.equal(petRow(db, withoutService.id).servico_padrao_id, banho[0].id);
+    for (const id of [onlyInText, orphan]) {
+      assert.deepEqual(
+        { ...db.prepare("SELECT servico_id, servico_nome FROM appointments WHERE id = ?").get(id) },
+        { servico_id: banho[0].id, servico_nome: "Banho" },
+      );
+    }
+    assert.ok(namesOf(db, LIST_SERVICE_TYPES_SQL, "servico").includes("Banho"));
+    assert.equal(foreignKeyProblems(db).length, 1, "só o agendamento do pet que não existe, que já era assim");
+  });
+
+  test("os três serviços do formulário do pet ficam ativos, e um banco novo não fica com repetidos", async () => {
+    const db = await databaseAt(5);
+    db.prepare("DELETE FROM service_type WHERE servico IN ('Banho e Tosa', 'Banho e Higiênica')").run();
+    await migrate(db);
+    const fresh = await createDatabase();
+
+    for (const database of [db, fresh]) {
+      assert.deepEqual(
+        namesOf(database, "SELECT servico FROM service_type WHERE is_ativo = 1 ORDER BY servico", "servico"),
+        [...Object.values(TipoServico)].sort(),
+      );
+      assert.equal(database.prepare("SELECT COUNT(*) AS total FROM service_type").get().total, 3);
+    }
+  });
+});
+
+describe("notas da migração com o valor antigo", () => {
+  /** Um banco da versão 5 com valores que a conversão joga fora, e valores que ela só normaliza. */
+  async function v5WithLostValues() {
+    const db = await databaseAt(5);
+    const dono_id = insertOwner(db);
+    const pets = {
+      allThree: insertPet(db, { dono_id, nome: "Xyz", porte: "xyz", observacoes: "Alérgico a xampu forte", horario_padrao: "25:00", valor_pacote: -1150 }),
+      onlyPorte: insertPet(db, { dono_id, nome: "Abc", porte: "abc", observacoes: null }),
+      cents: insertPet(db, { dono_id, nome: "Centavos", observacoes: "Dócil", valor_pacote: -50 }),
+      longPorte: insertPet(db, { dono_id, nome: "Longo", porte: "x".repeat(60) }),
+      normalized: insertPet(db, { dono_id, nome: "Normal", porte: "Médio", observacoes: "Sem nota", horario_padrao: "9:30" }),
+      empty: insertPet(db, { dono_id, nome: "Vazio", porte: "", observacoes: null, horario_padrao: null }),
+    };
+    const appointments = {
+      badTime: insertV5Appointment(db, pets.allThree.id, { hora: "abc", observacao: "Tem medo de secador" }),
+      badTimeNoText: insertV5Appointment(db, pets.allThree.id, { hora: "25:00" }),
+      negative: insertV5Appointment(db, pets.allThree.id, { hora: "9:30", valor: -1150 }),
+      cents: insertV5Appointment(db, pets.allThree.id, { valor: -50, observacao: "Pagou fiado" }),
+      both: insertV5Appointment(db, pets.allThree.id, { hora: "abc", valor: -1150 }),
+      normalized: insertV5Appointment(db, pets.allThree.id, { hora: "9:30", observacao: "Sem nota" }),
+      emptyTime: insertV5Appointment(db, pets.allThree.id, { hora: "" }),
+    };
+    return { db, pets, appointments };
+  }
+
+  test("o porte, o horário e o valor perdidos ganham a nota, sem apagar a observação que já existia", async () => {
+    const { db, pets, appointments } = await v5WithLostValues();
+    await migrate(db);
+    const petNote = (pet) => observationOf(db, "pets", pet.id);
+    const appointmentNote = (id) => observationOf(db, "appointments", id);
+
+    // As três notas saem na ordem, depois da observação, que fica intacta.
+    assert.equal(
+      petNote(pets.allThree),
+      'Alérgico a xampu forte\nPorte antigo: "xyz". Horário padrão antigo: "25:00". Valor do pacote antigo: "-11,50".',
+    );
+    assert.equal(petNote(pets.onlyPorte), 'Porte antigo: "abc".', "sem observação, fica só a nota");
+    assert.equal(petNote(pets.cents), 'Dócil\nValor do pacote antigo: "-0,50".');
+    assert.equal(petNote(pets.longPorte), `Porte antigo: "${"x".repeat(40)}".`, "o valor citado vai até 40 caracteres");
+    assert.deepEqual(
+      { ...db.prepare("SELECT porte, horario_padrao, valor_pacote FROM pets WHERE id = ?").get(pets.allThree.id) },
+      { porte: "MEDIO", horario_padrao: "00:00", valor_pacote: 0 },
+    );
+
+    assert.equal(appointmentNote(appointments.badTime), 'Tem medo de secador\nHorário antigo: "abc".');
+    assert.equal(appointmentNote(appointments.badTimeNoText), 'Horário antigo: "25:00".');
+    assert.equal(appointmentNote(appointments.negative), 'Valor antigo: "-11,50".');
+    assert.equal(appointmentNote(appointments.cents), 'Pagou fiado\nValor antigo: "-0,50".');
+    assert.equal(appointmentNote(appointments.both), 'Horário antigo: "abc". Valor antigo: "-11,50".');
+    assert.deepEqual(
+      { ...db.prepare("SELECT hora, valor FROM appointments WHERE id = ?").get(appointments.negative) },
+      { hora: "09:30", valor: 0 },
+      "o horário recuperável é normalizado, e o negativo vira 0",
+    );
+  });
+
+  test("a normalização e o nulo ou vazio não ganham nota", async () => {
+    const { db, pets, appointments } = await v5WithLostValues();
+    await migrate(db);
+
+    assert.equal(observationOf(db, "pets", pets.normalized.id), "Sem nota");
+    assert.deepEqual(
+      { ...db.prepare("SELECT porte, horario_padrao FROM pets WHERE id = ?").get(pets.normalized.id) },
+      { porte: "MEDIO", horario_padrao: "09:30" },
+    );
+    assert.equal(observationOf(db, "pets", pets.empty.id), null, "porte vazio e horário nulo");
+    assert.deepEqual(
+      { ...db.prepare("SELECT porte, horario_padrao FROM pets WHERE id = ?").get(pets.empty.id) },
+      { porte: "MEDIO", horario_padrao: "00:00" },
+    );
+    assert.equal(observationOf(db, "appointments", appointments.normalized), "Sem nota");
+    assert.equal(observationOf(db, "appointments", appointments.emptyTime), null);
+  });
+
+  test("um pacote negativo da versão 5 vira 0, e a agenda que ele gera sai com 0", async () => {
+    const db = await databaseAt(5);
+    const pet = insertPet(db, {
+      dono_id: insertOwner(db), remarcacao_ativa: 1, pacote_remarcacao: 4, data_inicio_pacote: isoDate(1),
+      valor_pacote: -32000, horario_padrao: "10:00",
+    });
+    await migrate(db);
+    assert.equal(petRow(db, pet.id).valor_pacote, 0);
+
+    // Salvar o pet com outro horário refaz a agenda a partir do valor do pacote.
+    await savePet(db, { ...petRow(db, pet.id), servico_padrao: "Banho", horario_padrao: "11:00" });
+
+    const agenda = pendingAutoOf(db, pet.id);
+    assert.ok(agenda.length > 0);
+    assert.ok(agenda.every((a) => a.valor === 0), "nenhum automático com valor negativo");
+    assert.equal(appointmentsOf(db, pet.id).length, agenda.length);
   });
 });

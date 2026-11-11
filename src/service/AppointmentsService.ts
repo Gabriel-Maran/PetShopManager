@@ -29,18 +29,23 @@ class AppointmentsService {
   }
 
   async updateAppointment(id: number, appointment: AppointmentData) {
-    await assertChoicesExist(appointment);
+    // O que está gravado vale mesmo fora da lista ativa (nome oculto pela migração).
+    const current = await this.getAppointmentById(id);
+    await assertChoicesExist(appointment, current ?? undefined);
     return packageSchedule.updateAppointment(id, appointment);
   }
 }
 
-// O banco grava o serviço e a forma de pagamento pelo id, achado pelo nome que a tela escolheu.
-async function assertChoicesExist(appointment: AppointmentData): Promise<void> {
+// O banco grava o serviço e a forma de pagamento pelo id, achado pelo nome ativo que a tela escolheu.
+async function assertChoicesExist(
+  appointment: AppointmentData,
+  current?: Pick<AppointmentData, "servico" | "tipo_pgto">,
+): Promise<void> {
   const [services, paymentMethods] = await Promise.all([
     serviceTypeService.getAllServiceTypes(),
     paymentMethodService.getAllPaymentMethods(),
   ]);
-  assertAppointmentChoices(appointment, { services, paymentMethods });
+  assertAppointmentChoices(appointment, { services, paymentMethods }, current);
 }
 
 export const appointmentsService = new AppointmentsService();

@@ -231,8 +231,8 @@ describe("edição do pet com pacote", () => {
     [nextAuto] = pendingAutoOf(db, pet.id).filter((a) => a.data > isoDate(1));
     await saveAppointment(db, nextAuto, { hora: "15:30" });
     db.prepare(
-      `INSERT INTO appointments (pet_id, servico_id, data, hora, is_auto_agen)
-       VALUES (?, (SELECT id FROM service_type WHERE servico = 'Banho'), ?, '10:00', 1)`,
+      `INSERT INTO appointments (pet_id, servico_id, servico_nome, data, hora, is_auto_agen)
+       VALUES (?, (SELECT id FROM service_type WHERE servico = 'Banho'), 'Banho', ?, '10:00', 1)`,
     ).run(pet.id, isoDate(-5));
   });
 

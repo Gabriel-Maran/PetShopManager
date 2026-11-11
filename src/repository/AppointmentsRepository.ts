@@ -2,6 +2,7 @@ import { getDatabase } from "../config/database";
 import {
   FIND_APPOINTMENT_SQL,
   INSERT_APPOINTMENT_SQL,
+  insertAppointmentParams,
   LIST_APPOINTMENTS_BETWEEN_SQL,
   LIST_APPOINTMENTS_OF_DAY_SQL,
 } from "./sql/appointmentsSql";
@@ -36,21 +37,10 @@ class AppointmentRepository {
   // Cria agendamento manual (is_auto_agen = 0 por padrão)
   async createAppointment(appointment: Appointment): Promise<void> {
     const db = await getDatabase();
+    // Sempre manual e pendente ao criar via repositório, qualquer que seja o que o formulário mandou.
     await db.runAsync(
       INSERT_APPOINTMENT_SQL,
-      [
-        appointment.pet_id,
-        appointment.servico,
-        appointment.data,
-        appointment.hora,
-        appointment.entregar_pet,
-        0,
-        appointment.observacao ?? null,
-        0, // sempre manual ao criar via repositório
-        appointment.valor,
-        appointment.tipo_pgto,
-        appointment.ta_pago,
-      ],
+      insertAppointmentParams({ ...appointment, concluido: 0, is_auto_agen: 0 }),
     );
   }
 }
