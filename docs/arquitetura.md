@@ -12,13 +12,13 @@ App Android para um pet shop organizar donos, pets e a agenda de banho e tosa. F
 
 Versões do `package.json`:
 
-- Expo SDK 54 (`expo` 54.0.33), React Native 0.81.5 e React 19.1.0, com a nova arquitetura ligada (`newArchEnabled`).
-- TypeScript 5.9.2 em modo `strict`.
-- `expo-sqlite` 16 para o banco, `react-native-calendars` para o calendário.
+- Expo SDK 58 (`expo` 58.0.23), React Native 0.88.1 e React 19.3.0, com a nova arquitetura ligada (`newArchEnabled`).
+- TypeScript 6.0.3 em modo `strict`, com `noUnusedLocals` e `noUnusedParameters`.
+- `expo-sqlite` 58 para o banco, `react-native-calendars` para o calendário e Zod 4 para a validação de entrada.
 - `expo-file-system`, `expo-sharing` e `expo-document-picker` para o backup.
 - Build Android pelo EAS: perfil `preview` gera APK e `production` gera AAB.
 
-Não há lint, formatador, testes nem CI. O único script de checagem possível hoje é o `tsc --noEmit`, e ele falha num arquivo sem uso (ver BUG-1 no plano).
+Checagens: `npm run check` roda o typecheck, o ESLint (`eslint.config.js`: regras do Expo, hooks, sem `any` e a ordem das camadas), o Prettier, os testes (`node:test` com `node:sqlite` em memória) e o pacote Android; o mesmo roda no CI a cada PR. `npm run format` formata o código.
 
 ## Pastas
 
@@ -43,7 +43,7 @@ src/                      o código do app (era app/ até o ARQ-1, PR #42)
     sql/                  os comandos de escrita, o SQL de todos os relatórios (reportsSql.ts, com `?`, PR #46), o das preferências (settingsSql.ts), o da agenda do pacote e a busca paginada por nome (searchSql.ts) e a de raças (breedsSql.ts, PR #34), que os testes também usam, sem o Expo (desde 2026-11-08)
     fetchPage.ts          roda a página e a contagem de uma busca (desde 2026-11-09)
   service/                repassa as chamadas ao repository, menos as regras da raça (breedRules.ts, sem o Expo, PR #38); BackupService exporta e importa o banco; ReportsService monta as barras dos relatórios, e ServiceTypeService e PaymentMethodService leem as listas do agendamento (PR #46); PackageScheduleService grava o pet ou o agendamento e a agenda do pacote numa transação só, sem o Expo (PR #47)
-  controller/             validação e regras de entrada; ScreenController guarda a tela atual e a guarda do voltar
+  controller/             validação e regras de entrada
   validation/             um schema Zod por entidade, os campos comuns (fields.ts) e o parseInput, que vira AppError, sem o Expo (desde 2026-11-09, PR #32)
   errors/
     AppError.ts           o AppError (código e mensagem), o texto da tela e o log, sem o Expo (desde 2026-11-09)
@@ -92,11 +92,12 @@ flowchart LR
 
 ## Navegação
 
-Não usa biblioteca de navegação. O `ScreenController` é um singleton que guarda a tela atual e os parâmetros e avisa os ouvintes. O hook `useScreen` assina essas mudanças, e o `App.tsx` escolhe a tela num `switch`.
+React Navigation com uma pilha nativa (`native-stack`), desde o ARQ-3 (2026-11-12). O `App.tsx` registra as telas, sem cabeçalho da biblioteca, e o `useScreen` dá a tela, os parâmetros, o `navigate` e o `goBack`.
 
-- Não há histórico: o destino do voltar de cada tela vem de um mapa só, o `backRouteOf` de `config/navigation.ts` (desde 2026-11-09, BUG-8).
-- O botão voltar da tela e o do Android chamam o mesmo `requestBack()` do `ScreenController`. O `BackHandler` tem um listener só, na raiz (`useAndroidBackButton`, no `App.tsx`). Um formulário em edição registra uma guarda (`useBackGuard`), que abre a confirmação no lugar de voltar. No Calendário, o voltar fecha o app.
-- A barra de navegação inferior (`AppBar`) aparece só nas quatro telas principais.
+- A regra da pilha é pura e testada (`planNavigation`, em `config/navigation.ts`): uma aba recomeça a pilha com o Calendário embaixo, para o voltar de qualquer aba levar a ele; o Calendário fica sozinho; formulários e o relatório aberto entram no topo, e o voltar os tira, mantendo a tela de baixo como estava.
+- O Calendário recarrega a agenda ao voltar a ficar em foco (`useFocusEffect`), porque outra tela pode tê-la mudado.
+- O voltar do Android é o da biblioteca. Um formulário mudado e a agenda em tela cheia põem uma guarda (`useBackGuard`) enquanto estão em foco, que abre a confirmação ou recolhe a agenda. No Calendário, o voltar fecha o app. Sem gesto de voltar, para a confirmação valer sempre.
+- A barra de abas (`AppBar`) fica fora da pilha, aparece só nas quatro abas e navega pelo `navigationRef`.
 
 ## Estado global
 

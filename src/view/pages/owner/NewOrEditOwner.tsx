@@ -1,10 +1,4 @@
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import { useScreen } from "../../../hooks/useScreen";
 import useFormState from "../../../hooks/useFormState";
@@ -53,48 +47,34 @@ export default function NewOrEditOwner() {
     address: params?.owner?.address ?? "",
   });
 
-  const { run: saveOwner, isRunning: isSavingRecord } = useAsyncAction(
-    async () => {
-      const ownerToSave: Owner = new OwnerBuilder()
-        .withName(form.name)
-        .withPhone(form.phone)
-        .withEmail(form.email)
-        .withAddress(form.address)
-        .build();
-      if (isEditing) {
-        await ownerController.updateOwner(params!.owner?.id!, ownerToSave);
-      } else {
-        await ownerController.createOwner(ownerToSave);
-      }
-      navigate(Screen.Registry, {
-        type: "OWNER",
-        mode: "view",
-      } as RegistryParams);
-    },
-  );
+  const { run: saveOwner, isRunning: isSavingRecord } = useAsyncAction(async () => {
+    const ownerToSave: Owner = new OwnerBuilder()
+      .withName(form.name)
+      .withPhone(form.phone)
+      .withEmail(form.email)
+      .withAddress(form.address)
+      .build();
+    if (isEditing) {
+      await ownerController.updateOwner(params!.owner?.id!, ownerToSave);
+    } else {
+      await ownerController.createOwner(ownerToSave);
+    }
+    navigate(Screen.Registry, {
+      type: "OWNER",
+      mode: "view",
+    } as RegistryParams);
+  });
 
   return (
-    <KeyboardAvoidingView
-      style={s.flex}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <KeyboardAvoidingView style={s.flex} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <DefaultHeader />
       <TitleBar
-        title={
-          isViewing
-            ? "Visualizando Dono"
-            : isEditing
-              ? "Editar Dono"
-              : "Novo Dono"
-        }
+        title={isViewing ? "Visualizando Dono" : isEditing ? "Editar Dono" : "Novo Dono"}
         subtitle={"Preencha os dados do responsável"}
         isViewing={isViewing}
         hasUnsavedChanges={isDirty}
       />
-      <ScrollView
-        contentContainerStyle={s.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={s.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={s.ctnRegistry}>
           <View style={s.requiredFieldBox}>
             <FormSectionTitle title="Dados obrigatórios" />
@@ -112,7 +92,7 @@ export default function NewOrEditOwner() {
               hasBorderBottom={true}
             />
             <InputInfo
-              image={require("../../../assets/outros/phoneGreen.png")}
+              image={require("../../../assets/misc/phoneGreen.png")}
               item={form.phone}
               setItem={(v) => updateField("phone", maskPhone(v))}
               placeholder="(46) 90000-0000"
@@ -128,7 +108,7 @@ export default function NewOrEditOwner() {
           </View>
           <View style={s.inputs}>
             <InputInfo
-              image={require("../../../assets/outros/mailGreen.png")}
+              image={require("../../../assets/misc/mailGreen.png")}
               item={form.email}
               setItem={(v) => updateField("email", v)}
               placeholder="email@exemplo.email"
@@ -140,7 +120,7 @@ export default function NewOrEditOwner() {
               hasBorderBottom={true}
             />
             <InputInfo
-              image={require("../../../assets/outros/locationGreen.png")}
+              image={require("../../../assets/misc/locationGreen.png")}
               item={form.address}
               setItem={(v) => updateField("address", v)}
               placeholder="Rua X, 456"
@@ -152,11 +132,7 @@ export default function NewOrEditOwner() {
           </View>
           {!isViewing && (
             <View style={s.ctnBtnSave}>
-              <SaveButton
-                isEditing={isEditing}
-                isSaving={isSavingRecord}
-                onPress={saveOwner}
-              />
+              <SaveButton isEditing={isEditing} isSaving={isSavingRecord} onPress={saveOwner} />
             </View>
           )}
         </View>

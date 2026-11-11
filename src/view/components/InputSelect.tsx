@@ -8,11 +8,7 @@ import {
   View,
   ImageSourcePropType,
 } from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../theme/ThemeProvider";
 import InputWrapper from "./registry/InputWrapper";
 import { A11Y_LABELS } from "../../globals/accessibilityLabels";
 import { touchTargetSlop } from "./accessibility/accessibilityProps";
@@ -92,8 +88,8 @@ export default function InputSelect<T>({
             style={s.arrow}
             source={
               isOpen
-                ? require("../../assets/setas/closeGreen.png")
-                : require("../../assets/setas/openGreen.png")
+                ? require("../../assets/arrows/closeGreen.png")
+                : require("../../assets/arrows/openGreen.png")
             }
           />
         )}

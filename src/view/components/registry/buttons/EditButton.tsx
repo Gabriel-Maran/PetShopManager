@@ -15,7 +15,7 @@ export default function EditButton({
   label,
 }: {
   navigateTo: Screen;
-  selectParam?: RegistryParams | Pet | Owner | Appointment | unknown;
+  selectParam?: RegistryParams | Pet | Owner | Appointment;
   editField?: boolean;
   goEdit?: boolean;
   setModal?: () => void;

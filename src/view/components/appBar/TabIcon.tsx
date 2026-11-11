@@ -1,34 +1,30 @@
 import { Image, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { ICONS_BY_NAME, ICON_NAMES, Screen } from "../../../config/consts";
-import { useScreen } from "../../../hooks/useScreen";
+import { ICONS_BY_NAME, ICON_NAMES } from "../../../config/consts";
 import { useThemedStyles, ThemeColors } from "../../theme/ThemeProvider";
 import { FONT_SIZE, FONT_WEIGHT, SPACING } from "../../theme/tokens";
 
 export default function TabIcon({
   imgName,
   titleText,
-  screenName,
+  isActive,
+  onPress,
 }: {
   imgName: ICON_NAMES;
   titleText: string;
-  screenName: Screen;
+  isActive: boolean;
+  onPress: () => void;
 }) {
   const s = useThemedStyles(styles);
-  const { screen, navigate } = useScreen();
   const imageSource = ICONS_BY_NAME[imgName];
-  const isActive = screen === screenName;
 
   return (
     <TouchableOpacity
       style={[s.container, isActive && s.containerActive]}
-      onPress={() => navigate(screenName)}
+      onPress={onPress}
       accessibilityRole="tab"
       accessibilityState={{ selected: isActive }}
     >
-      <Image
-        style={[s.image, !isActive && s.imageInactive]}
-        source={imageSource}
-      />
+      <Image style={[s.image, !isActive && s.imageInactive]} source={imageSource} />
       <Text style={[s.title, !isActive && s.titleInactive]}>{titleText}</Text>
     </TouchableOpacity>
   );

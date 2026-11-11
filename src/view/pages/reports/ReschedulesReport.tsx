@@ -1,8 +1,4 @@
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../../theme/ThemeProvider";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import TitleBar from "../../components/registry/TitleBar";
 import BarChart from "../../components/reports/BarChart";
@@ -17,10 +13,7 @@ export default function ReschedulesReport() {
   const s = useThemedStyles(styles);
 
   const titleBar = (
-    <TitleBar
-      title="Remarcações Pets"
-      subtitle="Remarcação automática ativa e inativa"
-    />
+    <TitleBar title="Remarcações Pets" subtitle="Remarcação automática ativa e inativa" />
   );
 
   if (loading) {
@@ -39,10 +32,7 @@ export default function ReschedulesReport() {
   return (
     <View style={s.mainContainer}>
       {titleBar}
-      <ScrollView
-        contentContainerStyle={s.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={s.card}>
           <BarChart
             data={data}

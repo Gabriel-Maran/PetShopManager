@@ -1,9 +1,5 @@
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../../theme/ThemeProvider";
 import BarChart from "../../components/reports/BarChart";
 
 import TitleBar from "../../components/registry/TitleBar";
@@ -23,10 +19,7 @@ export default function AppointmentOriginReport() {
   const s = useThemedStyles(styles);
 
   const titleBar = (
-    <TitleBar
-      title="Origem dos Agendamentos"
-      subtitle="Canais automáticos e manuais"
-    />
+    <TitleBar title="Origem dos Agendamentos" subtitle="Canais automáticos e manuais" />
   );
 
   if (loading) {
@@ -47,10 +40,7 @@ export default function AppointmentOriginReport() {
   return (
     <View style={s.mainContainer}>
       {titleBar}
-      <ScrollView
-        contentContainerStyle={s.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={s.card}>
           <BarChart
             data={completedByOrigin}

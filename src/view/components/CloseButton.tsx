@@ -12,12 +12,7 @@ export default function CloseButton({ onPress }: { onPress: () => void }) {
   const s = useThemedStyles(styles);
 
   return (
-    <IconButton
-      label={A11Y_LABELS.close}
-      width={SIZE}
-      style={s.button}
-      onPress={onPress}
-    >
+    <IconButton label={A11Y_LABELS.close} width={SIZE} style={s.button} onPress={onPress}>
       <Text style={s.icon}>✕</Text>
     </IconButton>
   );

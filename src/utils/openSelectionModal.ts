@@ -1,12 +1,23 @@
 import { Dispatch, SetStateAction } from "react";
 import { ImageSourcePropType } from "react-native";
 
+/** Um item do modal de seleção: o dono, a raça ou o pet, com o que a lista mostra. */
+export interface SelectableItem {
+  id?: number;
+  name: string;
+  owner_name?: string;
+  species_name?: string;
+  reschedule_active?: number;
+}
+
+export type ItemIcon = ImageSourcePropType | ((item: SelectableItem) => ImageSourcePropType);
+
 export type ModalConfig = {
   visible: boolean;
   title: string;
-  itemIcon?: ImageSourcePropType | ((item: any) => ImageSourcePropType);
-  items: any[];
-  onSelect: (item: any) => void;
+  itemIcon?: ItemIcon;
+  items: SelectableItem[];
+  onSelect: (item: SelectableItem) => void;
 };
 
 export function openSelectionModal({
@@ -17,9 +28,9 @@ export function openSelectionModal({
   setModalConfig,
 }: {
   title: string;
-  itemIcon?: ImageSourcePropType | ((item: any) => ImageSourcePropType);
-  items: any[];
-  onSelect: (item: any) => void;
+  itemIcon?: ItemIcon;
+  items: SelectableItem[];
+  onSelect: (item: SelectableItem) => void;
   setModalConfig: Dispatch<SetStateAction<ModalConfig>>;
 }) {
   setModalConfig({

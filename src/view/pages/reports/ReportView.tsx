@@ -1,4 +1,5 @@
-import { ReportType } from "../../../config/consts";
+import { ReportParams, ReportType } from "../../../config/consts";
+import { useScreen } from "../../../hooks/useScreen";
 import MonthlyComparisonReport from "./MonthlyComparisonReport";
 import BusiestDaysReport from "./BusiestDaysReport";
 import AppointmentOriginReport from "./AppointmentOriginReport";
@@ -6,8 +7,9 @@ import AbsentPetsReport from "./AbsentPetsReport";
 import ReschedulesReport from "./ReschedulesReport";
 import ActivePackagesReport from "./ActivePackagesReport";
 
-export default function ReportView({ route }: { route: ReportType }) {
-  switch (route) {
+export default function ReportView() {
+  const { params } = useScreen<ReportParams>();
+  switch (params?.type ?? ReportType.MonthlyComparison) {
     case ReportType.BusiestDaysAndHours:
       return <BusiestDaysReport />;
     case ReportType.AppointmentOrigin:

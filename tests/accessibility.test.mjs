@@ -161,14 +161,27 @@ describe("withAlpha", () => {
   });
 
   test("falha com cor em formato que não sabe ler, em vez de devolver outra cor", () => {
-    for (const color of ["", "red", "#12345", "#1234567", "#12345678", "#GGGGGG", "rgb(256, 0, 0)", "rgba(0, 0, 0, 0.5)"]) {
+    for (const color of [
+      "",
+      "red",
+      "#12345",
+      "#1234567",
+      "#12345678",
+      "#GGGGGG",
+      "rgb(256, 0, 0)",
+      "rgba(0, 0, 0, 0.5)",
+    ]) {
       assert.throws(() => withAlpha(color, 0.5), /formato não suportado/, color);
     }
   });
 
   test("falha com opacidade fora de 0 a 1 ou que não é número finito", () => {
     for (const opacity of [-0.1, 1.1, 34, Number.NaN, Number.POSITIVE_INFINITY]) {
-      assert.throws(() => withAlpha("#000000", opacity), /opacidade fora de 0 a 1/, String(opacity));
+      assert.throws(
+        () => withAlpha("#000000", opacity),
+        /opacidade fora de 0 a 1/,
+        String(opacity),
+      );
     }
   });
 });
@@ -210,10 +223,7 @@ for (const [themeName, colors] of Object.entries(THEME_COLORS)) {
 
 describe("temas", () => {
   test("os dois temas têm as mesmas cores, para nenhuma tela ficar sem cor ao trocar", () => {
-    assert.deepEqual(
-      Object.keys(THEME_COLORS.dark).sort(),
-      Object.keys(THEME_COLORS.light).sort(),
-    );
+    assert.deepEqual(Object.keys(THEME_COLORS.dark).sort(), Object.keys(THEME_COLORS.light).sort());
   });
 });
 
@@ -264,7 +274,10 @@ describe("leitor de tela", () => {
 
   test("o interruptor junta o título e a pergunta, e fica só com o título sem pergunta", () => {
     assert.equal(A11Y_LABELS.toggle("Pagamento", "Cliente pagou?"), "Pagamento: Cliente pagou?");
-    assert.equal(A11Y_LABELS.toggle("Remarcação automática ativa", ""), "Remarcação automática ativa");
+    assert.equal(
+      A11Y_LABELS.toggle("Remarcação automática ativa", ""),
+      "Remarcação automática ativa",
+    );
     assert.equal(A11Y_LABELS.toggle("Status"), "Status");
   });
 

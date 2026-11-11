@@ -10,6 +10,14 @@ Criado em 2026-11-05, a partir da auditoria do código no commit `e1d5f2f` do `m
 - Os números vêm do código e do histórico do Git em 2026-11-05.
 - Os links para o código apontam para o commit auditado, para a linha certa continuar valendo depois das mudanças.
 
+## O que falta, em blocos
+
+Decidido em 2026-11-11: o resto do plano vai em poucos PRs grandes, um por bloco, sem dividir item por item.
+
+1. ~~**Bloco de qualidade e arquitetura**~~ Feito em 2026-11-12, num PR: TEST-2, ARQ-3 e o lint de camadas do ARQ-1. Saíram do plano, decididos com o Gabriel: o TEST-3 (o Jest e a biblioteca de testes de componentes custam mais do que trazem, e a lógica já está no `node:test`), as pastas por assunto do ARQ-1 (a regra de lint já garante as camadas) e o `zod/mini` (troca a API de todos os schemas por poucos KB).
+2. **Bloco de entrega** (Parte 5): BUILD-1 (APK na release `v1.0.0`), MIDIA-2 (vídeo) e REPO-2 completo (APK, vídeo e "Quem fez o quê"), mais o card do portfólio. Depende do Gabriel: conta da Expo, gravação e as perguntas 3, 4 e 6 a 9.
+3. **Do Gabriel, sem código**: conferir no aparelho (roteiros dos PRs, TalkBack e tamanho do APK), REPO-4 com os parceiros e as perguntas 12, 23 e 24.
+
 ## Resumo
 
 Atualização de 2026-11-08:
@@ -229,6 +237,9 @@ Preparado em 2026-11-08, sem migração: a máscara e a conversão para centavos
 
 ### TEST-2 · Lint, formatação e CI
 
+Feito em 2026-11-12: ESLint 9 com o `eslint-config-expo`, sem `any`, com os hooks e a ordem das camadas, e o Prettier, os dois no `npm run check` e no CI.
+
+
 - **Por quê:** não há lint nem formatador, e os hooks têm dependências faltando nos `useEffect`, o que o lint de hooks pegaria. Não há CI para barrar um PR quebrado.
 - **O que muda:** ESLint com a configuração do Expo e o plugin de hooks, Prettier, e um script `check` que roda typecheck, lint, formatação e testes. Um workflow do GitHub Actions roda o `check` em cada PR. Lint e Prettier exigem instalação, que precisa do aval do Gabriel.
 - **Pronto quando:** `npm run check` passa localmente e no CI.
@@ -332,6 +343,9 @@ Feito em 2026-11-10, no PR #47: a regra pura em `src/domain/packageSchedule.ts`,
 
 ### ARQ-3 · Navegação com histórico
 
+Feito em 2026-11-12: React Navigation 7 com `native-stack` (ver `arquitetura.md`). Saíram o `ScreenController` e o mapa do voltar.
+
+
 - **Por quê:** a navegação própria não tem pilha, não tipa os parâmetros por tela e exige que cada tela saiba para onde voltar.
 - **O que muda:** React Navigation ou expo-router, com parâmetros tipados, ou uma pilha própria no `ScreenController`. A biblioteca exige instalação.
 - **Pronto quando:** voltar funciona por histórico em todas as telas, e os parâmetros de cada tela têm tipo.
@@ -375,6 +389,9 @@ Feito em 2026-11-10: os ícones e fundos foram reduzidos para 3 vezes o tamanho 
 - **Pronto quando:** o app builda e passa no `check` na versão nova do SDK.
 
 ### TEST-3 · Testes de componentes
+
+Fora do plano desde 2026-11-12 (ver "O que falta").
+
 
 - **Por quê:** o TEST-1 cobre regras e banco, mas não telas e hooks.
 - **O que muda:** `jest-expo` e Testing Library para React Native nos hooks de busca, nos formulários e na paginação. Exige instalação.

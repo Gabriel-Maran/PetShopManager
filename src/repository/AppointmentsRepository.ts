@@ -6,8 +6,8 @@ import {
   LIST_APPOINTMENTS_BETWEEN_SQL,
   LIST_APPOINTMENTS_OF_DAY_SQL,
 } from "./sql/appointmentsSql";
-import { Appointment } from "../model/Appointment";
-import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
+import { Appointment, AppointmentsWithOwnerAndPet } from "../model/Appointment";
+
 import type { IsoDate } from "../utils/dates";
 
 // Salvar um agendamento pode criar o próximo do pacote, então o UPDATE fica no
@@ -26,10 +26,7 @@ class AppointmentRepository {
   }
 
   // Retorna agendamentos de um intervalo de datas (útil para tela de calendário)
-  async getAppointmentsByDateRange(
-    from: IsoDate,
-    to: IsoDate,
-  ): Promise<Appointment[]> {
+  async getAppointmentsByDateRange(from: IsoDate, to: IsoDate): Promise<Appointment[]> {
     const db = await getDatabase();
     return db.getAllAsync<Appointment>(LIST_APPOINTMENTS_BETWEEN_SQL, [from, to]);
   }

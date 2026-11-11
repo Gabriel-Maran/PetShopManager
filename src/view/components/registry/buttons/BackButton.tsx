@@ -13,10 +13,7 @@ export default function BackButton({ onPress }: { onPress: () => void }) {
       accessibilityRole="button"
       accessibilityLabel={A11Y_LABELS.back}
     >
-      <Image
-        style={s.imgBack}
-        source={require("../../../../assets/setas/voltarBlack.png")}
-      />
+      <Image style={s.imgBack} source={require("../../../../assets/arrows/backBlack.png")} />
     </TouchableOpacity>
   );
 }

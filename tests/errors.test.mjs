@@ -38,7 +38,14 @@ describe("AppError", () => {
   });
 
   test("um Error comum, um texto ou nada não contam como AppError", () => {
-    for (const value of [new Error("x"), new TypeError("x"), "Dono não encontrado.", null, undefined, {}]) {
+    for (const value of [
+      new Error("x"),
+      new TypeError("x"),
+      "Dono não encontrado.",
+      null,
+      undefined,
+      {},
+    ]) {
       assert.equal(isAppError(value), false, String(value));
     }
   });
@@ -65,15 +72,23 @@ describe("toUserMessage", () => {
   });
 
   test("a tela pode trocar a genérica por uma do contexto", () => {
-    assert.equal(toUserMessage(new Error("disk I/O error"), MESSAGES.database.openFailed), MESSAGES.database.openFailed);
+    assert.equal(
+      toUserMessage(new Error("disk I/O error"), MESSAGES.database.openFailed),
+      MESSAGES.database.openFailed,
+    );
     const known = new AppError("DATABASE", MESSAGES.database.newerVersion);
-    assert.equal(toUserMessage(known, MESSAGES.database.openFailed), MESSAGES.database.newerVersion);
+    assert.equal(
+      toUserMessage(known, MESSAGES.database.openFailed),
+      MESSAGES.database.newerVersion,
+    );
   });
 });
 
 describe("logError", () => {
   test("uma falha de validação é prevista e não vai para o log", (t) => {
-    const calls = captureConsoleError(t, () => logError(new AppError("VALIDATION", MESSAGES.pet.nameRequired)));
+    const calls = captureConsoleError(t, () =>
+      logError(new AppError("VALIDATION", MESSAGES.pet.nameRequired)),
+    );
     assert.deepEqual(calls, []);
   });
 
@@ -84,7 +99,9 @@ describe("logError", () => {
   });
 
   test("um AppError com motivo vai para o log, para o motivo não se perder", (t) => {
-    const error = new AppError("DATABASE", MESSAGES.database.migrationFailed(4), { cause: new Error("no such table") });
+    const error = new AppError("DATABASE", MESSAGES.database.migrationFailed(4), {
+      cause: new Error("no such table"),
+    });
     const calls = captureConsoleError(t, () => logError(error));
     assert.deepEqual(calls, [["[erro]", error]]);
   });

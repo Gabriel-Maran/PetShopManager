@@ -28,10 +28,7 @@
       ],
       "package": "com.gabriel98989898.PetShopManager"
     },
-    "plugins": [
-      "expo-sqlite",
-      "expo-sharing"
-    ],
+    "plugins": ["expo-sqlite", "expo-sharing"],
     "extra": {
       "eas": {
         "projectId": "f2085da0-5287-4f67-b88e-1acfe6b01a28"

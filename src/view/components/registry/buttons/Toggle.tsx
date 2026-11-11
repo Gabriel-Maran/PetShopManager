@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   TouchableOpacity,
@@ -7,17 +7,10 @@ import {
   Text,
   ImageSourcePropType,
 } from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../../../theme/ThemeProvider";
 import InputWrapper from "../InputWrapper";
 import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
-import {
-  HIDDEN_FROM_SCREEN_READER,
-  touchTargetSlop,
-} from "../../accessibility/accessibilityProps";
+import { HIDDEN_FROM_SCREEN_READER, touchTargetSlop } from "../../accessibility/accessibilityProps";
 import { FONT_SIZE, RADIUS, SPACING } from "../../../theme/tokens";
 
 const SWITCH_WIDTH = 50;
@@ -44,7 +37,7 @@ export default function Toggle({
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
-  const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
+  const animatedValue = useState(() => new Animated.Value(value ? 1 : 0))[0];
 
   // A animação segue o `value`, e não o toque: assim ela acompanha também o valor que muda por fora,
   // como o formulário que carrega um pet com a remarcação ligada.
@@ -72,11 +65,7 @@ export default function Toggle({
   });
 
   return (
-    <InputWrapper
-      image={image}
-      titleName={title}
-      hasBorderBottom={hasBorderBottom}
-    >
+    <InputWrapper image={image} titleName={title} hasBorderBottom={hasBorderBottom}>
       <View style={s.toggleAndSubtitle}>
         {/* A pergunta já vai no nome do interruptor; escondida aqui, o leitor não a repete. */}
         {subtitle && (
@@ -98,9 +87,7 @@ export default function Toggle({
           })}
         >
           <Animated.View style={[s.switchContainer, { backgroundColor }]}>
-            <Animated.View
-              style={[s.thumb, { transform: [{ translateX: moveThumb }] }]}
-            />
+            <Animated.View style={[s.thumb, { transform: [{ translateX: moveThumb }] }]} />
           </Animated.View>
         </TouchableOpacity>
       </View>

@@ -11,7 +11,11 @@ import {
   LIST_BREED_NAMES_SQL,
   listBreedsSql,
 } from "../src/repository/sql/breedsSql.ts";
-import { assertBreedOfSpecies, assertNewBreedName, breedNameKey } from "../src/service/breedRules.ts";
+import {
+  assertBreedOfSpecies,
+  assertNewBreedName,
+  breedNameKey,
+} from "../src/service/breedRules.ts";
 import { breedSchema } from "../src/validation/breedSchema.ts";
 import { parseInput } from "../src/validation/parseInput.ts";
 import { normalizeForSearch } from "../src/utils/formatters/normalizeForSearch.ts";
@@ -33,9 +37,14 @@ function createBreed(db, input) {
   if (!db.prepare(FIND_SPECIES_SQL).get(speciesId)) {
     throw new AppError("NOT_FOUND", MESSAGES.species.notFound);
   }
-  const names = db.prepare(LIST_BREED_NAMES_SQL).all(speciesId).map((row) => row.name);
+  const names = db
+    .prepare(LIST_BREED_NAMES_SQL)
+    .all(speciesId)
+    .map((row) => row.name);
   assertNewBreedName(names, breedName);
-  const result = db.prepare(INSERT_BREED_SQL).run(speciesId, breedName, normalizeForSearch(breedName));
+  const result = db
+    .prepare(INSERT_BREED_SQL)
+    .run(speciesId, breedName, normalizeForSearch(breedName));
   return Number(result.lastInsertRowid);
 }
 
@@ -56,9 +65,18 @@ describe("raça repetida", () => {
     const db = await createDatabase();
     const id = createBreed(db, { speciesId: CAO, breedName: "  Pastor Alemão  " });
 
-    assert.deepEqual({ ...db.prepare(FIND_BREED_SQL).get(id) }, { id, species_id: CAO, name: "Pastor Alemão" });
+    assert.deepEqual(
+      { ...db.prepare(FIND_BREED_SQL).get(id) },
+      { id, species_id: CAO, name: "Pastor Alemão" },
+    );
     const { sql, params } = listBreedsSql(CAO, "pastor alemao", 0, 20);
-    assert.deepEqual(db.prepare(sql).all(...params).map((row) => row.id), [id]);
+    assert.deepEqual(
+      db
+        .prepare(sql)
+        .all(...params)
+        .map((row) => row.id),
+      [id],
+    );
   });
 
   test("recusa o mesmo nome na mesma espécie com outro acento, maiúscula ou espaçamento", async () => {
@@ -66,7 +84,13 @@ describe("raça repetida", () => {
     createBreed(db, { speciesId: CAO, breedName: "Pastor Alemão" });
     const before = breedCount(db);
 
-    for (const breedName of ["Pastor Alemao", "pastor alemão", "PASTOR ALEMÃO", "Pastor  Alemão", " Pástor Alemão "]) {
+    for (const breedName of [
+      "Pastor Alemao",
+      "pastor alemão",
+      "PASTOR ALEMÃO",
+      "Pastor  Alemão",
+      " Pástor Alemão ",
+    ]) {
       assert.throws(
         () => createBreed(db, { speciesId: CAO, breedName }),
         appError("CONFLICT", MESSAGES.breed.duplicate),
@@ -78,7 +102,11 @@ describe("raça repetida", () => {
 
   test("recusa a repetida da carga inicial, que tem a coluna normalizada sem a pontuação", async () => {
     const db = await createDatabase();
-    for (const [speciesId, breedName] of [[CAO, "vira-lata (srd)"], [GATO, "Siames"], [CAO, "Spitz Alemao (Lulu)"]]) {
+    for (const [speciesId, breedName] of [
+      [CAO, "vira-lata (srd)"],
+      [GATO, "Siames"],
+      [CAO, "Spitz Alemao (Lulu)"],
+    ]) {
       assert.throws(
         () => createBreed(db, { speciesId, breedName }),
         appError("CONFLICT", MESSAGES.breed.duplicate),
@@ -92,8 +120,13 @@ describe("raça repetida", () => {
     createBreed(db, { speciesId: CAO, breedName: "Pastor Alemão" });
 
     assert.doesNotThrow(() => createBreed(db, { speciesId: GATO, breedName: "Pastor Alemão" }));
-    assert.doesNotThrow(() => createBreed(db, { speciesId: CAO, breedName: "Pastor Alemão Branco" }));
-    assert.doesNotThrow(() => createBreed(db, { speciesId: CAO, breedName: "Poo" }), "parte de Poodle não é repetida");
+    assert.doesNotThrow(() =>
+      createBreed(db, { speciesId: CAO, breedName: "Pastor Alemão Branco" }),
+    );
+    assert.doesNotThrow(
+      () => createBreed(db, { speciesId: CAO, breedName: "Poo" }),
+      "parte de Poodle não é repetida",
+    );
   });
 
   test("curingas do LIKE e SQL no nome são só texto e não acham uma raça repetida", async () => {
@@ -116,9 +149,18 @@ describe("raça repetida", () => {
       () => createBreed(db, { speciesId: 999, breedName: "Pastor Alemão" }),
       appError("NOT_FOUND", MESSAGES.species.notFound),
     );
-    assert.throws(() => createBreed(db, { speciesId: 0, breedName: "Pastor" }), appError("VALIDATION", MESSAGES.breed.speciesRequired));
-    assert.throws(() => createBreed(db, { speciesId: CAO, breedName: " a " }), appError("VALIDATION", MESSAGES.breed.nameTooShort));
-    assert.throws(() => createBreed(db, { speciesId: "1 OR 1=1", breedName: "Pastor" }), appError("VALIDATION", MESSAGES.invalidInput));
+    assert.throws(
+      () => createBreed(db, { speciesId: 0, breedName: "Pastor" }),
+      appError("VALIDATION", MESSAGES.breed.speciesRequired),
+    );
+    assert.throws(
+      () => createBreed(db, { speciesId: CAO, breedName: " a " }),
+      appError("VALIDATION", MESSAGES.breed.nameTooShort),
+    );
+    assert.throws(
+      () => createBreed(db, { speciesId: "1 OR 1=1", breedName: "Pastor" }),
+      appError("VALIDATION", MESSAGES.invalidInput),
+    );
     assert.equal(breedCount(db), before);
   });
 });
@@ -150,7 +192,11 @@ describe("raça da espécie do pet", () => {
   test("a raça que não existe responde como não encontrada", async () => {
     const db = await createDatabase();
     for (const breed_id of [999, 2 ** 31]) {
-      assert.throws(() => checkBreedOfPet(db, { species_id: CAO, breed_id }), appError("NOT_FOUND", MESSAGES.breed.notFound), String(breed_id));
+      assert.throws(
+        () => checkBreedOfPet(db, { species_id: CAO, breed_id }),
+        appError("NOT_FOUND", MESSAGES.breed.notFound),
+        String(breed_id),
+      );
     }
   });
 
@@ -159,6 +205,9 @@ describe("raça da espécie do pet", () => {
     const id = createBreed(db, { speciesId: GATO, breedName: "Azul Russo" });
 
     assert.doesNotThrow(() => checkBreedOfPet(db, { species_id: GATO, breed_id: id }));
-    assert.throws(() => checkBreedOfPet(db, { species_id: CAO, breed_id: id }), appError("VALIDATION", MESSAGES.pet.breedOfOtherSpecies));
+    assert.throws(
+      () => checkBreedOfPet(db, { species_id: CAO, breed_id: id }),
+      appError("VALIDATION", MESSAGES.pet.breedOfOtherSpecies),
+    );
   });
 });

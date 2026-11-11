@@ -1,10 +1,4 @@
-import {
-  Image,
-  ImageSourcePropType,
-  StyleProp,
-  StyleSheet,
-  ViewStyle,
-} from "react-native";
+import { Image, ImageSourcePropType, StyleProp, StyleSheet, ViewStyle } from "react-native";
 import { ThemeColors, useTheme } from "../../../theme/ThemeProvider";
 import IconButton from "../../accessibility/IconButton";
 import { RADIUS, SPACING } from "../../../theme/tokens";
@@ -67,16 +61,9 @@ export default function ActionIconButton({
       label={label}
       width={BUTTON_SIZE}
       onPress={onPress}
-      style={[
-        styles.button,
-        { backgroundColor: tone.background, borderColor: tone.border },
-        style,
-      ]}
+      style={[styles.button, { backgroundColor: tone.background, borderColor: tone.border }, style]}
     >
-      <Image
-        style={[styles.icon, tone.icon ? { tintColor: tone.icon } : null]}
-        source={icon}
-      />
+      <Image style={[styles.icon, tone.icon ? { tintColor: tone.icon } : null]} source={icon} />
     </IconButton>
   );
 }

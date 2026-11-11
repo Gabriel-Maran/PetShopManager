@@ -1,129 +1,45 @@
-// Botão voltar (BUG-8): para onde o voltar leva a partir de cada tela, e o caminho único que o botão
-// da tela e o do Android seguem, com a guarda que pede confirmação nos formulários mudados e recolhe
-// a agenda em tela cheia. Também as abas da barra de baixo.
-import { beforeEach, describe, test } from "node:test";
+// Navegação (ARQ-3): como cada tela entra na pilha do React Navigation, as abas da barra de baixo e
+// se o formulário mudou, para o voltar pedir confirmação.
+import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  backRouteOf,
   HOME_SCREEN,
   isTabScreen,
+  planNavigation,
   Screen,
   TAB_SCREENS,
 } from "../src/config/navigation.ts";
-import { ScreenController } from "../src/controller/ScreenController.ts";
 import { isFormDirty, isSameFieldValue } from "../src/utils/formDirty.ts";
 
 const ALL_SCREENS = Object.values(Screen);
 
-describe("mapa do voltar", () => {
-  test("só o Calendário, a tela inicial, fecha o app", () => {
-    assert.equal(HOME_SCREEN, Screen.Calendar);
-    assert.equal(backRouteOf(Screen.Calendar), null);
-    for (const screen of ALL_SCREENS.filter((s) => s !== HOME_SCREEN)) {
-      assert.ok(backRouteOf(screen), screen);
-    }
-  });
-
-  test("as abas principais voltam para o Calendário", () => {
-    for (const { screen } of TAB_SCREENS.filter((tab) => tab.screen !== HOME_SCREEN)) {
-      assert.deepEqual(backRouteOf(screen), { screen: Screen.Calendar }, screen);
-    }
-  });
-
-  test("os formulários de dono e pet voltam para a aba deles em Cadastros", () => {
-    assert.deepEqual(backRouteOf(Screen.NewOrEditOwner), {
-      screen: Screen.Registry,
-      params: { type: "OWNER", mode: "view" },
-    });
-    assert.deepEqual(backRouteOf(Screen.NewOrEditPet), {
-      screen: Screen.Registry,
-      params: { type: "PET", mode: "view" },
+describe("pilha de telas", () => {
+  test("o Calendário fica sozinho na pilha, e o voltar nele fecha o app", () => {
+    assert.deepEqual(planNavigation(Screen.Calendar), {
+      kind: "reset",
+      keepHome: true,
+      target: null,
     });
   });
 
-  test("o agendamento volta para o Calendário, e o relatório, para a lista de relatórios", () => {
-    assert.deepEqual(backRouteOf(Screen.NewOrEditAppointment), { screen: Screen.Calendar });
-    assert.deepEqual(backRouteOf(Screen.ReportView), { screen: Screen.Reports });
-  });
-
-  test("de qualquer tela, voltando sem parar, chega ao Calendário sem andar em círculo", () => {
-    for (const start of ALL_SCREENS) {
-      const visited = new Set();
-      let screen = start;
-      while (screen !== HOME_SCREEN) {
-        assert.ok(!visited.has(screen), `o voltar anda em círculo a partir de ${start}`);
-        visited.add(screen);
-        screen = backRouteOf(screen).screen;
-      }
+  test("as outras abas ficam em cima do Calendário, para o voltar levar a ele", () => {
+    for (const screen of [Screen.Registry, Screen.Reports, Screen.Settings]) {
+      assert.deepEqual(
+        planNavigation(screen),
+        { kind: "reset", keepHome: true, target: screen },
+        screen,
+      );
     }
   });
-});
 
-describe("voltar pelo ScreenController", () => {
-  let controller;
-  let visits;
-
-  beforeEach(() => {
-    controller = new ScreenController();
-    visits = [];
-    controller.subscribe((screen, params) => visits.push({ screen, params }));
+  test("formulários e o relatório aberto entram no topo, e o voltar os tira", () => {
+    for (const screen of ALL_SCREENS.filter((screen) => !isTabScreen(screen))) {
+      assert.deepEqual(planNavigation(screen), { kind: "push", target: screen }, screen);
+    }
   });
 
-  test("o app abre no Calendário", () => {
-    assert.equal(controller.getCurrentScreen(), HOME_SCREEN);
-  });
-
-  test("volta para a tela do mapa, com os parâmetros dela no lugar dos da tela que saiu", () => {
-    controller.setCurrentScreen(Screen.NewOrEditPet, { type: "PET", mode: "edit", pet: { id: 7 } });
-
-    assert.equal(controller.requestBack(), true);
-    assert.equal(controller.getCurrentScreen(), Screen.Registry);
-    assert.deepEqual(controller.getCurrentParams(), { type: "PET", mode: "view" });
-  });
-
-  test("no Calendário devolve false, para o Android fechar o app, e não navega", () => {
-    assert.equal(controller.requestBack(), false);
-    assert.equal(controller.goBack(), false);
-    assert.deepEqual(visits, []);
-  });
-
-  test("com a guarda, o voltar pede a confirmação e fica na tela", () => {
-    controller.setCurrentScreen(Screen.NewOrEditAppointment);
-    let confirmations = 0;
-    controller.setBackGuard(() => confirmations++);
-
-    assert.equal(controller.requestBack(), true);
-    assert.equal(confirmations, 1);
-    assert.equal(controller.getCurrentScreen(), Screen.NewOrEditAppointment);
-  });
-
-  test("depois da confirmação, o goBack sai mesmo com a guarda posta", () => {
-    controller.setCurrentScreen(Screen.NewOrEditOwner);
-    controller.setBackGuard(() => assert.fail("o goBack não passa pela guarda"));
-
-    assert.equal(controller.goBack(), true);
-    assert.equal(controller.getCurrentScreen(), Screen.Registry);
-  });
-
-  test("sem a guarda, o voltar volta direto", () => {
-    controller.setCurrentScreen(Screen.ReportView);
-    const removeGuard = controller.setBackGuard(() => assert.fail("a guarda já foi tirada"));
-    removeGuard();
-
-    assert.equal(controller.requestBack(), true);
-    assert.equal(controller.getCurrentScreen(), Screen.Reports);
-  });
-
-  test("tirar uma guarda antiga não apaga a guarda nova", () => {
-    controller.setCurrentScreen(Screen.NewOrEditPet);
-    const removeOld = controller.setBackGuard(() => assert.fail("a guarda antiga foi trocada"));
-    let confirmations = 0;
-    controller.setBackGuard(() => confirmations++);
-    removeOld();
-
-    controller.requestBack();
-    assert.equal(confirmations, 1);
-    assert.equal(controller.getCurrentScreen(), Screen.NewOrEditPet);
+  test("toda tela tem um plano", () => {
+    for (const screen of ALL_SCREENS) assert.ok(planNavigation(screen), screen);
   });
 });
 
@@ -234,45 +150,5 @@ describe("valor de campo igual (isSameFieldValue)", () => {
     assert.equal(isSameFieldValue("1", 1), false);
     assert.equal(isSameFieldValue(1, 1), true);
     assert.equal(isSameFieldValue(Number.NaN, Number.NaN), true);
-  });
-});
-
-describe("ordem do voltar", () => {
-  let controller;
-
-  beforeEach(() => {
-    controller = new ScreenController();
-  });
-
-  test("na Home com a agenda em tela cheia, o voltar recolhe a agenda e não fecha o app", () => {
-    let collapsed = 0;
-    const removeGuard = controller.setBackGuard(() => {
-      collapsed++;
-      removeGuard();
-    });
-
-    assert.equal(controller.requestBack(), true);
-    assert.equal(collapsed, 1);
-    assert.equal(controller.getCurrentScreen(), HOME_SCREEN);
-
-    // Com a agenda recolhida a guarda sai, e o voltar seguinte fecha o app.
-    assert.equal(controller.requestBack(), false);
-    assert.equal(collapsed, 1);
-  });
-
-  test("formulário sem mudança não põe guarda: o voltar sai direto", () => {
-    controller.setCurrentScreen(Screen.NewOrEditOwner, { type: "OWNER", mode: "edit" });
-
-    assert.equal(controller.requestBack(), true);
-    assert.equal(controller.getCurrentScreen(), Screen.Registry);
-  });
-
-  test("formulário mudado e depois desfeito tira a guarda e volta direto", () => {
-    controller.setCurrentScreen(Screen.NewOrEditAppointment);
-    const removeGuard = controller.setBackGuard(() => assert.fail("o formulário já foi desfeito"));
-    removeGuard();
-
-    assert.equal(controller.requestBack(), true);
-    assert.equal(controller.getCurrentScreen(), Screen.Calendar);
   });
 });

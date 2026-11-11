@@ -3,13 +3,7 @@ import { ThemeColors, useThemedStyles } from "../../../theme/ThemeProvider";
 import { isoToBr } from "../../../../utils/dates";
 import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
 import { HIDDEN_FROM_SCREEN_READER } from "../../accessibility/accessibilityProps";
-import {
-  FONT_SIZE,
-  FONT_WEIGHT,
-  LINE_HEIGHTS,
-  RADIUS,
-  SPACING,
-} from "../../../theme/tokens";
+import { FONT_SIZE, FONT_WEIGHT, LINE_HEIGHTS, RADIUS, SPACING } from "../../../theme/tokens";
 
 export interface DatePickerInputProps {
   withIcon?: boolean;

@@ -1,10 +1,6 @@
 import { Animated, StyleSheet, TouchableOpacity, View } from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../theme/ThemeProvider";
-import { useRef } from "react";
+import { ThemeColors, useTheme, useThemedStyles } from "../theme/ThemeProvider";
+import { useState } from "react";
 import { settingsController } from "../../controller/SettingsController";
 import { ThemePreference } from "../../model/Settings";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
@@ -27,10 +23,10 @@ export default function ThemeToggle() {
     settingsController.saveTheme(theme),
   );
 
-  const thumbAnim = useRef(new Animated.Value(isDark ? 1 : 0)).current;
-  const thumbFadeAnim = useRef(new Animated.Value(1)).current;
+  const thumbAnim = useState(() => new Animated.Value(isDark ? 1 : 0))[0];
+  const thumbFadeAnim = useState(() => new Animated.Value(1))[0];
   // 0 = afternoon (claro), 1 = night (escuro)
-  const bgFadeAnim = useRef(new Animated.Value(isDark ? 1 : 0)).current;
+  const bgFadeAnim = useState(() => new Animated.Value(isDark ? 1 : 0))[0];
 
   const toggleSwitch = () => {
     const nextIsDark = !isDark;
@@ -101,18 +97,12 @@ export default function ThemeToggle() {
         {/* Background: night (escuro) */}
         <Animated.Image
           source={require("../../assets/color_modes/night.png")}
-          style={[
-            StyleSheet.absoluteFill,
-            { opacity: bgFadeAnim },
-            { width: 180, height: 100 },
-          ]}
+          style={[StyleSheet.absoluteFill, { opacity: bgFadeAnim }, { width: 180, height: 100 }]}
           resizeMode="cover"
         />
 
         {/* Thumb deslizante */}
-        <Animated.View
-          style={[s.thumbWrapper, { transform: [{ translateX: moveThumb }] }]}
-        >
+        <Animated.View style={[s.thumbWrapper, { transform: [{ translateX: moveThumb }] }]}>
           <Animated.View style={[s.thumb, { opacity: thumbFadeAnim }]} />
         </Animated.View>
       </View>

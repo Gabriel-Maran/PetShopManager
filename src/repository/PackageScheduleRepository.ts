@@ -142,7 +142,11 @@ export class PackageScheduleRepository {
   }
 
   async concludedDatesFrom(petId: number, from: IsoDate): Promise<Set<IsoDate>> {
-    const rows = await this.db.getAllAsync<{ date: IsoDate }>(LIST_CONCLUDED_DATES_FROM_SQL, petId, from);
+    const rows = await this.db.getAllAsync<{ date: IsoDate }>(
+      LIST_CONCLUDED_DATES_FROM_SQL,
+      petId,
+      from,
+    );
     return new Set(rows.map(({ date }) => date));
   }
 

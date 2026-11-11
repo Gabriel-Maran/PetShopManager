@@ -29,19 +29,12 @@ class BreedRepository {
   /** Os nomes de todas as raças da espécie, para conferir a raça repetida. */
   async listBreedNames(speciesId: number): Promise<string[]> {
     const db = await getDatabase();
-    const rows = await db.getAllAsync<Pick<BreedRecord, "name">>(
-      LIST_BREED_NAMES_SQL,
-      [speciesId],
-    );
+    const rows = await db.getAllAsync<Pick<BreedRecord, "name">>(LIST_BREED_NAMES_SQL, [speciesId]);
     return rows.map((row) => row.name);
   }
 
   /** Uma página (a partir de 0) das raças da espécie com `query` no nome. Vazio traz todas. */
-  async searchBreeds(
-    speciesId: number,
-    page: number,
-    query: string,
-  ): Promise<Breed[]> {
+  async searchBreeds(speciesId: number, page: number, query: string): Promise<Breed[]> {
     const db = await getDatabase();
     const { sql, params } = listBreedsSql(speciesId, query, page, LIMIT_ITEM_PAGE);
     return db.getAllAsync<Breed>(sql, params);

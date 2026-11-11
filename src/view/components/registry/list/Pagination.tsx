@@ -2,13 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { ThemeColors, useThemedStyles } from "../../../theme/ThemeProvider";
 import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
 import IconButton from "../../accessibility/IconButton";
-import {
-  FONT_SIZE,
-  FONT_WEIGHT,
-  LINE_HEIGHTS,
-  RADIUS,
-  SPACING,
-} from "../../../theme/tokens";
+import { FONT_SIZE, FONT_WEIGHT, LINE_HEIGHTS, RADIUS, SPACING } from "../../../theme/tokens";
 
 const BUTTON_SIZE = 36;
 
@@ -19,12 +13,7 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
-export default function Pagination({
-  currentPage,
-  totalItems,
-  itemsPerPage,
-  onPageChange,
-}: Props) {
+export default function Pagination({ currentPage, totalItems, itemsPerPage, onPageChange }: Props) {
   const s = useThemedStyles(styles);
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   if (totalPages <= 1) return null;
@@ -67,9 +56,7 @@ export default function Pagination({
           style={[s.btn, page === currentPage && s.btnActive]}
           onPress={() => onPageChange(page)}
         >
-          <Text style={[s.txt, page === currentPage && s.txtActive]}>
-            {page + 1}
-          </Text>
+          <Text style={[s.txt, page === currentPage && s.txtActive]}>{page + 1}</Text>
         </IconButton>
       ))}
 

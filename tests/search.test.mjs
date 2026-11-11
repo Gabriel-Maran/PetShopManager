@@ -6,7 +6,11 @@ import { createDatabase, insertOwner, insertPet } from "./helpers/database.mjs";
 import { DEACTIVATE_OWNER_SQL, searchOwnersSql } from "../src/repository/sql/ownersSql.ts";
 import { DEACTIVATE_PET_SQL, searchPetsSql } from "../src/repository/sql/petsSql.ts";
 import { toSearchPattern } from "../src/repository/sql/searchSql.ts";
-import { countBreedsSql, INSERT_BREED_SQL, listBreedsSql } from "../src/repository/sql/breedsSql.ts";
+import {
+  countBreedsSql,
+  INSERT_BREED_SQL,
+  listBreedsSql,
+} from "../src/repository/sql/breedsSql.ts";
 import { normalizeForSearch } from "../src/utils/formatters/normalizeForSearch.ts";
 import { validateNameSearch } from "../src/controller/validateNameSearch.ts";
 import { MAX_SEARCH_LENGTH } from "../src/globals/limits.ts";
@@ -77,10 +81,15 @@ describe("busca de donos", () => {
   test("as páginas não repetem nem pulam ninguém, mesmo com a mesma data de cadastro", () => {
     for (let i = 1; i <= 25; i++) insertOwner(db, { name: `Dono ${String(i).padStart(2, "0")}` });
 
-    const pages = [0, 1, 2].map((page) => runPage(db, searchOwnersSql(nameSearch({ page, limit: 10 }))));
+    const pages = [0, 1, 2].map((page) =>
+      runPage(db, searchOwnersSql(nameSearch({ page, limit: 10 }))),
+    );
     const ids = pages.flatMap((page) => page.items.map((item) => item.id));
 
-    assert.deepEqual(pages.map((page) => page.items.length), [10, 10, 5]);
+    assert.deepEqual(
+      pages.map((page) => page.items.length),
+      [10, 10, 5],
+    );
     assert.equal(new Set(ids).size, 25);
     assert.ok(pages.every((page) => page.total === 25));
   });
@@ -167,7 +176,9 @@ describe("busca de raças", () => {
   beforeEach(async () => {
     db = await createDatabase();
     // Uma espécie só do teste, para as raças semeadas do cão e do gato não entrarem na conta.
-    speciesId = Number(db.prepare("INSERT INTO species (name) VALUES ('TESTE')").run().lastInsertRowid);
+    speciesId = Number(
+      db.prepare("INSERT INTO species (name) VALUES ('TESTE')").run().lastInsertRowid,
+    );
   });
 
   test("sem texto, traz todas as raças da espécie, de A a Z, e só dela", () => {
@@ -207,7 +218,10 @@ describe("busca de raças", () => {
     const pages = [0, 1, 2].map((page) => runBreeds("", { page, limit: 10 }));
     const ids = pages.flatMap((page) => page.items.map((item) => item.id));
 
-    assert.deepEqual(pages.map((page) => page.items.length), [10, 10, 5]);
+    assert.deepEqual(
+      pages.map((page) => page.items.length),
+      [10, 10, 5],
+    );
     assert.equal(new Set(ids).size, 25);
     assert.ok(pages.every((page) => page.total === 25));
   });
@@ -218,7 +232,10 @@ describe("busca de raças", () => {
     const page = runBreeds("'; DROP TABLE race; --");
 
     assert.deepEqual(page, { items: [], total: 0 });
-    assert.equal(db.prepare("SELECT COUNT(*) AS total FROM breeds WHERE species_id = ?").get(speciesId).total, 1);
+    assert.equal(
+      db.prepare("SELECT COUNT(*) AS total FROM breeds WHERE species_id = ?").get(speciesId).total,
+      1,
+    );
   });
 });
 
@@ -238,7 +255,9 @@ describe("validateNameSearch", () => {
   test("aceita a busca da tela, inclusive o texto no limite", () => {
     assert.doesNotThrow(() => validateNameSearch(nameSearch()));
     assert.doesNotThrow(() => validateNameSearch(nameSearch({ active: 0, page: 3 })));
-    assert.doesNotThrow(() => validateNameSearch(nameSearch({ query: "a".repeat(MAX_SEARCH_LENGTH) })));
+    assert.doesNotThrow(() =>
+      validateNameSearch(nameSearch({ query: "a".repeat(MAX_SEARCH_LENGTH) })),
+    );
   });
 
   test("recusa o filtro de status fora de 0 e 1", () => {
@@ -252,7 +271,13 @@ describe("validateNameSearch", () => {
   });
 
   test("recusa página e limite que não são inteiros válidos", () => {
-    for (const fields of [{ page: -1 }, { page: 1.5 }, { page: NaN }, { limit: 0 }, { limit: 2.5 }]) {
+    for (const fields of [
+      { page: -1 },
+      { page: 1.5 },
+      { page: NaN },
+      { limit: 0 },
+      { limit: 2.5 },
+    ]) {
       assert.throws(
         () => validateNameSearch(nameSearch(fields)),
         validationError(MESSAGES.search.invalidPage),

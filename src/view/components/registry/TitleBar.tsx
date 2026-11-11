@@ -23,16 +23,16 @@ export default function TitleBar({
 }) {
   const s = useThemedStyles(styles);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const { requestBack, goBack } = useScreen();
+  const { goBack } = useScreen();
   const openConfirm = useCallback(() => setIsConfirmOpen(true), []);
 
-  // A guarda vale para o botão da tela e para o do Android, que pedem a mesma confirmação.
+  // O botão da tela e o do Android pedem a mesma confirmação.
   useBackGuard(hasUnsavedChanges ? openConfirm : null);
 
   return (
     <>
       <View style={s.container}>
-        <BackButton onPress={requestBack} />
+        <BackButton onPress={hasUnsavedChanges ? openConfirm : goBack} />
 
         <View>
           <Text style={s.txtTitle} accessibilityRole="header">

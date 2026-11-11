@@ -116,7 +116,12 @@ export const SQL_REBUILD_BREEDS_V7 = rebuildTable(
     FOREIGN KEY (species_id) REFERENCES species(id) ON DELETE CASCADE,
     UNIQUE (species_id, name)
   `,
-  { id: "id", species_id: "especie_id", name: "nome_raca", normalized_name: "nome_raca_normalized" },
+  {
+    id: "id",
+    species_id: "especie_id",
+    name: "nome_raca",
+    normalized_name: "nome_raca_normalized",
+  },
 );
 
 export const SQL_REBUILD_OWNERS_V7 = rebuildTable(

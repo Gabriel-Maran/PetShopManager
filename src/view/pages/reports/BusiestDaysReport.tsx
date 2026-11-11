@@ -1,9 +1,5 @@
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../../theme/ThemeProvider";
 import BarChart from "../../components/reports/BarChart";
 
 import TitleBar from "../../components/registry/TitleBar";
@@ -13,20 +9,14 @@ import { RADIUS, SPACING } from "../../theme/tokens";
 
 export default function BusiestDaysReport() {
   const { data, loading } = useAsyncData(() =>
-    Promise.all([
-      reportsService.getCompletedByWeekday(),
-      reportsService.getCompletedByHour(),
-    ]),
+    Promise.all([reportsService.getCompletedByWeekday(), reportsService.getCompletedByHour()]),
   );
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
   const titleBar = (
-    <TitleBar
-      title="Frequência de Atendimento"
-      subtitle="Análise de picos de horários e dias"
-    />
+    <TitleBar title="Frequência de Atendimento" subtitle="Análise de picos de horários e dias" />
   );
 
   if (loading) {
@@ -49,17 +39,9 @@ export default function BusiestDaysReport() {
       <View style={s.mainContainer}>
         {titleBar}
 
-        <ScrollView
-          contentContainerStyle={s.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
           <View style={s.card}>
-            <BarChart
-              data={days}
-              title="Dias mais atendidos"
-              suffix="atend."
-              invertLabelY={true}
-            />
+            <BarChart data={days} title="Dias mais atendidos" suffix="atend." invertLabelY={true} />
           </View>
 
           <View style={s.card}>

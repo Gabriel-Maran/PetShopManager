@@ -1,9 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../../theme/ThemeProvider";
 import { StatusFilter } from "../../../config/consts";
 import { TINT_OPACITY, withAlpha } from "../../theme/alpha";
 import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
@@ -35,13 +31,9 @@ const OPTIONS: { val: StatusFilter; label: string; accent: AccentColor }[] = [
 const CHIP_PADDING_VERTICAL = SPACING[7];
 const CHIP_BORDER_WIDTH = 1.5;
 const CHIP_LINE_HEIGHT = LINE_HEIGHTS[18];
-const CHIP_HEIGHT =
-  CHIP_LINE_HEIGHT + 2 * (CHIP_PADDING_VERTICAL + CHIP_BORDER_WIDTH);
+const CHIP_HEIGHT = CHIP_LINE_HEIGHT + 2 * (CHIP_PADDING_VERTICAL + CHIP_BORDER_WIDTH);
 
-export default function FilterPanel({
-  value,
-  onChange,
-}: FilterPanelProps) {
+export default function FilterPanel({ value, onChange }: FilterPanelProps) {
   const s = useThemedStyles(styles);
   const { colors } = useTheme();
 

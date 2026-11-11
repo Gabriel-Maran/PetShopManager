@@ -1,6 +1,7 @@
-// As telas do app e para onde o voltar leva a partir de cada uma (BUG-8). Sem depender do React Native,
-// para os testes rodarem no Node; por isso as telas são um objeto, e não um enum.
-import type { ICON_NAMES, RegistryParams } from "./consts";
+// As telas do app e a regra de como cada navegação mexe na pilha (ARQ-3). Sem depender do React
+// Native, para os testes rodarem no Node; por isso as telas são um objeto, e não um enum. O
+// React Navigation executa o plano (hooks/useScreen.ts).
+import type { ICON_NAMES } from "./consts";
 
 export const Screen = {
   Calendar: "Calendar",
@@ -14,9 +15,6 @@ export const Screen = {
 } as const;
 
 export type Screen = (typeof Screen)[keyof typeof Screen];
-
-/** Uma tela e os parâmetros com que ela abre. */
-export type Route = Readonly<{ screen: Screen; params?: unknown }>;
 
 /** A tela em que o app abre. O voltar nela fecha o app. */
 export const HOME_SCREEN: Screen = Screen.Calendar;
@@ -41,26 +39,19 @@ export function isTabScreen(screen: Screen): boolean {
   return TAB_SCREENS.some((tab) => tab.screen === screen);
 }
 
-const backToHome: Route = { screen: HOME_SCREEN };
+/**
+ * Como a pilha muda para abrir `target`:
+ * - uma aba recomeça a pilha com o Calendário embaixo, para o voltar de qualquer aba levar a ele;
+ *   a aba abre de novo, como antes, para recarregar a lista e ler os parâmetros;
+ * - o Calendário fica sozinho na pilha, sem ser recriado;
+ * - um formulário ou relatório entra no topo, e o voltar o tira.
+ */
+export type NavigationPlan =
+  | Readonly<{ kind: "reset"; keepHome: boolean; target: Screen | null }>
+  | Readonly<{ kind: "push"; target: Screen }>;
 
-/** Os formulários de dono e pet voltam para a aba deles em Cadastros. */
-const backToRegistry = (type: RegistryParams["type"]): Route => ({
-  screen: Screen.Registry,
-  params: { type, mode: "view" } satisfies RegistryParams,
-});
-
-const BACK_ROUTES: Record<Screen, Route | null> = {
-  [Screen.Calendar]: null,
-  [Screen.Registry]: backToHome,
-  [Screen.Reports]: backToHome,
-  [Screen.Settings]: backToHome,
-  [Screen.NewOrEditOwner]: backToRegistry("OWNER"),
-  [Screen.NewOrEditPet]: backToRegistry("PET"),
-  [Screen.NewOrEditAppointment]: { screen: Screen.Calendar },
-  [Screen.ReportView]: { screen: Screen.Reports },
-};
-
-/** Para onde o voltar leva a partir da tela, ou null quando ele fecha o app. */
-export function backRouteOf(screen: Screen): Route | null {
-  return BACK_ROUTES[screen];
+export function planNavigation(target: Screen): NavigationPlan {
+  if (target === HOME_SCREEN) return { kind: "reset", keepHome: true, target: null };
+  if (isTabScreen(target)) return { kind: "reset", keepHome: true, target };
+  return { kind: "push", target };
 }

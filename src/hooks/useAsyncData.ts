@@ -30,6 +30,7 @@ export function useAsyncData<T>(load: () => Promise<T>): AsyncData<T> {
       active = false;
     };
     // Carrega uma vez, ao abrir a tela: o `load` é recriado a cada render, e o showError é estável.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return state;

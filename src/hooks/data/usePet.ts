@@ -26,11 +26,8 @@ export function useBreeds(formSpeciesId: number): {
 
   // 1. Busca todas as espécies (executa apenas uma vez no load)
   useEffect(() => {
-    speciesController
-      .searchSpecies()
-      .then(setSpeciesList)
-      .catch(showError);
-  }, []);
+    speciesController.searchSpecies().then(setSpeciesList).catch(showError);
+  }, [showError]);
 
   // 2. Busca as raças paginadas/filtradas (executa quando muda a espécie, página ou texto)
   useEffect(() => {
@@ -42,19 +39,16 @@ export function useBreeds(formSpeciesId: number): {
     } else {
       setBreedsList([]);
     }
-  }, [formSpeciesId, page, searchTxt]);
+  }, [formSpeciesId, page, searchTxt, showError]);
 
   // 3. Conta o total de raças para a paginação (executa quando muda a espécie ou texto)
   useEffect(() => {
     if (formSpeciesId) {
-      speciesController
-        .countBreeds(formSpeciesId, searchTxt)
-        .then(setTotal)
-        .catch(showError);
+      speciesController.countBreeds(formSpeciesId, searchTxt).then(setTotal).catch(showError);
     } else {
       setTotal(0);
     }
-  }, [formSpeciesId, searchTxt]);
+  }, [formSpeciesId, searchTxt, showError]);
 
   // 4. Reseta a página para 0 sempre que a espécie selecionada ou o texto de busca mudarem
   useEffect(() => {

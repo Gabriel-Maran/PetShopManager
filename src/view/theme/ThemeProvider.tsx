@@ -58,9 +58,7 @@ export const useTheme = () => {
 // O React Native 0.88 deixou de exportar StyleSheet.NamedStyles.
 type NamedStyles<T> = { [P in keyof T]: ViewStyle | TextStyle | ImageStyle };
 
-export function useThemedStyles<T extends NamedStyles<T>>(
-  factory: (colors: ThemeColors) => T,
-): T {
+export function useThemedStyles<T extends NamedStyles<T>>(factory: (colors: ThemeColors) => T): T {
   const { colors } = useTheme();
-  return useMemo(() => factory(colors), [colors]);
+  return useMemo(() => factory(colors), [factory, colors]);
 }

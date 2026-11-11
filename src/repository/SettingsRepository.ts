@@ -5,7 +5,9 @@ import { FIND_SETTING_SQL, SAVE_SETTING_SQL, SETTING_KEYS } from "./sql/settings
 class SettingsRepository {
   async findTheme(): Promise<ThemePreference | null> {
     const db = await getDatabase();
-    const row = await db.getFirstAsync<{ value: ThemePreference }>(FIND_SETTING_SQL, [SETTING_KEYS.theme]);
+    const row = await db.getFirstAsync<{ value: ThemePreference }>(FIND_SETTING_SQL, [
+      SETTING_KEYS.theme,
+    ]);
     return row?.value ?? null;
   }
 

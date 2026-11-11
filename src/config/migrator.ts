@@ -39,9 +39,7 @@ export async function migrateDatabase(
   const pending = migrations.slice(current);
   if (pending.length === 0) return current;
 
-  await withForeignKeysOff(db, () =>
-    inTransaction(db, () => applyMigrations(db, pending)),
-  );
+  await withForeignKeysOff(db, () => inTransaction(db, () => applyMigrations(db, pending)));
   return latest;
 }
 

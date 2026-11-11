@@ -4,11 +4,7 @@ import AppointmentCalendar from "../components/AppointmentCalendar";
 import AppointmentList from "../components/AppointmentList";
 import DefaultHeader from "../components/header/DefaultHeader";
 import { useBackGuard } from "../../hooks/useBackNavigation";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../theme/ThemeProvider";
 import { SPACING } from "../theme/tokens";
 
 export default function HomeScreen() {

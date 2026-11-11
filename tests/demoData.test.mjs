@@ -13,7 +13,11 @@ import {
   DEMO_DATA_SUMMARY,
 } from "../src/config/demoData.ts";
 import { normalizeForSearch } from "../src/utils/formatters/normalizeForSearch.ts";
-import { packagePlanOf, scheduleClockOf, scheduleForNewPet } from "../src/domain/packageSchedule.ts";
+import {
+  packagePlanOf,
+  scheduleClockOf,
+  scheduleForNewPet,
+} from "../src/domain/packageSchedule.ts";
 import { FIND_PET_SQL } from "../src/repository/sql/petsSql.ts";
 
 const today = new Date();
@@ -73,7 +77,10 @@ describe("dados de exemplo", () => {
            WHERE a.pet_id = p.id AND a.is_auto = 1 AND a.completed = 0
          )`,
     );
-    assert.equal(count(db, "SELECT COUNT(*) AS total FROM pets WHERE reschedule_active = 1"), DEMO_DATA_SUMMARY.packages);
+    assert.equal(
+      count(db, "SELECT COUNT(*) AS total FROM pets WHERE reschedule_active = 1"),
+      DEMO_DATA_SUMMARY.packages,
+    );
     assert.equal(withoutAgenda, 0);
   });
 
@@ -103,11 +110,17 @@ describe("dados de exemplo", () => {
     loadDemoData(db);
 
     assert.equal(
-      count(db, `SELECT COUNT(*) AS total FROM appointments WHERE completed = 0 AND date < ${todayDate}`),
+      count(
+        db,
+        `SELECT COUNT(*) AS total FROM appointments WHERE completed = 0 AND date < ${todayDate}`,
+      ),
       0,
     );
     assert.equal(
-      count(db, `SELECT COUNT(*) AS total FROM appointments WHERE completed = 1 AND date > ${todayDate}`),
+      count(
+        db,
+        `SELECT COUNT(*) AS total FROM appointments WHERE completed = 1 AND date > ${todayDate}`,
+      ),
       0,
     );
   });
@@ -141,9 +154,17 @@ describe("dados de exemplo", () => {
     );
     assert.ok(absentPets >= 3, `${absentPets} pets ausentes`);
 
-    assert.ok(count(db, "SELECT COUNT(*) AS total FROM appointments WHERE completed = 1 AND is_auto = 0") > 0);
-    assert.ok(count(db, "SELECT COUNT(*) AS total FROM appointments WHERE completed = 0 AND is_auto = 1") > 0);
-    assert.ok(count(db, "SELECT COUNT(DISTINCT time) AS total FROM appointments WHERE completed = 1") >= 5);
+    assert.ok(
+      count(db, "SELECT COUNT(*) AS total FROM appointments WHERE completed = 1 AND is_auto = 0") >
+        0,
+    );
+    assert.ok(
+      count(db, "SELECT COUNT(*) AS total FROM appointments WHERE completed = 0 AND is_auto = 1") >
+        0,
+    );
+    assert.ok(
+      count(db, "SELECT COUNT(DISTINCT time) AS total FROM appointments WHERE completed = 1") >= 5,
+    );
   });
 
   test("o dono desativado e o pet dele entram desativados", () => {

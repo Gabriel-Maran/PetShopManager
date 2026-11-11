@@ -67,7 +67,6 @@ export const UPDATE_PET_SQL = `UPDATE pets SET
         package_price = ?
        WHERE id = ?`;
 
-
 /** Parâmetros: id. O pet com as colunas do modelo, sem o `normalized_name`, que é só da busca. */
 export const FIND_PET_SQL = `SELECT PT.id, PT.name, PT.species_id, PT.size, PT.breed_id, PT.notes, PT.owner_id,
   ST.name AS default_service, PT.package_price, PT.reschedule_active, PT.package_frequency,

@@ -44,8 +44,17 @@ const BY_TRIGGERS = {
   },
   saveAppointment: async (db, a) => {
     db.prepare(UPDATE_APPOINTMENT_V3_SQL).run(
-      a.pet_id, a.service, a.date, a.time, a.deliver_pet, a.completed, a.notes,
-      a.price, a.payment_method, a.is_paid, a.id,
+      a.pet_id,
+      a.service,
+      a.date,
+      a.time,
+      a.deliver_pet,
+      a.completed,
+      a.notes,
+      a.price,
+      a.payment_method,
+      a.is_paid,
+      a.id,
     );
   },
 };
@@ -72,7 +81,10 @@ const rows = (db, table) => db.prepare(`SELECT * FROM ${table} ORDER BY id`).all
  */
 async function assertSameOutcome(scenario) {
   const outcomes = [];
-  for (const [db, steps] of [[await databaseAt(3), BY_TRIGGERS], [await createDatabase(), BY_SERVICE]]) {
+  for (const [db, steps] of [
+    [await databaseAt(3), BY_TRIGGERS],
+    [await createDatabase(), BY_SERVICE],
+  ]) {
     await scenario(db, insertOwner(db), steps);
     await migrateDatabase(asMigrationDatabase(db), MIGRATIONS);
     outcomes.push({ pets: rows(db, "pets"), appointments: rows(db, "appointments") });
@@ -91,15 +103,27 @@ async function concludeNext(db, steps, petId, count, changes = {}) {
   }
 }
 
-const PACKAGE = { reschedule_active: 1, package_frequency: 4, package_price: 10003, default_time: "09:30" };
+const PACKAGE = {
+  reschedule_active: 1,
+  package_frequency: 4,
+  package_price: 10003,
+  default_time: "09:30",
+};
 
 describe("remarcação em TypeScript igual à dos triggers da versão 3", () => {
   test("cadastro: início em cada dia de 70 dias atrás a 70 dias à frente, nos dois pacotes", async () => {
     await assertSameOutcome(async (db, owner_id, steps) => {
       for (let offset = -70; offset <= 70; offset++) {
-        for (const [package_frequency, package_price] of [[4, 10003], [2, 20001]]) {
+        for (const [package_frequency, package_price] of [
+          [4, 10003],
+          [2, 20001],
+        ]) {
           await steps.createPet(db, {
-            ...PACKAGE, owner_id, package_frequency, package_price, package_start_date: isoDate(offset),
+            ...PACKAGE,
+            owner_id,
+            package_frequency,
+            package_price,
+            package_start_date: isoDate(offset),
           });
         }
       }
@@ -109,27 +133,57 @@ describe("remarcação em TypeScript igual à dos triggers da versão 3", () => 
   test("cadastro: sem data de início, sem valor e com o horário de hoje já passado ou não", async () => {
     await assertSameOutcome(async (db, owner_id, steps) => {
       await steps.createPet(db, { ...PACKAGE, owner_id, package_start_date: null });
-      await steps.createPet(db, { ...PACKAGE, owner_id, package_start_date: isoDate(0), package_price: null });
-      await steps.createPet(db, { ...PACKAGE, owner_id, package_start_date: isoDate(0), default_time: "00:00" });
-      await steps.createPet(db, { ...PACKAGE, owner_id, package_start_date: isoDate(0), default_time: "23:59" });
+      await steps.createPet(db, {
+        ...PACKAGE,
+        owner_id,
+        package_start_date: isoDate(0),
+        package_price: null,
+      });
+      await steps.createPet(db, {
+        ...PACKAGE,
+        owner_id,
+        package_start_date: isoDate(0),
+        default_time: "00:00",
+      });
+      await steps.createPet(db, {
+        ...PACKAGE,
+        owner_id,
+        package_start_date: isoDate(0),
+        default_time: "23:59",
+      });
       await steps.createPet(db, { owner_id, name: "Sem pacote" });
     });
   });
 
   test("conclusões seguidas, com o mês cheio pulando para o seguinte", async () => {
     await assertSameOutcome(async (db, owner_id, steps) => {
-      const weekly = await steps.createPet(db, { ...PACKAGE, owner_id, package_start_date: isoDate(-20) });
-      const biweekly = await steps.createPet(db, {
-        ...PACKAGE, owner_id, package_frequency: 2, package_price: 20001, package_start_date: isoDate(5),
+      const weekly = await steps.createPet(db, {
+        ...PACKAGE,
+        owner_id,
+        package_start_date: isoDate(-20),
       });
-      await concludeNext(db, steps, weekly.id, 12, { deliver_pet: 1, notes: "Táxi dog; '); DROP TABLE pets; --" });
+      const biweekly = await steps.createPet(db, {
+        ...PACKAGE,
+        owner_id,
+        package_frequency: 2,
+        package_price: 20001,
+        package_start_date: isoDate(5),
+      });
+      await concludeNext(db, steps, weekly.id, 12, {
+        deliver_pet: 1,
+        notes: "Táxi dog; '); DROP TABLE pets; --",
+      });
       await concludeNext(db, steps, biweekly.id, 8, { service: "Banho e Tosa" });
     });
   });
 
   test("concluir mudando a data no mesmo formulário usa o dia da semana novo", async () => {
     await assertSameOutcome(async (db, owner_id, steps) => {
-      const pet = await steps.createPet(db, { ...PACKAGE, owner_id, package_start_date: isoDate(3) });
+      const pet = await steps.createPet(db, {
+        ...PACKAGE,
+        owner_id,
+        package_start_date: isoDate(3),
+      });
       for (let i = 0; i < 6; i++) {
         const [next] = pendingAutoOf(db, pet.id);
         await steps.saveAppointment(db, { ...next, completed: 1, date: isoDate(1 + i) });
@@ -139,18 +193,28 @@ describe("remarcação em TypeScript igual à dos triggers da versão 3", () => 
 
   test("salvar de novo um concluído e concluir um manual não criam nada", async () => {
     await assertSameOutcome(async (db, owner_id, steps) => {
-      const pet = await steps.createPet(db, { ...PACKAGE, owner_id, package_start_date: isoDate(-30) });
+      const pet = await steps.createPet(db, {
+        ...PACKAGE,
+        owner_id,
+        package_start_date: isoDate(-30),
+      });
       const [manual] = appointmentsOf(db, pet.id).filter((a) => a.is_auto === 0);
       await steps.saveAppointment(db, { ...manual, completed: 1 });
       await concludeNext(db, steps, pet.id, 1);
-      const [concluded] = appointmentsOf(db, pet.id).filter((a) => a.is_auto === 1 && a.completed === 1);
+      const [concluded] = appointmentsOf(db, pet.id).filter(
+        (a) => a.is_auto === 1 && a.completed === 1,
+      );
       await steps.saveAppointment(db, { ...concluded, is_paid: 1, payment_method: "PIX" });
     });
   });
 
   test("edições do pet: só a observação, cada campo da agenda, e com dias já concluídos no futuro", async () => {
     await assertSameOutcome(async (db, owner_id, steps) => {
-      let pet = await steps.createPet(db, { ...PACKAGE, owner_id, package_start_date: isoDate(-30) });
+      let pet = await steps.createPet(db, {
+        ...PACKAGE,
+        owner_id,
+        package_start_date: isoDate(-30),
+      });
       await concludeNext(db, steps, pet.id, 3);
       for (const change of [
         { notes: "Mudou só a observação" },
@@ -170,8 +234,18 @@ describe("remarcação em TypeScript igual à dos triggers da versão 3", () => 
 
   test("desligar e religar o pacote, desativar e reativar o pet e o dono", async () => {
     await assertSameOutcome(async (db, owner_id, steps) => {
-      const pet = await steps.createPet(db, { ...PACKAGE, owner_id, package_start_date: isoDate(-10) });
-      const off = { ...pet, reschedule_active: 0, package_frequency: null, package_start_date: null, package_price: null };
+      const pet = await steps.createPet(db, {
+        ...PACKAGE,
+        owner_id,
+        package_start_date: isoDate(-10),
+      });
+      const off = {
+        ...pet,
+        reschedule_active: 0,
+        package_frequency: null,
+        package_start_date: null,
+        package_price: null,
+      };
       await steps.savePet(db, off);
       await steps.savePet(db, { ...pet, package_start_date: isoDate(2) });
 

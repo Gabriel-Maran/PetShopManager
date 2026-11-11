@@ -86,7 +86,11 @@ export function packagePlanOf(pet: PetPackage, today: IsoDate): PackagePlan | nu
  * Valor de um atendimento do pacote, em centavos. A sobra da divisão fica com os primeiros do mês
  * (decisão do Gabriel em 2026-11-08): R$ 100,03 em 4 dá 25,01 nos três primeiros e 25,00 no quarto.
  */
-export function visitCents(priceCents: Cents, visitsPerMonth: number, positionInMonth: number): Cents {
+export function visitCents(
+  priceCents: Cents,
+  visitsPerMonth: number,
+  positionInMonth: number,
+): Cents {
   const remainder = priceCents % visitsPerMonth;
   return Math.trunc(priceCents / visitsPerMonth) + (positionInMonth <= remainder ? 1 : 0);
 }
@@ -133,7 +137,10 @@ export function scheduleForNewPet(
 ): NewPetVisit[] {
   return buildPackageSchedule(plan, clock.today).map((visit) => ({
     ...visit,
-    auto: !(visit.date < clock.today || (visit.date === clock.today && time != null && time < clock.time)),
+    auto: !(
+      visit.date < clock.today ||
+      (visit.date === clock.today && time != null && time < clock.time)
+    ),
   }));
 }
 

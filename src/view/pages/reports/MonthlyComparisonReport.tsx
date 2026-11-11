@@ -1,8 +1,4 @@
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../../theme/ThemeProvider";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import TitleBar from "../../components/registry/TitleBar";
 import BarChart from "../../components/reports/BarChart";
@@ -12,21 +8,13 @@ import { RADIUS, SPACING } from "../../theme/tokens";
 
 export default function MonthlyComparisonReport() {
   const { data, loading } = useAsyncData(() =>
-    Promise.all([
-      reportsService.getCompletedByMonth(),
-      reportsService.getScheduledByMonth(),
-    ]),
+    Promise.all([reportsService.getCompletedByMonth(), reportsService.getScheduledByMonth()]),
   );
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
-  const titleBar = (
-    <TitleBar
-      title="Comparativo Mensal"
-      subtitle="Últimos 12 meses"
-    />
-  );
+  const titleBar = <TitleBar title="Comparativo Mensal" subtitle="Últimos 12 meses" />;
 
   if (loading) {
     return (
@@ -46,10 +34,7 @@ export default function MonthlyComparisonReport() {
   return (
     <View style={s.mainContainer}>
       {titleBar}
-      <ScrollView
-        contentContainerStyle={s.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={s.card}>
           <BarChart
             data={completedBars}

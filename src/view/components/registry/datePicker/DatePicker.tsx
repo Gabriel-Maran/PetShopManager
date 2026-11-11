@@ -39,7 +39,7 @@ export function DatePicker({
       setTemp(value); // reseta para o valor atual ao abrir
       setOpen(true);
     }
-  }, [value]);
+  }, [isEditable, value]);
 
   const handleClose = useCallback(() => setOpen(false), []);
 

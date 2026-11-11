@@ -1,11 +1,4 @@
-import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Owner } from "../../../../model/Owner";
 import { useScreen } from "../../../../hooks/useScreen";
 import EditButton from "../buttons/EditButton";
@@ -45,10 +38,7 @@ export default function OwnerList({
             }
           >
             <View style={s.itemCard}>
-              <Image
-                style={s.img}
-                source={require("../../../../assets/crud/person.png")}
-              />
+              <Image style={s.img} source={require("../../../../assets/crud/person.png")} />
 
               <View style={s.mainContent}>
                 <Text style={s.textMain}>{item.name}</Text>
@@ -57,9 +47,7 @@ export default function OwnerList({
 
               <EditButton
                 label={A11Y_LABELS.registry.edit(item.name)}
-                selectParam={
-                  { owner: item, mode: "edit" } as RegistryParams
-                }
+                selectParam={{ owner: item, mode: "edit" } as RegistryParams}
                 navigateTo={Screen.NewOrEditOwner}
               />
               {areActive ? (

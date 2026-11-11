@@ -10,6 +10,7 @@ import {
 
 import {
   isPackageFrequency,
+  isPetSize,
   PetSize,
   Screen,
   ServiceName,
@@ -22,17 +23,10 @@ import { formatMoneyInput, parseMoneyInput } from "../../../utils/money";
 
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import { useScreen } from "../../../hooks/useScreen";
-import {
-  useOwners,
-  useBreeds,
-} from "../../../hooks/data/usePet";
+import { useOwners, useBreeds } from "../../../hooks/data/usePet";
 import useFormState from "../../../hooks/useFormState";
 
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../../theme/ThemeProvider";
 
 import { PetBuilder } from "../../../model/Pet";
 import { petController } from "../../../controller/PetController";
@@ -42,12 +36,12 @@ import DefaultHeader from "../../components/header/DefaultHeader";
 import SelectListModal from "../../components/registry/modal/SelectListModal";
 import ItemSelect from "../../components/registry/ItemSelect";
 import SaveButton from "../../components/registry/SaveButton";
-import PetInfoTab, {
-  OpenModalConfig,
-} from "../../components/registry/tabs/PetInfoTab";
+import PetInfoTab, { OpenModalConfig } from "../../components/registry/tabs/PetInfoTab";
 import PetScheduleTab from "../../components/registry/tabs/PetScheduleTab";
 import type { PetForm } from "./petForm";
 import { SPACING } from "../../theme/tokens";
+
+import type { SelectableItem } from "../../../utils/openSelectionModal";
 
 const sizesList = Object.values(PetSize).map((size) => ({
   id: size,
@@ -55,15 +49,15 @@ const sizesList = Object.values(PetSize).map((size) => ({
 }));
 
 // Os nomes do dono e da raça são buscados a partir dos ids ao abrir a edição; mudam sem o usuário mexer.
-const DERIVED_FIELDS = ["owner_name", "breed_name"] as const;
+const DERIVED_FIELDS = ["ownerName", "breedName"] as const;
 
 const INITIAL_MODAL = {
   visible: false,
   title: "",
   itemIcon: undefined as ImageSourcePropType | undefined,
-  items: [] as any[],
+  items: [] as SelectableItem[],
   modalKind: "" as "OWNER" | "BREED" | "",
-  onSelect: (_item: any) => {},
+  onSelect: (_item: SelectableItem) => {},
 };
 
 export default function NewOrEditPet() {
@@ -81,22 +75,19 @@ export default function NewOrEditPet() {
   const { form, updateField, isDirty } = useFormState<PetForm>(
     {
       name: params?.pet?.name ?? "",
-      species_id: params?.pet?.species_id ?? 0,
-      owner_id: params?.pet?.owner_id ?? 0,
-      owner_name: "",
-      breed_id: params?.pet?.breed_id ?? 0,
-      breed_name: params?.pet?.breed_name ?? "",
+      speciesId: params?.pet?.species_id ?? 0,
+      ownerId: params?.pet?.owner_id ?? 0,
+      ownerName: "",
+      breedId: params?.pet?.breed_id ?? 0,
+      breedName: params?.pet?.breed_name ?? "",
       notes: params?.pet?.notes ?? "",
       defaultService: params?.pet?.default_service ?? ServiceName.Bath,
       rescheduleActive: Boolean(params?.pet?.reschedule_active ?? false),
       packagePrice: formatMoneyInput(params?.pet?.package_price),
-      size:
-        params?.pet?.size && params.pet?.size in PetSize
-          ? (params.pet?.size as PetSize)
-          : PetSize.Medium,
+      size: isPetSize(params?.pet?.size) ? params.pet.size : PetSize.Medium,
       packageFrequency: isPackageFrequency(savedPackage) ? savedPackage : undefined,
       packageStartDate: params?.pet?.package_start_date ?? todayIso(),
-      default_time: params?.pet?.default_time ?? "",
+      defaultTime: params?.pet?.default_time ?? "",
     },
     { ignoredWhenComparing: DERIVED_FIELDS },
   );
@@ -108,7 +99,7 @@ export default function NewOrEditPet() {
     setPage: setBreedPage,
     setSearchTxt: setBreedSearchTxt,
     total: breedTotal,
-  } = useBreeds(form.species_id);
+  } = useBreeds(form.speciesId);
 
   const {
     owners,
@@ -121,53 +112,45 @@ export default function NewOrEditPet() {
   const [modalConfig, setModalConfig] = useState(INITIAL_MODAL);
 
   // Dentro da ação: um valor digitado fora do formato vira a mensagem de erro da tela.
-  const { run: savePet, isRunning: isSavingRecord } = useAsyncAction(
-    async () => {
-      // Com a remarcação desligada, o pacote vai vazio: nem a sobra de quando ela estava ligada nem
-      // um valor mal digitado, que nem aparece mais na tela, chegam ao banco.
-      const pkg = form.rescheduleActive
-        ? {
-            frequency: form.packageFrequency,
-            start: form.packageStartDate ?? todayIso(),
-            price: parseMoneyInput(form.packagePrice),
-          }
-        : { frequency: null, start: null, price: null };
+  const { run: savePet, isRunning: isSavingRecord } = useAsyncAction(async () => {
+    // Com a remarcação desligada, o pacote vai vazio: nem a sobra de quando ela estava ligada nem
+    // um valor mal digitado, que nem aparece mais na tela, chegam ao banco.
+    const pkg = form.rescheduleActive
+      ? {
+          frequency: form.packageFrequency,
+          start: form.packageStartDate ?? todayIso(),
+          price: parseMoneyInput(form.packagePrice),
+        }
+      : { frequency: null, start: null, price: null };
 
-      const petToSave = new PetBuilder()
-        .withName(form.name)
-        .withSpecies(form.species_id)
-        .withSize(form.size)
-        .forOwner(form.owner_id)
-        .withBreed(form.breed_id)
-        .withNotes(form.notes)
-        .withDefaultService(form.defaultService)
-        .withRescheduleActive(form.rescheduleActive ? 1 : 0)
-        .withPackage(pkg.frequency)
-        .withPackageStart(pkg.start)
-        .withDefaultTime(form.default_time || "00:00")
-        .withPackagePrice(pkg.price)
-        .build();
+    const petToSave = new PetBuilder()
+      .withName(form.name)
+      .withSpecies(form.speciesId)
+      .withSize(form.size)
+      .forOwner(form.ownerId)
+      .withBreed(form.breedId)
+      .withNotes(form.notes)
+      .withDefaultService(form.defaultService)
+      .withRescheduleActive(form.rescheduleActive ? 1 : 0)
+      .withPackage(pkg.frequency)
+      .withPackageStart(pkg.start)
+      .withDefaultTime(form.defaultTime || "00:00")
+      .withPackagePrice(pkg.price)
+      .build();
 
-      if (params?.pet?.id) {
-        await petController.updatePet(params.pet.id, petToSave);
-      } else {
-        await petController.createPet(petToSave);
-      }
-      navigate(Screen.Registry, {
-        type: "PET",
-        mode: "view",
-      } as RegistryParams);
-    },
-  );
+    if (params?.pet?.id) {
+      await petController.updatePet(params.pet.id, petToSave);
+    } else {
+      await petController.createPet(petToSave);
+    }
+    navigate(Screen.Registry, {
+      type: "PET",
+      mode: "view",
+    } as RegistryParams);
+  });
 
   const openModal = useCallback(
-    ({
-      title,
-      items,
-      itemIcon,
-      modalKind,
-      onSelect,
-    }: OpenModalConfig) => {
+    ({ title, items, itemIcon, modalKind, onSelect }: OpenModalConfig) => {
       setModalConfig({
         visible: true,
         title,
@@ -192,13 +175,13 @@ export default function NewOrEditPet() {
     if (modalConfig.visible && modalConfig.modalKind === "OWNER") {
       setModalConfig((prev) => ({ ...prev, items: owners ?? [] }));
     }
-  }, [owners]);
+  }, [owners, modalConfig.visible, modalConfig.modalKind]);
 
   useEffect(() => {
     if (modalConfig.visible && modalConfig.modalKind === "BREED") {
       setModalConfig((prev) => ({ ...prev, items: breedsList ?? [] }));
     }
-  }, [breedsList]);
+  }, [breedsList, modalConfig.visible, modalConfig.modalKind]);
 
   const handleSetSearch = useCallback(
     (txt: string) => {
@@ -210,13 +193,7 @@ export default function NewOrEditPet() {
         setBreedSearchTxt(txt);
       }
     },
-    [
-      modalConfig.modalKind,
-      setOwnerPage,
-      setOwnerSearchTxt,
-      setBreedPage,
-      setBreedSearchTxt,
-    ],
+    [modalConfig.modalKind, setOwnerPage, setOwnerSearchTxt, setBreedPage, setBreedSearchTxt],
   );
 
   const isOwnerModal = modalConfig.modalKind === "OWNER";
@@ -231,21 +208,12 @@ export default function NewOrEditPet() {
   const setPageModal = isOwnerModal ? setOwnerPage : isBreedModal ? setBreedPage : () => {};
 
   return (
-    <KeyboardAvoidingView
-      style={s.flex}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <KeyboardAvoidingView style={s.flex} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <DefaultHeader />
 
       <View style={{ backgroundColor: colors.THIRD_BACKGROUND }}>
         <TitleBar
-          title={
-            isEditing
-              ? "Editar Pet"
-              : isViewing
-                ? "Visualizando Pet"
-                : "Novo Pet"
-          }
+          title={isEditing ? "Editar Pet" : isViewing ? "Visualizando Pet" : "Novo Pet"}
           subtitle="Preencha os dados do pet"
           isViewing={isViewing}
           hasUnsavedChanges={isDirty}
@@ -266,10 +234,7 @@ export default function NewOrEditPet() {
         </View>
       </View>
 
-      <ScrollView
-        contentContainerStyle={s.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={s.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={s.ctnRegistry}>
           <View style={{ display: isPetTabSelected ? "flex" : "none" }}>
             <PetInfoTab
@@ -295,11 +260,7 @@ export default function NewOrEditPet() {
           </View>
           {!isViewing && (
             <View style={s.ctnBtnSave}>
-              <SaveButton
-                isEditing={isEditing}
-                isSaving={isSavingRecord}
-                onPress={savePet}
-              />
+              <SaveButton isEditing={isEditing} isSaving={isSavingRecord} onPress={savePet} />
             </View>
           )}
         </View>

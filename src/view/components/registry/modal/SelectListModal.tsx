@@ -7,27 +7,23 @@ import {
   View,
   Image,
   Pressable,
-  ImageSourcePropType,
 } from "react-native";
 import { LIMIT_ITEM_PAGE } from "../../../../config/consts";
 import Pagination from "../list/Pagination";
 import SearchBar from "../../searchBar/SearchBar";
 import { ThemeColors, useThemedStyles } from "../../../theme/ThemeProvider";
 import CloseButton from "../../CloseButton";
-import {
-  FONT_SIZE,
-  FONT_WEIGHT,
-  RADIUS,
-  SPACING,
-} from "../../../theme/tokens";
+import { FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "../../../theme/tokens";
+
+import type { ItemIcon, SelectableItem } from "../../../../utils/openSelectionModal";
 
 interface SelectListModalProps {
-  items: any[] | null | undefined;
+  items: SelectableItem[] | null | undefined;
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (item: any) => void;
+  onSelect: (item: SelectableItem) => void;
   title: string;
-  itemIcon?: ImageSourcePropType | ((item: any) => ImageSourcePropType);
+  itemIcon?: ItemIcon;
   isPet?: boolean;
   page: number;
   total: number;
@@ -51,19 +47,10 @@ export default function SelectListModal({
   const s = useThemedStyles(styles);
 
   return (
-    <Modal
-      visible={isOpen}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={isOpen} transparent animationType="fade" onRequestClose={onClose}>
       {/* Os Pressable só fecham ao tocar fora; sem accessible, o leitor percorre o conteúdo item a item. */}
       <Pressable style={s.overlay} onPress={onClose} accessible={false}>
-        <Pressable
-          style={s.modalContent}
-          onPress={() => {}}
-          accessible={false}
-        >
+        <Pressable style={s.modalContent} onPress={() => {}} accessible={false}>
           <View style={s.modalHeader}>
             <Text style={s.modalTitle} accessibilityRole="header">
               {title}
@@ -72,26 +59,20 @@ export default function SelectListModal({
           </View>
 
           <View style={s.searchWrap}>
-            <SearchBar
-              placeholderText={`Pesquisar...`}
-              setSearch={setSearch}
-            />
+            <SearchBar placeholderText={`Pesquisar...`} setSearch={setSearch} />
           </View>
           <FlatList
             data={items ?? []}
             contentContainerStyle={s.listContent}
             renderItem={({ item }) => {
-              const iconSource =
-                typeof itemIcon === "function" ? itemIcon(item) : itemIcon;
+              const iconSource = typeof itemIcon === "function" ? itemIcon(item) : itemIcon;
               return (
                 <TouchableOpacity
                   style={s.itemRow}
                   onPress={() => onSelect(item)}
                   accessibilityRole="button"
                 >
-                  {iconSource && (
-                    <Image source={iconSource} style={s.itemIconRow} />
-                  )}
+                  {iconSource && <Image source={iconSource} style={s.itemIconRow} />}
                   <Text style={s.itemText}>
                     {isPet ? `Nome: ` : ""}
                     {item.name}
@@ -100,9 +81,7 @@ export default function SelectListModal({
                 </TouchableOpacity>
               );
             }}
-            keyExtractor={(item, index) =>
-              item.id?.toString() ?? index.toString()
-            }
+            keyExtractor={(item, index) => item.id?.toString() ?? index.toString()}
           />
 
           {/* Paginação — abaixo da lista */}

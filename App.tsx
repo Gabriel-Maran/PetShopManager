@@ -1,24 +1,19 @@
+import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from "react-native";
+import { useEffect, useMemo, useState, ReactNode } from "react";
+
 import {
-  ActivityIndicator,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { useEffect, useState, ReactNode } from "react";
+  createNavigationContainerRef,
+  DefaultTheme,
+  NavigationContainer,
+  type ParamListBase,
+} from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { initDatabase } from "./src/config/database";
 import { logError, toUserMessage } from "./src/errors/AppError";
 import { MESSAGES } from "./src/globals/messages";
-import {
-  ReportParams,
-  ReportType,
-  STATUS_BAR_HEIGHT,
-  Screen,
-} from "./src/config/consts";
-import { isTabScreen } from "./src/config/navigation";
-import { useScreen } from "./src/hooks/useScreen";
-import { useAndroidBackButton } from "./src/hooks/useBackNavigation";
+import { STATUS_BAR_HEIGHT } from "./src/config/consts";
+import { HOME_SCREEN, isTabScreen, Screen } from "./src/config/navigation";
 
 import {
   ThemeColors,
@@ -40,58 +35,50 @@ import SettingsScreen from "./src/view/pages/SettingsScreen";
 import { CalendarProvider } from "./src/view/contexts/CalendarContext";
 import ReportView from "./src/view/pages/reports/ReportView";
 
+const Stack = createNativeStackNavigator();
+const navigationRef = createNavigationContainerRef<ParamListBase>();
+
+const SCREENS: Record<Screen, () => ReactNode> = {
+  [Screen.Calendar]: HomeScreen,
+  [Screen.Registry]: RegistryScreen,
+  [Screen.Reports]: ReportsScreen,
+  [Screen.Settings]: SettingsScreen,
+  [Screen.NewOrEditOwner]: NewOrEditOwner,
+  [Screen.NewOrEditPet]: NewOrEditPet,
+  [Screen.NewOrEditAppointment]: NewOrEditAppointment,
+  [Screen.ReportView]: ReportView,
+};
+
 function AppContent() {
-  const { screen, params } = useScreen<ReportParams>();
-  useAndroidBackButton();
+  const { colors } = useTheme();
+  const [screen, setScreen] = useState<Screen>(HOME_SCREEN);
+  const theme = useMemo(
+    () => ({ ...DefaultTheme, colors: { ...DefaultTheme.colors, background: colors.BACKGROUND } }),
+    [colors.BACKGROUND],
+  );
 
-  let content: ReactNode;
-
-  switch (screen) {
-    case Screen.Calendar:
-      content = <HomeScreen />;
-      break;
-
-    case Screen.Registry:
-      content = <RegistryScreen />;
-      break;
-
-    case Screen.Reports:
-      content = <ReportsScreen />;
-      break;
-
-    case Screen.Settings:
-      content = <SettingsScreen />;
-      break;
-
-    case Screen.NewOrEditOwner:
-      content = <NewOrEditOwner />;
-      break;
-
-    case Screen.NewOrEditPet:
-      content = <NewOrEditPet />;
-      break;
-
-    case Screen.NewOrEditAppointment:
-      content = <NewOrEditAppointment />;
-      break;
-
-    case Screen.ReportView:
-      content = (
-        <ReportView
-          route={params?.type ?? ReportType.MonthlyComparison}
-        />
-      );
-      break;
-
-    default:
-      content = <HomeScreen />;
-      break;
-  }
   return (
-    <>
-      <CalendarProvider>{content}</CalendarProvider>
-      {isTabScreen(screen) && <AppBar />}
-    </>
+    <CalendarProvider>
+      <NavigationContainer
+        ref={navigationRef}
+        theme={theme}
+        onStateChange={() => {
+          const current = navigationRef.getCurrentRoute()?.name as Screen | undefined;
+          if (current) setScreen(current);
+        }}
+      >
+        {/* Cabeçalhos próprios; sem gesto de voltar, para a confirmação dos formulários valer sempre. */}
+        <Stack.Navigator
+          initialRouteName={HOME_SCREEN}
+          screenOptions={{ headerShown: false, gestureEnabled: false, animation: "fade" }}
+        >
+          {Object.entries(SCREENS).map(([name, component]) => (
+            <Stack.Screen key={name} name={name} component={component} />
+          ))}
+        </Stack.Navigator>
+        {isTabScreen(screen) && <AppBar current={screen} navigator={navigationRef} />}
+      </NavigationContainer>
+    </CalendarProvider>
   );
 }
 

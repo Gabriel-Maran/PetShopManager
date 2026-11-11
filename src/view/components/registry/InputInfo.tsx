@@ -1,14 +1,5 @@
-import {
-  ImageSourcePropType,
-  TextInput,
-  StyleSheet,
-  KeyboardTypeOptions,
-} from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../theme/ThemeProvider";
+import { ImageSourcePropType, TextInput, StyleSheet, KeyboardTypeOptions } from "react-native";
+import { ThemeColors, useTheme, useThemedStyles } from "../../theme/ThemeProvider";
 import InputWrapper from "./InputWrapper";
 import { FONT_SIZE, RADIUS, SPACING } from "../../theme/tokens";
 
@@ -26,7 +17,7 @@ export default function InputInfo({
 }: {
   image: ImageSourcePropType;
   item: string | null;
-  setItem: (item: any) => void;
+  setItem: (value: string) => void;
   placeholder: string;
   titleName: string;
   hasBorderBottom?: boolean;
@@ -40,11 +31,7 @@ export default function InputInfo({
   // O campo não conhece o formato do que recebe: máscaras de valor, horário ou telefone ficam no
   // setItem de quem usa.
   return (
-    <InputWrapper
-      image={image}
-      titleName={titleName}
-      hasBorderBottom={hasBorderBottom}
-    >
+    <InputWrapper image={image} titleName={titleName} hasBorderBottom={hasBorderBottom}>
       <TextInput
         style={s.input}
         placeholder={placeholder}
