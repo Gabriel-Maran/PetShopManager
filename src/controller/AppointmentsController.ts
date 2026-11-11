@@ -4,7 +4,7 @@ import { appointmentsService } from "../service/AppointmentsService";
 import type { IsoDate } from "../utils/datas";
 import { AppError } from "../errors/AppError";
 import { MESSAGES } from "../globals/messages";
-import { appointmentSchema } from "../validation/appointmentSchema";
+import { appointmentSchema, appointmentSchemaFor } from "../validation/appointmentSchema";
 import { parseInput, parseRecordId } from "../validation/parseInput";
 import { petController } from "./PetController";
 
@@ -34,8 +34,9 @@ class AppointmentsController {
   }
 
   async updateAppointment(id: number, input: Appointment): Promise<void> {
-    const appointment = parseInput(appointmentSchema, input);
-    await this.getAppointmentById(id); // valida existência
+    // O gravado vem antes da validação: os limites de texto valem só para o que mudou.
+    const stored = await this.getAppointmentById(id); // valida existência
+    const appointment = parseInput(appointmentSchemaFor(stored), input);
     await petController.getPetById(appointment.pet_id); // o pet precisa existir
     await appointmentsService.updateAppointment(id, appointment);
   }

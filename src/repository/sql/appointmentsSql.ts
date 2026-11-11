@@ -19,10 +19,10 @@ export const APPOINTMENT_COLUMNS = `AP.id, AP.pet_id, AP.servico_nome AS servico
   COALESCE(AP.tipo_pgto_nome, '') AS tipo_pgto, AP.ta_pago, AP.criado_em`;
 
 /** A tabela com o apelido AP, para ler com o APPOINTMENT_COLUMNS: o nome vem da própria linha. */
-export const APPOINTMENTS_WITH_NAMES = "appointments AS AP";
+export const APPOINTMENTS_TABLE = "appointments AS AP";
 
 /** Parâmetros: id. */
-export const FIND_APPOINTMENT_SQL = `SELECT ${APPOINTMENT_COLUMNS} FROM ${APPOINTMENTS_WITH_NAMES}
+export const FIND_APPOINTMENT_SQL = `SELECT ${APPOINTMENT_COLUMNS} FROM ${APPOINTMENTS_TABLE}
   WHERE AP.id = ?`;
 
 /** Parâmetro: a data. Os agendamentos do dia, com o pet, a espécie e o dono, os pendentes primeiro. */
@@ -30,7 +30,7 @@ export const LIST_APPOINTMENTS_OF_DAY_SQL = `SELECT ${APPOINTMENT_COLUMNS},
     PT.nome AS nome_pet,
     SP.nome AS especie,
     OW.nome AS nome_dono
-  FROM ${APPOINTMENTS_WITH_NAMES}
+  FROM ${APPOINTMENTS_TABLE}
   JOIN pets    AS PT ON AP.pet_id = PT.id
   JOIN owners  AS OW ON PT.dono_id = OW.id
   JOIN species AS SP ON PT.especie = SP.id
@@ -38,7 +38,7 @@ export const LIST_APPOINTMENTS_OF_DAY_SQL = `SELECT ${APPOINTMENT_COLUMNS},
   ORDER BY AP.concluido, AP.hora ASC`;
 
 /** Parâmetros: a primeira e a última data, inclusive. */
-export const LIST_APPOINTMENTS_BETWEEN_SQL = `SELECT ${APPOINTMENT_COLUMNS} FROM ${APPOINTMENTS_WITH_NAMES}
+export const LIST_APPOINTMENTS_BETWEEN_SQL = `SELECT ${APPOINTMENT_COLUMNS} FROM ${APPOINTMENTS_TABLE}
   WHERE AP.data BETWEEN ? AND ?
   ORDER BY AP.data ASC`;
 

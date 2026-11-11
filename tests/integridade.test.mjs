@@ -10,6 +10,8 @@ import {
   createPet,
   databaseAt,
   appointmentsOf,
+  editAppointmentLikeTheApp,
+  editPetLikeTheApp,
   insertAppointment,
   insertOwner,
   insertPet,
@@ -30,7 +32,10 @@ import {
 } from "../src/repository/sql/appointmentsSql.ts";
 import { FIND_PET_SQL } from "../src/repository/sql/petsSql.ts";
 import { LIST_PAYMENT_METHODS_SQL, LIST_SERVICE_TYPES_SQL } from "../src/repository/sql/listsSql.ts";
-import { assertAppointmentChoices } from "../src/service/appointmentRules.ts";
+import { assertAppointmentChoices, storedChoicesOf } from "../src/service/appointmentRules.ts";
+import { appointmentSchema, appointmentSchemaFor } from "../src/validation/appointmentSchema.ts";
+import { parseInput } from "../src/validation/parseInput.ts";
+import { MAX_LIST_ITEM_LENGTH, MAX_NOTES_LENGTH, MAX_STORED_TEXT_LENGTH } from "../src/globals/limits.ts";
 import { time } from "../src/validation/fields.ts";
 import { MESSAGES } from "../src/globals/messages.ts";
 
@@ -471,7 +476,8 @@ describe("migração para a versão 6", () => {
 
     const petService = (pet) => db.prepare(FIND_PET_SQL).get(pet.id).servico_padrao;
     assert.equal(petService(pets.pacoca), "Banho e Tosa");
-    assert.equal(petService(pets.mel), "Hidratação");
+    assert.equal(petService(pets.mel), "Banho", "o serviço padrão fora dos três vira o Banho");
+    assert.equal(observationOf(db, "pets", pets.mel.id), 'Serviço padrão antigo: "Hidratação".');
     assert.equal(petService(pets.thor), "Banho", "sem serviço, o Banho do DEFAULT antigo");
 
     // O que não estava na lista entra nela, mas oculto: o formulário não oferece (ver "itens ocultos").
@@ -683,7 +689,7 @@ describe("notas da migração com o valor antigo", () => {
     const db = await databaseAt(5);
     const dono_id = insertOwner(db);
     const pets = {
-      allThree: insertPet(db, { dono_id, nome: "Xyz", porte: "xyz", observacoes: "Alérgico a xampu forte", horario_padrao: "25:00", valor_pacote: -1150 }),
+      allThree: insertPet(db, { dono_id, nome: "Xyz", porte: "xyz", servico_padrao: "Hidratação", observacoes: "Alérgico a xampu forte", horario_padrao: "25:00", valor_pacote: -1150 }),
       onlyPorte: insertPet(db, { dono_id, nome: "Abc", porte: "abc", observacoes: null }),
       cents: insertPet(db, { dono_id, nome: "Centavos", observacoes: "Dócil", valor_pacote: -50 }),
       longPorte: insertPet(db, { dono_id, nome: "Longo", porte: "x".repeat(60) }),
@@ -711,7 +717,7 @@ describe("notas da migração com o valor antigo", () => {
     // As três notas saem na ordem, depois da observação, que fica intacta.
     assert.equal(
       petNote(pets.allThree),
-      'Alérgico a xampu forte\nPorte antigo: "xyz". Horário padrão antigo: "25:00". Valor do pacote antigo: "-11,50".',
+      'Alérgico a xampu forte\nPorte antigo: "xyz". Serviço padrão antigo: "Hidratação". Horário padrão antigo: "25:00". Valor do pacote antigo: "-11,50".',
     );
     assert.equal(petNote(pets.onlyPorte), 'Porte antigo: "abc".', "sem observação, fica só a nota");
     assert.equal(petNote(pets.cents), 'Dócil\nValor do pacote antigo: "-0,50".');
@@ -719,6 +725,12 @@ describe("notas da migração com o valor antigo", () => {
     assert.deepEqual(
       { ...db.prepare("SELECT porte, horario_padrao, valor_pacote FROM pets WHERE id = ?").get(pets.allThree.id) },
       { porte: "MEDIO", horario_padrao: "00:00", valor_pacote: 0 },
+    );
+    assert.equal(db.prepare(FIND_PET_SQL).get(pets.allThree.id).servico_padrao, "Banho");
+    assert.equal(
+      db.prepare("SELECT COUNT(*) AS total FROM service_type WHERE servico = 'Hidratação'").get().total,
+      0,
+      "nenhum agendamento usa o serviço, então ele não fica na lista nem oculto",
     );
 
     assert.equal(appointmentNote(appointments.badTime), 'Tem medo de secador\nHorário antigo: "abc".');
@@ -767,5 +779,122 @@ describe("notas da migração com o valor antigo", () => {
     assert.ok(agenda.length > 0);
     assert.ok(agenda.every((a) => a.valor === 0), "nenhum automático com valor negativo");
     assert.equal(appointmentsOf(db, pet.id).length, agenda.length);
+  });
+});
+
+describe("limites de tamanho só no que mudou", () => {
+  const tooLong = (field, max) => ({ name: "AppError", code: "VALIDATION", message: MESSAGES.textTooLong(field, max) });
+
+  /** Um banco da versão 5 já migrado, com texto grande que a migração engorda ou deixa oculto. */
+  async function migratedWithLongTexts() {
+    const db = await databaseAt(5);
+    const dono_id = insertOwner(db);
+    const pet = insertPet(db, { dono_id, nome: "Textão", porte: "xyz", observacoes: "o".repeat(240) });
+    const longService = "S".repeat(60);
+    const longPayment = "P".repeat(60);
+    const appointment = insertV5Appointment(db, pet.id, {
+      servico: longService, tipo_pgto: longPayment, hora: "abc", observacao: "a".repeat(240),
+    });
+    await migrate(db);
+    return { db, pet, appointment, longService, longPayment };
+  }
+
+  test("a observação do agendamento com a nota passa de 250 e salva sem mudar, mas não cresce", async () => {
+    const { db, appointment } = await migratedWithLongTexts();
+    const stored = db.prepare(FIND_APPOINTMENT_SQL).get(appointment).observacao;
+    assert.ok(stored.length > MAX_NOTES_LENGTH, "a nota empurrou a observação para além do limite");
+
+    await editAppointmentLikeTheApp(db, appointment, { ta_pago: 1 });
+    assert.equal(db.prepare(FIND_APPOINTMENT_SQL).get(appointment).observacao, stored);
+
+    const error = tooLong("A observação do agendamento", MAX_NOTES_LENGTH);
+    await assert.rejects(editAppointmentLikeTheApp(db, appointment, { observacao: `${stored}x` }), error);
+    await assert.rejects(editAppointmentLikeTheApp(db, appointment, { observacao: "b".repeat(MAX_NOTES_LENGTH + 1) }), error);
+    // Encurtar até o limite volta a valer.
+    await editAppointmentLikeTheApp(db, appointment, { observacao: "b".repeat(MAX_NOTES_LENGTH) });
+    assert.equal(db.prepare(FIND_APPOINTMENT_SQL).get(appointment).observacao.length, MAX_NOTES_LENGTH);
+  });
+
+  test("a observação do pet com a nota passa de 250 e salva sem mudar, mas não cresce", async () => {
+    const { db, pet } = await migratedWithLongTexts();
+    const stored = db.prepare(FIND_PET_SQL).get(pet.id).observacoes;
+    assert.ok(stored.length > MAX_NOTES_LENGTH);
+
+    await editPetLikeTheApp(db, pet.id, { nome: "Textão 2" });
+    const saved = db.prepare(FIND_PET_SQL).get(pet.id);
+    assert.deepEqual([saved.nome, saved.observacoes], ["Textão 2", stored]);
+
+    await assert.rejects(
+      editPetLikeTheApp(db, pet.id, { observacoes: `${stored}x` }),
+      tooLong("A observação do pet", MAX_NOTES_LENGTH),
+    );
+  });
+
+  test("o nome oculto de 60 caracteres passa sem trocar e é recusado na criação e na troca", async () => {
+    const { db, pet, appointment, longService, longPayment } = await migratedWithLongTexts();
+
+    await editAppointmentLikeTheApp(db, appointment, { valor: 7000 });
+    const saved = db.prepare(FIND_APPOINTMENT_SQL).get(appointment);
+    assert.deepEqual([saved.servico, saved.tipo_pgto, saved.valor], [longService, longPayment, 7000]);
+
+    const input = { ...saved, pet_id: pet.id, observacao: null };
+    assert.throws(() => parseInput(appointmentSchema, input), tooLong("O serviço", MAX_LIST_ITEM_LENGTH));
+    assert.throws(
+      () => parseInput(appointmentSchema, { ...input, servico: "Banho" }),
+      tooLong("O tipo de pagamento", MAX_LIST_ITEM_LENGTH),
+    );
+    await assert.rejects(
+      editAppointmentLikeTheApp(db, appointment, { servico: "T".repeat(60) }),
+      tooLong("O serviço", MAX_LIST_ITEM_LENGTH),
+    );
+  });
+
+  test("o teto alto vale mesmo para o texto igual ao gravado", () => {
+    const huge = "x".repeat(MAX_STORED_TEXT_LENGTH + 1);
+    const schema = appointmentSchemaFor({ servico: huge, tipo_pgto: "", observacao: huge });
+    const input = {
+      pet_id: 1, servico: "Banho", data: isoDate(1), hora: "10:00", valor: 0, tipo_pgto: "", observacao: huge,
+      entregar_pet: 0, concluido: 0, is_auto_agen: 0, ta_pago: 0,
+    };
+
+    assert.throws(() => parseInput(schema, input), tooLong("A observação do agendamento", MAX_NOTES_LENGTH));
+    assert.throws(() => parseInput(schema, { ...input, observacao: null, servico: huge }), tooLong("O serviço", MAX_LIST_ITEM_LENGTH));
+  });
+});
+
+describe("a edição do agendamento confere as listas com o que está gravado (service)", () => {
+  test("sem agendamento gravado, nada vale além da lista ativa", () => {
+    assert.equal(storedChoicesOf(null), undefined);
+    assert.equal(storedChoicesOf(undefined), undefined);
+    assert.deepEqual(
+      storedChoicesOf({ id: 3, servico: "Hidratação", tipo_pgto: "", observacao: "x" }),
+      { servico: "Hidratação", tipo_pgto: "" },
+      "só os nomes gravados vão para a conferência",
+    );
+  });
+
+  test("editar o agendamento oculto sem trocar passa; trocar para outro oculto ou criar com o oculto, não", async () => {
+    const { db, pets, appointments } = await v5WithOldData();
+    await migrate(db);
+    const before = storedNames(db, appointments.unknown);
+
+    await editAppointmentLikeTheApp(db, appointments.unknown, { observacao: "Editei", ta_pago: 1 });
+    assert.deepEqual(storedNames(db, appointments.unknown), before);
+    assert.equal(db.prepare(FIND_APPOINTMENT_SQL).get(appointments.unknown).observacao, "Editei");
+
+    // Outro agendamento, que não tem o oculto gravado, não pode escolher o oculto.
+    const regular = insertAppointment(db, pets.pacoca.id, { servico: "Banho", tipo_pgto: "PIX" });
+    await assert.rejects(editAppointmentLikeTheApp(db, regular, { servico: "Hidratação" }), {
+      code: "NOT_FOUND", message: MESSAGES.appointment.serviceNotFound,
+    });
+    await assert.rejects(editAppointmentLikeTheApp(db, regular, { tipo_pgto: "Vale-presente" }), {
+      code: "NOT_FOUND", message: MESSAGES.appointment.paymentMethodNotFound,
+    });
+    // O que está gravado vale só para o próprio agendamento: trocar o serviço do oculto por um ativo
+    // funciona, e voltar ao oculto não.
+    await editAppointmentLikeTheApp(db, appointments.unknown, { servico: "Banho e Tosa" });
+    await assert.rejects(editAppointmentLikeTheApp(db, appointments.unknown, { servico: "Hidratação" }), {
+      code: "NOT_FOUND", message: MESSAGES.appointment.serviceNotFound,
+    });
   });
 });

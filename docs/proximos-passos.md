@@ -1,18 +1,24 @@
 # Próximos passos
 
-Atualizado em 2026-11-10, depois da terceira rodada de agentes em paralelo (PRs #44 a #47) e da varredura dela (PRs #48 e #49).
+Atualizado em 2026-11-10, depois da terceira rodada de agentes em paralelo e da varredura dela (PRs #44 a #54) e do ajuste do DADOS-4 (PRs #56 e #57).
 
 > **Para o próximo chat:**
 > - Leia antes o [`checklist-perguntas.md`](checklist-perguntas.md) (PR #43): ele diz que perguntas responder ao iniciar, ao decidir e ao entregar.
-> - Em revisão: o PR #48 (sugestões da varredura: tipo do gráfico fora da tela, datas num módulo só e ícone do pacote em PNG), o PR #49 (versão 5 do esquema: horário nulo vira `00:00`) e este PR de documentação. O próximo passo é o Gabriel revisar os três.
-> - Depois: o patch do Expo (item 2 da lista abaixo, liberado desde hoje), o NOMES-1, que precisa ser feito sozinho porque mexe em todos os arquivos, e o tema do sistema na primeira abertura (P19), que precisa de uma migração própria.
+> - Entraram no `main` os PRs #48 a #54: a varredura (#48 e #49), a documentação (#50), o BUILD-2 (#51), o TEMA-1 (#52), o DADOS-4 (#53, versão 6 do esquema) e o patch do Expo (#54).
+> - O ajuste do DADOS-4 antes de a versão 6 chegar a um aparelho veio em dois PRs (ver `decisoes.md`):
+>   - no `main`, o #56: nome da época no agendamento, nota com o valor antigo, itens ocultos, três serviços padrão garantidos e dinheiro sem negativo;
+>   - em revisão, o #57: o pet com serviço fora dos três e os limites de tamanho só no que mudou. Ele era o segundo commit do #56 e chegou depois do merge.
+> - **O Gabriel não abre o app pelo `main` até o #57 entrar**, porque ele ainda muda a versão 6. Um banco que já tenha aberto uma v6 anterior precisa de "Apagar tudo" ou de reinstalar.
+> - Pergunta em aberto: a nota da migração se repete nos automáticos seguintes, porque o próximo copia a observação do concluído. Fica assim?
+> - Próximos passos, depois do #57:
+>   - NOMES-1, sozinho, porque mexe em todos os arquivos, com um PR por camada;
+>   - tema do sistema na primeira abertura (P19), que precisa de uma migração própria, a versão 7;
+>   - ARQ-3 (navegação) e TEST-3 (testes de componentes), que exigem instalação de pacote pelo Gabriel, com a análise de segurança.
 > - Agentes em paralelo partem só do `main` atualizado. Na terceira rodada eles partiram da branch do ARQ-1 antes do merge, e o squash deixou os PRs em conflito (ver `decisoes.md`).
 >
-> Entraram no `main` em 2026-11-10: as decisões de arquitetura (#41), o ARQ-1 (`app/` virou `src/`, #42), o checklist (#43), o PERF-1 (#44), o SEG-1 (#45), os relatórios pelo service (#46) e o ARQ-2 (#47). Os roteiros para conferir no aparelho estão nos PRs #44 a #47; o do SEG-1 precisa de um build novo, porque o `allowBackup` só vale no APK.
+> O clone do Gabriel: o `node_modules` estava incompleto em 2026-11-10 (sem `.bin` e sem a pasta `@expo`), então o `npm run typecheck` e o `export:android` falhavam nele. O `tsc` roda por `node node_modules/typescript/bin/tsc --noEmit`, e os testes rodam. Para consertar, o Gabriel roda `npm ci` no clone, sem mudanças locais pendentes.
 >
-> O clone do Gabriel: o `node_modules` está incompleto (sem `.bin` e sem a pasta `@expo`, conferido em 2026-11-10), então o `npm run typecheck` e o `export:android` falham nele. O `tsc` roda por `node node_modules/typescript/bin/tsc --noEmit`, e os testes rodam. Para consertar, o Gabriel roda `npm ci` no clone, sem mudanças locais pendentes.
->
-> Worktrees: os de `src-folder`, `checklist` e `seg-backup` foram removidos em 2026-11-10. Os de `perf-imagens` (este PR de documentação), `relatorios-service` (PR #48), `remarcacao-ts` (PR #49) e `integracao-r3` (branch local `test/integracao-rodada-3`, que nunca vai para o GitHub) saem depois do merge. Para tirar um worktree, primeiro a junction, com `cmd /c rmdir`, e depois `git worktree remove`.
+> Worktrees a remover depois do merge do #57: `historico-v6` e `patch-expo` (vazios) e o deste PR (`agent-a6a8bd08b4c41484b`, branch `fix/dados4-limites-v6`). Para tirar um worktree, primeiro a junction do `node_modules`, com `cmd /c rmdir`, e depois `git worktree remove`.
 
 ## Pendências entre áreas e varredura (2026-11-09, PRs #35 a #38)
 
@@ -38,7 +44,7 @@ Da varredura, também no PR:
 - o voltar do agendamento e do pet pode pedir confirmação sem mudança, se algum efeito da tela mudar um campo ao abrir. Conferir no aparelho, com o roteiro do #36.
 Das varreduras anteriores, ainda não aplicadas:
 
-- `CHECK` no banco numa versão nova do esquema (DADOS-4), tratando antes o dado antigo; a 4 e a 5 já foram usadas pelo ARQ-2 e pelo PR #49;
+- ~~`CHECK` no banco numa versão nova do esquema (DADOS-4).~~ Feito na versão 6 (PRs #53, #56 e #57); a 4 e a 5 foram usadas pelo ARQ-2 e pelo PR #49, e a próxima migração é a 7;
 - o tamanho do pacote: o Zod somou 680 KB ao JavaScript do Android. Avaliar o `zod/mini` ou o tree shaking do Expo. Deixado para depois pelo Gabriel em 2026-11-09.
 
 ## Em andamento: segurança e configuração do repositório

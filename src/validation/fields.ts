@@ -5,6 +5,7 @@
 import * as z from "zod";
 import { isIsoDate } from "../utils/datas.ts";
 import { isValidCents } from "../utils/dinheiro.ts";
+import { MAX_STORED_TEXT_LENGTH } from "../globals/limits.ts";
 import { MESSAGES } from "../globals/messages.ts";
 
 /** Horas de 00 a 23 e minutos de 00 a 59, sempre com dois dígitos: "09:30". */
@@ -27,13 +28,27 @@ export const withDefault = <T extends z.ZodType>(schema: T, fallback: z.input<T>
 /**
  * Texto com no máximo `max` caracteres, sem espaço nas pontas. O tamanho é conferido primeiro e
  * interrompe o resto: um texto gigante não chega às outras regras.
+ *
+ * Na edição, `stored` é o texto que já está gravado. O limite vale só para o que mudou: um texto igual
+ * ao gravado passa mesmo acima de `max` (a nota da migração engorda a observação, e o nome de um item
+ * oculto pode ser maior que o permitido hoje), com o teto de MAX_STORED_TEXT_LENGTH. Sem `stored`
+ * (criação), nada muda.
  */
-export const text = (max: number, tooLong: string) =>
-  z.string().trim().max(max, { error: tooLong, abort: true });
+export function text(max: number, tooLong: string, stored?: string | null) {
+  const trimmed = z.string().trim();
+  if (stored == null) return trimmed.max(max, { error: tooLong, abort: true });
+  const unchanged = stored.trim();
+  return trimmed
+    .max(MAX_STORED_TEXT_LENGTH, { error: tooLong, abort: true })
+    .refine((value) => value.length <= max || value === unchanged, { error: tooLong, abort: true });
+}
 
 /** Texto que não pode ficar vazio nem só com espaços. */
-export const requiredText = (max: number, messages: { required: string; tooLong: string }) =>
-  text(max, messages.tooLong).min(1, messages.required);
+export const requiredText = (
+  max: number,
+  messages: { required: string; tooLong: string },
+  stored?: string | null,
+) => text(max, messages.tooLong, stored).min(1, messages.required);
 
 /** O id de um registro: inteiro positivo. */
 export const id = (message?: string) => z.int().positive(message);

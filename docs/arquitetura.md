@@ -80,7 +80,7 @@ flowchart LR
 ```
 
 - **Telas e componentes** chamam os controllers, quase sempre dentro de `useEffect`, e passam o erro como veio ao `showError` do `useError`. As ações com carregamento usam o `useAsyncAction`, os relatórios carregam pelo `useAsyncData`, e as buscas paginadas por nome, pelo `useSearchPage`, que descarta a resposta atrasada.
-- **Controllers** validam a entrada e lançam `AppError` com uma mensagem de `globals/messages.ts` para cada falha. Desde o PR #32, a validação é o schema da entidade em `src/validation/`, pelo `parseInput`: texto com `trim` e tamanho máximo, id, data real, horário `HH:MM`, centavos, e-mail e telefone. O service recebe o tipo que sai do schema.
+- **Controllers** validam a entrada e lançam `AppError` com uma mensagem de `globals/messages.ts` para cada falha. Desde o PR #32, a validação é o schema da entidade em `src/validation/`, pelo `parseInput`: texto com `trim` e tamanho máximo, id, data real, horário `HH:MM`, centavos, e-mail e telefone. O service recebe o tipo que sai do schema. Na edição do pet e do agendamento, o controller lê o registro gravado antes de validar e o passa ao schema (`petSchemaFor` e `appointmentSchemaFor`), que só aplica os limites de texto ao que mudou.
 - **Formulários** guardam o valor como o texto do campo ("80,00") e a data como `AAAA-MM-DD`. Ao salvar, o `parseMoneyInput` converte o texto em centavos, e um valor fora do formato vira a mensagem de erro da tela.
 - **Services** quase só repassam a chamada ao repository. As exceções:
   - as regras da raça (PR #38): o `SpeciesService` recusa a raça repetida pelo nome sem acento e a espécie que não existe, e o `PetService` confere que a raça do pet é da espécie escolhida;
@@ -121,6 +121,13 @@ Desde 2026-11-08 (DADOS-1), o esquema tem versão, guardada no `PRAGMA user_vers
 - A versão 3 reconstrói `owners`, `pets` e `appointments`: dinheiro em centavos (`INTEGER`), datas em texto `AAAA-MM-DD` e o relógio dos triggers e do `criado_em` no fuso do aparelho (`'localtime'`). Os dados antigos são convertidos na cópia, e a contagem de ids continua de onde parou.
 - A versão 4 tira os três triggers da remarcação, que passou para o TypeScript (ARQ-2, PR #47). Nenhum dado muda.
 - A versão 5 troca o horário padrão nulo de pets antigos por `00:00`, a regra do formulário e da coluna, porque o nulo impedia concluir o automático do pacote (PR #49).
+- A versão 6 põe a integridade no banco (DADOS-4, PR #53, ajustada no PR #56 antes de chegar a um aparelho):
+  - `CHECK` nos flags (0 ou 1), no porte, nos horários (`HH:MM`) e no dinheiro (`valor >= 0` no agendamento e `valor_pacote >= 0` no pet, com o nulo do pacote passando); `NOT NULL` no `horario_padrao` do pet;
+  - o serviço (do pet e do agendamento) e a forma de pagamento são gravados pelo id, com chave estrangeira. O agendamento guarda também o nome da época, em `servico_nome` (obrigatório) e `tipo_pgto_nome`, e o `CHECK` exige que o id e o nome do pagamento sejam nulos juntos. A leitura mostra o nome gravado, sem JOIN, então renomear um item da lista não muda o histórico;
+  - `service_type` e `payment_methods` ganham `is_ativo`. O nome que algum agendamento usa e que não estava na lista entra nela oculto (`is_ativo = 0`); os três serviços de `TipoServico` são garantidos e ativos. As listas do formulário trazem só os ativos;
+  - o dado antigo é corrigido na cópia, pela regra do app: o que a correção joga fora (porte e serviço padrão que não são do formulário, horário fora do formato, dinheiro negativo, que vira 0) vai em uma nota no fim da `observacoes` do pet ou da `observacao` do agendamento, e a observação que já existia fica intacta;
+  - o nome da forma de pagamento passa a ser único, e o `idx_appointments_pet_id`, que repetia o começo de outro índice, saiu.
+- A `v6.ts` foi editada no lugar, e não substituída por uma versão 7, só porque nenhum aparelho a tinha aberto (ver `decisoes.md`). Daqui em diante está congelada.
 - Um banco de versão mais nova que o app é recusado.
 - O `migrator.ts` não usa o Expo: os testes rodam o mesmo código com o `node:sqlite`.
 
@@ -131,24 +138,26 @@ Reset de desenvolvimento (desde 2026-11-08): com dados no app e só com `__DEV__
 | Tabela | Para que serve |
 | --- | --- |
 | `configs` | preferências; hoje só o modo escuro |
-| `service_type` | serviços: Banho, Banho e Tosa, Banho e Higiênica |
-| `payment_methods` | formas de pagamento: crédito, débito, dinheiro, PIX e outro |
+| `service_type` | serviços: Banho, Banho e Tosa, Banho e Higiênica, e os nomes antigos que a migração manteve ocultos (`is_ativo = 0`) |
+| `payment_methods` | formas de pagamento: crédito, débito, dinheiro, PIX e outro, e os nomes antigos ocultos |
 | `species` | espécies: cão, gato e outro |
 | `race` | raças por espécie, 23 de partida, e o usuário pode criar mais |
 | `owners` | donos: nome, telefone, e-mail, endereço e ativo |
 | `pets` | pets: espécie, raça, porte, dono, serviço padrão e os dados do pacote de remarcação |
-| `appointments` | agendamentos: pet, serviço, data, hora, táxi dog, concluído, automático, valor, forma de pagamento e pago |
+| `appointments` | agendamentos: pet, serviço (id e `servico_nome`), data, hora, táxi dog, concluído, automático, valor, forma de pagamento (id e `tipo_pgto_nome`) e pago |
 
 Convenções:
 
 - Datas são texto `AAAA-MM-DD` (desde a versão 3). O texto se compara e se ordena como data e entra direto nas funções de data do SQLite. No app, o tipo é o `IsoDate`.
 - Horas são texto `HH:MM`, com `00:00` quando não há horário.
-- Flags são `INTEGER` 0 ou 1, sem `CHECK`.
-- Dinheiro é `INTEGER` em centavos (desde a versão 3). No app, o tipo é o `Cents`, e só os campos das telas usam o texto com vírgula.
-- Serviço e forma de pagamento são gravados como texto no agendamento, não como id.
+- Flags são `INTEGER` 0 ou 1, com `CHECK` (desde a versão 6).
+- Dinheiro é `INTEGER` em centavos (desde a versão 3), nunca negativo (`CHECK`, desde a versão 6). No app, o tipo é o `Cents`, e só os campos das telas usam o texto com vírgula.
+- Serviço e forma de pagamento são gravados pelo id, com chave estrangeira (desde a versão 6). O agendamento guarda também o nome da época (`servico_nome` e `tipo_pgto_nome`) e é esse nome que a leitura mostra. O pet guarda só o id do serviço padrão, porque é configuração de hoje, e não histórico.
+- Ao gravar, o id é achado pelo nome entre os itens ativos. Ao editar sem trocar o nome, o id fica, mesmo que o item tenha sido renomeado ou ocultado. A conferência das listas (`assertAppointmentChoices`) aceita o nome igual ao gravado, mesmo oculto; na criação ou na troca, só item ativo.
+- Na edição, os limites de tamanho da observação (do pet e do agendamento), do serviço e da forma de pagamento valem só para o que mudou, porque a nota da migração e o nome oculto podem passar do limite normal. O schema mantém um teto alto (`MAX_STORED_TEXT_LENGTH`), e o campo da tela abre a observação já gravada inteira.
 - Desativar é exclusão lógica (`is_ativo = 0`). Nada é apagado de verdade, exceto agendamentos automáticos pendentes.
 - `appointments.dia_semana` é uma coluna gerada, usada pelo relatório de dias mais movimentados.
-- São 12 índices, pensados para os relatórios e as buscas por nome normalizado.
+- São 11 índices de consulta, pensados para os relatórios e as buscas por nome normalizado, mais o único do nome da forma de pagamento.
 
 ### Triggers
 
@@ -191,7 +200,7 @@ Os gráficos são um componente próprio (`BarChart`), sem biblioteca.
 Fica em Configurações (`DatabaseTransfer` e `BackupService`):
 
 - **Exportar:** um modal avisa que o arquivo não tem senha e traz nome, telefone, e-mail e endereço dos clientes (SEG-1, PR #45). Confirmado, o app consolida o WAL, copia o `petshop.db` para `backups/petshop-AAAA-MM-DD.db`, no cache, e abre o compartilhamento do sistema. Cada exportação apaga as cópias anteriores; a última fica no cache privado do app até a próxima, porque o app de destino pode ler o arquivo depois que o menu fecha.
-- **Importar:** o usuário escolhe um arquivo `.db`, que é copiado para a pasta dos bancos do app. Desde 2026-11-08 (etapa 3c), a cópia é aberta numa conexão só dela e passa pelas mesmas migrações do banco do aparelho (`backupRestore.ts`): um backup de versão anterior chega no formato de hoje, e um arquivo danificado (`integrity_check`), sem as sete tabelas do app ou de versão mais nova é recusado antes de mexer nos dados. Depois, o app anexa a cópia com `ATTACH` e confere se ela tem todas as colunas do app. Numa transação, com as chaves estrangeiras e os triggers do app desligados, apaga e copia as sete tabelas pelo nome das colunas, e a contagem de ids. A cópia e os arquivos do SQLite ao lado dela são apagados no fim, com qualquer resultado.
+- **Importar:** o usuário escolhe um arquivo `.db`, que é copiado para a pasta dos bancos do app. Desde 2026-11-08 (etapa 3c), a cópia é aberta numa conexão só dela e passa pelas mesmas migrações do banco do aparelho (`backupRestore.ts`): um backup de versão anterior chega no formato de hoje, e um arquivo danificado (`integrity_check`), sem as sete tabelas do app que todo backup tem ou de versão mais nova é recusado antes de mexer nos dados. Depois, o app anexa a cópia com `ATTACH` e confere se ela tem todas as colunas do app. Numa transação, com as chaves estrangeiras e os triggers do app desligados, apaga e copia as oito tabelas (as sete e a `payment_methods`) pelo nome das colunas, e a contagem de ids. A cópia e os arquivos do SQLite ao lado dela são apagados no fim, com qualquer resultado.
 - O backup automático do Android está desligado (`android.allowBackup: false`, SEG-1, PR #45): o banco só sai do aparelho pela exportação manual. A transferência direta entre celulares, no Android 12 ou mais novo, continua possível.
 - Todas as conexões abrem com o `trusted_schema` desligado (`SQL_CONNECTION_PRAGMAS`), para o esquema de um arquivo de fora não rodar função com efeito colateral.
 

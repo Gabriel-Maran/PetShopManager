@@ -39,29 +39,45 @@ function requirePackageWhenActive(fields: PackageFields, ctx: z.core.$Refinement
   }
 }
 
-/** O cadastro do pet, com o pacote de remarcação. */
-export const petSchema = z
-  .object({
-    nome: requiredText(MAX_PET_NAME_LENGTH, {
-      required: MESSAGES.pet.nameRequired,
-      tooLong: MESSAGES.textTooLong("O nome do pet", MAX_PET_NAME_LENGTH),
-    }),
-    especie: id(MESSAGES.pet.speciesRequired),
-    dono_id: id(MESSAGES.pet.ownerRequired),
-    porte: choice(PorteAnimal, "Porte"),
-    raca: id(MESSAGES.pet.breedRequired),
-    servico_padrao: choice(TipoServico, "Serviço padrão"),
-    observacoes: optional(
-      text(MAX_NOTES_LENGTH, MESSAGES.textTooLong("A observação do pet", MAX_NOTES_LENGTH)),
-    ),
-    is_ativo: flag("Ativo"),
-    remarcacao_ativa: flag("Remarcação ativa"),
-    pacote_remarcacao: optional(choice(PacoteRemarcacao, "Pacote de remarcação")),
-    valor_pacote: optional(cents(MESSAGES.money.invalid)),
-    data_inicio_pacote: optional(isoDate(MESSAGES.date.invalid)),
-    horario_padrao: withDefault(time(MESSAGES.pet.defaultTimeInvalid), DEFAULT_TIME),
-  })
-  .superRefine(requirePackageWhenActive);
+/** Os textos do pet que já estão gravados, para a edição não recusar o que não mudou. */
+export interface StoredPetTexts {
+  observacoes?: string | null;
+}
+
+/**
+ * O cadastro do pet, com o pacote de remarcação. Na edição, recebe o que está gravado: o limite da
+ * observação vale só para o que mudou (a nota da migração pode ter passado dele).
+ */
+export const petSchemaFor = (stored: StoredPetTexts = {}) =>
+  z
+    .object({
+      nome: requiredText(MAX_PET_NAME_LENGTH, {
+        required: MESSAGES.pet.nameRequired,
+        tooLong: MESSAGES.textTooLong("O nome do pet", MAX_PET_NAME_LENGTH),
+      }),
+      especie: id(MESSAGES.pet.speciesRequired),
+      dono_id: id(MESSAGES.pet.ownerRequired),
+      porte: choice(PorteAnimal, "Porte"),
+      raca: id(MESSAGES.pet.breedRequired),
+      servico_padrao: choice(TipoServico, "Serviço padrão"),
+      observacoes: optional(
+        text(
+          MAX_NOTES_LENGTH,
+          MESSAGES.textTooLong("A observação do pet", MAX_NOTES_LENGTH),
+          stored.observacoes,
+        ),
+      ),
+      is_ativo: flag("Ativo"),
+      remarcacao_ativa: flag("Remarcação ativa"),
+      pacote_remarcacao: optional(choice(PacoteRemarcacao, "Pacote de remarcação")),
+      valor_pacote: optional(cents(MESSAGES.money.invalid)),
+      data_inicio_pacote: optional(isoDate(MESSAGES.date.invalid)),
+      horario_padrao: withDefault(time(MESSAGES.pet.defaultTimeInvalid), DEFAULT_TIME),
+    })
+    .superRefine(requirePackageWhenActive);
+
+/** O schema da criação, sem nada gravado. */
+export const petSchema = petSchemaFor();
 
 /** O pet conferido: o que o service recebe para gravar. */
 export type PetData = z.output<typeof petSchema>;
