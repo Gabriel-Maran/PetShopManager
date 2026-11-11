@@ -1,6 +1,6 @@
-import type { PacoteRemarcacao } from "../config/petEnums";
+import type { PackageFrequency } from "../config/petEnums";
 import { reportsRepository } from "../repository/ReportsRepository";
-import { todayIso } from "../utils/datas";
+import { todayIso } from "../utils/dates";
 import {
   type BarChartItem,
   countsToBars,
@@ -9,12 +9,12 @@ import {
   PACKAGE_BARS,
   RESCHEDULE_BARS,
   WEEKDAY_BARS,
-} from "../utils/relatorios/graficos";
+} from "../utils/reports/charts";
 import {
   lastMonthsRange,
   type MonthRange,
   nextMonthsRange,
-} from "../utils/relatorios/meses";
+} from "../utils/reports/months";
 
 /** Quantos pets cada gráfico de pets ausentes mostra. */
 const ABSENT_PETS_LIMIT = 30;
@@ -54,7 +54,7 @@ class ReportsService {
       rescheduleActive,
       ABSENT_PETS_LIMIT,
     );
-    return rows.map((row) => ({ x: row.label, y: row.dias_ausente }));
+    return rows.map((row) => ({ x: row.label, y: row.days_absent }));
   }
 
   async getPetsByReschedule(): Promise<BarChartItem[]> {
@@ -66,7 +66,7 @@ class ReportsService {
   }
 
   /** Uma barra por pet do pacote, com a altura nas visitas por mês. */
-  async getPetsInPackage(packageSize: PacoteRemarcacao): Promise<BarChartItem[]> {
+  async getPetsInPackage(packageSize: PackageFrequency): Promise<BarChartItem[]> {
     const names = await reportsRepository.listPetNamesInPackage(packageSize);
     return names.map((name) => ({ x: name, y: packageSize }));
   }

@@ -11,8 +11,8 @@ import { initDatabase } from "./src/config/database";
 import { logError, toUserMessage } from "./src/errors/AppError";
 import { MESSAGES } from "./src/globals/messages";
 import {
-  RelatorioParams,
-  RelatorioType,
+  ReportParams,
+  ReportType,
   STATUS_BAR_HEIGHT,
   Screen,
 } from "./src/config/consts";
@@ -25,42 +25,42 @@ import {
   ThemeProvider,
   useTheme,
   useThemedStyles,
-} from "./src/view/Themes/ThemeProvider";
+} from "./src/view/theme/ThemeProvider";
 
-import { ErrorProvider } from "./src/view/components/Error/ErrorProvider";
-import AppBar from "./src/view/components/AppBarra/AppBar";
+import { ErrorProvider } from "./src/view/components/error/ErrorProvider";
+import AppBar from "./src/view/components/appBar/AppBar";
 
-import Home from "./src/view/pages/Home";
-import Cadastros from "./src/view/pages/Cadastros";
-import Relatorios from "./src/view/pages/Relatorios";
-import NewOrEditOwner from "./src/view/pages/Owner/NewOrEditOwner";
-import NewOrEditPet from "./src/view/pages/Pet/NewOrEditPet";
-import NewOrEditAppointment from "./src/view/pages/Appointments/NewOrEditAppointment";
-import Configuracoes from "./src/view/pages/Configuracoes";
-import { AgendamentosProvider } from "./src/view/contexts/agendamentos";
-import RelatorioView from "./src/view/pages/Relatorios/Render/RelatorioView";
+import HomeScreen from "./src/view/pages/HomeScreen";
+import RegistryScreen from "./src/view/pages/RegistryScreen";
+import ReportsScreen from "./src/view/pages/ReportsScreen";
+import NewOrEditOwner from "./src/view/pages/owner/NewOrEditOwner";
+import NewOrEditPet from "./src/view/pages/pet/NewOrEditPet";
+import NewOrEditAppointment from "./src/view/pages/appointments/NewOrEditAppointment";
+import SettingsScreen from "./src/view/pages/SettingsScreen";
+import { CalendarProvider } from "./src/view/contexts/CalendarContext";
+import ReportView from "./src/view/pages/reports/ReportView";
 
 function AppContent() {
-  const { screen, params } = useScreen<RelatorioParams>();
+  const { screen, params } = useScreen<ReportParams>();
   useAndroidBackButton();
 
   let content: ReactNode;
 
   switch (screen) {
-    case Screen.Calendario:
-      content = <Home />;
+    case Screen.Calendar:
+      content = <HomeScreen />;
       break;
 
-    case Screen.Cadastros:
-      content = <Cadastros />;
+    case Screen.Registry:
+      content = <RegistryScreen />;
       break;
 
-    case Screen.Relatorios:
-      content = <Relatorios />;
+    case Screen.Reports:
+      content = <ReportsScreen />;
       break;
 
-    case Screen.Configuracoes:
-      content = <Configuracoes />;
+    case Screen.Settings:
+      content = <SettingsScreen />;
       break;
 
     case Screen.NewOrEditOwner:
@@ -75,21 +75,21 @@ function AppContent() {
       content = <NewOrEditAppointment />;
       break;
 
-    case Screen.RelatorioView:
+    case Screen.ReportView:
       content = (
-        <RelatorioView
-          route={params?.type ?? RelatorioType.ComparativoMensal}
+        <ReportView
+          route={params?.type ?? ReportType.MonthlyComparison}
         />
       );
       break;
 
     default:
-      content = <Home />;
+      content = <HomeScreen />;
       break;
   }
   return (
     <>
-      <AgendamentosProvider>{content}</AgendamentosProvider>
+      <CalendarProvider>{content}</CalendarProvider>
       {isTabScreen(screen) && <AppBar />}
     </>
   );

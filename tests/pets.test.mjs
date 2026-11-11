@@ -11,8 +11,8 @@ describe("FIND_PET_SQL", () => {
   beforeEach(async () => {
     db = await createDatabase();
     pet = insertPet(db, {
-      nome: "Thor", dono_id: insertOwner(db), remarcacao_ativa: 1, pacote_remarcacao: 4,
-      data_inicio_pacote: isoDate(3), valor_pacote: 32000,
+      name: "Thor", owner_id: insertOwner(db), reschedule_active: 1, package_frequency: 4,
+      package_start_date: isoDate(3), package_price: 32000,
     });
   });
 
@@ -20,12 +20,12 @@ describe("FIND_PET_SQL", () => {
     const row = db.prepare(FIND_PET_SQL).get(pet.id);
 
     assert.deepEqual(Object.keys(row).sort(), [
-      "criado_em", "current_ultima_visita_data", "data_inicio_pacote", "dono_id", "especie",
-      "horario_padrao", "id", "is_ativo", "nome", "observacoes", "pacote_remarcacao", "porte", "raca",
-      "remarcacao_ativa", "servico_padrao", "ultimo_visita_data_auto", "valor_pacote",
+      "breed_id", "created_at", "default_service", "default_time", "id", "is_active",
+      "last_auto_visit_date", "last_visit_date", "name", "notes", "owner_id", "package_frequency",
+      "package_price", "package_start_date", "reschedule_active", "size", "species_id",
     ]);
-    assert.equal(row.nome, "Thor");
-    assert.equal(row.valor_pacote, 32000);
+    assert.equal(row.name, "Thor");
+    assert.equal(row.package_price, 32000);
   });
 
   test("id que não existe, inclusive texto malicioso, não traz nada", () => {

@@ -6,8 +6,8 @@ import { MAX_BREED_NAME_LENGTH, MIN_BREED_NAME_LENGTH } from "../globals/limits.
 import { id, requiredText } from "./fields.ts";
 
 export const breedSchema = z.object({
-  especieId: id(MESSAGES.breed.speciesRequired),
-  nomeRaca: requiredText(MAX_BREED_NAME_LENGTH, {
+  speciesId: id(MESSAGES.breed.speciesRequired),
+  breedName: requiredText(MAX_BREED_NAME_LENGTH, {
     required: MESSAGES.breed.nameRequired,
     tooLong: MESSAGES.textTooLong("O nome da raça", MAX_BREED_NAME_LENGTH),
   }).min(MIN_BREED_NAME_LENGTH, MESSAGES.breed.nameTooShort),

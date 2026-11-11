@@ -10,21 +10,25 @@
  * inicial de maio de 2026 tinha o PIX no 3, e a de hoje tem no 4), então a lista vem junto do backup.
  */
 export const BACKUP_TABLES = [
-  "configs",
-  "service_type",
+  "settings",
+  "services",
   "payment_methods",
   "species",
-  "race",
+  "breeds",
   "owners",
   "pets",
   "appointments",
 ];
 
 /**
- * As tabelas que todo backup do app tem: um arquivo sem alguma delas não é backup. A payment_methods
- * fica de fora porque veio depois da exportação, e a versão 1 do esquema a cria na cópia.
+ * As tabelas que todo backup do app tem, conferidas antes das migrações: um arquivo sem alguma delas
+ * não é backup. Um backup de antes da versão 7 tem os nomes antigos; a payment_methods fica de fora
+ * porque veio depois das primeiras exportações, e a versão 1 do esquema a cria na cópia.
  */
-export const REQUIRED_BACKUP_TABLES = BACKUP_TABLES.filter((table) => table !== "payment_methods");
+export const REQUIRED_BACKUP_TABLES: readonly (readonly string[])[] = [
+  BACKUP_TABLES,
+  ["configs", "service_type", "species", "race", "owners", "pets", "appointments"],
+];
 
 /** Confere o arquivo inteiro e para no primeiro problema. Um arquivo íntegro devolve "ok". */
 export const INTEGRITY_CHECK_SQL = "PRAGMA integrity_check(1);";
@@ -38,21 +42,21 @@ export const ATTACH_BACKUP_SQL = "ATTACH DATABASE ? AS src;";
 export const DETACH_BACKUP_SQL = "DETACH DATABASE src;";
 
 /**
- * As colunas de uma tabela, sem a coluna gerada (dia_semana), que o SQLite calcula sozinho. O banco
+ * As colunas de uma tabela, sem a coluna gerada (weekday), que o SQLite calcula sozinho. O banco
  * vai no segundo argumento: com "src.pragma_table_info", o SQLite leria a tabela do main.
  */
-export const tableColumnsSql = (schema: "main" | "src", tabela: string) =>
-  `SELECT name FROM pragma_table_info('${tabela}', '${schema}');`;
+export const tableColumnsSql = (schema: "main" | "src", table: string) =>
+  `SELECT name FROM pragma_table_info('${table}', '${schema}');`;
 
-export const clearTableSql = (tabela: string) => `DELETE FROM main.${tabela};`;
+export const clearTableSql = (table: string) => `DELETE FROM main.${table};`;
 
 /** Copia pelo nome das colunas: a ordem delas no arquivo do backup não importa. */
-export function copyTableSql(tabela: string, colunas: readonly string[]): string {
-  const lista = colunas.map((coluna) => `"${coluna}"`).join(", ");
-  return `INSERT INTO main.${tabela} (${lista}) SELECT ${lista} FROM src.${tabela};`;
+export function copyTableSql(table: string, columns: readonly string[]): string {
+  const list = columns.map((column) => `"${column}"`).join(", ");
+  return `INSERT INTO main.${table} (${list}) SELECT ${list} FROM src.${table};`;
 }
 
-const BACKUP_TABLE_NAMES = BACKUP_TABLES.map((tabela) => `'${tabela}'`).join(", ");
+const BACKUP_TABLE_NAMES = BACKUP_TABLES.map((table) => `'${table}'`).join(", ");
 
 /** A contagem de ids volta a ser a do backup, para um id apagado lá não voltar a ser usado. */
 export const COPY_ID_SEQUENCES_SQL = `

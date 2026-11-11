@@ -19,16 +19,16 @@ class PetService {
   }
 
   async createPet(pet: PetData) {
-    await speciesService.assertBreedOfSpecies(pet.raca, pet.especie);
+    await speciesService.assertBreedOfSpecies(pet.breed_id, pet.species_id);
     return packageSchedule.createPet(pet, new Date());
   }
 
   async updatePet(id: number, pet: PetData) {
-    await speciesService.assertBreedOfSpecies(pet.raca, pet.especie);
+    await speciesService.assertBreedOfSpecies(pet.breed_id, pet.species_id);
     return packageSchedule.updatePet(id, pet, new Date());
   }
 
-  // O trigger trg_pet_desativar_limpar_remarcacao apaga os automáticos futuros e desliga o pacote.
+  // O trigger trg_pet_deactivate_clear_package apaga os automáticos futuros e desliga o pacote.
   deactivatePet(id: number) {
     return petRepository.deactivatePet(id);
   }

@@ -1,5 +1,5 @@
 import { Platform, StatusBar } from "react-native";
-import { Pet, PetWithSpecieRaceAndOwner } from "../model/Pet";
+import { Pet, PetWithSpeciesBreedAndOwner } from "../model/Pet";
 import { Owner } from "../model/Owner";
 
 export const STATUS_BAR_HEIGHT =
@@ -9,11 +9,11 @@ export const APP_BAR_HEIGHT = 70;
 
 export const LIMIT_ITEM_PAGE = 20;
 
-export const IMAGENS_BY_NAME = {
-  ARTIGO: require("../assets/nav_bar/artigo.png"),
-  PESSOA_ADD: require("../assets/nav_bar/personAdd.png"),
-  CALENDARIO: require("../assets/nav_bar/calendario.png"),
-  CONFIGURACOES: require("../assets/nav_bar/settings.png"),
+export const ICONS_BY_NAME = {
+  ARTICLE: require("../assets/nav_bar/artigo.png"),
+  PERSON_ADD: require("../assets/nav_bar/personAdd.png"),
+  CALENDAR: require("../assets/nav_bar/calendario.png"),
+  SETTINGS: require("../assets/nav_bar/settings.png"),
 };
 
 // As telas vivem em navigation.ts, que roda nos testes; o reexport mantém os imports de consts.
@@ -21,39 +21,39 @@ export { Screen } from "./navigation";
 
 // Os valores do pet vivem em petEnums.ts, que roda nos testes; o reexport mantém os imports de consts.
 export {
-  EspeciesAtendidas,
-  EspeciesAtendidasLabel,
-  isPacoteRemarcacao,
-  PacoteRemarcacao,
-  PorteAnimal,
-  PorteAnimalLabel,
-  TipoServico,
+  SpeciesCode,
+  SpeciesLabel,
+  isPackageFrequency,
+  PackageFrequency,
+  PetSize,
+  PetSizeLabel,
+  ServiceName,
 } from "./petEnums";
 
-export enum IMAGENS_NAMES {
-  ARTIGO = "ARTIGO",
-  PESSOA_ADD = "PESSOA_ADD",
-  CALENDARIO = "CALENDARIO",
-  CONFIGURACOES = "CONFIGURACOES",
+export enum ICON_NAMES {
+  ARTICLE = "ARTICLE",
+  PERSON_ADD = "PERSON_ADD",
+  CALENDAR = "CALENDAR",
+  SETTINGS = "SETTINGS",
 }
-export type NewOrEditCadastros = {
+export type RegistryParams = {
   mode: "create" | "view" | "edit";
   owner?: Owner;
-  pet?: Pet | PetWithSpecieRaceAndOwner;
-  type: "DONO" | "PET";
+  pet?: Pet | PetWithSpeciesBreedAndOwner;
+  type: "OWNER" | "PET";
 };
 
-export enum RelatorioType {
-  DiasHorasMovimentados = "DiasHorasMovimentados",
-  PetsAusentes = "PetsAusentes",
-  Remarcacoes = "Remarcacoes",
-  OrigemAgendamentos = "OrigemAgendamentos",
-  ComparativoMensal = "ComparativoMensal",
-  Pacotes = "Pacotes",
+export enum ReportType {
+  BusiestDaysAndHours = "BusiestDaysAndHours",
+  AbsentPets = "AbsentPets",
+  Reschedules = "Reschedules",
+  AppointmentOrigin = "AppointmentOrigin",
+  MonthlyComparison = "MonthlyComparison",
+  Packages = "Packages",
 }
 
-export type RelatorioParams = {
-  type: RelatorioType;
+export type ReportParams = {
+  type: ReportType;
 };
 
-export type StatusFiltro = "ativo" | "inativo";
+export type StatusFilter = "active" | "inactive";

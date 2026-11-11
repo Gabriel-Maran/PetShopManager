@@ -8,7 +8,7 @@ import {
 } from "./sql/appointmentsSql";
 import { Appointment } from "../model/Appointment";
 import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
-import type { IsoDate } from "../utils/datas";
+import type { IsoDate } from "../utils/dates";
 
 // Salvar um agendamento pode criar o próximo do pacote, então o UPDATE fica no
 // PackageScheduleRepository, que roda na transação da remarcação.
@@ -34,13 +34,13 @@ class AppointmentRepository {
     return db.getAllAsync<Appointment>(LIST_APPOINTMENTS_BETWEEN_SQL, [from, to]);
   }
 
-  // Cria agendamento manual (is_auto_agen = 0 por padrão)
+  // Cria agendamento manual (is_auto = 0 por padrão)
   async createAppointment(appointment: Appointment): Promise<void> {
     const db = await getDatabase();
     // Sempre manual e pendente ao criar via repositório, qualquer que seja o que o formulário mandou.
     await db.runAsync(
       INSERT_APPOINTMENT_SQL,
-      insertAppointmentParams({ ...appointment, concluido: 0, is_auto_agen: 0 }),
+      insertAppointmentParams({ ...appointment, completed: 0, is_auto: 0 }),
     );
   }
 }

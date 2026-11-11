@@ -1,0 +1,145 @@
+// Paleta dos temas claro e escuro. Fica fora do ThemeProvider, sem depender do React Native, para os
+// testes conferirem no Node o contraste de cada texto com o fundo em que ele aparece (A11Y-1). Todo
+// texto passa de 4,5:1 nos dois temas; os verdes do claro foram escurecidos para isso.
+
+const light = {
+  PRIMARY: "#0C855F",
+  PRIMARY_VARIANT: "#188462",
+  PRIMARY_SOFT: "#E1F5EE",
+  PRIMARY_CONTRAST: "#0B7377",
+
+  /** Sem cor: deixa aparecer o que está atrás. */
+  TRANSPARENT: "transparent",
+
+  BACKGROUND: "#ffffff",
+  SECOND_BACKGROUND: "#b5b5b5",
+  THIRD_BACKGROUND: "#f3f3f4",
+  SURFACE: "#F2F3F7",
+  SURFACE_VARIANT: "#EFEFEF",
+
+  TEXT_PRIMARY: "#000000",
+  TEXT_SECONDARY: "#2C2C2A",
+  TEXT_MUTED: "#646462",
+  TEXT_PLACEHOLDER: "#757574",
+
+  BORDER: "#F0F0F0",
+  BORDER_STRONG: "#888888",
+  BORDER_MID: "#b5b5b5",
+  BORDER_LIGHT: "#cccdcf",
+
+  MODAL_BACKGROUND: "rgba(0,0,0,0.45)",
+  /** O trilho do interruptor desligado: 3:1 com o fundo, para ele não sumir na tela. */
+  DISABLED: "#8C8A82",
+  /** A bolinha do interruptor: 3:1 com o trilho ligado (PRIMARY) e com o desligado (DISABLED). */
+  TOGGLE_THUMB: "#FFFFFF",
+  SHADOW: "#000000",
+
+  /** O céu e o sol do botão de tema; no escuro, a noite e a lua. */
+  THEME_TOGGLE_SKY: "#4CC9F0",
+  THEME_TOGGLE_THUMB: "#FFDF22",
+
+  RED_COLOR: "#b71c1c",
+  GREEN_COLOR: "#2B7630",
+
+  DEACTIVATE_MAIN_COLOR: "rgb(203, 31, 31)",
+  DEACTIVATE_BORDER_COLOR: "#F09595",
+  DEACTIVATE_BACKGROUND_COLOR: "#FCEBEB",
+
+  EDIT_MAIN_COLOR: "#0B7B58",
+  EDIT_BORDER_COLOR: "#1D9E75",
+  EDIT_BACKGROUND_COLOR: "#E1F5EE",
+
+  EDIT_FIELD_MAIN_COLOR: "#888888",
+  EDIT_FIELD_BORDER_COLOR: "#000000",
+  EDIT_FIELD_BACKGROUND_COLOR: "#ffffff",
+
+  FILTER_BACKGROUND: "#0C855F",
+  FILTER_ICON: "#ffffff",
+
+  REACTIVATE_MAIN_COLOR: "#0284c7",
+  REACTIVATE_BORDER_COLOR: "#0ea5e9",
+  REACTIVATE_BACKGROUND_COLOR: "#f0f9ff",
+
+  CHART_BAR: "#85B7EB",
+  CHART_BAR_HIGHLIGHT: "#185FA5",
+  CHART_TEXT_HIGHLIGHT: "#185FA5",
+
+  /** A faixa de cor de cada cartão de Relatórios; é enfeite, sem mínimo de contraste. */
+  REPORT_ACCENT_BUSY_DAYS: "#6366F1",
+  REPORT_ACCENT_ABSENT_PETS: "#EF4444",
+  REPORT_ACCENT_RESCHEDULES: "#F59E0B",
+  REPORT_ACCENT_ORIGIN: "#10B981",
+  REPORT_ACCENT_MONTHLY: "#3B82F6",
+  REPORT_ACCENT_PACKAGES: "#A855F7",
+};
+
+export type ThemeColors = typeof light;
+
+const dark: ThemeColors = {
+  PRIMARY: "#10B981",
+  PRIMARY_VARIANT: "#0E996D",
+  PRIMARY_SOFT: "#1A2E26",
+  PRIMARY_CONTRAST: "#2DD4BF",
+
+  TRANSPARENT: "transparent",
+
+  BACKGROUND: "#0F1115",
+  SECOND_BACKGROUND: "#1C1E23",
+  THIRD_BACKGROUND: "#24272D",
+  SURFACE: "#1E2128",
+  SURFACE_VARIANT: "#2D3139",
+
+  TEXT_PRIMARY: "#FFFFFF",
+  TEXT_SECONDARY: "#E2E8F0",
+  TEXT_MUTED: "#aeb1b6",
+  TEXT_PLACEHOLDER: "#7D8A9E",
+
+  BORDER: "#2D3139",
+  BORDER_STRONG: "#4A5568",
+  BORDER_MID: "#3F444E",
+  BORDER_LIGHT: "#2A2D35",
+
+  MODAL_BACKGROUND: "rgba(0,0,0,0.80)",
+  DISABLED: "#646A74",
+  // O branco sobre o PRIMARY do escuro dá 2,5:1; a bolinha escura, como no Material 3, passa de 3:1.
+  TOGGLE_THUMB: "#0F1115",
+  SHADOW: "#000000",
+
+  THEME_TOGGLE_SKY: "#03045E",
+  THEME_TOGGLE_THUMB: "#DEDEDA",
+
+  RED_COLOR: "#e57373",
+  GREEN_COLOR: "#81c784",
+
+  DEACTIVATE_MAIN_COLOR: "#F87171",
+  DEACTIVATE_BORDER_COLOR: "#991B1B",
+  DEACTIVATE_BACKGROUND_COLOR: "#2D1A1A",
+
+  EDIT_MAIN_COLOR: "#10B981",
+  EDIT_BORDER_COLOR: "#065F46",
+  EDIT_BACKGROUND_COLOR: "#13271F",
+
+  EDIT_FIELD_MAIN_COLOR: "#CBD5E1",
+  EDIT_FIELD_BORDER_COLOR: "#10B981",
+  EDIT_FIELD_BACKGROUND_COLOR: "#1E2128",
+
+  FILTER_BACKGROUND: "#10B981",
+  FILTER_ICON: "#0F1115",
+
+  REACTIVATE_MAIN_COLOR: "#38bdf8",
+  REACTIVATE_BORDER_COLOR: "#075985",
+  REACTIVATE_BACKGROUND_COLOR: "#0c1e2b",
+
+  CHART_BAR: "#85B7EB",
+  CHART_BAR_HIGHLIGHT: "#185FA5",
+  CHART_TEXT_HIGHLIGHT: "#85B7EB",
+
+  REPORT_ACCENT_BUSY_DAYS: "#6366F1",
+  REPORT_ACCENT_ABSENT_PETS: "#EF4444",
+  REPORT_ACCENT_RESCHEDULES: "#F59E0B",
+  REPORT_ACCENT_ORIGIN: "#10B981",
+  REPORT_ACCENT_MONTHLY: "#3B82F6",
+  REPORT_ACCENT_PACKAGES: "#A855F7",
+};
+
+export const THEME_COLORS = { light, dark };

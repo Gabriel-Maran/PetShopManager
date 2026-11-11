@@ -1,6 +1,6 @@
 import { getDatabase, recreateAppDatabase } from "../config/database";
 import { buildDemoDataSql, COUNT_USER_DATA_SQL } from "../config/demoData";
-import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
+import { normalizeForSearch } from "../utils/formatters/normalizeForSearch";
 import { AppError } from "../errors/AppError";
 import { MESSAGES } from "../globals/messages";
 

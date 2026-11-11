@@ -6,7 +6,7 @@ export interface NameSearch {
   /** O texto digitado. Vazio lista todos. */
   query: string;
   /** 1 lista os ativos; 0, os inativos. */
-  ativo: number;
+  active: number;
   /** A página, a partir de 0. */
   page: number;
   /** Quantos itens cabem numa página. */

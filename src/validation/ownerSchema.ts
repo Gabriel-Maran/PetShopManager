@@ -23,11 +23,11 @@ function isValidPhone(phone: string): boolean {
 }
 
 export const ownerSchema = z.object({
-  nome: requiredText(MAX_OWNER_NAME_LENGTH, {
+  name: requiredText(MAX_OWNER_NAME_LENGTH, {
     required: MESSAGES.owner.nameRequired,
     tooLong: MESSAGES.textTooLong("O nome do dono", MAX_OWNER_NAME_LENGTH),
   }),
-  telefone: text(MAX_PHONE_LENGTH, MESSAGES.owner.phoneInvalid)
+  phone: text(MAX_PHONE_LENGTH, MESSAGES.owner.phoneInvalid)
     .min(1, MESSAGES.owner.phoneRequired)
     .refine(isValidPhone, MESSAGES.owner.phoneInvalid),
   email: optional(
@@ -36,8 +36,8 @@ export const ownerSchema = z.object({
       MESSAGES.owner.emailInvalid,
     ),
   ),
-  endereco: optional(text(MAX_ADDRESS_LENGTH, MESSAGES.textTooLong("O endereço", MAX_ADDRESS_LENGTH))),
-  is_ativo: flag("Ativo"),
+  address: optional(text(MAX_ADDRESS_LENGTH, MESSAGES.textTooLong("O endereço", MAX_ADDRESS_LENGTH))),
+  is_active: flag("Ativo"),
 });
 
 /** O dono conferido: o que o service recebe para gravar. */

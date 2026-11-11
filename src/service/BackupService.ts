@@ -9,7 +9,7 @@ import {
 } from "../config/database";
 import { AppError } from "../errors/AppError";
 import { MESSAGES } from "../globals/messages";
-import { todayIso } from "../utils/datas";
+import { todayIso } from "../utils/dates";
 
 // A pasta onde o expo-sqlite abre os bancos pelo nome.
 const SQLITE_DIRECTORY = new Directory(Paths.document, "SQLite");

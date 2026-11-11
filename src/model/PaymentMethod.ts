@@ -1,4 +1,4 @@
-export interface PaymentsMethod {
+export interface PaymentMethod {
   id: number;
-  tipo_pgto: string;
+  name: string;
 }

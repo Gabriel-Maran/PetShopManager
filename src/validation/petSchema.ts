@@ -1,7 +1,7 @@
 // O cadastro do pet e o pacote de remarcação (VALID-1). Sem depender do Expo, para os testes rodarem
 // no Node, que exige a extensão .ts nos imports.
 import * as z from "zod";
-import { PacoteRemarcacao, PorteAnimal, TipoServico } from "../config/petEnums.ts";
+import { PackageFrequency, PetSize, ServiceName } from "../config/petEnums.ts";
 import { MESSAGES } from "../globals/messages.ts";
 import { MAX_NOTES_LENGTH, MAX_PET_NAME_LENGTH } from "../globals/limits.ts";
 import {
@@ -21,18 +21,18 @@ import {
 const DEFAULT_TIME = "00:00";
 
 /** O que a regra do pacote olha: se a remarcação está ligada e quais campos do pacote vieram vazios. */
-type PackageFields = { remarcacao_ativa: number } & Record<
-  "pacote_remarcacao" | "valor_pacote" | "data_inicio_pacote",
+type PackageFields = { reschedule_active: number } & Record<
+  "package_frequency" | "package_price" | "package_start_date",
   unknown
 >;
 
 /** Com a remarcação ligada, o pacote, o valor e o início são obrigatórios. Sem ela, podem ficar vazios. */
 function requirePackageWhenActive(fields: PackageFields, ctx: z.core.$RefinementCtx): void {
-  if (fields.remarcacao_ativa !== 1) return;
+  if (fields.reschedule_active !== 1) return;
   const required = [
-    ["pacote_remarcacao", MESSAGES.pet.packageRequired],
-    ["valor_pacote", MESSAGES.pet.packageValueRequired],
-    ["data_inicio_pacote", MESSAGES.pet.packageStartRequired],
+    ["package_frequency", MESSAGES.pet.packageRequired],
+    ["package_price", MESSAGES.pet.packageValueRequired],
+    ["package_start_date", MESSAGES.pet.packageStartRequired],
   ] as const;
   for (const [field, message] of required) {
     if (fields[field] === null) ctx.addIssue({ code: "custom", message, path: [field] });
@@ -41,7 +41,7 @@ function requirePackageWhenActive(fields: PackageFields, ctx: z.core.$Refinement
 
 /** Os textos do pet que já estão gravados, para a edição não recusar o que não mudou. */
 export interface StoredPetTexts {
-  observacoes?: string | null;
+  notes?: string | null;
 }
 
 /**
@@ -51,28 +51,28 @@ export interface StoredPetTexts {
 export const petSchemaFor = (stored: StoredPetTexts = {}) =>
   z
     .object({
-      nome: requiredText(MAX_PET_NAME_LENGTH, {
+      name: requiredText(MAX_PET_NAME_LENGTH, {
         required: MESSAGES.pet.nameRequired,
         tooLong: MESSAGES.textTooLong("O nome do pet", MAX_PET_NAME_LENGTH),
       }),
-      especie: id(MESSAGES.pet.speciesRequired),
-      dono_id: id(MESSAGES.pet.ownerRequired),
-      porte: choice(PorteAnimal, "Porte"),
-      raca: id(MESSAGES.pet.breedRequired),
-      servico_padrao: choice(TipoServico, "Serviço padrão"),
-      observacoes: optional(
+      species_id: id(MESSAGES.pet.speciesRequired),
+      owner_id: id(MESSAGES.pet.ownerRequired),
+      size: choice(PetSize, "Porte"),
+      breed_id: id(MESSAGES.pet.breedRequired),
+      default_service: choice(ServiceName, "Serviço padrão"),
+      notes: optional(
         text(
           MAX_NOTES_LENGTH,
           MESSAGES.textTooLong("A observação do pet", MAX_NOTES_LENGTH),
-          stored.observacoes,
+          stored.notes,
         ),
       ),
-      is_ativo: flag("Ativo"),
-      remarcacao_ativa: flag("Remarcação ativa"),
-      pacote_remarcacao: optional(choice(PacoteRemarcacao, "Pacote de remarcação")),
-      valor_pacote: optional(cents(MESSAGES.money.invalid)),
-      data_inicio_pacote: optional(isoDate(MESSAGES.date.invalid)),
-      horario_padrao: withDefault(time(MESSAGES.pet.defaultTimeInvalid), DEFAULT_TIME),
+      is_active: flag("Ativo"),
+      reschedule_active: flag("Remarcação ativa"),
+      package_frequency: optional(choice(PackageFrequency, "Pacote de remarcação")),
+      package_price: optional(cents(MESSAGES.money.invalid)),
+      package_start_date: optional(isoDate(MESSAGES.date.invalid)),
+      default_time: withDefault(time(MESSAGES.pet.defaultTimeInvalid), DEFAULT_TIME),
     })
     .superRefine(requirePackageWhenActive);
 

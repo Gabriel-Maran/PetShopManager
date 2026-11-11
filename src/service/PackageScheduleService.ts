@@ -22,7 +22,7 @@ import {
   type ScheduleDatabase,
 } from "../repository/PackageScheduleRepository.ts";
 import type { Appointment } from "../model/Appointment.ts";
-import { monthOf, type IsoDate } from "../utils/datas.ts";
+import { monthOf, type IsoDate } from "../utils/dates.ts";
 
 export class PackageScheduleService {
   // Campo declarado à parte, e não no construtor, porque o Node dos testes só apaga os tipos.
@@ -42,7 +42,7 @@ export class PackageScheduleService {
       const plan = saved && packagePlanOf(saved, clock.today);
       if (!saved || !plan) return;
 
-      const visits = scheduleForNewPet(plan, clock, saved.horario_padrao);
+      const visits = scheduleForNewPet(plan, clock, saved.default_time);
       await repository.insertVisits(
         visits.map((visit) => ({ ...visit, ...defaultVisitOf(id, saved) })),
       );
@@ -101,8 +101,8 @@ export class PackageScheduleService {
 /** O que todo atendimento gerado pelo pacote leva do pet: serviço e horário padrão, sem táxi dog. */
 const defaultVisitOf = (petId: number, pet: PetPackage) => ({
   petId,
-  serviceId: pet.servico_padrao_id,
-  time: pet.horario_padrao,
+  serviceId: pet.default_service_id,
+  time: pet.default_time,
   deliverPet: 0,
   notes: null,
 });
@@ -138,14 +138,14 @@ async function scheduleNextVisit(
 ): Promise<void> {
   const petId = concluded.pet_id;
   const pet = await repository.findPetPackage(petId);
-  if (!pet || pet.is_ativo !== 1 || pet.remarcacao_ativa !== 1) return;
+  if (!pet || pet.is_active !== 1 || pet.reschedule_active !== 1) return;
 
-  const visitsPerMonth = pet.pacote_remarcacao;
+  const visitsPerMonth = pet.package_frequency;
   if (visitsPerMonth != null) {
-    const lastScheduled = pet.ultimo_visita_data_auto ?? concluded.data;
+    const lastScheduled = pet.last_auto_visit_date ?? concluded.date;
     const date = nextPackageVisitDate({
       lastScheduled,
-      concludedDate: concluded.data,
+      concludedDate: concluded.date,
       visitsPerMonth,
       pendingInLastScheduledMonth: await repository.countPendingAutoInMonth(petId, monthOf(lastScheduled)),
     });
@@ -153,13 +153,13 @@ async function scheduleNextVisit(
     await repository.insertVisits([
       {
         petId,
-        serviceId: concluded.servico_id,
+        serviceId: concluded.service_id,
         date,
-        time: pet.horario_padrao,
-        deliverPet: concluded.entregar_pet,
-        notes: concluded.observacao,
+        time: pet.default_time,
+        deliverPet: concluded.deliver_pet,
+        notes: concluded.notes,
         auto: true,
-        cents: visitCents(pet.valor_pacote ?? 0, visitsPerMonth, positionInMonth),
+        cents: visitCents(pet.package_price ?? 0, visitsPerMonth, positionInMonth),
       },
     ]);
   }

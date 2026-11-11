@@ -1,24 +1,19 @@
 # Próximos passos
 
-Atualizado em 2026-11-10, depois da terceira rodada de agentes em paralelo e da varredura dela (PRs #44 a #54) e do ajuste do DADOS-4 (PRs #56 e #57).
+Atualizado em 2026-11-11, com o NOMES-1 inteiro e o tema do sistema (P19) num PR só.
 
 > **Para o próximo chat:**
-> - Leia antes o [`checklist-perguntas.md`](checklist-perguntas.md) (PR #43): ele diz que perguntas responder ao iniciar, ao decidir e ao entregar.
-> - Entraram no `main` os PRs #48 a #54: a varredura (#48 e #49), a documentação (#50), o BUILD-2 (#51), o TEMA-1 (#52), o DADOS-4 (#53, versão 6 do esquema) e o patch do Expo (#54).
-> - O ajuste do DADOS-4 antes de a versão 6 chegar a um aparelho veio em dois PRs (ver `decisoes.md`):
->   - no `main`, o #56: nome da época no agendamento, nota com o valor antigo, itens ocultos, três serviços padrão garantidos e dinheiro sem negativo;
->   - em revisão, o #57: o pet com serviço fora dos três e os limites de tamanho só no que mudou. Ele era o segundo commit do #56 e chegou depois do merge.
-> - **O Gabriel não abre o app pelo `main` até o #57 entrar**, porque ele ainda muda a versão 6. Um banco que já tenha aberto uma v6 anterior precisa de "Apagar tudo" ou de reinstalar.
-> - Pergunta em aberto: a nota da migração se repete nos automáticos seguintes, porque o próximo copia a observação do concluído. Fica assim?
-> - Próximos passos, depois do #57:
->   - NOMES-1, sozinho, porque mexe em todos os arquivos, com um PR por camada;
->   - tema do sistema na primeira abertura (P19), que precisa de uma migração própria, a versão 7;
->   - ARQ-3 (navegação) e TEST-3 (testes de componentes), que exigem instalação de pacote pelo Gabriel, com a análise de segurança.
-> - Agentes em paralelo partem só do `main` atualizado. Na terceira rodada eles partiram da branch do ARQ-1 antes do merge, e o squash deixou os PRs em conflito (ver `decisoes.md`).
->
-> O clone do Gabriel: o `node_modules` estava incompleto em 2026-11-10 (sem `.bin` e sem a pasta `@expo`), então o `npm run typecheck` e o `export:android` falhavam nele. O `tsc` roda por `node node_modules/typescript/bin/tsc --noEmit`, e os testes rodam. Para consertar, o Gabriel roda `npm ci` no clone, sem mudanças locais pendentes.
->
-> Worktrees a remover depois do merge do #57: `historico-v6` e `patch-expo` (vazios) e o deste PR (`agent-a6a8bd08b4c41484b`, branch `fix/dados4-limites-v6`). Para tirar um worktree, primeiro a junction do `node_modules`, com `cmd /c rmdir`, e depois `git worktree remove`.
+> - Leia antes o [`checklist-perguntas.md`](checklist-perguntas.md).
+> - O Gabriel quer tudo de uma vez, num PR, sem dividir em partes e com textos curtos (2026-11-11).
+> - Em revisão: o PR do NOMES-1 (branch `refactor/nomes-em-ingles-camadas`), com a versão 7 do esquema (nomes em inglês e a tabela `settings`) e o tema que segue o sistema. Depois do merge, um banco de aparelho sobe sozinho para a v7.
+> - Pergunta em aberto: a nota da migração v6 se repete nos automáticos seguintes, porque o próximo copia a observação do concluído. Fica assim?
+> - Falta no código:
+>   - ARQ-3 (navegação), TEST-2 (lint e Prettier, com o lint de hooks) e TEST-3 (testes de componentes): exigem instalação de pacote pelo Gabriel, com a análise de segurança;
+>   - ARQ-1, resto: pastas por assunto (`features/`, `data/`, `shared/`) e a regra de lint de imports, depois do TEST-2;
+>   - o tamanho do Zod (`zod/mini`), deixado para depois;
+>   - Parte 5: APK na release `v1.0.0`, vídeo e README completo.
+> - Do Gabriel: conferir no aparelho os roteiros dos PRs (#22 a #57 e este), o TalkBack e o tamanho do APK; responder as perguntas 3, 4, 6 a 9, 12, 23 e 24 de `perguntas-em-aberto.md`; avisar os parceiros do ruleset e decidir sobre os e-mails dos commits.
+> - Agentes em paralelo partem só do `main` atualizado (ver `decisoes.md`).
 
 ## Pendências entre áreas e varredura (2026-11-09, PRs #35 a #38)
 

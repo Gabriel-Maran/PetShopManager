@@ -2,24 +2,24 @@
 // gravar. Sem depender do Expo, para os testes rodarem no Node, que exige a extensão .ts nos imports.
 import { AppError } from "../errors/AppError.ts";
 import { MESSAGES } from "../globals/messages.ts";
-import type { PaymentsMethod } from "../model/PaymentMethod";
+import type { PaymentMethod } from "../model/PaymentMethod";
 import type { ServiceType } from "../model/ServiceType";
 import type { AppointmentData } from "../validation/appointmentSchema";
 
 /** As listas que o formulário do agendamento oferece. */
 export interface AppointmentChoices {
   services: readonly ServiceType[];
-  paymentMethods: readonly PaymentsMethod[];
+  paymentMethods: readonly PaymentMethod[];
 }
 
 /** O serviço e a forma de pagamento gravados num agendamento: o que a edição deixa passar sem trocar. */
-export type StoredChoices = Pick<AppointmentData, "servico" | "tipo_pgto">;
+export type StoredChoices = Pick<AppointmentData, "service" | "payment_method">;
 
 /** Os nomes gravados do agendamento que está sendo editado; sem ele (id que não existe), nada vale. */
 export const storedChoicesOf = (
   stored: StoredChoices | null | undefined,
 ): StoredChoices | undefined =>
-  stored ? { servico: stored.servico, tipo_pgto: stored.tipo_pgto } : undefined;
+  stored ? { service: stored.service, payment_method: stored.payment_method } : undefined;
 
 /**
  * O serviço e a forma de pagamento escolhidos precisam estar nas listas ativas. Desde a versão 6 do
@@ -33,19 +33,19 @@ export const storedChoicesOf = (
  * ativo.
  */
 export function assertAppointmentChoices(
-  appointment: Pick<AppointmentData, "servico" | "tipo_pgto">,
+  appointment: Pick<AppointmentData, "service" | "payment_method">,
   { services, paymentMethods }: AppointmentChoices,
   current?: StoredChoices,
 ): void {
-  const service = appointment.servico;
-  if (service !== current?.servico && !services.some(({ servico }) => servico === service)) {
+  const service = appointment.service;
+  if (service !== current?.service && !services.some(({ name }) => name === service)) {
     throw new AppError("NOT_FOUND", MESSAGES.appointment.serviceNotFound);
   }
-  const paymentMethod = appointment.tipo_pgto;
+  const paymentMethod = appointment.payment_method;
   if (
     paymentMethod &&
-    paymentMethod !== current?.tipo_pgto &&
-    !paymentMethods.some(({ tipo_pgto }) => tipo_pgto === paymentMethod)
+    paymentMethod !== current?.payment_method &&
+    !paymentMethods.some(({ name }) => name === paymentMethod)
   ) {
     throw new AppError("NOT_FOUND", MESSAGES.appointment.paymentMethodNotFound);
   }

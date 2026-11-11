@@ -45,7 +45,7 @@ export async function upgradeBackup(
   // Sem esta checagem, as migrações criariam as tabelas vazias num arquivo qualquer, e a restauração
   // apagaria os dados do app.
   const tables = await listTables(backup);
-  if (!REQUIRED_BACKUP_TABLES.every((table) => tables.has(table))) {
+  if (!REQUIRED_BACKUP_TABLES.some((required) => required.every((table) => tables.has(table)))) {
     throw new AppError("INVALID_BACKUP", MESSAGES.backup.notABackup);
   }
   // O migrateDatabase também recusa, mas com a mensagem da abertura do app, que fala dos dados do
@@ -131,7 +131,7 @@ async function columnsOf(db: MigrationDatabase, schema: "main" | "src", table: s
 
 // Os triggers são as regras do dia a dia: desativar o dono, por exemplo, desativa os pets e limpa o
 // pacote deles. Na restauração, os dados já vêm prontos do backup, com a agenda e o ponteiro da
-// remarcação (ultimo_visita_data_auto). Desde a versão 4 do esquema, a agenda nem é mais de trigger,
+// remarcação (last_auto_visit_date). Desde a versão 4 do esquema, a agenda nem é mais de trigger,
 // mas a regra vale para qualquer trigger: eles saem durante a cópia e voltam iguais, na mesma ordem,
 // pelo comando guardado no próprio banco do app. Roda dentro da transação: se a cópia falhar, o
 // ROLLBACK traz os triggers de volta.

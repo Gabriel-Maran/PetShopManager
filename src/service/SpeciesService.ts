@@ -1,7 +1,7 @@
 import { AppError } from "../errors/AppError";
 import { MESSAGES } from "../globals/messages";
 import type { Breed, BreedRecord } from "../model/Breed";
-import { raceRepository } from "../repository/RaceRepository";
+import { breedRepository } from "../repository/BreedRepository";
 import { Species, speciesRepository } from "../repository/SpeciesRepository";
 import type { BreedData } from "../validation/breedSchema";
 import { assertBreedOfSpecies, assertNewBreedName } from "./breedRules";
@@ -12,29 +12,29 @@ class SpeciesService {
   }
 
   searchBreeds(speciesId: number, page: number, query: string): Promise<Breed[]> {
-    return raceRepository.searchBreeds(speciesId, page, query);
+    return breedRepository.searchBreeds(speciesId, page, query);
   }
 
   countBreeds(speciesId: number, query: string): Promise<number> {
-    return raceRepository.countBreeds(speciesId, query);
+    return breedRepository.countBreeds(speciesId, query);
   }
 
   getBreedById(id: number): Promise<BreedRecord | null> {
-    return raceRepository.findBreedById(id);
+    return breedRepository.findBreedById(id);
   }
 
   /** Cadastra a raça e devolve o id. A espécie precisa existir, e o nome não pode repetir nela. */
-  async createBreed({ especieId, nomeRaca }: BreedData): Promise<number> {
-    if (!(await speciesRepository.speciesExists(especieId))) {
+  async createBreed({ speciesId, breedName }: BreedData): Promise<number> {
+    if (!(await speciesRepository.speciesExists(speciesId))) {
       throw new AppError("NOT_FOUND", MESSAGES.species.notFound);
     }
-    assertNewBreedName(await raceRepository.listBreedNames(especieId), nomeRaca);
-    return raceRepository.createBreed(especieId, nomeRaca);
+    assertNewBreedName(await breedRepository.listBreedNames(speciesId), breedName);
+    return breedRepository.createBreed(speciesId, breedName);
   }
 
   /** Confere, antes de salvar o pet, que a raça existe e é da espécie escolhida. */
   async assertBreedOfSpecies(breedId: number, speciesId: number): Promise<void> {
-    assertBreedOfSpecies(await raceRepository.findBreedById(breedId), speciesId);
+    assertBreedOfSpecies(await breedRepository.findBreedById(breedId), speciesId);
   }
 }
 

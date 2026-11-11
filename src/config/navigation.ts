@@ -1,16 +1,16 @@
 // As telas do app e para onde o voltar leva a partir de cada uma (BUG-8). Sem depender do React Native,
 // para os testes rodarem no Node; por isso as telas são um objeto, e não um enum.
-import type { IMAGENS_NAMES, NewOrEditCadastros } from "./consts";
+import type { ICON_NAMES, RegistryParams } from "./consts";
 
 export const Screen = {
-  Calendario: "Calendario",
-  Cadastros: "Cadastros",
-  Relatorios: "Relatorios",
-  Configuracoes: "Configuracoes",
+  Calendar: "Calendar",
+  Registry: "Registry",
+  Reports: "Reports",
+  Settings: "Settings",
   NewOrEditOwner: "NewOrEditOwner",
   NewOrEditPet: "NewOrEditPet",
   NewOrEditAppointment: "NewOrEditAppointment",
-  RelatorioView: "RelatorioView",
+  ReportView: "ReportView",
 } as const;
 
 export type Screen = (typeof Screen)[keyof typeof Screen];
@@ -19,21 +19,21 @@ export type Screen = (typeof Screen)[keyof typeof Screen];
 export type Route = Readonly<{ screen: Screen; params?: unknown }>;
 
 /** A tela em que o app abre. O voltar nela fecha o app. */
-export const HOME_SCREEN: Screen = Screen.Calendario;
+export const HOME_SCREEN: Screen = Screen.Calendar;
 
-/** Uma aba da barra de baixo: a tela, o nome mostrado e a chave do ícone em IMAGENS_NAMES. */
+/** Uma aba da barra de baixo: a tela, o nome mostrado e a chave do ícone em ICON_NAMES. */
 export type TabScreen = Readonly<{
   screen: Screen;
   title: string;
-  icon: keyof typeof IMAGENS_NAMES;
+  icon: keyof typeof ICON_NAMES;
 }>;
 
 /** As abas da barra de baixo, na ordem em que aparecem. Só nessas telas a barra fica visível. */
 export const TAB_SCREENS: readonly TabScreen[] = [
-  { screen: Screen.Calendario, title: "Calendário", icon: "CALENDARIO" },
-  { screen: Screen.Cadastros, title: "Cadastros", icon: "PESSOA_ADD" },
-  { screen: Screen.Relatorios, title: "Relatórios", icon: "ARTIGO" },
-  { screen: Screen.Configuracoes, title: "Configurações", icon: "CONFIGURACOES" },
+  { screen: Screen.Calendar, title: "Calendário", icon: "CALENDAR" },
+  { screen: Screen.Registry, title: "Cadastros", icon: "PERSON_ADD" },
+  { screen: Screen.Reports, title: "Relatórios", icon: "ARTICLE" },
+  { screen: Screen.Settings, title: "Configurações", icon: "SETTINGS" },
 ];
 
 /** Se a tela é uma das abas, para o App mostrar a barra de baixo. */
@@ -44,20 +44,20 @@ export function isTabScreen(screen: Screen): boolean {
 const backToHome: Route = { screen: HOME_SCREEN };
 
 /** Os formulários de dono e pet voltam para a aba deles em Cadastros. */
-const backToRegistry = (type: NewOrEditCadastros["type"]): Route => ({
-  screen: Screen.Cadastros,
-  params: { type, mode: "view" } satisfies NewOrEditCadastros,
+const backToRegistry = (type: RegistryParams["type"]): Route => ({
+  screen: Screen.Registry,
+  params: { type, mode: "view" } satisfies RegistryParams,
 });
 
 const BACK_ROUTES: Record<Screen, Route | null> = {
-  [Screen.Calendario]: null,
-  [Screen.Cadastros]: backToHome,
-  [Screen.Relatorios]: backToHome,
-  [Screen.Configuracoes]: backToHome,
-  [Screen.NewOrEditOwner]: backToRegistry("DONO"),
+  [Screen.Calendar]: null,
+  [Screen.Registry]: backToHome,
+  [Screen.Reports]: backToHome,
+  [Screen.Settings]: backToHome,
+  [Screen.NewOrEditOwner]: backToRegistry("OWNER"),
   [Screen.NewOrEditPet]: backToRegistry("PET"),
-  [Screen.NewOrEditAppointment]: { screen: Screen.Calendario },
-  [Screen.RelatorioView]: { screen: Screen.Relatorios },
+  [Screen.NewOrEditAppointment]: { screen: Screen.Calendar },
+  [Screen.ReportView]: { screen: Screen.Reports },
 };
 
 /** Para onde o voltar leva a partir da tela, ou null quando ele fecha o app. */

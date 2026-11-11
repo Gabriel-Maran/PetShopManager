@@ -14,7 +14,7 @@ const page = z.int(MESSAGES.search.invalidPage).nonnegative(MESSAGES.search.inva
 /** A busca de donos e de pets, a mesma nos dois. */
 export const nameSearchSchema = z.object({
   query,
-  ativo: flag("Filtro ativo"),
+  active: flag("Filtro ativo"),
   page,
   limit: z.int(MESSAGES.search.invalidPage).positive(MESSAGES.search.invalidPage),
 });
@@ -24,7 +24,7 @@ export type NameSearchData = z.output<typeof nameSearchSchema>;
 
 /** A busca de raças de uma espécie, no seletor de raça do pet. */
 export const breedSearchSchema = z.object({
-  especieId: id(MESSAGES.breed.speciesRequired),
+  speciesId: id(MESSAGES.breed.speciesRequired),
   query,
   page,
 });

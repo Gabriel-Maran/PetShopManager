@@ -11,10 +11,10 @@ import {
   ThemeColors,
   useTheme,
   useThemedStyles,
-} from "../Themes/ThemeProvider";
+} from "../theme/ThemeProvider";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import ConfirmModal from "./ConfirmModal";
-import { HIDDEN_FROM_SCREEN_READER } from "./Acessibilidade/accessibilityProps";
+import { HIDDEN_FROM_SCREEN_READER } from "./accessibility/accessibilityProps";
 import { DIALOGS } from "../../globals/messages";
 import { A11Y_LABELS } from "../../globals/accessibilityLabels";
 import {
@@ -23,7 +23,7 @@ import {
   LINE_HEIGHTS,
   RADIUS,
   SPACING,
-} from "../Themes/tokens";
+} from "../theme/tokens";
 
 /** O modal aberto: um só por vez, e as duas ações só começam depois da confirmação. */
 type PendingDialog = "export" | "import" | null;
@@ -188,12 +188,12 @@ const styles = (colors: ThemeColors) =>
       borderWidth: 1,
     },
     cardExport: {
-      backgroundColor: colors.EDITAR_BACKGROUND_COLOR,
-      borderColor: colors.EDITAR_BORDER_COLOR,
+      backgroundColor: colors.EDIT_BACKGROUND_COLOR,
+      borderColor: colors.EDIT_BORDER_COLOR,
     },
     cardImport: {
-      backgroundColor: colors.EXCLUIR_BACKGROUND_COLOR,
-      borderColor: colors.EXCLUIR_BORDER_COLOR,
+      backgroundColor: colors.DEACTIVATE_BACKGROUND_COLOR,
+      borderColor: colors.DEACTIVATE_BORDER_COLOR,
     },
     cardIcon: {
       width: 44,
@@ -206,7 +206,7 @@ const styles = (colors: ThemeColors) =>
       backgroundColor: colors.PRIMARY_SOFT,
     },
     cardIconImport: {
-      backgroundColor: colors.EXCLUIR_BACKGROUND_COLOR,
+      backgroundColor: colors.DEACTIVATE_BACKGROUND_COLOR,
     },
     icon: {
       fontSize: FONT_SIZE.TITLE_LARGE,
@@ -220,10 +220,10 @@ const styles = (colors: ThemeColors) =>
       marginBottom: SPACING[2],
     },
     cardTitleExport: {
-      color: colors.EDITAR_MAIN_COLOR,
+      color: colors.EDIT_MAIN_COLOR,
     },
     cardTitleImport: {
-      color: colors.EXCLUIR_MAIN_COLOR,
+      color: colors.DEACTIVATE_MAIN_COLOR,
     },
     cardDescription: {
       fontSize: FONT_SIZE.BODY_SMALL,

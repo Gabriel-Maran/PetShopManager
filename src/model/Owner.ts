@@ -1,13 +1,13 @@
-import type { IsoDate } from "../utils/datas";
+import type { IsoDate } from "../utils/dates";
 
 export interface Owner {
   id?: number;
-  nome: string;
-  telefone: string;
+  name: string;
+  phone: string;
   email?: string | null;
-  endereco?: string | null;
-  is_ativo: number; // 0 ou 1
-  criado_em?: IsoDate;
+  address?: string | null;
+  is_active: number; // 0 ou 1
+  created_at?: IsoDate;
 }
 
 export class OwnerBuilder {
@@ -15,19 +15,19 @@ export class OwnerBuilder {
 
   constructor() {
     this.props = {
-      nome: "",
-      telefone: "",
-      is_ativo: 1,
+      name: "",
+      phone: "",
+      is_active: 1,
     };
   }
 
-  public withNome(nome: string): this {
-    this.props.nome = nome;
+  public withName(name: string): this {
+    this.props.name = name;
     return this;
   }
 
-  public withTelefone(telefone: string): this {
-    this.props.telefone = telefone;
+  public withPhone(phone: string): this {
+    this.props.phone = phone;
     return this;
   }
 
@@ -36,13 +36,13 @@ export class OwnerBuilder {
     return this;
   }
 
-  public withEndereco(endereco: string | null): this {
-    this.props.endereco = endereco;
+  public withAddress(address: string | null): this {
+    this.props.address = address;
     return this;
   }
 
-  public is_ativo(num: number): this {
-    this.props.is_ativo = num !== 0 ? 1 : 0;
+  public withActive(num: number): this {
+    this.props.is_active = num !== 0 ? 1 : 0;
     return this;
   }
 

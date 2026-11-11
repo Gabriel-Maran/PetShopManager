@@ -9,8 +9,8 @@ import { parseInput, parseRecordId } from "../validation/parseInput";
 
 /** A raça nova como o modal manda, antes de conferir. */
 interface BreedInput {
-  especieId: number;
-  nomeRaca: string;
+  speciesId: number;
+  breedName: string;
 }
 
 class SpeciesController {
@@ -24,12 +24,12 @@ class SpeciesController {
     search: string,
   ): Promise<Breed[]> {
     const breedSearch = parseInput(breedSearchSchema, {
-      especieId: speciesId,
+      speciesId: speciesId,
       page,
       query: search,
     });
     return speciesService.searchBreeds(
-      breedSearch.especieId,
+      breedSearch.speciesId,
       breedSearch.page,
       breedSearch.query,
     );
@@ -37,10 +37,10 @@ class SpeciesController {
 
   async countBreeds(speciesId: number, search: string): Promise<number> {
     const breedSearch = parseInput(breedCountSchema, {
-      especieId: speciesId,
+      speciesId: speciesId,
       query: search,
     });
-    return speciesService.countBreeds(breedSearch.especieId, breedSearch.query);
+    return speciesService.countBreeds(breedSearch.speciesId, breedSearch.query);
   }
 
   async getBreedById(id: number): Promise<BreedRecord> {

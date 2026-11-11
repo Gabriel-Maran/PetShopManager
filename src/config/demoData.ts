@@ -4,11 +4,7 @@
 // exemplos. Do app, o módulo só importa a regra pura da remarcação, sem o Expo, para os testes rodarem
 // o SQL num SQLite em memória. Os imports levam a extensão .ts porque o Node dos testes exige.
 import { scheduleForNewPet, type NewPetVisit, type ScheduleClock } from "../domain/packageSchedule.ts";
-
-// Os mesmos valores de petEnums.ts (TipoServico, EspeciesAtendidas e PorteAnimal).
-type ServiceName = "Banho" | "Banho e Tosa" | "Banho e Higiênica";
-type Species = "CAO" | "GATO";
-type Size = "PEQUENO" | "MEDIO" | "GRANDE";
+import { ServiceName, type PetSize, type SpeciesCode } from "./petEnums.ts";
 
 interface DemoOwner {
   name: string;
@@ -26,9 +22,9 @@ interface DemoPackage {
 
 interface DemoPet {
   name: string;
-  species: Species;
-  race: string;
-  size: Size;
+  species: SpeciesCode;
+  breed: string;
+  size: PetSize;
   /** Posição do dono em DEMO_OWNERS. */
   owner: number;
   service: ServiceName;
@@ -74,35 +70,35 @@ const DEMO_OWNERS: DemoOwner[] = [
 
 const DEMO_PETS: DemoPet[] = [
   // Pets com pacote: a regra da remarcação gera a agenda, passada e futura.
-  { name: "Thor", species: "CAO", race: "Labrador Retriever", size: "GRANDE", owner: 0, service: "Banho e Tosa", notes: "Muito ativo", pkg: { visitsPerMonth: 4, price: 32000, startDaysAgo: 42, time: "08:00" } },
-  { name: "Mel", species: "CAO", race: "Vira-lata (SRD)", size: "PEQUENO", owner: 2, service: "Banho", notes: "Dócil", pkg: { visitsPerMonth: 2, price: 16000, startDaysAgo: 56, time: "09:00" } },
-  { name: "Max", species: "CAO", race: "Poodle", size: "MEDIO", owner: 5, service: "Banho e Tosa", notes: "Late bastante", pkg: { visitsPerMonth: 4, price: 28000, startDaysAgo: 35, time: "10:00" } },
-  { name: "Toby", species: "CAO", race: "Shih Tzu", size: "MEDIO", owner: 8, service: "Banho e Tosa", notes: "Muito energético", pkg: { visitsPerMonth: 2, price: 20000, startDaysAgo: 49, time: "14:00" } },
-  { name: "Julie", species: "CAO", race: "Yorkshire Terrier", size: "PEQUENO", owner: 11, service: "Banho", notes: "Sensível ao secador", pkg: { visitsPerMonth: 4, price: 24000, startDaysAgo: 28, time: "09:30" } },
-  { name: "Rex", species: "CAO", race: "Golden Retriever", size: "GRANDE", owner: 13, service: "Banho e Tosa", notes: "Muito forte", pkg: { visitsPerMonth: 2, price: 36000, startDaysAgo: 63, time: "15:00" } },
-  { name: "Teddy", species: "CAO", race: "Spitz Alemão (Lulu)", size: "PEQUENO", owner: 16, service: "Banho e Tosa", notes: "Pelo embaraça fácil", pkg: { visitsPerMonth: 4, price: 24000, startDaysAgo: 21, time: "11:00" } },
-  { name: "Zeus", species: "CAO", race: "Border Collie", size: "GRANDE", owner: 18, service: "Banho e Higiênica", notes: "Obediente", pkg: { visitsPerMonth: 2, price: 38000, startDaysAgo: 70, time: "16:00" } },
+  { name: "Thor", species: "DOG", breed: "Labrador Retriever", size: "LARGE", owner: 0, service: "Banho e Tosa", notes: "Muito ativo", pkg: { visitsPerMonth: 4, price: 32000, startDaysAgo: 42, time: "08:00" } },
+  { name: "Mel", species: "DOG", breed: "Vira-lata (SRD)", size: "SMALL", owner: 2, service: "Banho", notes: "Dócil", pkg: { visitsPerMonth: 2, price: 16000, startDaysAgo: 56, time: "09:00" } },
+  { name: "Max", species: "DOG", breed: "Poodle", size: "MEDIUM", owner: 5, service: "Banho e Tosa", notes: "Late bastante", pkg: { visitsPerMonth: 4, price: 28000, startDaysAgo: 35, time: "10:00" } },
+  { name: "Toby", species: "DOG", breed: "Shih Tzu", size: "MEDIUM", owner: 8, service: "Banho e Tosa", notes: "Muito energético", pkg: { visitsPerMonth: 2, price: 20000, startDaysAgo: 49, time: "14:00" } },
+  { name: "Julie", species: "DOG", breed: "Yorkshire Terrier", size: "SMALL", owner: 11, service: "Banho", notes: "Sensível ao secador", pkg: { visitsPerMonth: 4, price: 24000, startDaysAgo: 28, time: "09:30" } },
+  { name: "Rex", species: "DOG", breed: "Golden Retriever", size: "LARGE", owner: 13, service: "Banho e Tosa", notes: "Muito forte", pkg: { visitsPerMonth: 2, price: 36000, startDaysAgo: 63, time: "15:00" } },
+  { name: "Teddy", species: "DOG", breed: "Spitz Alemão (Lulu)", size: "SMALL", owner: 16, service: "Banho e Tosa", notes: "Pelo embaraça fácil", pkg: { visitsPerMonth: 4, price: 24000, startDaysAgo: 21, time: "11:00" } },
+  { name: "Zeus", species: "DOG", breed: "Border Collie", size: "LARGE", owner: 18, service: "Banho e Higiênica", notes: "Obediente", pkg: { visitsPerMonth: 2, price: 38000, startDaysAgo: 70, time: "16:00" } },
 
   // Pets sem pacote: histórico de visitas a cada everyDays, a última há lastVisitDaysAgo dias.
   // Os que estão há mais de 40 dias sem vir aparecem no relatório de pets ausentes.
-  { name: "Luna", species: "GATO", race: "Persa", size: "PEQUENO", owner: 1, service: "Banho", notes: "Assustada", lastVisitDaysAgo: 12, everyDays: 28 },
-  { name: "Bob", species: "CAO", race: "Labrador Retriever", size: "GRANDE", owner: 3, service: "Banho e Higiênica", notes: "Agitado", lastVisitDaysAgo: 6, everyDays: 21 },
-  { name: "Nina", species: "GATO", race: "Siamês", size: "PEQUENO", owner: 4, service: "Banho", notes: "Calma", lastVisitDaysAgo: 48, everyDays: 30 },
-  { name: "Bella", species: "CAO", race: "Vira-lata (SRD)", size: "PEQUENO", owner: 6, service: "Banho", notes: "Precisa cortar as unhas", lastVisitDaysAgo: 3, everyDays: 14 },
-  { name: "Simba", species: "GATO", race: "Persa", size: "PEQUENO", owner: 7, service: "Banho", notes: "Arisco", lastVisitDaysAgo: 65, everyDays: 35 },
-  { name: "Mia", species: "GATO", race: "Siamês", size: "PEQUENO", owner: 9, service: "Banho", notes: "Quietinha", lastVisitDaysAgo: 20, everyDays: 30 },
-  { name: "Fred", species: "CAO", race: "Labrador Retriever", size: "GRANDE", owner: 10, service: "Banho e Higiênica", notes: "Amigável", lastVisitDaysAgo: 9, everyDays: 21 },
-  { name: "Oliver", species: "GATO", race: "Maine Coon", size: "MEDIO", owner: 12, service: "Banho", notes: "Gosta de colo", lastVisitDaysAgo: 33, everyDays: 35 },
-  { name: "Lola", species: "CAO", race: "Pug", size: "PEQUENO", owner: 14, service: "Banho", notes: "Boazinha", lastVisitDaysAgo: 5, everyDays: 14 },
-  { name: "Pandora", species: "GATO", race: "Ragdoll", size: "MEDIO", owner: 15, service: "Banho", notes: "Pelagem longa", lastVisitDaysAgo: 15, everyDays: 28 },
-  { name: "Spike", species: "CAO", race: "Pinscher", size: "PEQUENO", owner: 17, service: "Banho e Higiênica", notes: "Corre muito", lastVisitDaysAgo: 80, everyDays: 30 },
-  { name: "Kiara", species: "GATO", race: "Angorá", size: "PEQUENO", owner: 19, service: "Banho", notes: "Muito dócil", lastVisitDaysAgo: 2, everyDays: 21 },
-  { name: "Amora", species: "CAO", race: "Bulldog Francês", size: "PEQUENO", owner: 0, service: "Banho", notes: "Filhote", lastVisitDaysAgo: 10, everyDays: 21 },
-  { name: "Apollo", species: "CAO", race: "Golden Retriever", size: "GRANDE", owner: 2, service: "Banho e Tosa", notes: "Gosta de brincar com bola", lastVisitDaysAgo: 18, everyDays: 28 },
-  { name: "Cacau", species: "CAO", race: "Basset Hound", size: "MEDIO", owner: 5, service: "Banho", notes: "Pele sensível, usar xampu neutro", lastVisitDaysAgo: 7, everyDays: 21 },
-  { name: "Duke", species: "CAO", race: "Pitbull", size: "GRANDE", owner: 8, service: "Banho e Higiênica", notes: "Puxa muito a guia", lastVisitDaysAgo: 44, everyDays: 30 },
-  { name: "Chico", species: "GATO", race: "Bengal", size: "PEQUENO", owner: 13, service: "Banho", notes: "Dorme muito", lastVisitDaysAgo: 25, everyDays: 35 },
-  { name: "Kronos", species: "CAO", race: "Chow Chow", size: "GRANDE", owner: 20, service: "Banho", notes: "Idoso, precisa de paciência", lastVisitDaysAgo: 120, everyDays: 30, active: false },
+  { name: "Luna", species: "CAT", breed: "Persa", size: "SMALL", owner: 1, service: "Banho", notes: "Assustada", lastVisitDaysAgo: 12, everyDays: 28 },
+  { name: "Bob", species: "DOG", breed: "Labrador Retriever", size: "LARGE", owner: 3, service: "Banho e Higiênica", notes: "Agitado", lastVisitDaysAgo: 6, everyDays: 21 },
+  { name: "Nina", species: "CAT", breed: "Siamês", size: "SMALL", owner: 4, service: "Banho", notes: "Calma", lastVisitDaysAgo: 48, everyDays: 30 },
+  { name: "Bella", species: "DOG", breed: "Vira-lata (SRD)", size: "SMALL", owner: 6, service: "Banho", notes: "Precisa cortar as unhas", lastVisitDaysAgo: 3, everyDays: 14 },
+  { name: "Simba", species: "CAT", breed: "Persa", size: "SMALL", owner: 7, service: "Banho", notes: "Arisco", lastVisitDaysAgo: 65, everyDays: 35 },
+  { name: "Mia", species: "CAT", breed: "Siamês", size: "SMALL", owner: 9, service: "Banho", notes: "Quietinha", lastVisitDaysAgo: 20, everyDays: 30 },
+  { name: "Fred", species: "DOG", breed: "Labrador Retriever", size: "LARGE", owner: 10, service: "Banho e Higiênica", notes: "Amigável", lastVisitDaysAgo: 9, everyDays: 21 },
+  { name: "Oliver", species: "CAT", breed: "Maine Coon", size: "MEDIUM", owner: 12, service: "Banho", notes: "Gosta de colo", lastVisitDaysAgo: 33, everyDays: 35 },
+  { name: "Lola", species: "DOG", breed: "Pug", size: "SMALL", owner: 14, service: "Banho", notes: "Boazinha", lastVisitDaysAgo: 5, everyDays: 14 },
+  { name: "Pandora", species: "CAT", breed: "Ragdoll", size: "MEDIUM", owner: 15, service: "Banho", notes: "Pelagem longa", lastVisitDaysAgo: 15, everyDays: 28 },
+  { name: "Spike", species: "DOG", breed: "Pinscher", size: "SMALL", owner: 17, service: "Banho e Higiênica", notes: "Corre muito", lastVisitDaysAgo: 80, everyDays: 30 },
+  { name: "Kiara", species: "CAT", breed: "Angorá", size: "SMALL", owner: 19, service: "Banho", notes: "Muito dócil", lastVisitDaysAgo: 2, everyDays: 21 },
+  { name: "Amora", species: "DOG", breed: "Bulldog Francês", size: "SMALL", owner: 0, service: "Banho", notes: "Filhote", lastVisitDaysAgo: 10, everyDays: 21 },
+  { name: "Apollo", species: "DOG", breed: "Golden Retriever", size: "LARGE", owner: 2, service: "Banho e Tosa", notes: "Gosta de brincar com bola", lastVisitDaysAgo: 18, everyDays: 28 },
+  { name: "Cacau", species: "DOG", breed: "Basset Hound", size: "MEDIUM", owner: 5, service: "Banho", notes: "Pele sensível, usar xampu neutro", lastVisitDaysAgo: 7, everyDays: 21 },
+  { name: "Duke", species: "DOG", breed: "Pitbull", size: "LARGE", owner: 8, service: "Banho e Higiênica", notes: "Puxa muito a guia", lastVisitDaysAgo: 44, everyDays: 30 },
+  { name: "Chico", species: "CAT", breed: "Bengal", size: "SMALL", owner: 13, service: "Banho", notes: "Dorme muito", lastVisitDaysAgo: 25, everyDays: 35 },
+  { name: "Kronos", species: "DOG", breed: "Chow Chow", size: "LARGE", owner: 20, service: "Banho", notes: "Idoso, precisa de paciência", lastVisitDaysAgo: 120, everyDays: 30, active: false },
 ];
 
 // Agendamentos avulsos de hoje e dos próximos dias, além do histórico e dos pacotes.
@@ -127,9 +123,9 @@ const HISTORY_DAYS = 180;
 
 // Preço de cada serviço, em centavos.
 const SERVICE_PRICE: Record<ServiceName, number> = {
-  Banho: 6000,
-  "Banho e Tosa": 9500,
-  "Banho e Higiênica": 7500,
+  [ServiceName.Bath]: 6000,
+  [ServiceName.BathAndGrooming]: 9500,
+  [ServiceName.BathAndHygienicTrim]: 7500,
 };
 
 // Os nomes de payment_methods. O agendamento grava o id, achado pelo nome (versão 6 do esquema).
@@ -165,13 +161,13 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
   const nowTime = `${pad(today.getHours())}:${pad(today.getMinutes())}`;
   const clock: ScheduleClock = { today: toIsoDate(today), time: nowTime };
   const phoneOf = (ownerIndex: number) => `(44) 99911-${1111 + ownerIndex}`;
-  const ownerId = (ownerIndex: number) => `(SELECT id FROM owners WHERE telefone = ${text(phoneOf(ownerIndex))})`;
-  const petId = (petName: string) => `(SELECT id FROM pets WHERE nome_normalizado = ${text(normalize(petName))})`;
-  const serviceId = (service: string) => `(SELECT id FROM service_type WHERE servico = ${text(service)})`;
-  // O agendamento guarda o id da forma de pagamento e também o nome (tipo_pgto_nome), os dois ou nenhum:
+  const ownerId = (ownerIndex: number) => `(SELECT id FROM owners WHERE phone = ${text(phoneOf(ownerIndex))})`;
+  const petId = (petName: string) => `(SELECT id FROM pets WHERE normalized_name = ${text(normalize(petName))})`;
+  const serviceId = (service: string) => `(SELECT id FROM services WHERE name = ${text(service)})`;
+  // O agendamento guarda o id da forma de pagamento e também o nome (payment_method_name), os dois ou nenhum:
   // os dois saem da lista, então um nome que ela não tem deixa os dois nulos.
   const paymentColumnsOf = (name: string) =>
-    `(SELECT id FROM payment_methods WHERE tipo_pgto = ${name}), (SELECT tipo_pgto FROM payment_methods WHERE tipo_pgto = ${name})`;
+    `(SELECT id FROM payment_methods WHERE name = ${name}), (SELECT name FROM payment_methods WHERE name = ${name})`;
   const paymentColumns = (method: string | null) => (method ? paymentColumnsOf(text(method)) : "NULL, NULL");
 
   // A forma de pagamento dos atendimentos passados dos pacotes, que gira pelo id do agendamento.
@@ -187,16 +183,16 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
   // Cada pet com pacote entra junto com a agenda, como o PackageScheduleService grava no cadastro: os
   // ids dos agendamentos seguem a mesma ordem, e o ponteiro aponta para o último automático.
   const pets = DEMO_PETS.map((pet) => {
-    const speciesId = `(SELECT id FROM species WHERE nome = ${text(pet.species)})`;
-    const raceId = `(SELECT id FROM race WHERE especie_id = ${speciesId} AND nome_raca = ${text(pet.race)})`;
+    const speciesId = `(SELECT id FROM species WHERE name = ${text(pet.species)})`;
+    const breedId = `(SELECT id FROM breeds WHERE species_id = ${speciesId} AND name = ${text(pet.breed)})`;
     const pkg = pet.pkg;
     const start = pkg ? toIsoDate(addDays(today, -pkg.startDaysAgo)) : null;
     const visits = pkg && start ? packageVisits(pkg, start, clock) : [];
     const lastAuto = visits.filter((visit) => visit.auto).at(-1)?.date;
-    const insertPet = `INSERT INTO pets (nome, nome_normalizado, especie, porte, raca, observacoes, dono_id, servico_padrao_id,
-      remarcacao_ativa, pacote_remarcacao, valor_pacote, data_inicio_pacote, horario_padrao, is_ativo,
-      ultimo_visita_data_auto)
-      VALUES (${text(pet.name)}, ${text(normalize(pet.name))}, ${speciesId}, ${text(pet.size)}, ${raceId},
+    const insertPet = `INSERT INTO pets (name, normalized_name, species_id, size, breed_id, notes, owner_id, default_service_id,
+      reschedule_active, package_frequency, package_price, package_start_date, default_time, is_active,
+      last_auto_visit_date)
+      VALUES (${text(pet.name)}, ${text(normalize(pet.name))}, ${speciesId}, ${text(pet.size)}, ${breedId},
       ${text(pet.notes)}, ${ownerId(pet.owner)}, ${serviceId(pet.service)}, ${flag(Boolean(pkg))},
       ${pkg ? pkg.visitsPerMonth : "NULL"}, ${pkg ? pkg.price : 0},
       ${start ? text(start) : "NULL"}, ${text(pkg ? pkg.time : "00:00")},
@@ -207,7 +203,7 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
         `(${petId(pet.name)}, ${serviceId(pet.service)}, ${text(pet.service)}, ${text(visit.date)}, ${text(pkg.time)}, 0, ${flag(visit.auto)}, ${visit.cents})`,
     );
     return `${insertPet}
-    INSERT INTO appointments (pet_id, servico_id, servico_nome, data, hora, entregar_pet, is_auto_agen, valor) VALUES
+    INSERT INTO appointments (pet_id, service_id, service_name, date, time, deliver_pet, is_auto, price) VALUES
       ${rows.join(",\n      ")};`;
   });
 
@@ -240,26 +236,26 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
   });
 
   return `
-    INSERT INTO owners (nome, nome_normalizado, telefone, email, endereco, is_ativo) VALUES
+    INSERT INTO owners (name, normalized_name, phone, email, address, is_active) VALUES
       ${owners.join(",\n      ")};
 
     ${pets.join("\n\n    ")}
 
-    INSERT INTO appointments (pet_id, servico_id, servico_nome, data, hora, entregar_pet, concluido,
-      observacao, is_auto_agen, valor, tipo_pgto_id, tipo_pgto_nome, ta_pago) VALUES
+    INSERT INTO appointments (pet_id, service_id, service_name, date, time, deliver_pet, completed,
+      notes, is_auto, price, payment_method_id, payment_method_name, is_paid) VALUES
       ${appointments.join(",\n      ")};
 
     -- Os atendimentos passados dos pacotes, que a remarcação gera como manuais, ficam concluídos e pagos.
     UPDATE appointments
-    SET concluido = 1, ta_pago = 1,
-        tipo_pgto_id = (SELECT pm.id FROM payment_methods pm WHERE pm.tipo_pgto = ${pastPaymentName}),
-        tipo_pgto_nome = (SELECT pm.tipo_pgto FROM payment_methods pm WHERE pm.tipo_pgto = ${pastPaymentName})
-    WHERE concluido = 0 AND is_auto_agen = 0 AND data < ${todayDate};
+    SET completed = 1, is_paid = 1,
+        payment_method_id = (SELECT pm.id FROM payment_methods pm WHERE pm.name = ${pastPaymentName}),
+        payment_method_name = (SELECT pm.name FROM payment_methods pm WHERE pm.name = ${pastPaymentName})
+    WHERE completed = 0 AND is_auto = 0 AND date < ${todayDate};
 
-    -- A última visita de cada pet é a data do último atendimento concluído.
+    -- A última visita de cada pet é a date do último atendimento concluído.
     UPDATE pets
-    SET current_ultima_visita_data = (
-      SELECT MAX(data) FROM appointments a WHERE a.pet_id = pets.id AND a.concluido = 1
+    SET last_visit_date = (
+      SELECT MAX(date) FROM appointments a WHERE a.pet_id = pets.id AND a.completed = 1
     );
   `;
 }

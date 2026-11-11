@@ -1,7 +1,7 @@
 import { getDatabase } from "../config/database";
 import { DEACTIVATE_PET_SQL, FIND_PET_SQL, searchPetsSql } from "./sql/petsSql";
 import { fetchPage } from "./fetchPage";
-import { Pet, PetWithSpecieRaceAndOwner } from "../model/Pet";
+import { Pet, PetWithSpeciesBreedAndOwner } from "../model/Pet";
 import type { NameSearch, Page } from "../model/Search";
 
 // Cadastrar, editar e reativar podem mexer na agenda do pacote, então esses comandos ficam no
@@ -12,8 +12,8 @@ class PetRepository {
     return db.getFirstAsync<Pet>(FIND_PET_SQL, [id]);
   }
 
-  searchPetsPage(search: NameSearch): Promise<Page<PetWithSpecieRaceAndOwner>> {
-    return fetchPage<PetWithSpecieRaceAndOwner>(searchPetsSql(search));
+  searchPetsPage(search: NameSearch): Promise<Page<PetWithSpeciesBreedAndOwner>> {
+    return fetchPage<PetWithSpeciesBreedAndOwner>(searchPetsSql(search));
   }
 
   async deactivatePet(id: number): Promise<void> {
