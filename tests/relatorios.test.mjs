@@ -4,8 +4,7 @@
 // podem ser fixas.
 import { beforeEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { createDatabase, insertOwner, insertPet, isoDate } from "./helpers/database.mjs";
-import { INSERT_APPOINTMENT_SQL } from "../src/repository/sql/appointmentsSql.ts";
+import { createDatabase, insertAppointment as insertAppointmentRow, insertOwner, insertPet, isoDate } from "./helpers/database.mjs";
 import { DEACTIVATE_PET_SQL } from "../src/repository/sql/petsSql.ts";
 import {
   ACTIVE_PACKAGES_SQL,
@@ -27,9 +26,9 @@ import {
 } from "../src/utils/relatorios/graficos.ts";
 import { lastMonthsRange, nextMonthsRange } from "../src/utils/relatorios/meses.ts";
 
-/** Agendamento com os parâmetros na ordem do INSERT_APPOINTMENT_SQL. */
+/** Agendamento de R$ 50,00 no PIX, pelo comando do app. */
 function insertAppointment(db, petId, data, { concluido = 0, hora = "10:00", automatico = 0 } = {}) {
-  db.prepare(INSERT_APPOINTMENT_SQL).run(petId, "Banho", data, hora, 0, concluido, null, automatico, 5000, "PIX", 0);
+  insertAppointmentRow(db, petId, { data, concluido, hora, is_auto_agen: automatico, valor: 5000, tipo_pgto: "PIX" });
 }
 
 const setPet = (db, id, column, value) =>

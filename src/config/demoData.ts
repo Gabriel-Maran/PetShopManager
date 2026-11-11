@@ -168,7 +168,16 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
   const ownerId = (ownerIndex: number) => `(SELECT id FROM owners WHERE telefone = ${text(phoneOf(ownerIndex))})`;
   const petId = (petName: string) => `(SELECT id FROM pets WHERE nome_normalizado = ${text(normalize(petName))})`;
   const serviceId = (service: string) => `(SELECT id FROM service_type WHERE servico = ${text(service)})`;
-  const paymentMethodId = (method: string) => `(SELECT id FROM payment_methods WHERE tipo_pgto = ${text(method)})`;
+  // O agendamento guarda o id da forma de pagamento e também o nome (tipo_pgto_nome), os dois ou nenhum:
+  // os dois saem da lista, então um nome que ela não tem deixa os dois nulos.
+  const paymentColumnsOf = (name: string) =>
+    `(SELECT id FROM payment_methods WHERE tipo_pgto = ${name}), (SELECT tipo_pgto FROM payment_methods WHERE tipo_pgto = ${name})`;
+  const paymentColumns = (method: string | null) => (method ? paymentColumnsOf(text(method)) : "NULL, NULL");
+
+  // A forma de pagamento dos atendimentos passados dos pacotes, que gira pelo id do agendamento.
+  const pastPaymentName = `CASE appointments.id % ${PAYMENT_METHODS.length}
+    ${PAYMENT_METHODS.map((method, index) => `WHEN ${index} THEN ${text(method)}`).join(" ")}
+  END`;
 
   const owners = DEMO_OWNERS.map((owner, index) => {
     const email = `${normalize(owner.name).replaceAll(" ", ".")}@example.com`;
@@ -195,19 +204,19 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
     if (!pkg || visits.length === 0) return insertPet;
     const rows = visits.map(
       (visit) =>
-        `(${petId(pet.name)}, ${serviceId(pet.service)}, ${text(visit.date)}, ${text(pkg.time)}, 0, ${flag(visit.auto)}, ${visit.cents})`,
+        `(${petId(pet.name)}, ${serviceId(pet.service)}, ${text(pet.service)}, ${text(visit.date)}, ${text(pkg.time)}, 0, ${flag(visit.auto)}, ${visit.cents})`,
     );
     return `${insertPet}
-    INSERT INTO appointments (pet_id, servico_id, data, hora, entregar_pet, is_auto_agen, valor) VALUES
+    INSERT INTO appointments (pet_id, servico_id, servico_nome, data, hora, entregar_pet, is_auto_agen, valor) VALUES
       ${rows.join(",\n      ")};`;
   });
 
   const appointments: string[] = [];
   let paymentIndex = 0;
   const appointment = (pet: DemoPet, date: Date, time: string, done: boolean, taxiDog: boolean) => {
-    const payment = done ? paymentMethodId(PAYMENT_METHODS[paymentIndex++ % PAYMENT_METHODS.length]) : "NULL";
+    const payment = paymentColumns(done ? PAYMENT_METHODS[paymentIndex++ % PAYMENT_METHODS.length] : null);
     appointments.push(
-      `(${petId(pet.name)}, ${serviceId(pet.service)}, ${text(toIsoDate(date))}, ${text(time)}, ${flag(taxiDog)}, ${flag(done)}, NULL, 0, ${SERVICE_PRICE[pet.service]}, ${payment}, ${flag(done)})`,
+      `(${petId(pet.name)}, ${serviceId(pet.service)}, ${text(pet.service)}, ${text(toIsoDate(date))}, ${text(time)}, ${flag(taxiDog)}, ${flag(done)}, NULL, 0, ${SERVICE_PRICE[pet.service]}, ${payment}, ${flag(done)})`,
     );
   };
 
@@ -236,19 +245,15 @@ export function buildDemoDataSql({ today, normalize }: DemoDataOptions): string 
 
     ${pets.join("\n\n    ")}
 
-    INSERT INTO appointments (pet_id, servico_id, data, hora, entregar_pet, concluido, observacao,
-      is_auto_agen, valor, tipo_pgto_id, ta_pago) VALUES
+    INSERT INTO appointments (pet_id, servico_id, servico_nome, data, hora, entregar_pet, concluido,
+      observacao, is_auto_agen, valor, tipo_pgto_id, tipo_pgto_nome, ta_pago) VALUES
       ${appointments.join(",\n      ")};
 
     -- Os atendimentos passados dos pacotes, que a remarcação gera como manuais, ficam concluídos e pagos.
     UPDATE appointments
     SET concluido = 1, ta_pago = 1,
-        tipo_pgto_id = (
-          SELECT pm.id FROM payment_methods pm
-          WHERE pm.tipo_pgto = CASE appointments.id % 4
-            WHEN 0 THEN 'PIX' WHEN 1 THEN 'Cartão de Débito' WHEN 2 THEN 'Dinheiro' ELSE 'Cartão de Crédito'
-          END
-        )
+        tipo_pgto_id = (SELECT pm.id FROM payment_methods pm WHERE pm.tipo_pgto = ${pastPaymentName}),
+        tipo_pgto_nome = (SELECT pm.tipo_pgto FROM payment_methods pm WHERE pm.tipo_pgto = ${pastPaymentName})
     WHERE concluido = 0 AND is_auto_agen = 0 AND data < ${todayDate};
 
     -- A última visita de cada pet é a data do último atendimento concluído.

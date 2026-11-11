@@ -23,9 +23,9 @@ import {
   INSERT_PACKAGE_VISIT_SQL,
   LIST_CONCLUDED_DATES_FROM_SQL,
   UPDATE_APPOINTMENT_SQL,
+  updateAppointmentParams,
+  type SqlValue,
 } from "./sql/appointmentsSql.ts";
-
-type SqlValue = string | number | null;
 
 /** A parte da conexão do expo-sqlite que a remarcação usa, com a transação das migrações. */
 export interface ScheduleDatabase extends MigrationDatabase {
@@ -113,20 +113,7 @@ export class PackageScheduleRepository {
   }
 
   async updateAppointment(id: number, appointment: Appointment): Promise<void> {
-    await this.db.runAsync(
-      UPDATE_APPOINTMENT_SQL,
-      appointment.pet_id,
-      appointment.servico,
-      appointment.data,
-      appointment.hora,
-      appointment.entregar_pet,
-      appointment.concluido,
-      appointment.observacao ?? null,
-      appointment.valor,
-      appointment.tipo_pgto,
-      appointment.ta_pago,
-      id,
-    );
+    await this.db.runAsync(UPDATE_APPOINTMENT_SQL, ...updateAppointmentParams(appointment, id));
   }
 
   findAppointmentState(id: number): Promise<AppointmentState | null> {
@@ -139,6 +126,7 @@ export class PackageScheduleRepository {
         INSERT_PACKAGE_VISIT_SQL,
         visit.petId,
         visit.serviceId,
+        visit.serviceId, // de novo, para o nome que o id tem agora (servico_nome)
         visit.date,
         visit.time ?? null,
         visit.deliverPet,
