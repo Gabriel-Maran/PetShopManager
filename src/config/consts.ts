@@ -2,17 +2,16 @@ import { Platform, StatusBar } from "react-native";
 import { Pet, PetWithSpeciesBreedAndOwner } from "../model/Pet";
 import { Owner } from "../model/Owner";
 
-export const STATUS_BAR_HEIGHT =
-  Platform.OS === "ios" ? 44 : (StatusBar.currentHeight ?? 24);
+export const STATUS_BAR_HEIGHT = Platform.OS === "ios" ? 44 : (StatusBar.currentHeight ?? 24);
 
 export const APP_BAR_HEIGHT = 70;
 
 export const LIMIT_ITEM_PAGE = 20;
 
 export const ICONS_BY_NAME = {
-  ARTICLE: require("../assets/nav_bar/artigo.png"),
+  ARTICLE: require("../assets/nav_bar/article.png"),
   PERSON_ADD: require("../assets/nav_bar/personAdd.png"),
-  CALENDAR: require("../assets/nav_bar/calendario.png"),
+  CALENDAR: require("../assets/nav_bar/calendar.png"),
   SETTINGS: require("../assets/nav_bar/settings.png"),
 };
 
@@ -24,6 +23,7 @@ export {
   SpeciesCode,
   SpeciesLabel,
   isPackageFrequency,
+  isPetSize,
   PackageFrequency,
   PetSize,
   PetSizeLabel,

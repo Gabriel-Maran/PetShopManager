@@ -17,9 +17,7 @@ class PetController {
     return pet;
   }
 
-  async searchPetsPage(
-    search: NameSearch,
-  ): Promise<Page<PetWithSpeciesBreedAndOwner>> {
+  async searchPetsPage(search: NameSearch): Promise<Page<PetWithSpeciesBreedAndOwner>> {
     return petService.searchPetsPage(validateNameSearch(search));
   }
 

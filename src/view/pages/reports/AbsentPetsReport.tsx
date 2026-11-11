@@ -1,6 +1,6 @@
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
-import { ThemeColors, useThemedStyles } from "../../theme/ThemeProvider";
-import { useTheme } from "../../theme/ThemeProvider";
+import { ThemeColors, useThemedStyles, useTheme } from "../../theme/ThemeProvider";
+
 import BarChart from "../../components/reports/BarChart";
 import { reportsService } from "../../../service/ReportsService";
 import TitleBar from "../../components/registry/TitleBar";
@@ -9,21 +9,13 @@ import { RADIUS, SPACING } from "../../theme/tokens";
 
 export default function AbsentPetsReport() {
   const { data, loading } = useAsyncData(() =>
-    Promise.all([
-      reportsService.getAbsentPets(false),
-      reportsService.getAbsentPets(true),
-    ]),
+    Promise.all([reportsService.getAbsentPets(false), reportsService.getAbsentPets(true)]),
   );
 
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
-  const titleBar = (
-    <TitleBar
-      title="Pets Ausentes"
-      subtitle="Pets há mais tempo sem visita"
-    />
-  );
+  const titleBar = <TitleBar title="Pets Ausentes" subtitle="Pets há mais tempo sem visita" />;
 
   if (loading) {
     return (
@@ -43,10 +35,7 @@ export default function AbsentPetsReport() {
   return (
     <View style={s.mainContainer}>
       {titleBar}
-      <ScrollView
-        contentContainerStyle={s.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={s.card}>
           <BarChart
             data={petsWithoutPackage}

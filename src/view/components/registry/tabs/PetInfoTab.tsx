@@ -1,14 +1,7 @@
 import { ImageSourcePropType, StyleSheet, Text, View } from "react-native";
 import { SpeciesLabel } from "../../../../config/consts";
-import {
-  MAX_NOTES_LENGTH,
-  MAX_PET_NAME_LENGTH,
-} from "../../../../globals/limits";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../../theme/ThemeProvider";
+import { MAX_NOTES_LENGTH, MAX_PET_NAME_LENGTH } from "../../../../globals/limits";
+import { ThemeColors, useTheme, useThemedStyles } from "../../../theme/ThemeProvider";
 import InputInfo from "../InputInfo";
 import InputSelect from "../../InputSelect";
 import SelectionField from "../SelectionField";
@@ -24,14 +17,22 @@ import type { Species } from "../../../../repository/SpeciesRepository";
 import type { PetForm } from "../../../pages/pet/petForm";
 import { RADIUS, SPACING } from "../../../theme/tokens";
 
+import type { SelectableItem } from "../../../../utils/openSelectionModal";
+
 export type ModalKind = "OWNER" | "BREED";
+
+/** Um porte na lista do formulário: o código gravado e o rótulo. */
+export interface SizeOption {
+  id: PetSize;
+  name: string;
+}
 
 export interface OpenModalConfig {
   title: string;
   modalKind: ModalKind;
   itemIcon?: ImageSourcePropType;
-  items: any[];
-  onSelect: (item: any) => void;
+  items: SelectableItem[];
+  onSelect: (item: SelectableItem) => void;
 }
 
 interface PetInfoTabProps {
@@ -43,7 +44,7 @@ interface PetInfoTabProps {
   openModal: (config: OpenModalConfig) => void;
   speciesList: Species[];
   breedsList: Breed[];
-  sizesList: { id: PetSize; name: string }[];
+  sizesList: SizeOption[];
 }
 
 export default function PetInfoTab({
@@ -67,17 +68,17 @@ export default function PetInfoTab({
   // abre inteira, e salvar sem mudar vale; o que for editado volta a respeitar o limite (schema).
   const [notesMaxLength] = useState(() => Math.max(MAX_NOTES_LENGTH, form.notes.length));
 
-  // --- Busca nome do dono quando não é novo pet e owner_id muda ---
+  // --- Busca nome do dono quando não é novo pet e o dono muda ---
   useEffect(() => {
-    if (isNewPet || !form.owner_id) return;
+    if (isNewPet || !form.ownerId) return;
 
     let cancelled = false;
 
     ownerController
-      .getOwnerById(form.owner_id)
+      .getOwnerById(form.ownerId)
       .then((result) => {
         if (!cancelled && result?.name) {
-          updateField("owner_name", result.name);
+          updateField("ownerName", result.name);
         }
       })
       .catch(showError);
@@ -85,47 +86,40 @@ export default function PetInfoTab({
     return () => {
       cancelled = true;
     };
-  }, [isNewPet, form.owner_id]);
+  }, [isNewPet, form.ownerId, showError, updateField]);
 
-  // --- Busca nome da raça quando não é novo pet e raca muda ---
+  // --- Busca nome da raça quando não é novo pet e a raça muda ---
   useEffect(() => {
-    if (isNewPet || !form.breed_id) return;
+    if (isNewPet || !form.breedId) return;
 
     let cancelled = false;
 
     speciesController
-      .getBreedById(form.breed_id)
+      .getBreedById(form.breedId)
       .then((breed) => {
-        if (!cancelled) updateField("breed_name", breed.name);
+        if (!cancelled) updateField("breedName", breed.name);
       })
       .catch(showError);
 
     return () => {
       cancelled = true;
     };
-  }, [isNewPet, form.breed_id]);
-
-  // --- Sincroniza porte ao carregar pet existente ---
-  useEffect(() => {
-    if (isNewPet || !form.size) return;
-    const foundSize = sizesList.find((item) => item.id === form.size);
-    if (foundSize) updateField("size", foundSize.id);
-  }, [isNewPet]);
+  }, [isNewPet, form.breedId, showError, updateField]);
 
   // A raça é de uma espécie só: trocar a espécie apaga a raça escolhida, e o pet pede outra ao salvar.
   const handleSelectSpecies = useCallback(
     (item: Species) => {
-      if (item.id === form.species_id) return;
-      updateField("species_id", item.id);
-      updateField("breed_id", 0);
-      updateField("breed_name", "");
+      if (item.id === form.speciesId) return;
+      updateField("speciesId", item.id);
+      updateField("breedId", 0);
+      updateField("breedName", "");
     },
-    [form.species_id, updateField],
+    [form.speciesId, updateField],
   );
 
   const selectedSpecies = useMemo(
-    () => speciesList.find((e) => e.id === form.species_id),
-    [speciesList, form.species_id],
+    () => speciesList.find((e) => e.id === form.speciesId),
+    [speciesList, form.speciesId],
   );
 
   const selectedSize = useMemo(
@@ -134,46 +128,46 @@ export default function PetInfoTab({
   );
 
   const handleSelectOwner = useCallback(
-    (item: any) => {
-      updateField("owner_id", item.id);
-      updateField("owner_name", item.name);
+    (item: SelectableItem) => {
+      updateField("ownerId", item.id ?? 0);
+      updateField("ownerName", item.name);
     },
     [updateField],
   );
 
   const handleClearOwner = useCallback(() => {
-    updateField("owner_id", 0);
-    updateField("owner_name", "");
+    updateField("ownerId", 0);
+    updateField("ownerName", "");
   }, [updateField]);
 
   const handleOpenOwnerModal = useCallback(() => {
     openModal({
       title: "Selecionar Dono",
       modalKind: "OWNER",
-      itemIcon: require("../../../../assets/animais/iconDono.png"),
+      itemIcon: require("../../../../assets/animals/iconOwner.png"),
       items: [],
       onSelect: handleSelectOwner,
     });
   }, [openModal, handleSelectOwner]);
 
   const handleSelectBreed = useCallback(
-    (item: any) => {
-      updateField("breed_id", item.id);
-      updateField("breed_name", item.name);
+    (item: SelectableItem) => {
+      updateField("breedId", item.id ?? 0);
+      updateField("breedName", item.name);
     },
     [updateField],
   );
 
   const handleClearBreed = useCallback(() => {
-    updateField("breed_id", 0);
-    updateField("breed_name", "");
+    updateField("breedId", 0);
+    updateField("breedName", "");
   }, [updateField]);
 
   const handleOpenBreedModal = useCallback(() => {
     openModal({
       title: "Selecionar Raça",
       modalKind: "BREED",
-      itemIcon: require("../../../../assets/animais/iconPata.png"),
+      itemIcon: require("../../../../assets/animals/iconPaw.png"),
       items: breedsList,
       onSelect: handleSelectBreed,
     });
@@ -181,53 +175,40 @@ export default function PetInfoTab({
 
   const handleBreedCreated = useCallback(
     (id: number, breedName: string) => {
-      updateField("breed_id", id);
-      updateField("breed_name", breedName);
+      updateField("breedId", id);
+      updateField("breedName", breedName);
       setIsBreedFormOpen(false);
     },
     [updateField],
   );
 
-  const handleOpenBreedForm = useCallback(
-    () => setIsBreedFormOpen(true),
-    [],
-  );
-  const handleCloseBreedForm = useCallback(
-    () => setIsBreedFormOpen(false),
-    [],
-  );
+  const handleOpenBreedForm = useCallback(() => setIsBreedFormOpen(true), []);
+  const handleCloseBreedForm = useCallback(() => setIsBreedFormOpen(false), []);
 
   const renderSpeciesItem = useCallback(
-    (item: any) => (
+    (item: Species) => (
       <Text style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}>
-        {
-          SpeciesLabel[
-            item.name as keyof typeof SpeciesLabel
-          ]
-        }
+        {SpeciesLabel[item.name as keyof typeof SpeciesLabel]}
       </Text>
     ),
     [colors.TEXT_PRIMARY],
   );
 
   const renderSizeItem = useCallback(
-    (item: any) => (
-      <Text style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}>
-        {item.name}
-      </Text>
+    (item: SizeOption) => (
+      <Text style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}>{item.name}</Text>
     ),
     [colors.TEXT_PRIMARY],
   );
 
   const speciesLabelExtractor = useCallback(
-    (item: any) =>
-      SpeciesLabel[item.name as keyof typeof SpeciesLabel],
+    (item: Species) => SpeciesLabel[item.name as keyof typeof SpeciesLabel],
     [],
   );
 
-  const sizeLabelExtractor = useCallback((item: any) => item.name, []);
+  const sizeLabelExtractor = useCallback((item: SizeOption) => item.name, []);
 
-  if (visible == false) {
+  if (!visible) {
     return;
   }
 
@@ -235,7 +216,7 @@ export default function PetInfoTab({
     <>
       <View style={s.inputs}>
         <InputInfo
-          image={require("../../../../assets/animais/iconNome.png")}
+          image={require("../../../../assets/animals/iconName.png")}
           item={form.name}
           setItem={(v) => updateField("name", v)}
           placeholder="Digite o nome..."
@@ -247,10 +228,10 @@ export default function PetInfoTab({
         />
 
         <SelectionField
-          image={require("../../../../assets/animais/iconDono.png")}
+          image={require("../../../../assets/animals/iconOwner.png")}
           titleName="Dono"
-          selectedRecord={form.owner_name}
-          buttonText={form.owner_name ? "Trocar dono" : "Selecionar dono"}
+          selectedRecord={form.ownerName}
+          buttonText={form.ownerName ? "Trocar dono" : "Selecionar dono"}
           hasBorderBottom={true}
           onPress={handleOpenOwnerModal}
           onClear={handleClearOwner}
@@ -260,7 +241,7 @@ export default function PetInfoTab({
 
         <InputSelect
           titleName="Espécie"
-          image={require("../../../../assets/animais/iconEspecie.png")}
+          image={require("../../../../assets/animals/iconSpecies.png")}
           placeholder="Selecione a espécie..."
           options={speciesList}
           itemSelected={selectedSpecies}
@@ -271,12 +252,12 @@ export default function PetInfoTab({
           isEditable={isEditable}
         />
 
-        {form.species_id ? (
+        {form.speciesId ? (
           <SelectionField
-            image={require("../../../../assets/animais/iconRaca.png")}
+            image={require("../../../../assets/animals/iconBreed.png")}
             titleName="Raça"
-            selectedRecord={form.breed_name}
-            buttonText={form.breed_name ? "Trocar raça" : "Selecionar raça"}
+            selectedRecord={form.breedName}
+            buttonText={form.breedName ? "Trocar raça" : "Selecionar raça"}
             hasBorderBottom={true}
             onPress={handleOpenBreedModal}
             onClear={handleClearBreed}
@@ -289,7 +270,7 @@ export default function PetInfoTab({
 
         <InputSelect
           titleName="Porte"
-          image={require("../../../../assets/animais/iconPorte.png")}
+          image={require("../../../../assets/animals/iconSize.png")}
           placeholder="Selecione o Porte do animal"
           options={sizesList}
           itemSelected={selectedSize}
@@ -301,7 +282,7 @@ export default function PetInfoTab({
         />
 
         <InputInfo
-          image={require("../../../../assets/nav_bar/artigo.png")}
+          image={require("../../../../assets/nav_bar/article.png")}
           item={form.notes}
           setItem={(v) => updateField("notes", v)}
           placeholder="Uma observação adicional..."

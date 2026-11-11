@@ -1,29 +1,13 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { exportDatabase, importDatabase } from "../../service/BackupService";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../theme/ThemeProvider";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import ConfirmModal from "./ConfirmModal";
 import { HIDDEN_FROM_SCREEN_READER } from "./accessibility/accessibilityProps";
 import { DIALOGS } from "../../globals/messages";
 import { A11Y_LABELS } from "../../globals/accessibilityLabels";
-import {
-  FONT_SIZE,
-  FONT_WEIGHT,
-  LINE_HEIGHTS,
-  RADIUS,
-  SPACING,
-} from "../theme/tokens";
+import { FONT_SIZE, FONT_WEIGHT, LINE_HEIGHTS, RADIUS, SPACING } from "../theme/tokens";
 
 /** O modal aberto: um só por vez, e as duas ações só começam depois da confirmação. */
 type PendingDialog = "export" | "import" | null;
@@ -76,10 +60,7 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
         accessibilityHint={A11Y_LABELS.backup.exportHint}
         accessibilityState={{ busy: exportAction.isRunning }}
       >
-        <View
-          style={[s.cardIcon, s.cardIconExport]}
-          {...HIDDEN_FROM_SCREEN_READER}
-        >
+        <View style={[s.cardIcon, s.cardIconExport]} {...HIDDEN_FROM_SCREEN_READER}>
           <Text style={s.icon}>📤</Text>
         </View>
         <View style={s.cardText}>
@@ -88,9 +69,7 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
             Salva o banco de dados atual e abre o compartilhamento do sistema.
           </Text>
         </View>
-        {exportAction.isRunning && (
-          <ActivityIndicator color={colors.GREEN_COLOR} />
-        )}
+        {exportAction.isRunning && <ActivityIndicator color={colors.GREEN_COLOR} />}
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -102,10 +81,7 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
         accessibilityHint={A11Y_LABELS.backup.importHint}
         accessibilityState={{ busy: importAction.isRunning }}
       >
-        <View
-          style={[s.cardIcon, s.cardIconImport]}
-          {...HIDDEN_FROM_SCREEN_READER}
-        >
+        <View style={[s.cardIcon, s.cardIconImport]} {...HIDDEN_FROM_SCREEN_READER}>
           <Text style={s.icon}>📥</Text>
         </View>
         <View style={s.cardText}>
@@ -114,9 +90,7 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
             Seleciona um arquivo .db e substitui os dados atuais.
           </Text>
         </View>
-        {importAction.isRunning && (
-          <ActivityIndicator color={colors.RED_COLOR} />
-        )}
+        {importAction.isRunning && <ActivityIndicator color={colors.RED_COLOR} />}
       </TouchableOpacity>
 
       <View style={s.warning}>
@@ -124,8 +98,8 @@ export function DatabaseTransfer({ onImportSuccess }: DatabaseTransferProps) {
           ⚠️
         </Text>
         <Text style={s.warningText}>
-          A importação substitui permanentemente todos os dados existentes.
-          Exporte antes de importar.
+          A importação substitui permanentemente todos os dados existentes. Exporte antes de
+          importar.
         </Text>
       </View>
 

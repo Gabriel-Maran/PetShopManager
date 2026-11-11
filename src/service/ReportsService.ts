@@ -10,11 +10,7 @@ import {
   RESCHEDULE_BARS,
   WEEKDAY_BARS,
 } from "../utils/reports/charts";
-import {
-  lastMonthsRange,
-  type MonthRange,
-  nextMonthsRange,
-} from "../utils/reports/months";
+import { lastMonthsRange, type MonthRange, nextMonthsRange } from "../utils/reports/months";
 
 /** Quantos pets cada gráfico de pets ausentes mostra. */
 const ABSENT_PETS_LIMIT = 30;

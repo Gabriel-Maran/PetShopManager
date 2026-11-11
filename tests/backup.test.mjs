@@ -23,16 +23,16 @@ import {
 import { buildDemoDataSql } from "../src/config/demoData.ts";
 import { normalizeForSearch } from "../src/utils/formatters/normalizeForSearch.ts";
 import { MIGRATIONS } from "../src/config/schema.ts";
-import {
-  restoreBackup,
-  upgradeBackup,
-} from "../src/config/backupRestore.ts";
+import { restoreBackup, upgradeBackup } from "../src/config/backupRestore.ts";
 import { BACKUP_TABLES } from "../src/repository/sql/backupSql.ts";
 import {
   FIND_APPOINTMENT_SQL,
   LIST_APPOINTMENTS_BETWEEN_SQL,
 } from "../src/repository/sql/appointmentsSql.ts";
-import { LIST_PAYMENT_METHODS_SQL, LIST_SERVICE_TYPES_SQL } from "../src/repository/sql/listsSql.ts";
+import {
+  LIST_PAYMENT_METHODS_SQL,
+  LIST_SERVICE_TYPES_SQL,
+} from "../src/repository/sql/listsSql.ts";
 import { FIND_PET_SQL } from "../src/repository/sql/petsSql.ts";
 import { MESSAGES } from "../src/globals/messages.ts";
 import { AppError } from "../src/errors/AppError.ts";
@@ -66,7 +66,9 @@ function fillLegacyBackup(backup) {
     package_price: "200,00",
   });
   backup
-    .prepare("INSERT INTO appointments (pet_id, servico, data, valor, concluido) VALUES (?, 'Banho', ?, '12,5', 1)")
+    .prepare(
+      "INSERT INTO appointments (pet_id, servico, data, valor, concluido) VALUES (?, 'Banho', ?, '12,5', 1)",
+    )
     .run(pet.id, legacyDateInt(-10));
   return pet;
 }
@@ -109,15 +111,23 @@ function failingOnCopyOf(app, table) {
 }
 
 const rows = tableRows;
-const allTables = (db) => Object.fromEntries(BACKUP_TABLES.map((table) => [table, rows(db, table)]));
+const allTables = (db) =>
+  Object.fromEntries(BACKUP_TABLES.map((table) => [table, rows(db, table)]));
 /** Os atendimentos concluídos, como objetos simples para comparar. */
 const doneAppointments = (db) =>
-  db.prepare("SELECT date, price FROM appointments WHERE completed = 1").all().map((row) => ({ ...row }));
+  db
+    .prepare("SELECT date, price FROM appointments WHERE completed = 1")
+    .all()
+    .map((row) => ({ ...row }));
 const idSequences = (db) => db.prepare("SELECT name, seq FROM sqlite_sequence ORDER BY name").all();
 const appTriggers = (db) =>
   db.prepare("SELECT name, sql FROM sqlite_master WHERE type = 'trigger' ORDER BY rowid").all();
 const userVersion = (db) => db.prepare("PRAGMA user_version").get().user_version;
-const isAttached = (db) => db.prepare("PRAGMA database_list").all().some(({ name }) => name === "src");
+const isAttached = (db) =>
+  db
+    .prepare("PRAGMA database_list")
+    .all()
+    .some(({ name }) => name === "src");
 const foreignKeysOn = (db) => db.prepare("PRAGMA foreign_keys").get().foreign_keys === 1;
 
 /** Confere que a importação recusada não mexeu em nada do app. */
@@ -150,10 +160,14 @@ describe("restauração de backup", () => {
   test("BKP-1: o ponteiro da remarcação dos pets com pacote volta igual ao do backup", async () => {
     const { uri, backup } = await createBackup();
     // Um backup antigo: a agenda do pacote ia só até a metade, e o ponteiro apontava para lá.
-    const pet = backup.prepare("SELECT id FROM pets WHERE reschedule_active = 1 ORDER BY id LIMIT 1").get();
+    const pet = backup
+      .prepare("SELECT id FROM pets WHERE reschedule_active = 1 ORDER BY id LIMIT 1")
+      .get();
     const pending = pendingAutoOf(backup, pet.id);
     const cut = pending[Math.floor(pending.length / 2)].date;
-    backup.prepare("DELETE FROM appointments WHERE pet_id = ? AND is_auto = 1 AND date > ?").run(pet.id, cut);
+    backup
+      .prepare("DELETE FROM appointments WHERE pet_id = ? AND is_auto = 1 AND date > ?")
+      .run(pet.id, cut);
     backup.prepare("UPDATE pets SET last_auto_visit_date = ? WHERE id = ?").run(cut, pet.id);
     const app = await createDatabase();
 
@@ -172,7 +186,12 @@ describe("restauração de backup", () => {
     await importBackup(app, { uri, backup });
 
     const owner_id = insertOwner(app, { name: "Dono novo" });
-    const pet = await createPet(app, { owner_id, reschedule_active: 1, package_frequency: 2, package_start_date: isoDate(1) });
+    const pet = await createPet(app, {
+      owner_id,
+      reschedule_active: 1,
+      package_frequency: 2,
+      package_start_date: isoDate(1),
+    });
 
     const agenda = pendingAutoOf(app, pet.id);
     assert.ok(agenda.length > 0, "a remarcação gera a agenda no banco restaurado");
@@ -219,7 +238,10 @@ describe("restauração de backup", () => {
     const before = snapshot(app);
 
     // Os agendamentos são a última tabela copiada: as outras já foram trocadas quando ela falha.
-    await assert.rejects(restoreBackup(failingOnCopyOf(app, "appointments"), uri), /disk I\/O error/);
+    await assert.rejects(
+      restoreBackup(failingOnCopyOf(app, "appointments"), uri),
+      /disk I\/O error/,
+    );
 
     assertUntouched(app, before);
     backup.close();
@@ -254,7 +276,11 @@ describe("backup de versão anterior", () => {
     const backup = await databaseAt(3, uri);
     const owner_id = insertOwner(backup, { name: "Dono do backup da versão 3" });
     const pet = insertPet(backup, {
-      owner_id, reschedule_active: 1, package_frequency: 2, package_start_date: isoDate(-20), package_price: 20001,
+      owner_id,
+      reschedule_active: 1,
+      package_frequency: 2,
+      package_start_date: isoDate(-20),
+      package_price: 20001,
     });
     const agendaBefore = rows(backup, "appointments");
     assert.ok(agendaBefore.length > 0, "o trigger da versão 3 gerou a agenda");
@@ -266,16 +292,26 @@ describe("backup de versão anterior", () => {
     // Desde a versão 6, o serviço vai pelo id (o "Banho" é o 1 da carga inicial) e pelo nome da época,
     // e o "0" do DEFAULT antigo do pagamento é a forma não informada.
     const inV6 = ({ service, payment_method, ...rest }) => ({
-      ...rest, service_id: 1, service_name: "Banho", payment_method_id: null, payment_method_name: null,
+      ...rest,
+      service_id: 1,
+      service_name: "Banho",
+      payment_method_id: null,
+      payment_method_name: null,
     });
     assert.deepEqual(
       rows(app, "appointments").map((row) => ({ ...row })),
       agendaBefore.map(inV6),
       "a agenda vem como estava",
     );
-    assert.equal(petRow(app, pet.id).last_auto_visit_date, pendingAutoOf(backup, pet.id).at(-1).date);
+    assert.equal(
+      petRow(app, pet.id).last_auto_visit_date,
+      pendingAutoOf(backup, pet.id).at(-1).date,
+    );
     const triggers = appTriggers(app).map(({ name }) => name);
-    assert.ok(!triggers.includes("trg_pet_remarcacao_insert") && !triggers.includes("trg_remarcacao_automatica"));
+    assert.ok(
+      !triggers.includes("trg_pet_remarcacao_insert") &&
+        !triggers.includes("trg_remarcacao_automatica"),
+    );
     backup.close();
   });
 
@@ -308,7 +344,12 @@ describe("backup de versão anterior", () => {
     const shown = app
       .prepare(LIST_APPOINTMENTS_BETWEEN_SQL)
       .all(isoDate(-10), isoDate(0))
-      .map(({ service, payment_method, time, price }) => ({ service, payment_method, time, price }));
+      .map(({ service, payment_method, time, price }) => ({
+        service,
+        payment_method,
+        time,
+        price,
+      }));
     assert.deepEqual(shown, [
       { service: "Banho e Tosa", payment_method: "PIX", time: "09:30", price: 9500 },
       { service: "Hidratação", payment_method: "Vale-presente", time: "15:00", price: 4000 },
@@ -342,9 +383,19 @@ describe("backup de versão anterior", () => {
       `INSERT INTO appointments (pet_id, servico, data, hora, valor, tipo_pgto, observacao, concluido)
        VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
     );
-    const textOnly = Number(insert.run(pet.id, "Banho", isoDate(-7), "9:30", 6000, "PIX", null).lastInsertRowid);
+    const textOnly = Number(
+      insert.run(pet.id, "Banho", isoDate(-7), "9:30", 6000, "PIX", null).lastInsertRowid,
+    );
     const hidden = Number(
-      insert.run(pet.id, "Hidratação", isoDate(-3), "abc", -50, "Vale-presente", "Já tinha observação").lastInsertRowid,
+      insert.run(
+        pet.id,
+        "Hidratação",
+        isoDate(-3),
+        "abc",
+        -50,
+        "Vale-presente",
+        "Já tinha observação",
+      ).lastInsertRowid,
     );
     const app = await appWithData();
 
@@ -353,7 +404,11 @@ describe("backup de versão anterior", () => {
     // As listas vêm do backup, com o "Banho" ativo e os desconhecidos ocultos.
     assert.deepEqual(rows(app, "payment_methods"), rows(backup, "payment_methods"));
     assert.deepEqual(rows(app, "services"), rows(backup, "services"));
-    const active = (sql, column) => app.prepare(sql).all().map((row) => row[column]);
+    const active = (sql, column) =>
+      app
+        .prepare(sql)
+        .all()
+        .map((row) => row[column]);
     assert.ok(active(LIST_SERVICE_TYPES_SQL, "name").includes("Banho"));
     assert.ok(!active(LIST_SERVICE_TYPES_SQL, "name").includes("Hidratação"));
     assert.ok(!active(LIST_PAYMENT_METHODS_SQL, "name").includes("Vale-presente"));
@@ -361,21 +416,38 @@ describe("backup de versão anterior", () => {
     // As notas, os nomes da época e os ids de pagamento da lista do backup.
     const restoredPet = app.prepare(FIND_PET_SQL).get(pet.id);
     assert.deepEqual(
-      [restoredPet.size, restoredPet.default_time, restoredPet.package_price, restoredPet.default_service],
+      [
+        restoredPet.size,
+        restoredPet.default_time,
+        restoredPet.package_price,
+        restoredPet.default_service,
+      ],
       ["MEDIUM", "00:00", 0, "Banho"],
     );
     assert.equal(
       restoredPet.notes,
       'Observação do pet\nPorte antigo: "xyz". Serviço padrão antigo: "Hidratação". Horário padrão antigo: "25:00". Valor do pacote antigo: "-11,50".',
     );
-    const stored = (id) =>
-      ({ ...app.prepare("SELECT service_name, payment_method_id, payment_method_name, time, price, notes FROM appointments WHERE id = ?").get(id) });
+    const stored = (id) => ({
+      ...app
+        .prepare(
+          "SELECT service_name, payment_method_id, payment_method_name, time, price, notes FROM appointments WHERE id = ?",
+        )
+        .get(id),
+    });
     assert.deepEqual(stored(textOnly), {
-      service_name: "Banho", payment_method_id: 3, payment_method_name: "PIX", time: "09:30", price: 6000, notes: null,
+      service_name: "Banho",
+      payment_method_id: 3,
+      payment_method_name: "PIX",
+      time: "09:30",
+      price: 6000,
+      notes: null,
     });
     assert.deepEqual(stored(hidden), {
       service_name: "Hidratação",
-      payment_method_id: backup.prepare("SELECT id FROM payment_methods WHERE name = 'Vale-presente'").get().id,
+      payment_method_id: backup
+        .prepare("SELECT id FROM payment_methods WHERE name = 'Vale-presente'")
+        .get().id,
       payment_method_name: "Vale-presente",
       time: "00:00",
       price: 0,
@@ -383,27 +455,51 @@ describe("backup de versão anterior", () => {
     });
 
     // Editar o oculto sem trocar funciona, e renomear depois da restauração não muda o histórico.
-    const before = { ...app.prepare("SELECT service_id, payment_method_id FROM appointments WHERE id = ?").get(hidden) };
+    const before = {
+      ...app
+        .prepare("SELECT service_id, payment_method_id FROM appointments WHERE id = ?")
+        .get(hidden),
+    };
     // Pelo caminho do app (schema, conferência das listas e remarcação), com o "Vale-presente" e o
     // "Hidratação" ocultos vindos da migração.
-    await editAppointmentLikeTheApp(app, hidden, { is_paid: 1, notes: "Editei depois de restaurar" });
+    await editAppointmentLikeTheApp(app, hidden, {
+      is_paid: 1,
+      notes: "Editei depois de restaurar",
+    });
     assert.equal(app.prepare(FIND_APPOINTMENT_SQL).get(hidden).notes, "Editei depois de restaurar");
-    assert.deepEqual({ ...app.prepare("SELECT service_id, payment_method_id FROM appointments WHERE id = ?").get(hidden) }, before);
+    assert.deepEqual(
+      {
+        ...app
+          .prepare("SELECT service_id, payment_method_id FROM appointments WHERE id = ?")
+          .get(hidden),
+      },
+      before,
+    );
     app.prepare("UPDATE services SET name = 'Hidratação premium' WHERE name = 'Hidratação'").run();
     app.prepare("UPDATE payment_methods SET name = 'Pix' WHERE name = 'PIX'").run();
     app.prepare("UPDATE payment_methods SET name = 'Vale' WHERE name = 'Vale-presente'").run();
     const shown = app.prepare(LIST_APPOINTMENTS_BETWEEN_SQL).all(isoDate(-10), isoDate(0));
     assert.deepEqual(
       shown.map(({ service, payment_method }) => ({ service, payment_method })),
-      [{ service: "Banho", payment_method: "PIX" }, { service: "Hidratação", payment_method: "Vale-presente" }],
+      [
+        { service: "Banho", payment_method: "PIX" },
+        { service: "Hidratação", payment_method: "Vale-presente" },
+      ],
     );
 
     // O esquema é o de um banco novo, e os dados de exemplo carregam sobre ele.
-    const schema = (db) => db.prepare("SELECT type, name, sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type, name").all();
+    const schema = (db) =>
+      db
+        .prepare(
+          "SELECT type, name, sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type, name",
+        )
+        .all();
     assert.deepEqual(schema(app), schema(await createDatabase()));
     app.exec("DELETE FROM owners;");
     app.exec(buildDemoDataSql({ today: new Date(), normalize: normalizeForSearch }));
-    const demo = app.prepare("SELECT COUNT(*) AS total, SUM(service_name IS NULL) AS unnamed FROM appointments").get();
+    const demo = app
+      .prepare("SELECT COUNT(*) AS total, SUM(service_name IS NULL) AS unnamed FROM appointments")
+      .get();
     assert.ok(demo.total > 0 && demo.unnamed === 0);
     backup.close();
   });
@@ -418,7 +514,9 @@ describe("backup de versão anterior", () => {
     await importBackup(app, { uri, backup });
 
     assert.equal(userVersion(backup), LATEST);
-    const restoredPet = app.prepare("SELECT package_price, package_start_date FROM pets WHERE id = ?").get(pet.id);
+    const restoredPet = app
+      .prepare("SELECT package_price, package_start_date FROM pets WHERE id = ?")
+      .get(pet.id);
     assert.deepEqual({ ...restoredPet }, { package_price: 20000, package_start_date: isoDate(3) });
     assert.deepEqual(doneAppointments(app), [{ date: isoDate(-10), price: 1250 }]);
     backup.close();
@@ -434,7 +532,10 @@ describe("arquivo inválido ou malicioso", () => {
     const app = await appWithData();
     const before = snapshot(app);
 
-    await assert.rejects(importBackup(app, { uri, backup }), rejection(MESSAGES.backup.newerVersion));
+    await assert.rejects(
+      importBackup(app, { uri, backup }),
+      rejection(MESSAGES.backup.newerVersion),
+    );
 
     assertUntouched(app, before);
     assert.equal(userVersion(backup), LATEST + 1, "a cópia não é mexida");
@@ -452,7 +553,11 @@ describe("arquivo inválido ou malicioso", () => {
 
     assertUntouched(app, before);
     const tables = backup.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all();
-    assert.deepEqual(tables.map(({ name }) => name), ["notas"], "nenhuma tabela é criada na cópia");
+    assert.deepEqual(
+      tables.map(({ name }) => name),
+      ["notas"],
+      "nenhuma tabela é criada na cópia",
+    );
     assert.equal(userVersion(backup), 0);
     backup.close();
   });
@@ -489,7 +594,11 @@ describe("arquivo inválido ou malicioso", () => {
     await assert.rejects(importBackup(app, { uri, backup }), (error) => {
       assert.equal(error.code, "INVALID_BACKUP");
       assert.equal(error.message, MESSAGES.backup.damaged);
-      assert.match(error.cause.message, /idx_pets_dono_id/, "o problema achado fica no cause, para o log");
+      assert.match(
+        error.cause.message,
+        /idx_pets_dono_id/,
+        "o problema achado fica no cause, para o log",
+      );
       return true;
     });
 
@@ -531,7 +640,11 @@ describe("arquivo inválido ou malicioso", () => {
     const app = await appWithData();
     const before = snapshot(app);
 
-    assert.equal(backup.prepare("PRAGMA trusted_schema").get().trusted_schema, 0, "aberto como o app abre");
+    assert.equal(
+      backup.prepare("PRAGMA trusted_schema").get().trusted_schema,
+      0,
+      "aberto como o app abre",
+    );
     await assert.rejects(importBackup(app, { uri, backup }), (error) => {
       assert.equal(error.message, MESSAGES.backup.notABackup);
       assert.match(error.cause.message, /unsafe use of efeito_colateral/);

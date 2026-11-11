@@ -44,11 +44,7 @@ class ReportsRepository {
   }
 
   /** Contagem por mês ("AAAA-MM") entre as duas datas, com as pontas. */
-  countByMonth(
-    completed: boolean,
-    from: IsoDate,
-    to: IsoDate,
-  ): Promise<GroupCount<string>[]> {
+  countByMonth(completed: boolean, from: IsoDate, to: IsoDate): Promise<GroupCount<string>[]> {
     return this.countBy(APPOINTMENTS_BY_MONTH_SQL, [asFlag(completed), from, to]);
   }
 
@@ -72,11 +68,7 @@ class ReportsRepository {
     limit: number,
   ): Promise<AbsentPetRow[]> {
     const db = await getDatabase();
-    return db.getAllAsync<AbsentPetRow>(ABSENT_PETS_SQL, [
-      today,
-      asFlag(rescheduleActive),
-      limit,
-    ]);
+    return db.getAllAsync<AbsentPetRow>(ABSENT_PETS_SQL, [today, asFlag(rescheduleActive), limit]);
   }
 }
 

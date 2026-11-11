@@ -1,14 +1,5 @@
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../theme/ThemeProvider";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { ThemeColors, useTheme, useThemedStyles } from "../../theme/ThemeProvider";
 import { RADIUS, SPACING } from "../../theme/tokens";
 
 /**

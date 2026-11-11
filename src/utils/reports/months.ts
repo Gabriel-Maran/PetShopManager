@@ -3,7 +3,20 @@
 import { dateToIso, type IsoDate, monthOf, todayIso } from "../dates.ts";
 import type { BarSpec } from "./charts.ts";
 
-const MONTH_LABELS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+const MONTH_LABELS = [
+  "Jan",
+  "Fev",
+  "Mar",
+  "Abr",
+  "Mai",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Set",
+  "Out",
+  "Nov",
+  "Dez",
+];
 
 /** O intervalo de datas que o banco conta e uma barra para cada mês dele, mesmo os sem atendimento. */
 export interface MonthRange {

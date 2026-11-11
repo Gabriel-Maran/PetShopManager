@@ -246,7 +246,6 @@ export const SQL_TRIGGER_PET_REMARCACAO_ATIVAR_V2 = `
   END;
 `;
 
-
 export const V2: Migration = {
   // Os triggers só agem quando o valor muda de fato.
   version: 2,

@@ -36,7 +36,9 @@ export const ownerSchema = z.object({
       MESSAGES.owner.emailInvalid,
     ),
   ),
-  address: optional(text(MAX_ADDRESS_LENGTH, MESSAGES.textTooLong("O endereço", MAX_ADDRESS_LENGTH))),
+  address: optional(
+    text(MAX_ADDRESS_LENGTH, MESSAGES.textTooLong("O endereço", MAX_ADDRESS_LENGTH)),
+  ),
   is_active: flag("Ativo"),
 });
 

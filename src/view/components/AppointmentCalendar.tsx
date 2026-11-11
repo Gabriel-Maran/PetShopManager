@@ -1,11 +1,8 @@
-import { Calendar, LocaleConfig } from "react-native-calendars";
+import { Calendar, LocaleConfig, type CalendarProps } from "react-native-calendars";
 import { StyleSheet, Text, View } from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../theme/ThemeProvider";
-import { useEffect, useMemo } from "react";
+import { ThemeColors, useTheme, useThemedStyles } from "../theme/ThemeProvider";
+import { useCallback, useMemo } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { useError } from "../../hooks/useError";
 
 import { appointmentController } from "../../controller/AppointmentsController";
@@ -13,6 +10,7 @@ import { appointmentController } from "../../controller/AppointmentsController";
 import { dateToIso, todayIso } from "../../utils/dates";
 import { useCalendar } from "../contexts/CalendarContext";
 import { FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "../theme/tokens";
+import type { CalendarTheme } from "../theme/calendarTheme";
 
 // Configuração do calendário para português do Brasil
 LocaleConfig.locales["pt-br"] = {
@@ -44,15 +42,7 @@ LocaleConfig.locales["pt-br"] = {
     "Nov",
     "Dez",
   ],
-  dayNames: [
-    "Domingo",
-    "Segunda",
-    "Terça",
-    "Quarta",
-    "Quinta",
-    "Sexta",
-    "Sábado",
-  ],
+  dayNames: ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"],
   dayNamesShort: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
   today: "Hoje",
 };
@@ -72,46 +62,25 @@ export default function AppointmentCalendar() {
     setDatedAppointments,
   } = useCalendar();
 
-  const monthAndYearOf = () => {
-    const data = selectedMonth || dateSelected;
-    const [year, month] = data.split("-");
-
-    return {
-      year: Number(year),
-      month: Number(month),
-    };
-  };
-
-  function monthRangeOf() {
-    const { month, year } = monthAndYearOf();
-    // No Date, o mês vai de 0 a 11: (ano, mes - 1, 1) é o dia 1 do mês, e o dia 0 do mês seguinte,
-    // (ano, mes, 0), é o último dia dele (28, 29, 30 ou 31).
-    return {
-      rangeStart: dateToIso(new Date(year, month - 1, 1)),
-      rangeEnd: dateToIso(new Date(year, month, 0)),
-    };
-  }
-
-  useEffect(() => {
-    const { rangeStart, rangeEnd } = monthRangeOf();
-    appointmentController
-      .getAppointmentsByDateRange(rangeStart, rangeEnd)
-      .then(setDatedAppointments)
-      .catch(showError);
-  }, [selectedMonth, dateSelected]);
+  useFocusEffect(
+    useCallback(() => {
+      const { rangeStart, rangeEnd } = monthRangeOf(selectedMonth || dateSelected);
+      appointmentController
+        .getAppointmentsByDateRange(rangeStart, rangeEnd)
+        .then(setDatedAppointments)
+        .catch(showError);
+    }, [selectedMonth, dateSelected, setDatedAppointments, showError]),
+  );
 
   const markedDays = useMemo(() => {
-    const marks = datedAppointments.reduce(
-      (acc, appointment) => {
-        acc[appointment.date] = {
-          marked: true,
-          dotColor: colors.PRIMARY_CONTRAST,
-        };
+    const marks = datedAppointments.reduce((acc, appointment) => {
+      acc[appointment.date] = {
+        marked: true,
+        dotColor: colors.PRIMARY_CONTRAST,
+      };
 
-        return acc;
-      },
-      {} as Record<string, any>,
-    );
+      return acc;
+    }, {} as MarkedDates);
 
     marks[dateSelected] = {
       ...(marks[dateSelected] ?? {}),
@@ -120,12 +89,7 @@ export default function AppointmentCalendar() {
     };
 
     return marks;
-  }, [
-    datedAppointments,
-    dateSelected,
-    colors.PRIMARY,
-    colors.PRIMARY_CONTRAST,
-  ]);
+  }, [datedAppointments, dateSelected, colors.PRIMARY_CONTRAST]);
   const s = useThemedStyles(styles);
 
   const today = todayIso();
@@ -162,7 +126,6 @@ export default function AppointmentCalendar() {
             ...markedDays[today],
             marked: markedDays[today]?.marked ?? true,
             dotColor: colors.BACKGROUND,
-            selectedDotColor: colors.BACKGROUND,
             selected: true,
             customStyles: {
               container: {
@@ -268,7 +231,7 @@ export default function AppointmentCalendar() {
                 backgroundColor: colors.PRIMARY_CONTRAST,
               },
             },
-          } as any
+          } as CalendarTheme
         }
       />
     </View>
@@ -291,3 +254,17 @@ const styles = (colors: ThemeColors) =>
       borderRadius: RADIUS[15],
     },
   });
+
+type MarkedDates = NonNullable<CalendarProps["markedDates"]>;
+
+/**
+ * O primeiro e o último dia do mês de `date` ("AAAA-MM" ou "AAAA-MM-DD"). No Date, o mês vai de 0 a
+ * 11: (ano, mês - 1, 1) é o dia 1, e o dia 0 do mês seguinte, (ano, mês, 0), é o último.
+ */
+function monthRangeOf(date: string) {
+  const [year, month] = date.split("-").map(Number);
+  return {
+    rangeStart: dateToIso(new Date(year, month - 1, 1)),
+    rangeEnd: dateToIso(new Date(year, month, 0)),
+  };
+}

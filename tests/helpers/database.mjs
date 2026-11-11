@@ -10,7 +10,7 @@ import { migrateDatabase } from "../../src/config/migrator.ts";
 import { normalizeForSearch } from "../../src/utils/formatters/normalizeForSearch.ts";
 import { todayIso } from "../../src/utils/dates.ts";
 import { INSERT_OWNER_SQL } from "../../src/repository/sql/ownersSql.ts";
-import { INSERT_PET_SQL, UPDATE_PET_SQL } from "../../src/repository/sql/petsSql.ts";
+import { INSERT_PET_SQL, UPDATE_PET_SQL, FIND_PET_SQL } from "../../src/repository/sql/petsSql.ts";
 import {
   APPOINTMENT_COLUMNS,
   APPOINTMENTS_TABLE,
@@ -18,8 +18,11 @@ import {
   INSERT_APPOINTMENT_SQL,
   insertAppointmentParams,
 } from "../../src/repository/sql/appointmentsSql.ts";
-import { FIND_PET_SQL } from "../../src/repository/sql/petsSql.ts";
-import { LIST_PAYMENT_METHODS_SQL, LIST_SERVICE_TYPES_SQL } from "../../src/repository/sql/listsSql.ts";
+
+import {
+  LIST_PAYMENT_METHODS_SQL,
+  LIST_SERVICE_TYPES_SQL,
+} from "../../src/repository/sql/listsSql.ts";
 import { PackageScheduleService } from "../../src/service/PackageScheduleService.ts";
 import { assertAppointmentChoices, storedChoicesOf } from "../../src/service/appointmentRules.ts";
 import { appointmentSchemaFor } from "../../src/validation/appointmentSchema.ts";
@@ -86,17 +89,41 @@ const legacySize = (size) => LEGACY_SIZES[size] ?? size;
 
 /** O nome de hoje de cada coluna de antes da versão 7, para ler um banco antigo com os nomes novos. */
 const ENGLISH_COLUMNS = {
-  nome: "name", nome_normalizado: "normalized_name", telefone: "phone", endereco: "address",
-  is_ativo: "is_active", criado_em: "created_at", especie: "species_id", porte: "size", raca: "breed_id",
-  observacoes: "notes", dono_id: "owner_id", servico_padrao: "default_service",
-  servico_padrao_id: "default_service_id", remarcacao_ativa: "reschedule_active",
-  pacote_remarcacao: "package_frequency", valor_pacote: "package_price",
-  data_inicio_pacote: "package_start_date", horario_padrao: "default_time",
-  current_ultima_visita_data: "last_visit_date", ultimo_visita_data_auto: "last_auto_visit_date",
-  servico: "service", servico_id: "service_id", servico_nome: "service_name", data: "date", hora: "time",
-  dia_semana: "weekday", entregar_pet: "deliver_pet", concluido: "completed", observacao: "notes",
-  is_auto_agen: "is_auto", valor: "price", tipo_pgto: "payment_method", tipo_pgto_id: "payment_method_id",
-  tipo_pgto_nome: "payment_method_name", ta_pago: "is_paid",
+  nome: "name",
+  nome_normalizado: "normalized_name",
+  telefone: "phone",
+  endereco: "address",
+  is_ativo: "is_active",
+  criado_em: "created_at",
+  especie: "species_id",
+  porte: "size",
+  raca: "breed_id",
+  observacoes: "notes",
+  dono_id: "owner_id",
+  servico_padrao: "default_service",
+  servico_padrao_id: "default_service_id",
+  remarcacao_ativa: "reschedule_active",
+  pacote_remarcacao: "package_frequency",
+  valor_pacote: "package_price",
+  data_inicio_pacote: "package_start_date",
+  horario_padrao: "default_time",
+  current_ultima_visita_data: "last_visit_date",
+  ultimo_visita_data_auto: "last_auto_visit_date",
+  servico: "service",
+  servico_id: "service_id",
+  servico_nome: "service_name",
+  data: "date",
+  hora: "time",
+  dia_semana: "weekday",
+  entregar_pet: "deliver_pet",
+  concluido: "completed",
+  observacao: "notes",
+  is_auto_agen: "is_auto",
+  valor: "price",
+  tipo_pgto: "payment_method",
+  tipo_pgto_id: "payment_method_id",
+  tipo_pgto_nome: "payment_method_name",
+  ta_pago: "is_paid",
 };
 
 /** As colunas da tabela, as de antes da versão 7 com o nome de hoje (inclusive a gerada, dia_semana). */
@@ -168,18 +195,20 @@ const legacyServiceColumn = (version) =>
 const legacyServiceValue = (version) =>
   version < LIST_IDS_VERSION ? "?" : "(SELECT id FROM service_type WHERE servico = ?)";
 
-const legacyInsertPetSql = (version) => `INSERT INTO pets (nome, nome_normalizado, especie, porte, raca,
+const legacyInsertPetSql = (
+  version,
+) => `INSERT INTO pets (nome, nome_normalizado, especie, porte, raca,
   observacoes, dono_id, ${legacyServiceColumn(version)}, remarcacao_ativa,
   pacote_remarcacao, data_inicio_pacote, horario_padrao, valor_pacote)
   VALUES (?, ?, ?, ?, ?, ?, ?, ${legacyServiceValue(version)}, ?, ?, ?, ?, ?)`;
 
-const legacyUpdatePetSql = (version) => `UPDATE pets SET nome = ?, nome_normalizado = ?, especie = ?,
+const legacyUpdatePetSql = (
+  version,
+) => `UPDATE pets SET nome = ?, nome_normalizado = ?, especie = ?,
   porte = ?, raca = ?, observacoes = ?, dono_id = ?,
   ${legacyServiceColumn(version)} = ${legacyServiceValue(version)},
   remarcacao_ativa = ?, pacote_remarcacao = ?, data_inicio_pacote = ?, horario_padrao = ?, valor_pacote = ?
   WHERE id = ?`;
-
-const isLegacy = (db) => schemaVersion(db) < LIST_IDS_VERSION;
 
 // Os parâmetros na ordem do INSERT_PET_SQL e do UPDATE_PET_SQL, como o PetRepository monta.
 const petParams = (pet, legacy = false) => [
@@ -229,11 +258,20 @@ export async function createPet(db, fields, now = new Date()) {
 }
 
 /** Salva o formulário de edição do pet como o app faz: regrava todos os campos, pela remarcação. */
-export const savePet = (db, pet, now = new Date()) => packageScheduleOf(db).updatePet(pet.id, pet, now);
+export const savePet = (db, pet, now = new Date()) =>
+  packageScheduleOf(db).updatePet(pet.id, pet, now);
 
 const DEFAULT_APPOINTMENT = {
-  service: "Banho", date: null, time: "10:00", deliver_pet: 0, completed: 0, notes: null,
-  is_auto: 0, price: 6000, payment_method: "", is_paid: 0,
+  service: "Banho",
+  date: null,
+  time: "10:00",
+  deliver_pet: 0,
+  completed: 0,
+  notes: null,
+  is_auto: 0,
+  price: 6000,
+  payment_method: "",
+  is_paid: 0,
 };
 
 /**
@@ -256,7 +294,10 @@ export async function editAppointmentLikeTheApp(db, id, fields) {
   const appointment = parseInput(appointmentSchemaFor(stored), { ...stored, ...fields });
   assertAppointmentChoices(
     appointment,
-    { services: db.prepare(LIST_SERVICE_TYPES_SQL).all(), paymentMethods: db.prepare(LIST_PAYMENT_METHODS_SQL).all() },
+    {
+      services: db.prepare(LIST_SERVICE_TYPES_SQL).all(),
+      paymentMethods: db.prepare(LIST_PAYMENT_METHODS_SQL).all(),
+    },
     storedChoicesOf(stored),
   );
   await packageScheduleOf(db).updateAppointment(id, appointment);
@@ -271,10 +312,18 @@ export async function editPetLikeTheApp(db, id, fields, now = new Date()) {
 
 /** As linhas da tabela na ordem em que entraram. Num banco de antes da versão 7, com os nomes de hoje. */
 export const tableRows = (db, table) =>
-  db.prepare(`SELECT ${isBeforeEnglish(db) ? englishColumnsOf(db, table) : "*"} FROM ${table} ORDER BY rowid`).all();
+  db
+    .prepare(
+      `SELECT ${isBeforeEnglish(db) ? englishColumnsOf(db, table) : "*"} FROM ${table} ORDER BY rowid`,
+    )
+    .all();
 
 export const petRow = (db, id) =>
-  db.prepare(`SELECT ${isBeforeEnglish(db) ? englishColumnsOf(db, "pets") : "*"} FROM pets WHERE id = ?`).get(id);
+  db
+    .prepare(
+      `SELECT ${isBeforeEnglish(db) ? englishColumnsOf(db, "pets") : "*"} FROM pets WHERE id = ?`,
+    )
+    .get(id);
 
 /**
  * Os agendamentos do pet, com as colunas que as telas leem (o serviço e a forma de pagamento pelo nome),
@@ -284,10 +333,14 @@ export const petRow = (db, id) =>
 export const appointmentsOf = (db, petId) =>
   isBeforeEnglish(db)
     ? db
-        .prepare(`SELECT ${englishColumnsOf(db, "appointments")} FROM appointments WHERE pet_id = ? ORDER BY data, id`)
+        .prepare(
+          `SELECT ${englishColumnsOf(db, "appointments")} FROM appointments WHERE pet_id = ? ORDER BY data, id`,
+        )
         .all(petId)
     : db
-        .prepare(`SELECT ${APPOINTMENT_COLUMNS} FROM ${APPOINTMENTS_TABLE} WHERE AP.pet_id = ? ORDER BY AP.date, AP.id`)
+        .prepare(
+          `SELECT ${APPOINTMENT_COLUMNS} FROM ${APPOINTMENTS_TABLE} WHERE AP.pet_id = ? ORDER BY AP.date, AP.id`,
+        )
         .all(petId);
 
 export const pendingAutoOf = (db, petId) =>

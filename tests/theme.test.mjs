@@ -35,7 +35,10 @@ describe("tokens do tema", () => {
 
   test("o tamanho do texto cresce na ordem em que os nomes foram declarados", () => {
     const sizes = Object.values(FONT_SIZE);
-    assert.deepEqual(sizes, [...sizes].sort((a, b) => a - b));
+    assert.deepEqual(
+      sizes,
+      [...sizes].sort((a, b) => a - b),
+    );
   });
 
   test("o peso do texto vai como texto, que é o que o React Native aceita", () => {
@@ -43,7 +46,8 @@ describe("tokens do tema", () => {
   });
 
   test("os dois temas têm a cor transparente", () => {
-    for (const colors of Object.values(THEME_COLORS)) assert.equal(colors.TRANSPARENT, "transparent");
+    for (const colors of Object.values(THEME_COLORS))
+      assert.equal(colors.TRANSPARENT, "transparent");
   });
 });
 

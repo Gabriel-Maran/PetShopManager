@@ -96,7 +96,7 @@ export class AppointmentBuilder {
 
   public withPaymentMethod(payment_method: string): this {
     this.props.payment_method = payment_method;
-    return this; 
+    return this;
   }
 
   public withPaid(is_paid: number): this {

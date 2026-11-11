@@ -1,15 +1,5 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../theme/ThemeProvider";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { ThemeColors, useTheme, useThemedStyles } from "../theme/ThemeProvider";
 import DefaultHeader from "../components/header/DefaultHeader";
 import { useScreen } from "../../hooks/useScreen";
 import { APP_BAR_HEIGHT, ReportType, Screen } from "../../config/consts";
@@ -121,19 +111,12 @@ export default function ReportsScreen() {
               {section.items.map((report, index) => (
                 <TouchableOpacity
                   key={report.id}
-                  style={[
-                    s.card,
-                    index === section.items.length - 1 && s.cardLast,
-                  ]}
-                  onPress={() =>
-                    navigate(Screen.ReportView, { type: report.type })
-                  }
+                  style={[s.card, index === section.items.length - 1 && s.cardLast]}
+                  onPress={() => navigate(Screen.ReportView, { type: report.type })}
                   activeOpacity={0.65}
                   accessibilityRole="button"
                 >
-                  <View
-                    style={[s.cardAccent, { backgroundColor: colors[report.accent] }]}
-                  />
+                  <View style={[s.cardAccent, { backgroundColor: colors[report.accent] }]} />
                   <View style={s.cardBody}>
                     <Text style={s.cardTitle}>{report.title}</Text>
                     <Text style={s.cardSubtitle}>{report.subtitle}</Text>

@@ -1,22 +1,12 @@
 import { StyleSheet, Text, View, ScrollView } from "react-native";
 import DefaultHeader from "../components/header/DefaultHeader";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../theme/ThemeProvider";
 import ThemeToggle from "../components/ThemeToggle";
 import { DatabaseTransfer } from "../components/DatabaseTransfer";
 import { DemoDataLoader } from "../components/DemoDataLoader";
 import { useScreen } from "../../hooks/useScreen";
 import { APP_BAR_HEIGHT, Screen } from "../../config/consts";
-import {
-  FONT_SIZE,
-  FONT_WEIGHT,
-  LETTER_SPACINGS,
-  RADIUS,
-  SPACING,
-} from "../theme/tokens";
+import { FONT_SIZE, FONT_WEIGHT, LETTER_SPACINGS, RADIUS, SPACING } from "../theme/tokens";
 
 export default function SettingsScreen() {
   const { colors } = useTheme();
@@ -27,10 +17,7 @@ export default function SettingsScreen() {
     <View style={[s.root, { backgroundColor: colors.THIRD_BACKGROUND }]}>
       <DefaultHeader />
 
-      <ScrollView
-        contentContainerStyle={s.scroll}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         <Text style={s.sectionLabel} accessibilityRole="header">
           Aparência
         </Text>
@@ -48,9 +35,7 @@ export default function SettingsScreen() {
         </Text>
         <View style={s.card}>
           <DemoDataLoader onLoaded={() => navigate(Screen.Calendar)} />
-          <DatabaseTransfer
-            onImportSuccess={() => navigate(Screen.Calendar)}
-          />
+          <DatabaseTransfer onImportSuccess={() => navigate(Screen.Calendar)} />
         </View>
       </ScrollView>
     </View>

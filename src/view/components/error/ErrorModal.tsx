@@ -12,12 +12,7 @@ export default function ErrorModal({ message, onClose }: Props) {
   const s = useThemedStyles(styles);
 
   return (
-    <Modal
-      visible={!!message}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={!!message} transparent animationType="fade" onRequestClose={onClose}>
       <View style={s.overlay}>
         <View style={s.box}>
           <Text style={s.emoji} {...HIDDEN_FROM_SCREEN_READER}>
@@ -27,11 +22,7 @@ export default function ErrorModal({ message, onClose }: Props) {
             Algo deu errado
           </Text>
           <Text style={s.message}>{message}</Text>
-          <TouchableOpacity
-            style={s.btn}
-            onPress={onClose}
-            accessibilityRole="button"
-          >
+          <TouchableOpacity style={s.btn} onPress={onClose} accessibilityRole="button">
             <Text style={s.btnTxt}>OK</Text>
           </TouchableOpacity>
         </View>

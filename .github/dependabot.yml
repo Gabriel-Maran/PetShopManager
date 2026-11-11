@@ -8,7 +8,7 @@ updates:
     schedule:
       interval: weekly
       day: monday
-      time: '09:00'
+      time: "09:00"
       timezone: America/Sao_Paulo
     cooldown:
       default-days: 7
@@ -23,12 +23,12 @@ updates:
     # Um pacote novo do SDK (como `expo-camera`) já fica de fora pelo `expo-*`; um `react-native-*`
     # do SDK precisa entrar nesta lista.
     ignore:
-      - dependency-name: 'expo'
-      - dependency-name: 'expo-*'
-      - dependency-name: 'react'
-      - dependency-name: 'react-native'
-      - dependency-name: '@types/react'
-      - dependency-name: 'typescript'
+      - dependency-name: "expo"
+      - dependency-name: "expo-*"
+      - dependency-name: "react"
+      - dependency-name: "react-native"
+      - dependency-name: "@types/react"
+      - dependency-name: "typescript"
     groups:
       # O resto (como o react-native-calendars): versões menores e correções num PR só, e uma
       # versão major em PR próprio.
@@ -37,7 +37,7 @@ updates:
       # As correções de segurança chegam num PR só, em vez de um PR por alerta.
       security:
         applies-to: security-updates
-        patterns: ['*']
+        patterns: ["*"]
 
   # As actions estão fixadas por SHA no ci.yml; o Dependabot troca o SHA e o comentário da versão.
   - package-ecosystem: github-actions
@@ -45,7 +45,7 @@ updates:
     schedule:
       interval: weekly
       day: monday
-      time: '09:00'
+      time: "09:00"
       timezone: America/Sao_Paulo
     cooldown:
       default-days: 7
@@ -55,4 +55,4 @@ updates:
     groups:
       # Todas as actions num PR só, para o CI ser atualizado de uma vez.
       actions:
-        patterns: ['*']
+        patterns: ["*"]

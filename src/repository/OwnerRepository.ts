@@ -23,16 +23,13 @@ class OwnerRepository {
   async createOwner(owner: Owner): Promise<void> {
     const normalized_name = normalizeForSearch(owner.name);
     const db = await getDatabase();
-    await db.runAsync(
-      INSERT_OWNER_SQL,
-      [
-        owner.name,
-        normalized_name,
-        owner.phone,
-        owner.email ?? null,
-        owner.address ?? null,
-      ],
-    );
+    await db.runAsync(INSERT_OWNER_SQL, [
+      owner.name,
+      normalized_name,
+      owner.phone,
+      owner.email ?? null,
+      owner.address ?? null,
+    ]);
   }
 
   async updateOwner(id: number, owner: Owner): Promise<void> {
@@ -40,14 +37,7 @@ class OwnerRepository {
     const db = await getDatabase();
     await db.runAsync(
       `UPDATE owners SET name = ?, normalized_name = ?, phone = ?, email = ?, address = ? WHERE id = ?`,
-      [
-        owner.name,
-        normalized_name,
-        owner.phone,
-        owner.email ?? null,
-        owner.address ?? null,
-        id,
-      ],
+      [owner.name, normalized_name, owner.phone, owner.email ?? null, owner.address ?? null, id],
     );
   }
 

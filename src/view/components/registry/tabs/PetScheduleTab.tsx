@@ -3,15 +3,8 @@ import { StyleSheet, Text, View } from "react-native";
 import { PackageFrequency, ServiceName } from "../../../../config/consts";
 import type { UpdateField } from "../../../../hooks/useFormState";
 import type { PetForm } from "../../../pages/pet/petForm";
-import {
-  MAX_MONEY_INPUT_LENGTH,
-  MAX_TIME_LENGTH,
-} from "../../../../globals/limits";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../../theme/ThemeProvider";
+import { MAX_MONEY_INPUT_LENGTH, MAX_TIME_LENGTH } from "../../../../globals/limits";
+import { ThemeColors, useTheme, useThemedStyles } from "../../../theme/ThemeProvider";
 
 import { todayIso } from "../../../../utils/dates";
 import { maskTime } from "../../../../utils/timeMask";
@@ -23,7 +16,6 @@ import InputSelect from "../../InputSelect";
 import Toggle from "../buttons/Toggle";
 import { RADIUS, SPACING } from "../../../theme/tokens";
 
-
 const serviceTypesList = Object.values(ServiceName).map((v) => ({
   id: v,
   name: v,
@@ -31,8 +23,7 @@ const serviceTypesList = Object.values(ServiceName).map((v) => ({
 
 const packageFrequencies = Object.values(PackageFrequency).map((v) => ({
   id: v,
-  name:
-    v === PackageFrequency.Weekly ? "Mensal (4 semanas)" : "Quinzenal (2 semanas)",
+  name: v === PackageFrequency.Weekly ? "Mensal (4 semanas)" : "Quinzenal (2 semanas)",
 }));
 
 interface PetScheduleTabProps {
@@ -58,17 +49,17 @@ export default function PetScheduleTab({
     updateField("packageFrequency", undefined);
     updateField("packageStartDate", todayIso());
     updateField("packagePrice", "");
-    updateField("default_time", "");
+    updateField("defaultTime", "");
   };
 
-  if (visible == false) {
+  if (!visible) {
     return;
   }
 
   return (
     <View style={s.inputs}>
       <InputSelect
-        image={require("../../../../assets/outros/servicos.png")}
+        image={require("../../../../assets/misc/services.png")}
         titleName="Serviço Padrão"
         placeholder="Selecione o serviço padrão..."
         options={serviceTypesList}
@@ -76,18 +67,14 @@ export default function PetScheduleTab({
         labelExtractor={(item) => item.name}
         onChange={(item) => updateField("defaultService", item.id)}
         renderItem={(item) => (
-          <Text
-            style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}
-          >
-            {item.name}
-          </Text>
+          <Text style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}>{item.name}</Text>
         )}
         hasBorderBottom={true}
         isEditable={isEditable}
       />
 
       <Toggle
-        image={require("../../../../assets/outros/auto_gen.png")}
+        image={require("../../../../assets/misc/autoScheduled.png")}
         value={form.rescheduleActive ? 1 : 0}
         onChange={handleRescheduleChange}
         title="Remarcação automática ativa"
@@ -99,27 +86,21 @@ export default function PetScheduleTab({
       {form.rescheduleActive && (
         <>
           <InputSelect
-            image={require("../../../../assets/outros/pacoteRemarcacao.png")}
+            image={require("../../../../assets/misc/package.png")}
             titleName="Pacote de Remarcação"
             placeholder="Selecione o pacote..."
             options={packageFrequencies}
-            itemSelected={packageFrequencies.find(
-              (e) => e.id === form.packageFrequency,
-            )}
+            itemSelected={packageFrequencies.find((e) => e.id === form.packageFrequency)}
             labelExtractor={(item) => item.name}
             onChange={(item) => updateField("packageFrequency", item.id)}
             renderItem={(item) => (
-              <Text
-                style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}
-              >
-                {item.name}
-              </Text>
+              <Text style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}>{item.name}</Text>
             )}
             hasBorderBottom={true}
             isEditable={isEditable}
           />
           <InputInfo
-            image={require("../../../../assets/outros/valor.png")}
+            image={require("../../../../assets/misc/price.png")}
             item={form.packagePrice}
             setItem={(item) => updateField("packagePrice", maskMoneyInput(item))}
             titleName="Valor"
@@ -131,7 +112,7 @@ export default function PetScheduleTab({
             placeholder="Digite o valor..."
           />
           <DatePickerField
-            image={require("../../../../assets/nav_bar/calendario.png")}
+            image={require("../../../../assets/nav_bar/calendar.png")}
             item={form.packageStartDate}
             setItem={(v) => updateField("packageStartDate", v)}
             titleName={"Data do agendamento"}
@@ -139,9 +120,9 @@ export default function PetScheduleTab({
             hasBorderBottom={true}
           />
           <InputInfo
-            image={require("../../../../assets/outros/hora.png")}
-            item={form.default_time || null}
-            setItem={(item) => updateField("default_time", maskTime(item))}
+            image={require("../../../../assets/misc/time.png")}
+            item={form.defaultTime || null}
+            setItem={(item) => updateField("defaultTime", maskTime(item))}
             titleName="Horário Padrão"
             isMultiline={false}
             inputKeyboardType="numeric"

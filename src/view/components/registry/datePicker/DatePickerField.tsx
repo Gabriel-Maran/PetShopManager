@@ -14,16 +14,12 @@ export default function DatePickerField({
   isEditable: boolean;
   image: ImageSourcePropType;
   item: string | null | undefined;
-  setItem: (item: any) => void;
+  setItem: (value: string) => void;
   titleName: string;
   hasBorderBottom?: boolean;
 }) {
   return (
-    <InputWrapper
-      image={image}
-      titleName={titleName}
-      hasBorderBottom={hasBorderBottom}
-    >
+    <InputWrapper image={image} titleName={titleName} hasBorderBottom={hasBorderBottom}>
       <DatePicker
         isEditable={isEditable}
         withIcon={false}

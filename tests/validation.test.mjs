@@ -7,10 +7,20 @@ import * as z from "zod";
 import { parseInput, parseRecordId } from "../src/validation/parseInput.ts";
 import { ownerSchema } from "../src/validation/ownerSchema.ts";
 import { petSchema } from "../src/validation/petSchema.ts";
-import { isPackageFrequency, PackageFrequency, PetSize, ServiceName } from "../src/config/petEnums.ts";
+import {
+  isPackageFrequency,
+  isPetSize,
+  PackageFrequency,
+  PetSize,
+  ServiceName,
+} from "../src/config/petEnums.ts";
 import { appointmentSchema } from "../src/validation/appointmentSchema.ts";
 import { breedSchema } from "../src/validation/breedSchema.ts";
-import { breedCountSchema, breedSearchSchema, nameSearchSchema } from "../src/validation/searchSchema.ts";
+import {
+  breedCountSchema,
+  breedSearchSchema,
+  nameSearchSchema,
+} from "../src/validation/searchSchema.ts";
 import { themeSchema } from "../src/validation/settingsSchema.ts";
 import { AppError, logError } from "../src/errors/AppError.ts";
 import { MESSAGES } from "../src/globals/messages.ts";
@@ -115,7 +125,10 @@ const nameSearch = (fields = {}) => ({ query: "", active: 1, page: 0, limit: 20,
 
 describe("parseInput", () => {
   test("devolve o dado limpo: texto sem espaço nas pontas e opcional vazio como null", () => {
-    const data = parseInput(ownerSchema, owner({ name: "  Ana Souza  ", email: "   ", address: "" }));
+    const data = parseInput(
+      ownerSchema,
+      owner({ name: "  Ana Souza  ", email: "   ", address: "" }),
+    );
     assert.deepEqual(data, {
       name: "Ana Souza",
       phone: "(45) 99999-1234",
@@ -126,7 +139,10 @@ describe("parseInput", () => {
   });
 
   test("descarta os campos fora do schema", () => {
-    const data = parseInput(ownerSchema, owner({ id: 99, created_at: "2020-01-01", is_admin: true }));
+    const data = parseInput(
+      ownerSchema,
+      owner({ id: 99, created_at: "2020-01-01", is_admin: true }),
+    );
     assert.deepEqual(Object.keys(data).sort(), ["address", "email", "is_active", "name", "phone"]);
   });
 
@@ -136,11 +152,18 @@ describe("parseInput", () => {
     assert.equal(error.code, "VALIDATION");
     assert.equal(error.message, MESSAGES.owner.nameRequired);
     assert.equal(error.cause, undefined);
-    assert.deepEqual(captureConsoleError(t, () => logError(error)), []);
+    assert.deepEqual(
+      captureConsoleError(t, () => logError(error)),
+      [],
+    );
   });
 
   test("com mais de uma falha, mostra a do primeiro campo do formulário", () => {
-    assertRejects(ownerSchema, owner({ name: "", phone: "", email: "x" }), MESSAGES.owner.nameRequired);
+    assertRejects(
+      ownerSchema,
+      owner({ name: "", phone: "", email: "x" }),
+      MESSAGES.owner.nameRequired,
+    );
     assertRejects(ownerSchema, owner({ phone: "", email: "x" }), MESSAGES.owner.phoneRequired);
   });
 
@@ -197,14 +220,20 @@ describe("parseInput", () => {
 describe("parseRecordId", () => {
   test("aceita inteiros positivos", () => {
     assert.equal(parseRecordId(1, MESSAGES.owner.notFound), 1);
-    assert.equal(parseRecordId(Number.MAX_SAFE_INTEGER, MESSAGES.owner.notFound), Number.MAX_SAFE_INTEGER);
+    assert.equal(
+      parseRecordId(Number.MAX_SAFE_INTEGER, MESSAGES.owner.notFound),
+      Number.MAX_SAFE_INTEGER,
+    );
   });
 
   test("um id fora do formato responde como registro que não existe", () => {
     for (const value of [0, -1, 1.5, "1", NaN, Infinity, 2 ** 53, null, undefined, {}]) {
       assert.throws(
         () => parseRecordId(value, MESSAGES.pet.notFound),
-        (error) => error instanceof AppError && error.code === "NOT_FOUND" && error.message === MESSAGES.pet.notFound,
+        (error) =>
+          error instanceof AppError &&
+          error.code === "NOT_FOUND" &&
+          error.message === MESSAGES.pet.notFound,
         String(value),
       );
     }
@@ -225,7 +254,9 @@ describe("dono", () => {
     for (const name of ["", "   ", "\t\n"]) {
       assertRejects(ownerSchema, owner({ name }), MESSAGES.owner.nameRequired);
     }
-    assert.doesNotThrow(() => parseInput(ownerSchema, owner({ name: "a".repeat(MAX_OWNER_NAME_LENGTH) })));
+    assert.doesNotThrow(() =>
+      parseInput(ownerSchema, owner({ name: "a".repeat(MAX_OWNER_NAME_LENGTH) })),
+    );
     assertRejects(
       ownerSchema,
       owner({ name: "a".repeat(MAX_OWNER_NAME_LENGTH + 1) }),
@@ -257,10 +288,19 @@ describe("dono", () => {
   });
 
   test("telefone válido: fixo de 10 dígitos, celular de 11, com ou sem máscara", () => {
-    for (const phone of ["(45) 3333-4444", "4533334444", "(45) 99999-1234", "45999991234", "45 99999 1234"]) {
+    for (const phone of [
+      "(45) 3333-4444",
+      "4533334444",
+      "(45) 99999-1234",
+      "45999991234",
+      "45 99999 1234",
+    ]) {
       assert.equal(parseInput(ownerSchema, owner({ phone })).phone, phone);
     }
-    assert.equal(parseInput(ownerSchema, owner({ phone: " (45) 99999-1234 " })).phone, "(45) 99999-1234");
+    assert.equal(
+      parseInput(ownerSchema, owner({ phone: " (45) 99999-1234 " })).phone,
+      "(45) 99999-1234",
+    );
   });
 
   test("telefone acima do tamanho da máscara é inválido", () => {
@@ -271,18 +311,35 @@ describe("dono", () => {
   });
 
   test("e-mail: opcional, com formato conferido e até o limite", () => {
-    assert.equal(parseInput(ownerSchema, owner({ email: " Ana.Souza+pet@example.com.br " })).email, "Ana.Souza+pet@example.com.br");
-    for (const email of ["ana", "ana@", "ana@example", "@example.com", "ana souza@example.com", "ana@@example.com", "ana..souza@example.com"]) {
+    assert.equal(
+      parseInput(ownerSchema, owner({ email: " Ana.Souza+pet@example.com.br " })).email,
+      "Ana.Souza+pet@example.com.br",
+    );
+    for (const email of [
+      "ana",
+      "ana@",
+      "ana@example",
+      "@example.com",
+      "ana souza@example.com",
+      "ana@@example.com",
+      "ana..souza@example.com",
+    ]) {
       assertRejects(ownerSchema, owner({ email }), MESSAGES.owner.emailInvalid, email);
     }
     const domain = "@example.com";
     const atLimit = `${"a".repeat(MAX_EMAIL_LENGTH - domain.length)}${domain}`;
     assert.equal(parseInput(ownerSchema, owner({ email: atLimit })).email, atLimit);
-    assertRejects(ownerSchema, owner({ email: `a${atLimit}` }), MESSAGES.textTooLong("O e-mail", MAX_EMAIL_LENGTH));
+    assertRejects(
+      ownerSchema,
+      owner({ email: `a${atLimit}` }),
+      MESSAGES.textTooLong("O e-mail", MAX_EMAIL_LENGTH),
+    );
   });
 
   test("endereço: opcional e até o limite", () => {
-    assert.doesNotThrow(() => parseInput(ownerSchema, owner({ address: "a".repeat(MAX_ADDRESS_LENGTH) })));
+    assert.doesNotThrow(() =>
+      parseInput(ownerSchema, owner({ address: "a".repeat(MAX_ADDRESS_LENGTH) })),
+    );
     assertRejects(
       ownerSchema,
       owner({ address: "a".repeat(MAX_ADDRESS_LENGTH + 1) }),
@@ -292,7 +349,12 @@ describe("dono", () => {
 
   test("ativo só aceita 0 ou 1", () => {
     for (const is_active of [2, -1, "1", null, true]) {
-      assertRejects(ownerSchema, owner({ is_active }), MESSAGES.invalidFlag("Ativo"), String(is_active));
+      assertRejects(
+        ownerSchema,
+        owner({ is_active }),
+        MESSAGES.invalidFlag("Ativo"),
+        String(is_active),
+      );
     }
   });
 
@@ -300,17 +362,30 @@ describe("dono", () => {
     const db = await createDatabase();
     const data = parseInput(
       ownerSchema,
-      owner({ name: "  O'Brien; DROP TABLE owners; --  ", address: " Rua 100% Feliz, 'casa' ", email: "" }),
+      owner({
+        name: "  O'Brien; DROP TABLE owners; --  ",
+        address: " Rua 100% Feliz, 'casa' ",
+        email: "",
+      }),
     );
-    db.prepare(INSERT_OWNER_SQL).run(data.name, normalizeForSearch(data.name), data.phone, data.email, data.address);
+    db.prepare(INSERT_OWNER_SQL).run(
+      data.name,
+      normalizeForSearch(data.name),
+      data.phone,
+      data.email,
+      data.address,
+    );
 
     const saved = db.prepare("SELECT name, phone, email, address FROM owners").get();
-    assert.deepEqual({ ...saved }, {
-      name: "O'Brien; DROP TABLE owners; --",
-      phone: "(45) 99999-1234",
-      email: null,
-      address: "Rua 100% Feliz, 'casa'",
-    });
+    assert.deepEqual(
+      { ...saved },
+      {
+        name: "O'Brien; DROP TABLE owners; --",
+        phone: "(45) 99999-1234",
+        email: null,
+        address: "Rua 100% Feliz, 'casa'",
+      },
+    );
   });
 });
 
@@ -321,6 +396,13 @@ describe("pet", () => {
     assert.deepEqual(Object.values(PetSize), ["SMALL", "MEDIUM", "LARGE", "EXTRA_LARGE"]);
     assert.deepEqual(Object.values(ServiceName), ["Banho", "Banho e Tosa", "Banho e Higiênica"]);
     assert.deepEqual(PackageFrequency, { Weekly: 4, Biweekly: 2 });
+  });
+
+  test("isPetSize aceita só o código gravado do porte, e não a chave nem o rótulo", () => {
+    for (const size of Object.values(PetSize)) assert.ok(isPetSize(size), size);
+    for (const input of ["Medium", "Médio", "MEDIO", "", null, undefined, 2]) {
+      assert.equal(isPetSize(input), false, String(input));
+    }
   });
 
   test("isPackageFrequency aceita só 4 e 2, como o pet salvo traz do banco", () => {
@@ -344,7 +426,9 @@ describe("pet", () => {
 
   test("nome: obrigatório e até o limite", () => {
     assertRejects(petSchema, pet({ name: "  " }), MESSAGES.pet.nameRequired);
-    assert.doesNotThrow(() => parseInput(petSchema, pet({ name: "a".repeat(MAX_PET_NAME_LENGTH) })));
+    assert.doesNotThrow(() =>
+      parseInput(petSchema, pet({ name: "a".repeat(MAX_PET_NAME_LENGTH) })),
+    );
     assertRejects(
       petSchema,
       pet({ name: "a".repeat(MAX_PET_NAME_LENGTH + 1) }),
@@ -377,7 +461,10 @@ describe("pet", () => {
   });
 
   test("pacote: só 4 (mensal) ou 2 (quinzenal); o nome do enum não passa como valor", () => {
-    assert.equal(parseInput(petSchema, petWithPackage({ package_frequency: 2 })).package_frequency, 2);
+    assert.equal(
+      parseInput(petSchema, petWithPackage({ package_frequency: 2 })).package_frequency,
+      2,
+    );
     for (const package_frequency of [3, 0, "Mensal", "4"]) {
       assertRejects(
         petSchema,
@@ -389,20 +476,40 @@ describe("pet", () => {
   });
 
   test("com a remarcação ligada, pacote, valor e início são obrigatórios, cada um com a sua mensagem", () => {
-    assertRejects(petSchema, petWithPackage({ package_frequency: null }), MESSAGES.pet.packageRequired);
-    assertRejects(petSchema, petWithPackage({ package_price: undefined }), MESSAGES.pet.packageValueRequired);
-    assertRejects(petSchema, petWithPackage({ package_start_date: "" }), MESSAGES.pet.packageStartRequired);
+    assertRejects(
+      petSchema,
+      petWithPackage({ package_frequency: null }),
+      MESSAGES.pet.packageRequired,
+    );
+    assertRejects(
+      petSchema,
+      petWithPackage({ package_price: undefined }),
+      MESSAGES.pet.packageValueRequired,
+    );
+    assertRejects(
+      petSchema,
+      petWithPackage({ package_start_date: "" }),
+      MESSAGES.pet.packageStartRequired,
+    );
   });
 
   test("com a remarcação desligada, o pacote pode ficar vazio", () => {
-    const data = parseInput(petSchema, pet({ package_frequency: undefined, package_start_date: null }));
+    const data = parseInput(
+      petSchema,
+      pet({ package_frequency: undefined, package_start_date: null }),
+    );
     assert.equal(data.package_start_date, null);
   });
 
   test("valor do pacote: centavos inteiros e sem sinal", () => {
     assert.equal(parseInput(petSchema, petWithPackage({ package_price: 0 })).package_price, 0);
     for (const package_price of [-1, 120.5, Number.MAX_SAFE_INTEGER + 1]) {
-      assertRejects(petSchema, petWithPackage({ package_price }), MESSAGES.money.invalid, String(package_price));
+      assertRejects(
+        petSchema,
+        petWithPackage({ package_price }),
+        MESSAGES.money.invalid,
+        String(package_price),
+      );
     }
   });
 
@@ -410,7 +517,17 @@ describe("pet", () => {
     for (const package_start_date of ["2028-02-29", "2026-12-31", "2026-01-01"]) {
       assert.doesNotThrow(() => parseInput(petSchema, petWithPackage({ package_start_date })));
     }
-    for (const package_start_date of ["2026-02-30", "2026-02-29", "2100-02-29", "2026-04-31", "2026-13-01", "2026-00-10", "2026-01-00", "09/11/2026", "2026-1-9"]) {
+    for (const package_start_date of [
+      "2026-02-30",
+      "2026-02-29",
+      "2100-02-29",
+      "2026-04-31",
+      "2026-13-01",
+      "2026-00-10",
+      "2026-01-00",
+      "09/11/2026",
+      "2026-1-9",
+    ]) {
       assertRejects(
         petSchema,
         petWithPackage({ package_start_date }),
@@ -426,7 +543,12 @@ describe("pet", () => {
     }
     assert.equal(parseInput(petSchema, pet({ default_time: "23:59" })).default_time, "23:59");
     for (const default_time of ["9", "9:30", "24:00", "12:60", "0930", "09h30"]) {
-      assertRejects(petSchema, pet({ default_time }), MESSAGES.pet.defaultTimeInvalid, default_time);
+      assertRejects(
+        petSchema,
+        pet({ default_time }),
+        MESSAGES.pet.defaultTimeInvalid,
+        default_time,
+      );
     }
   });
 
@@ -440,7 +562,11 @@ describe("pet", () => {
   });
 
   test("remarcação ativa e ativo só aceitam 0 ou 1", () => {
-    assertRejects(petSchema, pet({ reschedule_active: 2 }), MESSAGES.invalidFlag("Remarcação ativa"));
+    assertRejects(
+      petSchema,
+      pet({ reschedule_active: 2 }),
+      MESSAGES.invalidFlag("Remarcação ativa"),
+    );
     assertRejects(petSchema, pet({ is_active: "1" }), MESSAGES.invalidFlag("Ativo"));
   });
 });
@@ -455,7 +581,10 @@ describe("agendamento", () => {
   });
 
   test("o tipo de pagamento é opcional e fica como texto vazio, como o banco guarda", () => {
-    assert.equal(parseInput(appointmentSchema, appointment({ payment_method: "  " })).payment_method, "");
+    assert.equal(
+      parseInput(appointmentSchema, appointment({ payment_method: "  " })).payment_method,
+      "",
+    );
     assertRejects(
       appointmentSchema,
       appointment({ payment_method: "a".repeat(MAX_LIST_ITEM_LENGTH + 1) }),
@@ -465,7 +594,11 @@ describe("agendamento", () => {
 
   test("pet, serviço, data, horário e valor têm cada um a sua mensagem", () => {
     assertRejects(appointmentSchema, appointment({ pet_id: 0 }), MESSAGES.appointment.petRequired);
-    assertRejects(appointmentSchema, appointment({ service: " " }), MESSAGES.appointment.serviceRequired);
+    assertRejects(
+      appointmentSchema,
+      appointment({ service: " " }),
+      MESSAGES.appointment.serviceRequired,
+    );
     assertRejects(appointmentSchema, appointment({ date: "2026-02-30" }), MESSAGES.date.invalid);
     assertRejects(appointmentSchema, appointment({ time: "" }), MESSAGES.appointment.timeRequired);
     assertRejects(appointmentSchema, appointment({ time: "9" }), MESSAGES.appointment.timeInvalid);
@@ -473,7 +606,9 @@ describe("agendamento", () => {
   });
 
   test("serviço até o limite", () => {
-    assert.doesNotThrow(() => parseInput(appointmentSchema, appointment({ service: "a".repeat(MAX_LIST_ITEM_LENGTH) })));
+    assert.doesNotThrow(() =>
+      parseInput(appointmentSchema, appointment({ service: "a".repeat(MAX_LIST_ITEM_LENGTH) })),
+    );
     assertRejects(
       appointmentSchema,
       appointment({ service: "a".repeat(MAX_LIST_ITEM_LENGTH + 1) }),
@@ -487,13 +622,25 @@ describe("agendamento", () => {
     }
     assert.equal(parseInput(appointmentSchema, appointment({ time: " 09:30 " })).time, "09:30");
     for (const time of ["9", "09", "9:30", "24:00", "23:60", "-1:00", "09:30:00", "0930"]) {
-      assertRejects(appointmentSchema, appointment({ time }), MESSAGES.appointment.timeInvalid, time);
+      assertRejects(
+        appointmentSchema,
+        appointment({ time }),
+        MESSAGES.appointment.timeInvalid,
+        time,
+      );
     }
   });
 
   test("data: só um dia que existe, no formato do banco", () => {
     assert.doesNotThrow(() => parseInput(appointmentSchema, appointment({ date: "2028-02-29" })));
-    for (const date of ["", "2026-02-29", "2026-11-31", "09/11/2026", "2026/11/09", " 2026-11-09"]) {
+    for (const date of [
+      "",
+      "2026-02-29",
+      "2026-11-31",
+      "09/11/2026",
+      "2026/11/09",
+      " 2026-11-09",
+    ]) {
       assertRejects(appointmentSchema, appointment({ date }), MESSAGES.date.invalid, date);
     }
   });
@@ -505,7 +652,12 @@ describe("agendamento", () => {
       Number.MAX_SAFE_INTEGER,
     );
     for (const price of [-1, 0.5, 80.1, Number.MAX_SAFE_INTEGER + 1]) {
-      assertRejects(appointmentSchema, appointment({ price }), MESSAGES.money.invalid, String(price));
+      assertRejects(
+        appointmentSchema,
+        appointment({ price }),
+        MESSAGES.money.invalid,
+        String(price),
+      );
     }
   });
 
@@ -518,8 +670,16 @@ describe("agendamento", () => {
   });
 
   test("os campos de sim ou não só aceitam 0 ou 1", () => {
-    assertRejects(appointmentSchema, appointment({ deliver_pet: 2 }), MESSAGES.invalidFlag("Entregar pet"));
-    assertRejects(appointmentSchema, appointment({ completed: true }), MESSAGES.invalidFlag("Concluído"));
+    assertRejects(
+      appointmentSchema,
+      appointment({ deliver_pet: 2 }),
+      MESSAGES.invalidFlag("Entregar pet"),
+    );
+    assertRejects(
+      appointmentSchema,
+      appointment({ completed: true }),
+      MESSAGES.invalidFlag("Concluído"),
+    );
     assertRejects(appointmentSchema, appointment({ is_paid: "1" }), MESSAGES.invalidFlag("Pago"));
   });
 });
@@ -541,7 +701,9 @@ describe("raça", () => {
     assertRejects(breedSchema, breed({ breedName: "   " }), MESSAGES.breed.nameRequired);
     assertRejects(breedSchema, breed({ breedName: " a " }), MESSAGES.breed.nameTooShort);
     assert.doesNotThrow(() => parseInput(breedSchema, breed({ breedName: "ab" })));
-    assert.doesNotThrow(() => parseInput(breedSchema, breed({ breedName: "a".repeat(MAX_BREED_NAME_LENGTH) })));
+    assert.doesNotThrow(() =>
+      parseInput(breedSchema, breed({ breedName: "a".repeat(MAX_BREED_NAME_LENGTH) })),
+    );
     assertRejects(
       breedSchema,
       breed({ breedName: "a".repeat(MAX_BREED_NAME_LENGTH + 1) }),
@@ -568,8 +730,16 @@ describe("buscas", () => {
       page: 0,
       query: "poo",
     });
-    assertRejects(breedSearchSchema, { speciesId: 0, page: 0, query: "" }, MESSAGES.breed.speciesRequired);
-    assertRejects(breedSearchSchema, { speciesId: 2, page: -1, query: "" }, MESSAGES.search.invalidPage);
+    assertRejects(
+      breedSearchSchema,
+      { speciesId: 0, page: 0, query: "" },
+      MESSAGES.breed.speciesRequired,
+    );
+    assertRejects(
+      breedSearchSchema,
+      { speciesId: 2, page: -1, query: "" },
+      MESSAGES.search.invalidPage,
+    );
     assertRejects(
       breedSearchSchema,
       { speciesId: 2, page: 0, query: "a".repeat(MAX_SEARCH_LENGTH + 1) },
@@ -578,7 +748,10 @@ describe("buscas", () => {
   });
 
   test("a contagem de raças é a mesma busca, sem a página", () => {
-    assert.deepEqual(parseInput(breedCountSchema, { speciesId: 2, query: "", page: 5 }), { speciesId: 2, query: "" });
+    assert.deepEqual(parseInput(breedCountSchema, { speciesId: 2, query: "", page: 5 }), {
+      speciesId: 2,
+      query: "",
+    });
   });
 });
 
@@ -587,7 +760,12 @@ describe("preferências", () => {
     assert.equal(parseInput(themeSchema, "dark"), "dark");
     assert.equal(parseInput(themeSchema, "light"), "light");
     for (const theme of ["escuro", "", null, 1, "dark; DROP TABLE settings"]) {
-      assertRejects(themeSchema, theme, MESSAGES.invalidOption("Tema", ["light", "dark"]), String(theme));
+      assertRejects(
+        themeSchema,
+        theme,
+        MESSAGES.invalidOption("Tema", ["light", "dark"]),
+        String(theme),
+      );
     }
   });
 });
@@ -598,18 +776,42 @@ describe("entrada maliciosa", () => {
   test("texto gigante para no limite do campo, sem chegar às outras regras", () => {
     const huge = "a".repeat(1_000_000);
     const cases = [
-      [ownerSchema, owner({ name: huge }), MESSAGES.textTooLong("O nome do dono", MAX_OWNER_NAME_LENGTH)],
+      [
+        ownerSchema,
+        owner({ name: huge }),
+        MESSAGES.textTooLong("O nome do dono", MAX_OWNER_NAME_LENGTH),
+      ],
       [ownerSchema, owner({ phone: huge }), MESSAGES.owner.phoneInvalid],
-      [ownerSchema, owner({ email: `${huge}@example.com` }), MESSAGES.textTooLong("O e-mail", MAX_EMAIL_LENGTH)],
-      [ownerSchema, owner({ address: huge }), MESSAGES.textTooLong("O endereço", MAX_ADDRESS_LENGTH)],
+      [
+        ownerSchema,
+        owner({ email: `${huge}@example.com` }),
+        MESSAGES.textTooLong("O e-mail", MAX_EMAIL_LENGTH),
+      ],
+      [
+        ownerSchema,
+        owner({ address: huge }),
+        MESSAGES.textTooLong("O endereço", MAX_ADDRESS_LENGTH),
+      ],
       [petSchema, pet({ name: huge }), MESSAGES.textTooLong("O nome do pet", MAX_PET_NAME_LENGTH)],
-      [petSchema, pet({ notes: huge }), MESSAGES.textTooLong("A observação do pet", MAX_NOTES_LENGTH)],
+      [
+        petSchema,
+        pet({ notes: huge }),
+        MESSAGES.textTooLong("A observação do pet", MAX_NOTES_LENGTH),
+      ],
       [petSchema, pet({ default_time: huge }), MESSAGES.pet.defaultTimeInvalid],
-      [appointmentSchema, appointment({ service: huge }), MESSAGES.textTooLong("O serviço", MAX_LIST_ITEM_LENGTH)],
+      [
+        appointmentSchema,
+        appointment({ service: huge }),
+        MESSAGES.textTooLong("O serviço", MAX_LIST_ITEM_LENGTH),
+      ],
       [appointmentSchema, appointment({ time: huge }), MESSAGES.appointment.timeInvalid],
       [appointmentSchema, appointment({ date: huge }), MESSAGES.date.invalid],
       [nameSearchSchema, nameSearch({ query: huge }), MESSAGES.search.tooLong(MAX_SEARCH_LENGTH)],
-      [breedSchema, { speciesId: 1, breedName: huge }, MESSAGES.textTooLong("O nome da raça", MAX_BREED_NAME_LENGTH)],
+      [
+        breedSchema,
+        { speciesId: 1, breedName: huge },
+        MESSAGES.textTooLong("O nome da raça", MAX_BREED_NAME_LENGTH),
+      ],
     ];
     for (const [schema, input, message] of cases) {
       assertRejects(schema, input, message, message);
@@ -629,7 +831,11 @@ describe("entrada maliciosa", () => {
 
   test("objeto no lugar de valor não passa como filtro", () => {
     assertRejects(petSchema, pet({ owner_id: { $gt: 0 } }), MESSAGES.invalidInput);
-    assertRejects(nameSearchSchema, nameSearch({ active: { $ne: 0 } }), MESSAGES.invalidFlag("Filtro ativo"));
+    assertRejects(
+      nameSearchSchema,
+      nameSearch({ active: { $ne: 0 } }),
+      MESSAGES.invalidFlag("Filtro ativo"),
+    );
   });
 });
 
@@ -637,12 +843,18 @@ describe("entrada maliciosa", () => {
 
 describe("mensagens da validação", () => {
   test("o limite de texto diz o campo e o tamanho", () => {
-    assert.equal(MESSAGES.textTooLong("O nome do dono", 100), "O nome do dono pode ter até 100 caracteres.");
+    assert.equal(
+      MESSAGES.textTooLong("O nome do dono", 100),
+      "O nome do dono pode ter até 100 caracteres.",
+    );
   });
 
   test("o horário vazio e o horário inválido têm mensagens diferentes, como o telefone", () => {
     assert.notEqual(MESSAGES.appointment.timeRequired, MESSAGES.appointment.timeInvalid);
     assert.notEqual(MESSAGES.appointment.timeInvalid, MESSAGES.pet.defaultTimeInvalid);
-    assert.notEqual(MESSAGES.pet.packageRequired, MESSAGES.invalidOption("Pacote de remarcação", [4, 2]));
+    assert.notEqual(
+      MESSAGES.pet.packageRequired,
+      MESSAGES.invalidOption("Pacote de remarcação", [4, 2]),
+    );
   });
 });

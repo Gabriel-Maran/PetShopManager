@@ -1,5 +1,5 @@
-import { Appointment } from "../model/Appointment";
-import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
+import { Appointment, AppointmentsWithOwnerAndPet } from "../model/Appointment";
+
 import { appointmentsService } from "../service/AppointmentsService";
 import type { IsoDate } from "../utils/dates";
 import { AppError } from "../errors/AppError";
@@ -17,9 +17,7 @@ class AppointmentsController {
     return appointment;
   }
 
-  getAppointmentsByDateWithOwnerAndPet(
-    date: IsoDate,
-  ): Promise<AppointmentsWithOwnerAndPet[]> {
+  getAppointmentsByDateWithOwnerAndPet(date: IsoDate): Promise<AppointmentsWithOwnerAndPet[]> {
     return appointmentsService.getAppointmentsByDateWithOwnerAndPet(date);
   }
 

@@ -1,10 +1,19 @@
 import { StyleSheet, View } from "react-native";
 import { APP_BAR_HEIGHT, ICON_NAMES } from "../../../config/consts";
-import { TAB_SCREENS } from "../../../config/navigation";
+import { TAB_SCREENS, type Screen } from "../../../config/navigation";
+import type { NavigationContainerRef, ParamListBase } from "@react-navigation/native";
+import { navigateTo } from "../../../hooks/useScreen";
 import TabIcon from "./TabIcon";
 import { useTheme } from "../../theme/ThemeProvider";
 
-export default function AppBar() {
+/** A barra fica fora da pilha, então recebe a tela aberta e navega pelo ref do NavigationContainer. */
+export default function AppBar({
+  current,
+  navigator,
+}: {
+  current: Screen;
+  navigator: NavigationContainerRef<ParamListBase>;
+}) {
   const { colors } = useTheme();
 
   return (
@@ -17,7 +26,8 @@ export default function AppBar() {
           key={tab.screen}
           imgName={ICON_NAMES[tab.icon]}
           titleText={tab.title}
-          screenName={tab.screen}
+          isActive={tab.screen === current}
+          onPress={() => navigateTo(navigator, tab.screen)}
         />
       ))}
     </View>

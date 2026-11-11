@@ -18,7 +18,8 @@ import { DEACTIVATE_PET_SQL } from "../src/repository/sql/petsSql.ts";
 /** Reativa o pet como o app faz. */
 const activatePet = (db, petId) => packageScheduleOf(db).activatePet(petId, new Date());
 
-const ownerActive = (db, id) => db.prepare("SELECT is_active FROM owners WHERE id = ?").get(id).is_active;
+const ownerActive = (db, id) =>
+  db.prepare("SELECT is_active FROM owners WHERE id = ?").get(id).is_active;
 
 describe("cascata entre donos e pets", () => {
   let db;
@@ -30,8 +31,12 @@ describe("cascata entre donos e pets", () => {
     db = await createDatabase();
     ownerId = insertOwner(db);
     withPackage = await createPet(db, {
-      name: "Thor", owner_id: ownerId, reschedule_active: 1, package_frequency: 4,
-      package_start_date: isoDate(3), package_price: 32000,
+      name: "Thor",
+      owner_id: ownerId,
+      reschedule_active: 1,
+      package_frequency: 4,
+      package_start_date: isoDate(3),
+      package_price: 32000,
     });
     withoutPackage = await createPet(db, { name: "Mel", owner_id: ownerId });
   });
@@ -85,7 +90,10 @@ describe("cascata entre donos e pets", () => {
 
     const agenda = pendingAutoOf(db, withPackage.id);
     assert.ok(agenda.length > 0);
-    assert.ok(agenda.every((a) => a.date >= isoDate(0)), "nenhuma data passada é criada");
+    assert.ok(
+      agenda.every((a) => a.date >= isoDate(0)),
+      "nenhuma data passada é criada",
+    );
     assert.equal(petRow(db, withPackage.id).last_auto_visit_date, agenda.at(-1).date);
   });
 });

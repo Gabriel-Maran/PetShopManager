@@ -41,7 +41,8 @@ export function useSearchPage<T>(
       isLatest = false;
     };
     // O `load` é recriado a cada render; quem decide quando buscar de novo é o `deps`.
-  }, [...deps, enabled, reloadCount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...deps, enabled, reloadCount, showError]);
 
   const reload = useCallback(() => setReloadCount((count) => count + 1), []);
 

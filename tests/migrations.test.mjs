@@ -21,10 +21,7 @@ import {
   tableRows,
   toDate,
 } from "./helpers/database.mjs";
-import {
-  migrateDatabase,
-  recreateDatabase,
-} from "../src/config/migrator.ts";
+import { migrateDatabase, recreateDatabase } from "../src/config/migrator.ts";
 import { MESSAGES } from "../src/globals/messages.ts";
 import { AppError } from "../src/errors/AppError.ts";
 import { MIGRATIONS } from "../src/config/schema.ts";
@@ -33,20 +30,31 @@ import { normalizeForSearch } from "../src/utils/formatters/normalizeForSearch.t
 
 const LATEST = MIGRATIONS.length;
 
-const migrate = (db, migrations = MIGRATIONS) => migrateDatabase(asMigrationDatabase(db), migrations);
-const recreate = (db, migrations = MIGRATIONS) => recreateDatabase(asMigrationDatabase(db), migrations);
+const migrate = (db, migrations = MIGRATIONS) =>
+  migrateDatabase(asMigrationDatabase(db), migrations);
+const recreate = (db, migrations = MIGRATIONS) =>
+  recreateDatabase(asMigrationDatabase(db), migrations);
 const userVersion = (db) => db.prepare("PRAGMA user_version").get().user_version;
 const foreignKeys = (db) => db.prepare("PRAGMA foreign_keys").get().foreign_keys;
 const count = (db, table) => db.prepare(`SELECT COUNT(*) AS total FROM ${table}`).get().total;
 const rows = tableRows;
 const schemaObjects = (db) =>
   db
-    .prepare("SELECT type, name, sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type, name")
+    .prepare(
+      "SELECT type, name, sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type, name",
+    )
     .all();
-const triggerNames = (db) => schemaObjects(db).filter(({ type }) => type === "trigger").map(({ name }) => name);
+const triggerNames = (db) =>
+  schemaObjects(db)
+    .filter(({ type }) => type === "trigger")
+    .map(({ name }) => name);
 
 /** Os triggers da remarcação, que a versão 4 tira (ARQ-2). */
-const SCHEDULE_TRIGGERS = ["trg_pet_remarcacao_ativar", "trg_pet_remarcacao_insert", "trg_remarcacao_automatica"];
+const SCHEDULE_TRIGGERS = [
+  "trg_pet_remarcacao_ativar",
+  "trg_pet_remarcacao_insert",
+  "trg_remarcacao_automatica",
+];
 
 /** Uma migração a mais depois das do app, só para o teste. */
 const nextMigration = (statements, offset = 1) => ({ version: LATEST + offset, statements });
@@ -158,17 +166,31 @@ describe("migrações do banco", () => {
   test("banco na versão 2: sobe para a 3 com o dinheiro em centavos e as datas em texto", async () => {
     const db = await databaseAt(2);
     const { pet } = insertOwnerWithPackagePet(db, LEGACY_PACKAGE);
-    const noPackagePet = insertPet(db, { owner_id: pet.owner_id, name: "Sem pacote", package_price: null });
+    const noPackagePet = insertPet(db, {
+      owner_id: pet.owner_id,
+      name: "Sem pacote",
+      package_price: null,
+    });
     // Valores como as máscaras antigas deixavam gravar, com o que cada um vale em centavos.
     const legacyValues = [
-      ["12,5", 1250], ["12,", 1200], ["", 0], ["7", 700], ["0,99", 99],
-      ["1234,56", 123456], ["12,505", 1250], ["12.5", 1250],
+      ["12,5", 1250],
+      ["12,", 1200],
+      ["", 0],
+      ["7", 700],
+      ["0,99", 99],
+      ["1234,56", 123456],
+      ["12,505", 1250],
+      ["12.5", 1250],
     ];
     const insertLegacy = db.prepare(
       "INSERT INTO appointments (pet_id, servico, data, valor, concluido) VALUES (?, 'Banho', ?, ?, 1)",
     );
-    for (const [price] of legacyValues) insertLegacy.run(noPackagePet.id, legacyDateInt(-10), price);
-    db.prepare("UPDATE pets SET current_ultima_visita_data = ? WHERE id = ?").run(legacyDateInt(-10), noPackagePet.id);
+    for (const [price] of legacyValues)
+      insertLegacy.run(noPackagePet.id, legacyDateInt(-10), price);
+    db.prepare("UPDATE pets SET current_ultima_visita_data = ? WHERE id = ?").run(
+      legacyDateInt(-10),
+      noPackagePet.id,
+    );
     // O último agendamento apagado: o id dele não pode voltar depois da troca das tabelas.
     const deletedId = rows(db, "appointments").at(-1).id;
     db.prepare("DELETE FROM appointments WHERE id = ?").run(deletedId);
@@ -187,7 +209,13 @@ describe("migrações do banco", () => {
     appointments.forEach((after, index) => {
       const old = before.appointments[index];
       assert.deepEqual(
-        { ...after, date: old.date, price: old.price, created_at: old.created_at, weekday: old.weekday },
+        {
+          ...after,
+          date: old.date,
+          price: old.price,
+          created_at: old.created_at,
+          weekday: old.weekday,
+        },
         { ...old },
         "as outras colunas não mudam",
       );
@@ -201,14 +229,18 @@ describe("migrações do banco", () => {
     const [withPackage, withoutPackage] = rows(db, "pets");
     assert.equal(withPackage.package_price, 20000);
     assert.equal(withPackage.package_start_date, isoDate(3));
-    assert.equal(withPackage.last_auto_visit_date, isoFromLegacy(before.pets[0].last_auto_visit_date));
+    assert.equal(
+      withPackage.last_auto_visit_date,
+      isoFromLegacy(before.pets[0].last_auto_visit_date),
+    );
     assert.equal(withoutPackage.package_price, null);
     assert.equal(withoutPackage.last_visit_date, isoDate(-10));
     assert.equal(rows(db, "owners")[0].created_at, isoFromLegacy(before.owners[0].created_at));
 
     const nextId = Number(
-      db.prepare("INSERT INTO appointments (pet_id, servico, data) VALUES (?, 'Banho', ?)").run(pet.id, isoDate(5))
-        .lastInsertRowid,
+      db
+        .prepare("INSERT INTO appointments (pet_id, servico, data) VALUES (?, 'Banho', ?)")
+        .run(pet.id, isoDate(5)).lastInsertRowid,
     );
     assert.equal(nextId, deletedId + 1, "a contagem de ids continua de onde parou");
   });
@@ -250,13 +282,21 @@ describe("migrações do banco", () => {
     assert.equal(agenda.length, countBefore + 1, "concluir cria o próximo");
     assert.ok(agenda.at(-1).date > lastBefore);
     assert.equal(petRow(db, pet.id).last_auto_visit_date, agenda.at(-1).date);
-    assert.equal(petRow(db, pet.id).last_visit_date, first.date, "a última visita segue no trigger");
+    assert.equal(
+      petRow(db, pet.id).last_visit_date,
+      first.date,
+      "a última visita segue no trigger",
+    );
   });
 
   test("banco na versão 4: o horário padrão nulo vira 00:00, e o resto do pet fica igual", async () => {
     const db = await databaseAt(4);
     const { pet } = insertOwnerWithPackagePet(db);
-    const withTime = insertPet(db, { owner_id: pet.owner_id, name: "Com horário", default_time: "14:30" });
+    const withTime = insertPet(db, {
+      owner_id: pet.owner_id,
+      name: "Com horário",
+      default_time: "14:30",
+    });
     db.prepare("UPDATE pets SET horario_padrao = NULL WHERE id = ?").run(pet.id);
     const before = rows(db, "pets");
 
@@ -283,7 +323,11 @@ describe("migrações do banco", () => {
     const [first] = pendingAutoOf(db, pet.id);
     await packageScheduleOf(db).updateAppointment(first.id, { ...first, completed: 1 });
 
-    assert.equal(pendingAutoOf(db, pet.id).at(-1).time, "00:00", "o próximo da agenda leva o 00:00");
+    assert.equal(
+      pendingAutoOf(db, pet.id).at(-1).time,
+      "00:00",
+      "o próximo da agenda leva o 00:00",
+    );
   });
 
   test("banco de antes das migrações sobe direto para a última versão, sem os triggers da remarcação", async () => {
@@ -318,7 +362,10 @@ describe("migrações do banco", () => {
     const db = openConnection();
     const migrations = [
       ...MIGRATIONS,
-      nextMigration(["CREATE TABLE extra (id INTEGER);", "INSERT INTO tabela_que_nao_existe VALUES (1);"]),
+      nextMigration([
+        "CREATE TABLE extra (id INTEGER);",
+        "INSERT INTO tabela_que_nao_existe VALUES (1);",
+      ]),
     ];
 
     await assert.rejects(migrate(db, migrations), failedAt(LATEST + 1));
@@ -333,7 +380,11 @@ describe("migrações do banco", () => {
     db.exec(`PRAGMA user_version = ${LATEST + 5};`);
     const schemaBefore = schemaObjects(db);
 
-    await assert.rejects(migrate(db), { name: "AppError", code: "DATABASE", message: MESSAGES.database.newerVersion });
+    await assert.rejects(migrate(db), {
+      name: "AppError",
+      code: "DATABASE",
+      message: MESSAGES.database.newerVersion,
+    });
 
     assert.equal(userVersion(db), LATEST + 5);
     assert.deepEqual(schemaObjects(db), schemaBefore);
@@ -374,7 +425,10 @@ describe("migrações do banco", () => {
     // Com as chaves estrangeiras desligadas, apagar o dono não leva os pets junto.
     const migrations = [...MIGRATIONS, nextMigration(["DELETE FROM owners;"])];
 
-    await assert.rejects(migrate(db, migrations), failedAt(LATEST + 1, MESSAGES.database.brokenForeignKey));
+    await assert.rejects(
+      migrate(db, migrations),
+      failedAt(LATEST + 1, MESSAGES.database.brokenForeignKey),
+    );
 
     assert.equal(count(db, "owners"), 1);
     assert.equal(userVersion(db), LATEST);
@@ -403,20 +457,33 @@ describe("migração para a versão 7 (nomes em inglês)", () => {
   test("tabelas, colunas e códigos em inglês, com os mesmos dados, ids e contagem de ids", async () => {
     const db = await databaseAt(6);
     const ownerId = insertOwner(db, { name: "Dona da versão 6" });
-    const pet = insertPet(db, { owner_id: ownerId, name: "Pipoca", species_id: 2, size: "EXTRA_LARGE" });
+    const pet = insertPet(db, {
+      owner_id: ownerId,
+      name: "Pipoca",
+      species_id: 2,
+      size: "EXTRA_LARGE",
+    });
     db.prepare("DELETE FROM owners WHERE id = ?").run(insertOwner(db, { name: "Apagado" }));
     db.prepare("UPDATE configs SET is_ativo = 1 WHERE config = 'Modo Escuro'").run();
     const before = Object.fromEntries(["owners", "pets"].map((table) => [table, rows(db, table)]));
-    const sequencesBefore = db.prepare("SELECT name, seq FROM sqlite_sequence WHERE name IN ('owners', 'pets')").all();
+    const sequencesBefore = db
+      .prepare("SELECT name, seq FROM sqlite_sequence WHERE name IN ('owners', 'pets')")
+      .all();
 
     await migrate(db);
 
     assert.deepEqual(schemaObjects(db), schemaObjects(await createDatabase()));
     assert.deepEqual(rows(db, "owners"), before.owners);
-    assert.deepEqual(rows(db, "pets").map(({ size, ...rest }) => rest), before.pets.map(({ size, ...rest }) => rest));
+    assert.deepEqual(
+      rows(db, "pets").map(({ size, ...rest }) => rest),
+      before.pets.map(({ size, ...rest }) => rest),
+    );
     assert.equal(petRow(db, pet.id).size, "EXTRA_LARGE", "GRANDAO vira EXTRA_LARGE");
     assert.deepEqual(
-      db.prepare("SELECT name FROM species ORDER BY id").all().map(({ name }) => name),
+      db
+        .prepare("SELECT name FROM species ORDER BY id")
+        .all()
+        .map(({ name }) => name),
       ["DOG", "CAT", "OTHER"],
     );
     assert.deepEqual(
@@ -466,7 +533,10 @@ describe("recriar o banco (reset de desenvolvimento)", () => {
   test("se uma migração falhar, os dados antigos continuam lá", async () => {
     const db = await createDatabase();
     insertOwnerWithPackagePet(db);
-    const migrations = [...MIGRATIONS, nextMigration(["INSERT INTO tabela_que_nao_existe VALUES (1);"])];
+    const migrations = [
+      ...MIGRATIONS,
+      nextMigration(["INSERT INTO tabela_que_nao_existe VALUES (1);"]),
+    ];
 
     await assert.rejects(recreate(db, migrations), failedAt(LATEST + 1));
 

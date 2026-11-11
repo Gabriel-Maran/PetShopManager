@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { Image, View, TextInput, StyleSheet } from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../../theme/ThemeProvider";
 import { StatusFilter } from "../../../config/consts";
 import FilterPanel from "./FilterPanel";
 import { MAX_SEARCH_LENGTH } from "../../../globals/limits";
@@ -47,15 +43,12 @@ export default function SearchBar({
     }, 600);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [text]);
+  }, [text, setSearch]);
 
   return (
     <View style={s.container}>
       {hasFilter && isSelectedFilter ? (
-        <FilterPanel
-          value={statusFilter}
-          onChange={onStatusFilterChange ?? (() => {})}
-        />
+        <FilterPanel value={statusFilter} onChange={onStatusFilterChange ?? (() => {})} />
       ) : (
         <View style={s.searchText}>
           <IconButton
@@ -65,10 +58,7 @@ export default function SearchBar({
             onPress={() => setSearch(text)}
             style={s.btnImg}
           >
-            <Image
-              style={s.img}
-              source={require("../../../assets/outros/search.png")}
-            />
+            <Image style={s.img} source={require("../../../assets/misc/search.png")} />
           </IconButton>
           <TextInput
             onChangeText={setText}
@@ -89,10 +79,7 @@ export default function SearchBar({
           onPress={() => setIsSelectedFilter(!isSelectedFilter)}
           style={s.btnFilter}
         >
-          <Image
-            style={s.imgFilter}
-            source={require("../../../assets/outros/filter.png")}
-          />
+          <Image style={s.imgFilter} source={require("../../../assets/misc/filter.png")} />
         </IconButton>
       )}
     </View>

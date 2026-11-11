@@ -4,7 +4,13 @@
 // podem ser fixas.
 import { beforeEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { createDatabase, insertAppointment as insertAppointmentRow, insertOwner, insertPet, isoDate } from "./helpers/database.mjs";
+import {
+  createDatabase,
+  insertAppointment as insertAppointmentRow,
+  insertOwner,
+  insertPet,
+  isoDate,
+} from "./helpers/database.mjs";
 import { DEACTIVATE_PET_SQL } from "../src/repository/sql/petsSql.ts";
 import {
   ACTIVE_PACKAGES_SQL,
@@ -28,20 +34,35 @@ import { lastMonthsRange, nextMonthsRange } from "../src/utils/reports/months.ts
 
 /** Agendamento de R$ 50,00 no PIX, pelo comando do app. */
 function insertAppointment(db, petId, date, { completed = 0, time = "10:00", auto = 0 } = {}) {
-  insertAppointmentRow(db, petId, { date, completed, time, is_auto: auto, price: 5000, payment_method: "PIX" });
+  insertAppointmentRow(db, petId, {
+    date,
+    completed,
+    time,
+    is_auto: auto,
+    price: 5000,
+    payment_method: "PIX",
+  });
 }
 
 const setPet = (db, id, column, value) =>
   db.prepare(`UPDATE pets SET ${column} = ? WHERE id = ?`).run(value, id);
 
 /** As linhas como objetos simples, para o deepEqual. */
-const rowsOf = (db, sql, ...params) => db.prepare(sql).all(...params).map((r) => ({ ...r }));
+const rowsOf = (db, sql, ...params) =>
+  db
+    .prepare(sql)
+    .all(...params)
+    .map((r) => ({ ...r }));
 
 /** Um pet ativo com pacote, como o cadastro grava. */
 const insertPackagePet = (db, ownerId, name, pacote) =>
   insertPet(db, {
-    name, owner_id: ownerId, reschedule_active: 1, package_frequency: pacote,
-    package_start_date: isoDate(3), package_price: pacote * 8000,
+    name,
+    owner_id: ownerId,
+    reschedule_active: 1,
+    package_frequency: pacote,
+    package_start_date: isoDate(3),
+    package_price: pacote * 8000,
   });
 
 // Um texto que mudaria a consulta se fosse montado no SQL; como parâmetro, é só um valor que não bate.
@@ -65,15 +86,22 @@ describe("relatórios: montagem das barras", () => {
   });
 
   test("um grupo que não tem barra fica de fora", () => {
-    const rows = [{ category: 3, total: 5 }, { category: 2, total: 1 }];
+    const rows = [
+      { category: 3, total: 5 },
+      { category: 2, total: 1 },
+    ];
 
-    assert.deepEqual(countsToBars(rows, PACKAGE_BARS).map((bar) => bar.y), [1, 0]);
+    assert.deepEqual(
+      countsToBars(rows, PACKAGE_BARS).map((bar) => bar.y),
+      [1, 0],
+    );
   });
 
   test("os dias da semana vão de domingo a sábado, e as horas, de 00h a 23h", () => {
-    assert.deepEqual(WEEKDAY_BARS.map(([day, label]) => `${day}:${label}`), [
-      "0:Dom", "1:Seg", "2:Ter", "3:Qua", "4:Qui", "5:Sex", "6:Sáb",
-    ]);
+    assert.deepEqual(
+      WEEKDAY_BARS.map(([day, label]) => `${day}:${label}`),
+      ["0:Dom", "1:Seg", "2:Ter", "3:Qua", "4:Qui", "5:Sex", "6:Sáb"],
+    );
     assert.equal(HOUR_BARS.length, 24);
     assert.deepEqual(HOUR_BARS[0], [0, "00h"]);
     assert.deepEqual(HOUR_BARS[23], [23, "23h"]);
@@ -111,7 +139,10 @@ describe("relatórios: meses do comparativo", () => {
 
   test("as contagens do banco caem nos meses certos, com 0 nos vazios", () => {
     const range = lastMonthsRange(new Date(2026, 2, 10), 3); // Jan a Mar/26
-    const rows = [{ category: "2026-01", total: 2 }, { category: "2026-03", total: 5 }];
+    const rows = [
+      { category: "2026-01", total: 2 },
+      { category: "2026-03", total: 5 },
+    ];
 
     assert.deepEqual(countsToBars(rows, range.bars), [
       { x: "Jan/26", y: 2 },
@@ -151,7 +182,10 @@ describe("relatório: atendimentos por mês", () => {
   });
 
   test("um valor malicioso no lugar do concluido não traz nenhuma linha", () => {
-    assert.deepEqual(rowsOf(db, APPOINTMENTS_BY_MONTH_SQL, INJECTION, "2026-01-01", "2026-12-31"), []);
+    assert.deepEqual(
+      rowsOf(db, APPOINTMENTS_BY_MONTH_SQL, INJECTION, "2026-01-01", "2026-12-31"),
+      [],
+    );
   });
 });
 
@@ -189,7 +223,10 @@ describe("relatório: dias e horários mais movimentados", () => {
     const days = countsToBars(rowsOf(db, COMPLETED_BY_WEEKDAY_SQL), WEEKDAY_BARS);
     const hours = countsToBars(rowsOf(db, COMPLETED_BY_HOUR_SQL), HOUR_BARS);
 
-    assert.deepEqual(days.map((bar) => bar.y), [1, 2, 0, 0, 0, 0, 1]);
+    assert.deepEqual(
+      days.map((bar) => bar.y),
+      [1, 2, 0, 0, 0, 0, 1],
+    );
     assert.equal(hours.length, 24);
     assert.deepEqual(hours[9], { x: "09h", y: 2 });
   });
@@ -266,7 +303,10 @@ describe("relatório: remarcações e pacotes", () => {
     db.prepare(DEACTIVATE_PET_SQL).run(inactive.id);
     insertPet(db, { name: "Mel", owner_id: ownerId }); // sem pacote
 
-    assert.deepEqual(rowsOf(db, PETS_IN_PACKAGE_SQL, 2), [{ name: "Luna" }, { name: "Pé-de-Moça" }]);
+    assert.deepEqual(rowsOf(db, PETS_IN_PACKAGE_SQL, 2), [
+      { name: "Luna" },
+      { name: "Pé-de-Moça" },
+    ]);
     assert.deepEqual(rowsOf(db, PETS_IN_PACKAGE_SQL, 4), [{ name: "Thor" }]);
   });
 
@@ -287,7 +327,8 @@ describe("relatório: pets ausentes", () => {
     ownerId = insertOwner(db, { name: "Ana" });
   });
 
-  const absent = (rescheduleActive, limit = 30) => rowsOf(db, ABSENT_PETS_SQL, TODAY, rescheduleActive, limit);
+  const absent = (rescheduleActive, limit = 30) =>
+    rowsOf(db, ABSENT_PETS_SQL, TODAY, rescheduleActive, limit);
 
   test("conta os dias desde a última visita e, para quem nunca veio, desde o cadastro", () => {
     const visited = insertPet(db, { name: "Rex", owner_id: ownerId });
@@ -330,7 +371,10 @@ describe("relatório: pets ausentes", () => {
     insertPet(db, { name: "Mel", owner_id: ownerId });
     insertPet(db, { name: "Nina", owner_id: ownerId });
 
-    assert.deepEqual(absent(1).map((r) => r.label), ["Thor · Ana"]);
+    assert.deepEqual(
+      absent(1).map((r) => r.label),
+      ["Thor · Ana"],
+    );
     assert.equal(absent(0).length, 2);
     assert.equal(absent(0, 1).length, 1);
   });

@@ -1,23 +1,11 @@
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  ImageSourcePropType,
-} from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, ImageSourcePropType } from "react-native";
 import { Screen } from "../../../config/consts";
 import EditButton from "./buttons/EditButton";
 import { ThemeColors, useThemedStyles } from "../../theme/ThemeProvider";
 import InputWrapper from "./InputWrapper";
 import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
 import { touchTargetSlop } from "../accessibility/accessibilityProps";
-import {
-  FONT_SIZE,
-  FONT_WEIGHT,
-  LINE_HEIGHTS,
-  RADIUS,
-  SPACING,
-} from "../../theme/tokens";
+import { FONT_SIZE, FONT_WEIGHT, LINE_HEIGHTS, RADIUS, SPACING } from "../../theme/tokens";
 
 /** Altura fixa da linha de "Cadastrar nova raça", para a área de toque chegar a 48 dp. */
 const NEW_BREED_LINE_HEIGHT = LINE_HEIGHTS[20];
@@ -49,19 +37,10 @@ export default function SelectionField({
   const s = useThemedStyles(styles);
 
   return (
-    <InputWrapper
-      image={image}
-      titleName={titleName}
-      hasBorderBottom={hasBorderBottom}
-    >
+    <InputWrapper image={image} titleName={titleName} hasBorderBottom={hasBorderBottom}>
       {selectedRecord ? (
         <View style={s.selectedRecordBox}>
-          <View
-            style={[
-              s.recordBox,
-              isEditable ? { marginRight: SPACING[10] } : {},
-            ]}
-          >
+          <View style={[s.recordBox, isEditable ? { marginRight: SPACING[10] } : {}]}>
             <Text style={s.txtRecord} numberOfLines={1}>
               {selectedRecord}
             </Text>
@@ -79,11 +58,7 @@ export default function SelectionField({
       ) : (
         isEditable && (
           <View style={s.actionsContainer}>
-            <TouchableOpacity
-              style={s.btnSave}
-              onPress={onPress}
-              accessibilityRole="button"
-            >
+            <TouchableOpacity style={s.btnSave} onPress={onPress} accessibilityRole="button">
               <Text style={s.txtSave}>{buttonText}</Text>
             </TouchableOpacity>
           </View>

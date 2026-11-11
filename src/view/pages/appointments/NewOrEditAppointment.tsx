@@ -1,18 +1,7 @@
-import {
-  KeyboardAvoidingView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  Platform,
-} from "react-native";
+import { KeyboardAvoidingView, StyleSheet, ScrollView, View, Text, Platform } from "react-native";
 import { useState, useEffect, useCallback } from "react";
 import { SpeciesCode, Screen } from "../../../config/consts";
-import {
-  MAX_MONEY_INPUT_LENGTH,
-  MAX_NOTES_LENGTH,
-  MAX_TIME_LENGTH,
-} from "../../../globals/limits";
+import { MAX_MONEY_INPUT_LENGTH, MAX_NOTES_LENGTH, MAX_TIME_LENGTH } from "../../../globals/limits";
 import { useScreen } from "../../../hooks/useScreen";
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
 
@@ -23,23 +12,15 @@ import {
   usePaymentMethods,
 } from "../../../hooks/data/useAppointment";
 
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../../theme/ThemeProvider";
 
 import { maskTime } from "../../../utils/timeMask";
 import { maskMoneyInput, parseMoneyInput } from "../../../utils/money";
-import {
-  openSelectionModal,
-  ModalConfig,
-} from "../../../utils/openSelectionModal";
+import { openSelectionModal, ModalConfig } from "../../../utils/openSelectionModal";
 
-import {
-  AppointmentBuilder,
-  NewOrEditAppointmentParams,
-} from "../../../model/Appointment";
+import { AppointmentBuilder, NewOrEditAppointmentParams } from "../../../model/Appointment";
+import type { PaymentMethod } from "../../../model/PaymentMethod";
+import type { ServiceType } from "../../../model/ServiceType";
 
 import { appointmentController } from "../../../controller/AppointmentsController";
 
@@ -75,49 +56,41 @@ export default function NewOrEditAppointment() {
   const [appointmentSelected, setAppointmentSelected] = useState(true);
   const [modalConfig, setModalConfig] = useState<ModalConfig>(INITIAL_MODAL);
 
-  const { appointmentsForm, updateAppointmentsField, isAppointmentDirty } =
-    useAppointmentForm();
+  const { appointmentsForm, updateAppointmentsField, isAppointmentDirty } = useAppointmentForm();
   const { servicesForm } = useServices();
   const { paymentMethodsForm } = usePaymentMethods();
 
-  const { petsForm, updatePetsField } = usePetsWithSpeciesAndBreed(
-    modalConfig.visible,
-  );
+  const { petsForm, updatePetsField } = usePetsWithSpeciesAndBreed(modalConfig.visible);
 
   // Sem isso, a lista do modal fica congelada no momento em que ele abriu, sem a busca nem a paginação.
   useEffect(() => {
     if (modalConfig.visible) {
       setModalConfig((prev) => ({ ...prev, items: petsForm.pets ?? [] }));
     }
-  }, [petsForm.pets]);
+  }, [petsForm.pets, modalConfig.visible]);
 
   // Com proteção contra duplo clique. Dentro da ação: um valor digitado fora do formato vira a mensagem de erro da tela.
-  const { run: saveAppointment, isRunning: isSavingRecord } = useAsyncAction(
-    async () => {
-      const appointmentToSave = new AppointmentBuilder()
-        .withPetId(appointmentsForm.pet_id)
-        .withService(appointmentsForm.service)
-        .withTime(appointmentsForm.time ?? "00:00")
-        .withDate(appointmentsForm.date)
-        .withDeliverPet(appointmentsForm.deliver_pet)
-        .withNotes(appointmentsForm.notes)
-        .withPrice(parseMoneyInput(appointmentsForm.price) ?? 0)
-        .withPaymentMethod(appointmentsForm.payment_method)
-        .withPaid(appointmentsForm.is_paid)
-        .withCompleted(appointmentsForm.completed)
-        .build();
+  const { run: saveAppointment, isRunning: isSavingRecord } = useAsyncAction(async () => {
+    const appointmentToSave = new AppointmentBuilder()
+      .withPetId(appointmentsForm.pet_id)
+      .withService(appointmentsForm.service)
+      .withTime(appointmentsForm.time ?? "00:00")
+      .withDate(appointmentsForm.date)
+      .withDeliverPet(appointmentsForm.deliver_pet)
+      .withNotes(appointmentsForm.notes)
+      .withPrice(parseMoneyInput(appointmentsForm.price) ?? 0)
+      .withPaymentMethod(appointmentsForm.payment_method)
+      .withPaid(appointmentsForm.is_paid)
+      .withCompleted(appointmentsForm.completed)
+      .build();
 
-      if (isEditing) {
-        await appointmentController.updateAppointment(
-          params!.appointment?.id!,
-          appointmentToSave,
-        );
-      } else {
-        await appointmentController.createAppointment(appointmentToSave);
-      }
-      navigate(Screen.Calendar);
-    },
-  );
+    if (isEditing) {
+      await appointmentController.updateAppointment(params!.appointment?.id!, appointmentToSave);
+    } else {
+      await appointmentController.createAppointment(appointmentToSave);
+    }
+    navigate(Screen.Calendar);
+  });
 
   const closeModal = useCallback(() => {
     setModalConfig((prev) => ({ ...prev, visible: false }));
@@ -128,17 +101,17 @@ export default function NewOrEditAppointment() {
       title: "Selecionar Pet",
       itemIcon: (pet) => {
         if (pet.species_name === SpeciesCode.Dog)
-          return require("../../../assets/animais/caoGreen.png");
+          return require("../../../assets/animals/dogGreen.png");
         if (pet.species_name === SpeciesCode.Cat)
-          return require("../../../assets/animais/gatoGreen.png");
-        return require("../../../assets/animais/interrogacaoGreen.png");
+          return require("../../../assets/animals/catGreen.png");
+        return require("../../../assets/animals/questionGreen.png");
       },
       items: petsForm.pets,
       setModalConfig,
       onSelect: (pet) => {
-        updateAppointmentsField("pet_id", pet.id);
+        updateAppointmentsField("pet_id", pet.id ?? 0);
         updateAppointmentsField("pet_name", pet.name);
-        updateAppointmentsField("is_auto", pet.reschedule_active);
+        updateAppointmentsField("is_auto", pet.reschedule_active ?? 0);
       },
     });
   }, [petsForm.pets, updateAppointmentsField]);
@@ -157,7 +130,7 @@ export default function NewOrEditAppointment() {
   );
 
   const handleChangeService = useCallback(
-    (item: any) => updateAppointmentsField("service", item.name),
+    (item: ServiceType) => updateAppointmentsField("service", item.name),
     [updateAppointmentsField],
   );
 
@@ -192,7 +165,7 @@ export default function NewOrEditAppointment() {
   );
 
   const handleChangePaymentMethod = useCallback(
-    (item: any) => updateAppointmentsField("payment_method", item.name),
+    (item: PaymentMethod) => updateAppointmentsField("payment_method", item.name),
     [updateAppointmentsField],
   );
 
@@ -202,19 +175,15 @@ export default function NewOrEditAppointment() {
   );
 
   const renderServiceItem = useCallback(
-    (item: any) => (
-      <Text style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}>
-        {item.name}
-      </Text>
+    (item: ServiceType) => (
+      <Text style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}>{item.name}</Text>
     ),
     [colors.TEXT_PRIMARY],
   );
 
   const renderPaymentItem = useCallback(
-    (item: any) => (
-      <Text style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}>
-        {item.name}
-      </Text>
+    (item: PaymentMethod) => (
+      <Text style={{ padding: SPACING[15], color: colors.TEXT_PRIMARY }}>{item.name}</Text>
     ),
     [colors.TEXT_PRIMARY],
   );
@@ -223,10 +192,7 @@ export default function NewOrEditAppointment() {
   // da lista). O formulário mostra o nome em vez do aviso de "selecione", e salvar sem trocar vale.
   // O campo não corta a observação já gravada: com a nota da migração ela pode passar do limite. Ela
   // abre inteira, e salvar sem mudar vale; o que for editado volta a respeitar o limite (schema).
-  const observationMaxLength = Math.max(
-    MAX_NOTES_LENGTH,
-    params?.appointment?.notes?.length ?? 0,
-  );
+  const observationMaxLength = Math.max(MAX_NOTES_LENGTH, params?.appointment?.notes?.length ?? 0);
 
   const storedService = appointmentsForm.service
     ? { id: 0, name: appointmentsForm.service }
@@ -237,19 +203,12 @@ export default function NewOrEditAppointment() {
 
   const saveButton = (
     <View style={s.ctnBtnSave}>
-      <SaveButton
-        isEditing={isEditing}
-        isSaving={isSavingRecord}
-        onPress={saveAppointment}
-      />
+      <SaveButton isEditing={isEditing} isSaving={isSavingRecord} onPress={saveAppointment} />
     </View>
   );
 
   return (
-    <KeyboardAvoidingView
-      style={s.flex}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <KeyboardAvoidingView style={s.flex} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <DefaultHeader />
       <TitleBar
         title={isEditing ? "Editar Agendamento" : "Novo Agendamento"}
@@ -273,17 +232,14 @@ export default function NewOrEditAppointment() {
 
       {appointmentSelected && (
         <>
-          <ScrollView
-            contentContainerStyle={s.scrollContent}
-            keyboardShouldPersistTaps="handled"
-          >
+          <ScrollView contentContainerStyle={s.scrollContent} keyboardShouldPersistTaps="handled">
             <View style={s.ctnRegistry}>
               <View style={s.requiredFieldBox}>
                 <FormSectionTitle title="Dados" />
               </View>
               <View style={s.inputs}>
                 <SelectionField
-                  image={require("../../../assets/animais/petHome.png")}
+                  image={require("../../../assets/animals/petHome.png")}
                   titleName="PET"
                   selectedRecord={appointmentsForm.pet_name}
                   buttonText="Selecionar Pet"
@@ -293,14 +249,13 @@ export default function NewOrEditAppointment() {
                   isEditable={true}
                 />
                 <InputSelect
-                  image={require("../../../assets/outros/servicos.png")}
+                  image={require("../../../assets/misc/services.png")}
                   titleName="Serviço"
                   placeholder="Selecione o serviço..."
                   options={servicesForm.service}
                   itemSelected={
-                    servicesForm.service.find(
-                      (e) => e.name === appointmentsForm.service,
-                    ) ?? storedService
+                    servicesForm.service.find((e) => e.name === appointmentsForm.service) ??
+                    storedService
                   }
                   labelExtractor={(item) => item.name}
                   onChange={handleChangeService}
@@ -309,7 +264,7 @@ export default function NewOrEditAppointment() {
                   isEditable={true}
                 />
                 <DatePickerField
-                  image={require("../../../assets/outros/data.png")}
+                  image={require("../../../assets/misc/date.png")}
                   item={appointmentsForm.date}
                   setItem={handleChangeDate}
                   titleName="Data do agendamento"
@@ -317,7 +272,7 @@ export default function NewOrEditAppointment() {
                   isEditable={true}
                 />
                 <InputInfo
-                  image={require("../../../assets/outros/hora.png")}
+                  image={require("../../../assets/misc/time.png")}
                   item={appointmentsForm.time}
                   setItem={handleChangeTime}
                   placeholder="Informe o horário..."
@@ -328,7 +283,7 @@ export default function NewOrEditAppointment() {
                   hasBorderBottom={true}
                 />
                 <Toggle
-                  image={require("../../../assets/outros/entrega.png")}
+                  image={require("../../../assets/misc/delivery.png")}
                   value={appointmentsForm.deliver_pet}
                   onChange={handleChangeDeliverPet}
                   title="Táxi dog"
@@ -337,7 +292,7 @@ export default function NewOrEditAppointment() {
                   noEdit={false}
                 />
                 <InputInfo
-                  image={require("../../../assets/nav_bar/artigo.png")}
+                  image={require("../../../assets/nav_bar/article.png")}
                   item={appointmentsForm.notes}
                   setItem={handleChangeNotes}
                   placeholder="Uma observação adicional..."
@@ -349,20 +304,18 @@ export default function NewOrEditAppointment() {
                 {isEditing && (
                   <>
                     <Toggle
-                      image={require("../../../assets/outros/concluido.png")}
+                      image={require("../../../assets/misc/completed.png")}
                       value={appointmentsForm.completed}
                       onChange={handleChangeCompleted}
                       title="Status"
                       subtitle="Serviço concluído?"
                       hasBorderBottom={true}
                     />
-                    {appointmentsForm.is_auto == 1 && (
+                    {appointmentsForm.is_auto === 1 && (
                       <Toggle
-                        image={require("../../../assets/outros/auto_gen.png")}
+                        image={require("../../../assets/misc/autoScheduled.png")}
                         value={appointmentsForm.is_auto}
-                        onChange={(value) =>
-                          updateAppointmentsField("is_auto", value)
-                        }
+                        onChange={(value) => updateAppointmentsField("is_auto", value)}
                         title="Agendamento Auto-gerado"
                         subtitle=""
                         hasBorderBottom={false}
@@ -393,17 +346,14 @@ export default function NewOrEditAppointment() {
       )}
 
       {!appointmentSelected && (
-        <ScrollView
-          contentContainerStyle={s.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
+        <ScrollView contentContainerStyle={s.scrollContent} keyboardShouldPersistTaps="handled">
           <View style={s.ctnRegistry}>
             <View style={s.requiredFieldBox}>
               <FormSectionTitle title="Dados" />
             </View>
             <View style={s.inputs}>
               <InputInfo
-                image={require("../../../assets/outros/valor.png")}
+                image={require("../../../assets/misc/price.png")}
                 item={appointmentsForm.price}
                 setItem={handleChangePrice}
                 placeholder="Valor do serviço..."
@@ -414,7 +364,7 @@ export default function NewOrEditAppointment() {
                 hasBorderBottom={true}
               />
               <InputSelect
-                image={require("../../../assets/outros/tipo_pgto.png")}
+                image={require("../../../assets/misc/paymentMethod.png")}
                 titleName="Tipo de Pagamento"
                 placeholder="Selecione o tipo de pgto..."
                 options={paymentMethodsForm.paymentMethods}
@@ -430,7 +380,7 @@ export default function NewOrEditAppointment() {
                 isEditable={true}
               />
               <Toggle
-                image={require("../../../assets/outros/pagamento.png")}
+                image={require("../../../assets/misc/payment.png")}
                 value={appointmentsForm.is_paid}
                 onChange={handleChangePaid}
                 title="Pagamento"

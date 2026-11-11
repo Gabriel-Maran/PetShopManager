@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import { todayIso } from "../../../../utils/dates";
 import { useTheme } from "../../../theme/ThemeProvider";
-import { Calendar } from "react-native-calendars";
+import { Calendar, type CalendarProps } from "react-native-calendars";
 import { FONT_SIZE, FONT_WEIGHT, RADIUS } from "../../../theme/tokens";
+import type { CalendarTheme } from "../../../theme/calendarTheme";
 
 interface DatePickerCalendarProps {
   value?: string; // YYYY-MM-DD  (data selecionada)
@@ -11,17 +12,12 @@ interface DatePickerCalendarProps {
   maxDate?: string;
 }
 
-export function DatePickerCalendar({
-  value,
-  onChange,
-  minDate,
-  maxDate,
-}: DatePickerCalendarProps) {
+export function DatePickerCalendar({ value, onChange, minDate, maxDate }: DatePickerCalendarProps) {
   const { colors } = useTheme();
   const hj = todayIso();
 
   const markedDates = useMemo(() => {
-    const marks: Record<string, any> = {};
+    const marks: NonNullable<CalendarProps["markedDates"]> = {};
 
     // Hoje — quadrado colorido
     marks[hj] = {
@@ -114,7 +110,7 @@ export function DatePickerCalendar({
               textAlignVertical: "center",
             },
           },
-        } as any
+        } as CalendarTheme
       }
     />
   );

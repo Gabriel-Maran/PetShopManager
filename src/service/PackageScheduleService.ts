@@ -147,7 +147,10 @@ async function scheduleNextVisit(
       lastScheduled,
       concludedDate: concluded.date,
       visitsPerMonth,
-      pendingInLastScheduledMonth: await repository.countPendingAutoInMonth(petId, monthOf(lastScheduled)),
+      pendingInLastScheduledMonth: await repository.countPendingAutoInMonth(
+        petId,
+        monthOf(lastScheduled),
+      ),
     });
     const positionInMonth = 1 + (await repository.countAutoInMonth(petId, monthOf(date)));
     await repository.insertVisits([

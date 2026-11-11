@@ -12,12 +12,7 @@ import type { NameSearch } from "../../model/Search";
 import { ownerController } from "../../controller/OwnerController";
 import { petController } from "../../controller/PetController";
 
-import {
-  APP_BAR_HEIGHT,
-  LIMIT_ITEM_PAGE,
-  RegistryParams,
-  Screen,
-} from "../../config/consts";
+import { APP_BAR_HEIGHT, LIMIT_ITEM_PAGE, RegistryParams, Screen } from "../../config/consts";
 
 import SearchBar from "../components/searchBar/SearchBar";
 import DefaultHeader from "../components/header/DefaultHeader";
@@ -40,13 +35,11 @@ export default function RegistryScreen() {
 
   const s = useThemedStyles(styles);
 
-  const [isOwnerSelected, setIsOwnerSelected] = useState(params?.type != "PET");
+  const [isOwnerSelected, setIsOwnerSelected] = useState(params?.type !== "PET");
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
-  const [itemToDeactivate, setItemToDeactivate] = useState<
-    RegistryItem | undefined
-  >();
+  const [itemToDeactivate, setItemToDeactivate] = useState<RegistryItem | undefined>();
   const [showActive, setShowActive] = useState(1);
 
   const handleTabChange = (value: boolean) => {
@@ -80,7 +73,7 @@ export default function RegistryScreen() {
   useEffect(() => {
     const lastPage = Math.max(0, Math.ceil(total / LIMIT_ITEM_PAGE) - 1);
     if (page > lastPage) setPage(lastPage);
-  }, [total]);
+  }, [total, page]);
 
   // A lista só muda depois que o banco confirma, e a busca de novo traz a página e o total certos.
   // Uma falha aparece no modal de erro, e o item fica.
@@ -161,14 +154,14 @@ export default function RegistryScreen() {
         <View style={{ flex: 1 }}>
           {isOwnerSelected ? (
             <OwnerList
-              areActive={showActive == 1}
+              areActive={showActive === 1}
               records={owners.items}
               onDeactivate={askToDeactivate}
               onActivate={activate.run}
             />
           ) : (
             <PetList
-              areActive={showActive == 1}
+              areActive={showActive === 1}
               records={pets.items}
               onDeactivate={askToDeactivate}
               onActivate={activate.run}
@@ -179,23 +172,12 @@ export default function RegistryScreen() {
 
       <View style={s.ctnBtnAdd}>
         <IconButton
-          label={
-            isOwnerSelected
-              ? A11Y_LABELS.registry.addOwner
-              : A11Y_LABELS.registry.addPet
-          }
+          label={isOwnerSelected ? A11Y_LABELS.registry.addOwner : A11Y_LABELS.registry.addPet}
           width={ADD_BUTTON_SIZE}
           style={s.btnAdd}
-          onPress={() =>
-            navigate(
-              isOwnerSelected ? Screen.NewOrEditOwner : Screen.NewOrEditPet,
-            )
-          }
+          onPress={() => navigate(isOwnerSelected ? Screen.NewOrEditOwner : Screen.NewOrEditPet)}
         >
-          <Image
-            style={s.imgAdd}
-            source={require("../../assets/crud/addWhite.png")}
-          />
+          <Image style={s.imgAdd} source={require("../../assets/crud/addWhite.png")} />
         </IconButton>
       </View>
     </>

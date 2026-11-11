@@ -1,18 +1,14 @@
 # Próximos passos
 
-Atualizado em 2026-11-11, com o NOMES-1 inteiro e o tema do sistema (P19) num PR só.
+Atualizado em 2026-11-12, com o bloco de qualidade e arquitetura.
 
 > **Para o próximo chat:**
 > - Leia antes o [`checklist-perguntas.md`](checklist-perguntas.md).
-> - O Gabriel quer tudo de uma vez, num PR, sem dividir em partes e com textos curtos (2026-11-11).
-> - Em revisão: o PR do NOMES-1 (branch `refactor/nomes-em-ingles-camadas`), com a versão 7 do esquema (nomes em inglês e a tabela `settings`) e o tema que segue o sistema. Depois do merge, um banco de aparelho sobe sozinho para a v7.
-> - Pergunta em aberto: a nota da migração v6 se repete nos automáticos seguintes, porque o próximo copia a observação do concluído. Fica assim?
-> - Falta no código:
->   - ARQ-3 (navegação), TEST-2 (lint e Prettier, com o lint de hooks) e TEST-3 (testes de componentes): exigem instalação de pacote pelo Gabriel, com a análise de segurança;
->   - ARQ-1, resto: pastas por assunto (`features/`, `data/`, `shared/`) e a regra de lint de imports, depois do TEST-2;
->   - o tamanho do Zod (`zod/mini`), deixado para depois;
->   - Parte 5: APK na release `v1.0.0`, vídeo e README completo.
-> - Do Gabriel: conferir no aparelho os roteiros dos PRs (#22 a #57 e este), o TalkBack e o tamanho do APK; responder as perguntas 3, 4, 6 a 9, 12, 23 e 24 de `perguntas-em-aberto.md`; avisar os parceiros do ruleset e decidir sobre os e-mails dos commits.
+> - O Gabriel quer tudo de uma vez, num PR, e textos curtos.
+> - Em revisão: o PR do bloco de qualidade (branch `feat/bloco-qualidade`): navegação com React Navigation, ESLint e Prettier no `check`, e o commit que ficou fora do #58.
+> - Próximo: o bloco de entrega (Parte 5), no topo do [`plano-de-melhorias.md`](plano-de-melhorias.md). Depende do Gabriel: conta da Expo, gravação e as perguntas 3, 4 e 6 a 9.
+> - Do Gabriel: conferir no aparelho os roteiros dos PRs, o TalkBack e o tamanho do APK; REPO-4 com os parceiros; perguntas 12, 23 e 24.
+> - Pergunta em aberto: a nota da migração v6 se repete nos automáticos seguintes. Fica assim?
 > - Agentes em paralelo partem só do `main` atualizado (ver `decisoes.md`).
 
 ## Pendências entre áreas e varredura (2026-11-09, PRs #35 a #38)

@@ -1,9 +1,5 @@
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../../theme/ThemeProvider";
 import BarChart from "../../components/reports/BarChart";
 import TitleBar from "../../components/registry/TitleBar";
 
@@ -24,12 +20,7 @@ export default function ActivePackagesReport() {
   const { colors } = useTheme();
   const s = useThemedStyles(styles);
 
-  const titleBar = (
-    <TitleBar
-      title="Planos Ativos"
-      subtitle="Quinzenal e semanal"
-    />
-  );
+  const titleBar = <TitleBar title="Planos Ativos" subtitle="Quinzenal e semanal" />;
 
   if (loading) {
     return (
@@ -53,17 +44,10 @@ export default function ActivePackagesReport() {
         subtitle={`${packageBars.reduce((acc, p) => acc + p.y, 0)} pets com remarcação automática`}
       />
 
-      <ScrollView
-        contentContainerStyle={s.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         {/* ── Gráfico geral ─────────────────────────────────────────── */}
         <View style={s.card}>
-          <BarChart
-            data={packageBars}
-            title="Distribuição por plano"
-            suffix="pets"
-          />
+          <BarChart data={packageBars} title="Distribuição por plano" suffix="pets" />
         </View>
 
         {/* ── Lista Quinzenal ───────────────────────────────────────── */}

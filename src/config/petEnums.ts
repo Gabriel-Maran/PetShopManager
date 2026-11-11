@@ -44,6 +44,11 @@ export const PetSize = {
 } as const;
 export type PetSize = ValueOf<typeof PetSize>;
 
+/** Se o valor é um dos portes, como o pet salvo traz do banco. */
+export function isPetSize(value: unknown): value is PetSize {
+  return Object.values(PetSize).some((size) => size === value);
+}
+
 export const PetSizeLabel: Record<PetSize, string> = {
   [PetSize.Small]: "Pequeno",
   [PetSize.Medium]: "Médio",

@@ -1,28 +1,11 @@
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../../../theme/ThemeProvider";
 import { TINT_OPACITY, withAlpha } from "../../../theme/alpha";
-import {
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { isoToBr } from "../../../../utils/dates";
 import { HIDDEN_FROM_SCREEN_READER } from "../../accessibility/accessibilityProps";
 import CloseButton from "../../CloseButton";
 import { DatePickerCalendar } from "./DatePickerCalendarProps";
-import {
-  FONT_SIZE,
-  FONT_WEIGHT,
-  LETTER_SPACINGS,
-  RADIUS,
-  SPACING,
-} from "../../../theme/tokens";
+import { FONT_SIZE, FONT_WEIGHT, LETTER_SPACINGS, RADIUS, SPACING } from "../../../theme/tokens";
 
 interface DatePickerModalProps {
   visible: boolean;
@@ -57,11 +40,7 @@ export function DatePickerModal({
       statusBarTranslucent
     >
       {/* Backdrop: fechar pelo leitor de tela é com o botão Fechar ou o voltar do Android. */}
-      <Pressable
-        style={s.backdrop}
-        onPress={onClose}
-        {...HIDDEN_FROM_SCREEN_READER}
-      />
+      <Pressable style={s.backdrop} onPress={onClose} {...HIDDEN_FROM_SCREEN_READER} />
 
       {/* Card */}
       <View style={s.centeredView} pointerEvents="box-none">
@@ -97,9 +76,7 @@ export function DatePickerModal({
               activeOpacity={0.7}
               accessibilityRole="button"
             >
-              <Text style={[s.btnText, { color: colors.TEXT_SECONDARY }]}>
-                Cancelar
-              </Text>
+              <Text style={[s.btnText, { color: colors.TEXT_SECONDARY }]}>Cancelar</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -110,9 +87,7 @@ export function DatePickerModal({
               accessibilityRole="button"
             >
               {/* Texto sobre o verde cheio usa a cor do fundo: escuro no tema escuro, branco no claro. */}
-              <Text style={[s.btnText, { color: colors.BACKGROUND }]}>
-                Confirmar
-              </Text>
+              <Text style={[s.btnText, { color: colors.BACKGROUND }]}>Confirmar</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -163,10 +138,7 @@ const modalStyles = (colors: ThemeColors) =>
       marginBottom: SPACING[4],
       paddingVertical: SPACING[8],
       paddingHorizontal: SPACING[14],
-      backgroundColor: withAlpha(
-        colors.PRIMARY_CONTRAST,
-        TINT_OPACITY.SELECTED_DATE,
-      ),
+      backgroundColor: withAlpha(colors.PRIMARY_CONTRAST, TINT_OPACITY.SELECTED_DATE),
       borderRadius: RADIUS[8],
       alignItems: "center",
     },

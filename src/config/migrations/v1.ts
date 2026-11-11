@@ -624,7 +624,6 @@ export const SQL_DROP_TRIGGERS_V1 = `
   DROP TRIGGER IF EXISTS trg_pet_desativar_limpar_remarcacao;
 `;
 
-
 export const V1: Migration = {
   // Tabelas, índices e dados iniciais usam IF NOT EXISTS e INSERT OR IGNORE, então a mesma versão
   // cria o banco novo e marca o que já existia sem versão, sem perder dados.

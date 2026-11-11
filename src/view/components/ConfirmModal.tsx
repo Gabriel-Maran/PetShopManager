@@ -1,13 +1,7 @@
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ThemeColors, useThemedStyles } from "../theme/ThemeProvider";
 import { HIDDEN_FROM_SCREEN_READER } from "./accessibility/accessibilityProps";
-import {
-  FONT_SIZE,
-  FONT_WEIGHT,
-  LINE_HEIGHTS,
-  RADIUS,
-  SPACING,
-} from "../theme/tokens";
+import { FONT_SIZE, FONT_WEIGHT, LINE_HEIGHTS, RADIUS, SPACING } from "../theme/tokens";
 
 type Variant = "destructive" | "default";
 
@@ -37,12 +31,7 @@ export default function ConfirmModal({
   const s = useThemedStyles(styles);
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onCancel}
-    >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View style={s.overlay}>
         <View style={s.box}>
           <Text style={s.emoji} {...HIDDEN_FROM_SCREEN_READER}>
@@ -61,10 +50,7 @@ export default function ConfirmModal({
               <Text style={s.btnCancelTxt}>{cancelLabel}</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[
-                s.btn,
-                variant === "destructive" ? s.btnDestructive : s.btnPrimary,
-              ]}
+              style={[s.btn, variant === "destructive" ? s.btnDestructive : s.btnPrimary]}
               onPress={onConfirm}
               accessibilityRole="button"
             >

@@ -11,11 +11,7 @@ import {
   Platform,
   ImageSourcePropType,
 } from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../../../theme/ThemeProvider";
 import { useAsyncAction } from "../../../../hooks/useAsyncAction";
 import { speciesController } from "../../../../controller/SpeciesController";
 import InputSelect from "../../InputSelect";
@@ -23,12 +19,7 @@ import { SpeciesLabel } from "../../../../config/consts";
 import InputInfo from "../InputInfo";
 import CloseButton from "../../CloseButton";
 import { MAX_BREED_NAME_LENGTH } from "../../../../globals/limits";
-import {
-  FONT_SIZE,
-  FONT_WEIGHT,
-  RADIUS,
-  SPACING,
-} from "../../../theme/tokens";
+import { FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "../../../theme/tokens";
 
 const SUBMIT_LABEL = "Cadastrar";
 
@@ -54,9 +45,7 @@ export default function CreateBreedModal({
 }: CreateBreedModalProps) {
   const s = useThemedStyles(styles);
   const [breedName, setBreedName] = useState("");
-  const [selectedSpecies, setSelectedSpecies] = useState<SpeciesOption | null>(
-    null,
-  );
+  const [selectedSpecies, setSelectedSpecies] = useState<SpeciesOption | null>(null);
 
   function resetForm() {
     setBreedName("");
@@ -107,18 +96,11 @@ export default function CreateBreedModal({
             <View style={s.body}>
               <InputSelect
                 titleName="Espécie"
-                image={
-                  speciesIcon ??
-                  require("../../../../assets/animais/iconEspecie.png")
-                }
+                image={speciesIcon ?? require("../../../../assets/animals/iconSpecies.png")}
                 placeholder="Selecione a espécie..."
                 options={speciesList}
                 itemSelected={selectedSpecies ?? undefined}
-                labelExtractor={(item) =>
-                  SpeciesLabel[
-                    item.name as keyof typeof SpeciesLabel
-                  ]
-                }
+                labelExtractor={(item) => SpeciesLabel[item.name as keyof typeof SpeciesLabel]}
                 onChange={setSelectedSpecies}
                 renderItem={(item) => (
                   <>
@@ -128,11 +110,7 @@ export default function CreateBreedModal({
                         color: colors.TEXT_PRIMARY,
                       }}
                     >
-                      {
-                        SpeciesLabel[
-                          item.name as keyof typeof SpeciesLabel
-                        ]
-                      }
+                      {SpeciesLabel[item.name as keyof typeof SpeciesLabel]}
                     </Text>
                   </>
                 )}
@@ -141,7 +119,7 @@ export default function CreateBreedModal({
               />
 
               <InputInfo
-                image={require("../../../../assets/animais/iconRaca.png")}
+                image={require("../../../../assets/animals/iconBreed.png")}
                 titleName="Nome da Raça"
                 item={breedName}
                 setItem={setBreedName}

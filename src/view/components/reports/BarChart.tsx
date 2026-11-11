@@ -1,9 +1,5 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../../theme/ThemeProvider";
+import { ThemeColors, useTheme, useThemedStyles } from "../../theme/ThemeProvider";
 import { formatValue } from "../../../utils/formatters/numberFormat";
 import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
 import type { BarChartItem } from "../../../utils/reports/charts";
@@ -58,10 +54,7 @@ export default function BarChart({
         horizontal
         showsHorizontalScrollIndicator={false}
         style={s.scroll}
-        contentContainerStyle={[
-          s.scrollContent,
-          verticalLabels && { gap: SPACING[20] },
-        ]}
+        contentContainerStyle={[s.scrollContent, verticalLabels && { gap: SPACING[20] }]}
       >
         {data.map((item, index) => {
           const ratio = maxY > 0 ? item.y / maxY : 0;
@@ -80,10 +73,7 @@ export default function BarChart({
               key={index}
               accessible
               accessibilityLabel={A11Y_LABELS.chartBar(item.x, valueWithSuffix)}
-              style={[
-                s.barWrapper,
-                verticalLabels && { minWidth: 36, maxWidth: 52 },
-              ]}
+              style={[s.barWrapper, verticalLabels && { minWidth: 36, maxWidth: 52 }]}
             >
               {/* Valor no topo */}
               <Text style={[s.valueLabel, isMax && s.valueLabelMax]}>
@@ -108,8 +98,7 @@ export default function BarChart({
                     {
                       height: barHeight,
                       backgroundColor:
-                        color ??
-                        (isMax ? colors.CHART_BAR_HIGHLIGHT : colors.CHART_BAR),
+                        color ?? (isMax ? colors.CHART_BAR_HIGHLIGHT : colors.CHART_BAR),
                     },
                   ]}
                 />

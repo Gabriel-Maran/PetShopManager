@@ -1,16 +1,6 @@
 import { ReactNode } from "react";
-import {
-  View,
-  Text,
-  Image,
-  ImageSourcePropType,
-  StyleSheet,
-} from "react-native";
-import {
-  useTheme,
-  useThemedStyles,
-  ThemeColors,
-} from "../../theme/ThemeProvider";
+import { View, Text, Image, ImageSourcePropType, StyleSheet } from "react-native";
+import { useTheme, useThemedStyles, ThemeColors } from "../../theme/ThemeProvider";
 import { FONT_SIZE, FONT_WEIGHT, RADIUS, SPACING } from "../../theme/tokens";
 
 interface InputWrapperProps {
@@ -37,9 +27,7 @@ export default function InputWrapper({
     <View
       style={[
         s.ctnInput,
-        hasBorderBottom
-          ? { borderBottomWidth: 1, borderColor: colors.BORDER_LIGHT }
-          : {},
+        hasBorderBottom ? { borderBottomWidth: 1, borderColor: colors.BORDER_LIGHT } : {},
       ]}
     >
       <View
@@ -53,12 +41,7 @@ export default function InputWrapper({
         <Image style={s.imgInput} source={image} />
       </View>
 
-      <View
-        style={[
-          s.rightContent,
-          withGapComponents ? { gap: SPACING[5] } : { gap: 0 },
-        ]}
-      >
+      <View style={[s.rightContent, withGapComponents ? { gap: SPACING[5] } : { gap: 0 }]}>
         {/* Em maiúsculas, o leitor poderia soletrar; o rótulo faz ele ler o nome do campo. */}
         <Text style={s.txtInput} accessibilityLabel={titleName}>
           {titleName.toUpperCase()}

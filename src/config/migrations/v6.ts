@@ -40,7 +40,8 @@ const isHourMinute = (value: string) =>
   `(${value} GLOB '[01][0-9]:[0-5][0-9]' OR ${value} GLOB '2[0-3]:[0-5][0-9]')`;
 
 /** O horário que a migração aproveita: "HH:MM", ou "H:MM", que ganha o zero à esquerda. */
-const isRecoverableTime = (value: string) => `(${isHourMinute(value)} OR ${value} GLOB '[0-9]:[0-5][0-9]')`;
+const isRecoverableTime = (value: string) =>
+  `(${isHourMinute(value)} OR ${value} GLOB '[0-9]:[0-5][0-9]')`;
 
 /** '09:30' fica; '9:30' vira '09:30'; nulo, vazio ou fora do formato vira '00:00', o "sem horário". */
 function timeFrom(column: string): string {
@@ -99,7 +100,11 @@ const textNote = (isLost: string, label: string, column: string) =>
 
 /** O dinheiro negativo em reais, como o app mostra ("-11,50"; -50 centavos é "-0,50"). */
 const negativeMoneyNote = (label: string, column: string) =>
-  noteWhen(`${column} < 0`, label, `printf('-%d,%02d', abs(${column}) / 100, abs(${column}) % 100)`);
+  noteWhen(
+    `${column} < 0`,
+    label,
+    `printf('-%d,%02d', abs(${column}) / 100, abs(${column}) % 100)`,
+  );
 
 /**
  * Põe as notas no fim da observação, depois de uma quebra de linha e separadas por espaço. A observação
@@ -255,9 +260,24 @@ export const SQL_REBUILD_PETS_V6 = rebuildTable(
     FOREIGN KEY (servico_padrao_id) REFERENCES service_type(id) ON DELETE RESTRICT
   `,
   [
-    "id", "nome", "nome_normalizado", "especie", "porte", "raca", "observacoes", "dono_id",
-    "servico_padrao_id", "remarcacao_ativa", "pacote_remarcacao", "valor_pacote", "data_inicio_pacote",
-    "horario_padrao", "current_ultima_visita_data", "ultimo_visita_data_auto", "is_ativo", "criado_em",
+    "id",
+    "nome",
+    "nome_normalizado",
+    "especie",
+    "porte",
+    "raca",
+    "observacoes",
+    "dono_id",
+    "servico_padrao_id",
+    "remarcacao_ativa",
+    "pacote_remarcacao",
+    "valor_pacote",
+    "data_inicio_pacote",
+    "horario_padrao",
+    "current_ultima_visita_data",
+    "ultimo_visita_data_auto",
+    "is_ativo",
+    "criado_em",
   ],
   {
     porte: porteFrom("porte"),
@@ -312,8 +332,21 @@ export const SQL_REBUILD_APPOINTMENTS_V6 = rebuildTable(
     FOREIGN KEY (tipo_pgto_id) REFERENCES payment_methods(id) ON DELETE RESTRICT
   `,
   [
-    "id", "pet_id", "servico_id", "servico_nome", "data", "hora", "entregar_pet", "concluido",
-    "observacao", "is_auto_agen", "valor", "tipo_pgto_id", "tipo_pgto_nome", "ta_pago", "criado_em",
+    "id",
+    "pet_id",
+    "servico_id",
+    "servico_nome",
+    "data",
+    "hora",
+    "entregar_pet",
+    "concluido",
+    "observacao",
+    "is_auto_agen",
+    "valor",
+    "tipo_pgto_id",
+    "tipo_pgto_nome",
+    "ta_pago",
+    "criado_em",
   ],
   {
     servico_id: APPOINTMENT_SERVICE_ID,

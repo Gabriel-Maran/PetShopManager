@@ -1,12 +1,6 @@
-import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useEffect } from "react";
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { useScreen } from "../../hooks/useScreen";
 import { useError } from "../../hooks/useError";
@@ -20,13 +14,7 @@ import { ThemeColors, useThemedStyles } from "../theme/ThemeProvider";
 import { useCalendar } from "../contexts/CalendarContext";
 import { A11Y_LABELS } from "../../globals/accessibilityLabels";
 import IconButton from "./accessibility/IconButton";
-import {
-  FONT_SIZE,
-  FONT_WEIGHT,
-  LETTER_SPACINGS,
-  RADIUS,
-  SPACING,
-} from "../theme/tokens";
+import { FONT_SIZE, FONT_WEIGHT, LETTER_SPACINGS, RADIUS, SPACING } from "../theme/tokens";
 
 const ICON_BUTTON_SIZE = 38;
 
@@ -44,12 +32,15 @@ export default function AppointmentList({
   const s = useThemedStyles(styles);
   const { dateSelected, appointments, setAppointments } = useCalendar();
 
-  useEffect(() => {
-    const fetch = appointmentController
-      .getAppointmentsByDateWithOwnerAndPet(dateSelected)
-      .then(setAppointments);
-    fetch.catch(showError);
-  }, [dateSelected]);
+  // Recarrega ao voltar para o Calendário, porque outra tela pode ter mudado a agenda.
+  useFocusEffect(
+    useCallback(() => {
+      appointmentController
+        .getAppointmentsByDateWithOwnerAndPet(dateSelected)
+        .then(setAppointments)
+        .catch(showError);
+    }, [dateSelected, setAppointments, showError]),
+  );
 
   return (
     <View style={[s.container, { marginTop: topMargin }]}>
@@ -58,26 +49,18 @@ export default function AppointmentList({
           label={A11Y_LABELS.appointments.add}
           width={ICON_BUTTON_SIZE}
           style={s.iconBtn}
-          onPress={() =>
-            navigate(Screen.NewOrEditAppointment, { dateSelected })
-          }
+          onPress={() => navigate(Screen.NewOrEditAppointment, { dateSelected })}
         >
           <Image source={require("../../assets/crud/add.png")} style={s.icon} />
         </IconButton>
 
         <View style={s.titleBlock} accessible accessibilityRole="header">
           <Text style={s.titleLabel}>Agendamentos</Text>
-          <Text style={s.titleDate}>
-            {isoToBr(dateSelected)}
-          </Text>
+          <Text style={s.titleDate}>{isoToBr(dateSelected)}</Text>
         </View>
 
         <IconButton
-          label={
-            isFullScreen
-              ? A11Y_LABELS.appointments.collapse
-              : A11Y_LABELS.appointments.expand
-          }
+          label={isFullScreen ? A11Y_LABELS.appointments.collapse : A11Y_LABELS.appointments.expand}
           width={ICON_BUTTON_SIZE}
           accessibilityState={{ expanded: isFullScreen }}
           style={s.iconBtn}
@@ -86,8 +69,8 @@ export default function AppointmentList({
           <Image
             source={
               isFullScreen
-                ? require("../../assets/setas/diminuir.png")
-                : require("../../assets/setas/expandir.png")
+                ? require("../../assets/arrows/collapse.png")
+                : require("../../assets/arrows/expand.png")
             }
             style={s.icon}
           />
@@ -116,27 +99,23 @@ export default function AppointmentList({
               time: item.time,
               done: Boolean(item.completed),
             })}
-            onPress={() =>
-              navigate(Screen.NewOrEditAppointment, { appointment: item })
-            }
+            onPress={() => navigate(Screen.NewOrEditAppointment, { appointment: item })}
           >
             <View style={!item.completed ? s.avatar : s.avatarDone}>
               <Image
                 source={
                   item.species_name === SpeciesCode.Dog
-                    ? require("../../assets/animais/caoGreen.png")
+                    ? require("../../assets/animals/dogGreen.png")
                     : item.species_name === SpeciesCode.Cat
-                      ? require("../../assets/animais/gatoGreen.png")
-                      : require("../../assets/animais/interrogacaoGreen.png")
+                      ? require("../../assets/animals/catGreen.png")
+                      : require("../../assets/animals/questionGreen.png")
                 }
                 style={!item.completed ? s.petImg : s.imgPetImgDone}
               />
             </View>
 
             <View style={s.info}>
-              <Text style={!item.completed ? s.petName : s.petNameDone}>
-                {item.pet_name}
-              </Text>
+              <Text style={!item.completed ? s.petName : s.petNameDone}>{item.pet_name}</Text>
               <Text style={s.ownerName}>{item.owner_name}</Text>
             </View>
 
@@ -149,9 +128,7 @@ export default function AppointmentList({
               <Text style={s.time}>{item.time}</Text>
             </View>
 
-            {item.completed ? (
-              <View pointerEvents="none" style={s.strikeLine} />
-            ) : null}
+            {item.completed ? <View pointerEvents="none" style={s.strikeLine} /> : null}
           </TouchableOpacity>
         )}
       />

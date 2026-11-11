@@ -492,3 +492,20 @@ Decisão:
 - Os testes das versões antigas montam os bancos com o SQL da época; o helper lê esses bancos com os nomes de hoje.
 Motivo: o código passa a ter um idioma só, e o critério do item ("nenhum identificador em português") vale também para o banco. Juntar a v7 dos nomes com a do tema evita duas reconstruções de tabela seguidas.
 
+**O resto do plano em três blocos.**
+Contexto: o Gabriel quer entregar muito por PR e gastar menos com idas e voltas.
+Decisão: o que falta vira três blocos (qualidade e arquitetura, entrega e o que é só dele), listados no topo do `plano-de-melhorias.md`. O PR #58 também levou as sugestões da varredura: imagens com nomes em inglês, seletores sem `any`, o formulário do pet em camelCase e a stack atualizada na arquitetura.
+Motivo: menos PRs e menos troca de contexto. Os itens de cada bloco mexem nos mesmos arquivos e dependem das mesmas instalações.
+
+## 2026-11-12
+
+**Bloco de qualidade e arquitetura num PR.**
+Contexto: o primeiro bloco do plano, com os pacotes que o Gabriel instalou.
+Decisão:
+- Pacotes só o necessário: React Navigation (4) e ESLint, `eslint-config-expo` e Prettier. Ficaram de fora o Jest e a biblioteca de testes de componentes (TEST-3) e o `eslint-config-prettier`, que teve versões comprometidas em 2025.
+- Navegação: pilha nativa. A aba recomeça a pilha sobre o Calendário, como o voltar de antes; formulários entram no topo. O voltar do Android é o da biblioteca, com a guarda só na tela em foco.
+- Lint: as regras do Expo, os hooks como erro, sem `any` e a ordem das camadas (`import/no-restricted-paths`), com zero aviso. O `set-state-in-effect` ficou desligado, porque zerar a lista quando o filtro muda é de propósito.
+- O ARQ-1 fica com a regra de camadas, sem mover as pastas por assunto, e o `zod/mini` saiu: os dois custam muito para o que trazem hoje.
+- O commit das imagens, dos tipos e do porte do pet, que ficou fora do merge do #58, entrou aqui.
+Motivo: entregar o bloco inteiro de uma vez, com o `check` cobrindo lint e formato daqui em diante.
+

@@ -1,21 +1,10 @@
-import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import EditButton from "../buttons/EditButton";
 import DeactivateButton from "../buttons/DeactivateButton";
 import { PetWithSpeciesBreedAndOwner } from "../../../../model/Pet";
-import {
-  SpeciesCode,
-  RegistryParams,
-  Screen,
-} from "../../../../config/consts";
+import { SpeciesCode, RegistryParams, Screen, SpeciesLabel } from "../../../../config/consts";
 import { ThemeColors, useThemedStyles } from "../../../theme/ThemeProvider";
-import { SpeciesLabel } from "../../../../config/consts";
+
 import ActivateButton from "../buttons/ActivateButton";
 import { useScreen } from "../../../../hooks/useScreen";
 import { A11Y_LABELS } from "../../../../globals/accessibilityLabels";
@@ -51,10 +40,7 @@ export default function PetList({
             }
             style={s.itemCard}
           >
-            <Image
-              style={s.img}
-              source={require("../../../../assets/animais/pet.png")}
-            />
+            <Image style={s.img} source={require("../../../../assets/animals/pet.png")} />
 
             <View style={s.mainContent}>
               <View style={{ flexDirection: "row" }}>

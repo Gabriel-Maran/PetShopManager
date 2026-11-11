@@ -1,32 +1,12 @@
 import { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { DEMO_DATA_SUMMARY } from "../../config/demoData";
-import {
-  isAppEmpty,
-  loadDemoData,
-  resetToDemoData,
-} from "../../service/DemoDataService";
-import {
-  ThemeColors,
-  useTheme,
-  useThemedStyles,
-} from "../theme/ThemeProvider";
+import { isAppEmpty, loadDemoData, resetToDemoData } from "../../service/DemoDataService";
+import { ThemeColors, useTheme, useThemedStyles } from "../theme/ThemeProvider";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import ConfirmModal from "./ConfirmModal";
 import { HIDDEN_FROM_SCREEN_READER } from "./accessibility/accessibilityProps";
-import {
-  FONT_SIZE,
-  FONT_WEIGHT,
-  LINE_HEIGHTS,
-  RADIUS,
-  SPACING,
-} from "../theme/tokens";
+import { FONT_SIZE, FONT_WEIGHT, LINE_HEIGHTS, RADIUS, SPACING } from "../theme/tokens";
 
 interface DemoDataLoaderProps {
   onLoaded?: () => void;
@@ -93,13 +73,11 @@ export function DemoDataLoader({ onLoaded }: DemoDataLoaderProps) {
     };
   }, []);
 
-  const { run, isRunning: loading } = useAsyncAction(
-    async (current: DemoAction) => {
-      await ACTIONS[current].run();
-      setAction(availableAction(false));
-      onLoaded?.();
-    },
-  );
+  const { run, isRunning: loading } = useAsyncAction(async (current: DemoAction) => {
+    await ACTIONS[current].run();
+    setAction(availableAction(false));
+    onLoaded?.();
+  });
 
   function runAction(current: DemoAction) {
     setConfirmVisible(false);
@@ -126,17 +104,13 @@ export function DemoDataLoader({ onLoaded }: DemoDataLoaderProps) {
           <Text style={s.icon}>{config.emoji}</Text>
         </View>
         <View style={s.cardText}>
-          <Text
-            style={[s.cardTitle, config.destructive && s.cardTitleDestructive]}
-          >
+          <Text style={[s.cardTitle, config.destructive && s.cardTitleDestructive]}>
             {config.title}
           </Text>
           <Text style={s.cardDescription}>{config.description}</Text>
         </View>
         {loading && (
-          <ActivityIndicator
-            color={config.destructive ? colors.RED_COLOR : colors.GREEN_COLOR}
-          />
+          <ActivityIndicator color={config.destructive ? colors.RED_COLOR : colors.GREEN_COLOR} />
         )}
       </TouchableOpacity>
 

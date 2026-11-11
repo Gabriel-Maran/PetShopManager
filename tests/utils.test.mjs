@@ -43,7 +43,16 @@ describe("datas", () => {
 
   test("só AAAA-MM-DD passa como data do banco", () => {
     assert.equal(isIsoDate("2026-11-08"), true);
-    for (const input of ["", "08/11/2026", "20261108", 20261108, "2026-11-8", " 2026-11-08", null, undefined]) {
+    for (const input of [
+      "",
+      "08/11/2026",
+      "20261108",
+      20261108,
+      "2026-11-8",
+      " 2026-11-08",
+      null,
+      undefined,
+    ]) {
       assert.equal(isIsoDate(input), false, JSON.stringify(input));
     }
   });
@@ -52,7 +61,16 @@ describe("datas", () => {
     for (const input of ["2024-02-29", "2000-02-29", "2026-01-31", "2026-04-30", "2026-12-31"]) {
       assert.equal(isIsoDate(input), true, input);
     }
-    for (const input of ["2025-02-29", "1900-02-29", "2026-02-30", "2026-04-31", "2026-13-01", "2026-00-10", "2026-01-00", "2026-01-32"]) {
+    for (const input of [
+      "2025-02-29",
+      "1900-02-29",
+      "2026-02-30",
+      "2026-04-31",
+      "2026-13-01",
+      "2026-00-10",
+      "2026-01-00",
+      "2026-01-32",
+    ]) {
       assert.equal(isIsoDate(input), false, input);
     }
   });
@@ -68,7 +86,14 @@ describe("datas", () => {
   });
 
   test("entrada maliciosa ou fora do tipo não passa como data", () => {
-    for (const input of ["2026-11-08'; DROP TABLE pets; --", "2026-11-08\n", "２０２６-11-08", "9999-99-99", { toString: () => "2026-11-08" }, ["2026-11-08"]]) {
+    for (const input of [
+      "2026-11-08'; DROP TABLE pets; --",
+      "2026-11-08\n",
+      "２０２６-11-08",
+      "9999-99-99",
+      { toString: () => "2026-11-08" },
+      ["2026-11-08"],
+    ]) {
       assert.equal(isIsoDate(input), false, String(input));
     }
   });
@@ -146,7 +171,20 @@ describe("dinheiro: centavos", () => {
     });
   }
 
-  for (const input of ["", "   ", ",", ",50", "12,", "12,345", "1.234,56", "12.50", "-5", "abc", null, undefined]) {
+  for (const input of [
+    "",
+    "   ",
+    ",",
+    ",50",
+    "12,",
+    "12,345",
+    "1.234,56",
+    "12.50",
+    "-5",
+    "abc",
+    null,
+    undefined,
+  ]) {
     test(`${JSON.stringify(input)} não é um valor`, () => {
       assert.equal(moneyToCents(input), null);
     });
@@ -183,7 +221,10 @@ describe("dinheiro: campos dos formulários", () => {
     for (const input of [",", "12,", "12,345", "-5", "abc"]) {
       assert.throws(
         () => parseMoneyInput(input),
-        (error) => error instanceof AppError && error.code === "VALIDATION" && error.message === MESSAGES.money.invalid,
+        (error) =>
+          error instanceof AppError &&
+          error.code === "VALIDATION" &&
+          error.message === MESSAGES.money.invalid,
         JSON.stringify(input),
       );
     }
@@ -197,7 +238,8 @@ describe("dinheiro: campos dos formulários", () => {
   });
 
   test("os controllers só aceitam centavos inteiros e sem sinal", () => {
-    for (const price of [0, 1, 1250, 10_000_000]) assert.equal(isValidCents(price), true, String(price));
+    for (const price of [0, 1, 1250, 10_000_000])
+      assert.equal(isValidCents(price), true, String(price));
     for (const price of [-1, 12.5, Number.NaN, Number.POSITIVE_INFINITY, "1250", null, undefined]) {
       assert.equal(isValidCents(price), false, String(price));
     }

@@ -27,10 +27,7 @@ type PetsForm = PetsSearchForm & {
 
 type UsePetsResult = {
   petsForm: PetsForm;
-  updatePetsField: <K extends keyof PetsSearchForm>(
-    field: K,
-    value: PetsSearchForm[K],
-  ) => void;
+  updatePetsField: <K extends keyof PetsSearchForm>(field: K, value: PetsSearchForm[K]) => void;
 };
 
 export function usePetsWithSpeciesAndBreed(enabled: boolean): UsePetsResult {

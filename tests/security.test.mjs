@@ -29,10 +29,17 @@ describe("modais de confirmação", () => {
   test("todo modal tem título, mensagem em frase terminada em ponto e botão curto", () => {
     for (const [name, dialog] of Object.entries(DIALOGS)) {
       assert.ok(dialog.title.trim().length > 0, `DIALOGS.${name}.title está vazio`);
-      assert.match(dialog.message, /^\p{Lu}.*\.$/su, `DIALOGS.${name}.message não é uma frase com ponto`);
+      assert.match(
+        dialog.message,
+        /^\p{Lu}.*\.$/su,
+        `DIALOGS.${name}.message não é uma frase com ponto`,
+      );
       // O botão divide a linha com o "Cancelar": um rótulo longo quebra em duas linhas.
       const { confirmLabel } = dialog;
-      assert.ok(confirmLabel.trim().length > 0 && confirmLabel.length <= 12, `DIALOGS.${name}.confirmLabel: "${confirmLabel}"`);
+      assert.ok(
+        confirmLabel.trim().length > 0 && confirmLabel.length <= 12,
+        `DIALOGS.${name}.confirmLabel: "${confirmLabel}"`,
+      );
     }
   });
 });

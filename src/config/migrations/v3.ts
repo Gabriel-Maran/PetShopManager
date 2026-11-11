@@ -120,9 +120,24 @@ export const SQL_REBUILD_PETS_V3 = rebuildTable(
     FOREIGN KEY (raca)     REFERENCES race(id)    ON DELETE RESTRICT
   `,
   [
-    "id", "nome", "nome_normalizado", "especie", "porte", "raca", "observacoes", "dono_id",
-    "servico_padrao", "remarcacao_ativa", "pacote_remarcacao", "valor_pacote", "data_inicio_pacote",
-    "horario_padrao", "current_ultima_visita_data", "ultimo_visita_data_auto", "is_ativo", "criado_em",
+    "id",
+    "nome",
+    "nome_normalizado",
+    "especie",
+    "porte",
+    "raca",
+    "observacoes",
+    "dono_id",
+    "servico_padrao",
+    "remarcacao_ativa",
+    "pacote_remarcacao",
+    "valor_pacote",
+    "data_inicio_pacote",
+    "horario_padrao",
+    "current_ultima_visita_data",
+    "ultimo_visita_data_auto",
+    "is_ativo",
+    "criado_em",
   ],
   {
     valor_pacote: centsFromText("valor_pacote"),
@@ -153,8 +168,19 @@ export const SQL_REBUILD_APPOINTMENTS_V3 = rebuildTable(
     FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
   `,
   [
-    "id", "pet_id", "servico", "data", "hora", "entregar_pet", "concluido", "observacao",
-    "is_auto_agen", "valor", "tipo_pgto", "ta_pago", "criado_em",
+    "id",
+    "pet_id",
+    "servico",
+    "data",
+    "hora",
+    "entregar_pet",
+    "concluido",
+    "observacao",
+    "is_auto_agen",
+    "valor",
+    "tipo_pgto",
+    "ta_pago",
+    "criado_em",
   ],
   {
     data: isoFromNumber("data"),
@@ -247,7 +273,11 @@ const PACKAGE_AGENDA = `
       WHERE dia < ${HORIZON}
     )`;
 
-const PACKAGE_VISIT_CENTS = visitCents("NEW.valor_pacote", "NEW.pacote_remarcacao", "posicao_no_mes");
+const PACKAGE_VISIT_CENTS = visitCents(
+  "NEW.valor_pacote",
+  "NEW.pacote_remarcacao",
+  "posicao_no_mes",
+);
 
 // ── Triggers ──────────────────────────────────────────────────────────────
 // A mesma regra das versões 1 e 2, com as datas em texto, os valores em centavos e o relógio do

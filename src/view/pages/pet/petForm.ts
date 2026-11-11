@@ -4,11 +4,11 @@ import type { IsoDate } from "../../../utils/dates";
 /** O formulário do pet, que as duas abas editam: os valores como os campos mostram, antes de salvar. */
 export interface PetForm {
   name: string;
-  species_id: number;
-  owner_id: number;
-  owner_name: string;
-  breed_id: number;
-  breed_name: string;
+  speciesId: number;
+  ownerId: number;
+  ownerName: string;
+  breedId: number;
+  breedName: string;
   notes: string;
   size: PetSize;
   defaultService: ServiceName;
@@ -16,5 +16,5 @@ export interface PetForm {
   packageFrequency: PackageFrequency | undefined;
   packagePrice: string;
   packageStartDate: IsoDate;
-  default_time: string;
+  defaultTime: string;
 }

@@ -18,21 +18,13 @@ class SpeciesController {
     return speciesService.searchSpecies();
   }
 
-  async searchBreed(
-    speciesId: number,
-    page: number,
-    search: string,
-  ): Promise<Breed[]> {
+  async searchBreed(speciesId: number, page: number, search: string): Promise<Breed[]> {
     const breedSearch = parseInput(breedSearchSchema, {
       speciesId: speciesId,
       page,
       query: search,
     });
-    return speciesService.searchBreeds(
-      breedSearch.speciesId,
-      breedSearch.page,
-      breedSearch.query,
-    );
+    return speciesService.searchBreeds(breedSearch.speciesId, breedSearch.page, breedSearch.query);
   }
 
   async countBreeds(speciesId: number, search: string): Promise<number> {
@@ -44,9 +36,7 @@ class SpeciesController {
   }
 
   async getBreedById(id: number): Promise<BreedRecord> {
-    const breed = await speciesService.getBreedById(
-      parseRecordId(id, MESSAGES.breed.notFound),
-    );
+    const breed = await speciesService.getBreedById(parseRecordId(id, MESSAGES.breed.notFound));
     if (!breed) throw new AppError("NOT_FOUND", MESSAGES.breed.notFound);
     return breed;
   }

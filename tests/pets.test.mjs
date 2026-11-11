@@ -11,8 +11,12 @@ describe("FIND_PET_SQL", () => {
   beforeEach(async () => {
     db = await createDatabase();
     pet = insertPet(db, {
-      name: "Thor", owner_id: insertOwner(db), reschedule_active: 1, package_frequency: 4,
-      package_start_date: isoDate(3), package_price: 32000,
+      name: "Thor",
+      owner_id: insertOwner(db),
+      reschedule_active: 1,
+      package_frequency: 4,
+      package_start_date: isoDate(3),
+      package_price: 32000,
     });
   });
 
@@ -20,9 +24,23 @@ describe("FIND_PET_SQL", () => {
     const row = db.prepare(FIND_PET_SQL).get(pet.id);
 
     assert.deepEqual(Object.keys(row).sort(), [
-      "breed_id", "created_at", "default_service", "default_time", "id", "is_active",
-      "last_auto_visit_date", "last_visit_date", "name", "notes", "owner_id", "package_frequency",
-      "package_price", "package_start_date", "reschedule_active", "size", "species_id",
+      "breed_id",
+      "created_at",
+      "default_service",
+      "default_time",
+      "id",
+      "is_active",
+      "last_auto_visit_date",
+      "last_visit_date",
+      "name",
+      "notes",
+      "owner_id",
+      "package_frequency",
+      "package_price",
+      "package_start_date",
+      "reschedule_active",
+      "size",
+      "species_id",
     ]);
     assert.equal(row.name, "Thor");
     assert.equal(row.package_price, 32000);

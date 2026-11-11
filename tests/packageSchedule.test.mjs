@@ -76,13 +76,23 @@ describe("calendário em texto AAAA-MM-DD", () => {
       process.stdout.write(JSON.stringify(buildPackageSchedule(plan, "2026-11-01")));
     `;
     const runIn = (timeZone) =>
-      execFileSync(process.execPath, ["--input-type=module", "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON", "-e", script], {
-        env: { ...process.env, TZ: timeZone },
-        encoding: "utf8",
-      });
+      execFileSync(
+        process.execPath,
+        ["--input-type=module", "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON", "-e", script],
+        {
+          env: { ...process.env, TZ: timeZone },
+          encoding: "utf8",
+        },
+      );
 
     const expected = runIn("UTC");
-    for (const timeZone of ["America/Sao_Paulo", "America/New_York", "Europe/Lisbon", "Pacific/Kiritimati", "Pacific/Pago_Pago"]) {
+    for (const timeZone of [
+      "America/Sao_Paulo",
+      "America/New_York",
+      "Europe/Lisbon",
+      "Pacific/Kiritimati",
+      "Pacific/Pago_Pago",
+    ]) {
       assert.equal(runIn(timeZone), expected, timeZone);
     }
   });
@@ -93,22 +103,43 @@ describe("agenda do pacote", () => {
     const schedule = buildPackageSchedule(WEEKLY, TODAY);
 
     assert.deepEqual(dates(schedule).slice(0, 10), [
-      "2026-11-03", "2026-11-10", "2026-11-17", "2026-11-24",
-      "2026-12-01", "2026-12-08", "2026-12-15", "2026-12-22",
-      "2027-01-05", "2027-01-12",
+      "2026-11-03",
+      "2026-11-10",
+      "2026-11-17",
+      "2026-11-24",
+      "2026-12-01",
+      "2026-12-08",
+      "2026-12-15",
+      "2026-12-22",
+      "2027-01-05",
+      "2027-01-12",
     ]);
-    assert.ok(schedule.every((visit) => weekdayOf(visit.date) === 2), "sempre na terça do início");
+    assert.ok(
+      schedule.every((visit) => weekdayOf(visit.date) === 2),
+      "sempre na terça do início",
+    );
   });
 
   test("a sobra dos centavos fica com os primeiros de cada mês, e o mês cheio soma o pacote", () => {
-    const november = buildPackageSchedule(WEEKLY, TODAY).filter((visit) => monthOf(visit.date) === "2026-11");
+    const november = buildPackageSchedule(WEEKLY, TODAY).filter(
+      (visit) => monthOf(visit.date) === "2026-11",
+    );
 
-    assert.deepEqual(november.map((visit) => visit.cents), [2501, 2501, 2501, 2500]);
-    assert.equal(november.reduce((total, visit) => total + visit.cents, 0), 10003);
+    assert.deepEqual(
+      november.map((visit) => visit.cents),
+      [2501, 2501, 2501, 2500],
+    );
+    assert.equal(
+      november.reduce((total, visit) => total + visit.cents, 0),
+      10003,
+    );
   });
 
   test("pacote de 2 começando no dia 31: a soma que cai no mês seguinte recomeça a contagem dele", () => {
-    const schedule = buildPackageSchedule({ visitsPerMonth: 2, start: "2026-01-31", priceCents: 20001 }, "2026-01-31");
+    const schedule = buildPackageSchedule(
+      { visitsPerMonth: 2, start: "2026-01-31", priceCents: 20001 },
+      "2026-01-31",
+    );
 
     assert.deepEqual(dates(schedule).slice(0, 6), [
       "2026-01-31", // 1º de janeiro
@@ -118,14 +149,25 @@ describe("agenda do pacote", () => {
       "2026-03-21",
       "2026-04-04",
     ]);
-    assert.deepEqual(schedule.slice(0, 3).map((visit) => visit.cents), [10001, 10001, 10000]);
+    assert.deepEqual(
+      schedule.slice(0, 3).map((visit) => visit.cents),
+      [10001, 10001, 10000],
+    );
   });
 
   test("início em 29/02 de ano bissexto", () => {
-    const schedule = buildPackageSchedule({ visitsPerMonth: 4, start: "2028-02-29", priceCents: 32000 }, "2028-02-01");
+    const schedule = buildPackageSchedule(
+      { visitsPerMonth: 4, start: "2028-02-29", priceCents: 32000 },
+      "2028-02-01",
+    );
 
     assert.deepEqual(dates(schedule).slice(0, 6), [
-      "2028-02-29", "2028-03-07", "2028-03-14", "2028-03-21", "2028-03-28", "2028-04-04",
+      "2028-02-29",
+      "2028-03-07",
+      "2028-03-14",
+      "2028-03-21",
+      "2028-03-28",
+      "2028-04-04",
     ]);
     assert.ok(schedule.every((visit) => visit.cents === 8000));
   });
@@ -134,7 +176,10 @@ describe("agenda do pacote", () => {
     const schedule = buildPackageSchedule(WEEKLY, TODAY);
     const horizon = addDays(TODAY, SCHEDULE_HORIZON_DAYS);
 
-    assert.ok(schedule.at(-2).date < horizon && schedule.at(-1).date >= horizon, schedule.at(-1).date);
+    assert.ok(
+      schedule.at(-2).date < horizon && schedule.at(-1).date >= horizon,
+      schedule.at(-1).date,
+    );
   });
 
   test("início depois do horizonte: só o próprio início", () => {
@@ -144,13 +189,16 @@ describe("agenda do pacote", () => {
   });
 
   test("valor zero dá atendimentos de zero", () => {
-    assert.ok(buildPackageSchedule({ ...WEEKLY, priceCents: 0 }, TODAY).every((visit) => visit.cents === 0));
+    assert.ok(
+      buildPackageSchedule({ ...WEEKLY, priceCents: 0 }, TODAY).every((visit) => visit.cents === 0),
+    );
   });
 });
 
 describe("agenda de um pet novo", () => {
   const clock = { today: TODAY, time: "12:00" };
-  const autoOf = (time) => scheduleForNewPet(WEEKLY, clock, time).map((visit) => [visit.date, visit.auto]);
+  const autoOf = (time) =>
+    scheduleForNewPet(WEEKLY, clock, time).map((visit) => [visit.date, visit.auto]);
 
   test("o que já passou entra como manual, e o resto como automático", () => {
     const [past, today, next] = autoOf("13:00");
@@ -170,8 +218,14 @@ describe("agenda de um pet novo", () => {
   });
 
   test("o relógio é o do aparelho: a data e o horário locais", () => {
-    assert.deepEqual(scheduleClockOf(new Date(2026, 10, 10, 9, 5)), { today: "2026-11-10", time: "09:05" });
-    assert.deepEqual(scheduleClockOf(new Date(2026, 11, 31, 23, 59)), { today: "2026-12-31", time: "23:59" });
+    assert.deepEqual(scheduleClockOf(new Date(2026, 10, 10, 9, 5)), {
+      today: "2026-11-10",
+      time: "09:05",
+    });
+    assert.deepEqual(scheduleClockOf(new Date(2026, 11, 31, 23, 59)), {
+      today: "2026-12-31",
+      time: "23:59",
+    });
   });
 });
 
@@ -179,7 +233,12 @@ describe("agenda refeita depois de uma edição", () => {
   test("só de hoje em diante, sem os dias com atendimento concluído, e com o valor da posição no mês", () => {
     const schedule = scheduleFromToday(WEEKLY, TODAY, new Set(["2026-11-17", "2026-11-03"]));
 
-    assert.deepEqual(dates(schedule).slice(0, 4), ["2026-11-10", "2026-11-24", "2026-12-01", "2026-12-08"]);
+    assert.deepEqual(dates(schedule).slice(0, 4), [
+      "2026-11-10",
+      "2026-11-24",
+      "2026-12-01",
+      "2026-12-08",
+    ]);
     assert.equal(schedule[1].cents, 2500, "24/11 continua o 4º do mês");
     assert.equal(schedule[2].cents, 2501);
   });
@@ -220,26 +279,50 @@ describe("quando a edição refaz a agenda", () => {
   });
 
   test("com o pacote desligado, sem pacote ou com o pet inativo, nada é refeito", () => {
-    assert.equal(shouldRebuildSchedule(pet, { ...pet, reschedule_active: 0, package_price: 1 }), false);
+    assert.equal(
+      shouldRebuildSchedule(pet, { ...pet, reschedule_active: 0, package_price: 1 }),
+      false,
+    );
     assert.equal(shouldRebuildSchedule(pet, { ...pet, package_frequency: null }), false);
     assert.equal(shouldRebuildSchedule(pet, { ...pet, is_active: 0, package_price: 1 }), false);
   });
 
   test("nulo e ausente valem o mesmo, e nulo para valor é mudança", () => {
-    assert.equal(shouldRebuildSchedule({ ...pet, package_start_date: null }, { ...pet, package_start_date: undefined }), false);
+    assert.equal(
+      shouldRebuildSchedule(
+        { ...pet, package_start_date: null },
+        { ...pet, package_start_date: undefined },
+      ),
+      false,
+    );
     assert.equal(shouldRebuildSchedule(pet, { ...pet, package_price: null }), true);
   });
 });
 
 describe("o pacote do pet", () => {
   test("sem a remarcação ligada ou sem pacote, não há agenda", () => {
-    assert.equal(packagePlanOf({ reschedule_active: 0, package_frequency: 4, is_active: 1 }, TODAY), null);
-    assert.equal(packagePlanOf({ reschedule_active: 1, package_frequency: null, is_active: 1 }, TODAY), null);
+    assert.equal(
+      packagePlanOf({ reschedule_active: 0, package_frequency: 4, is_active: 1 }, TODAY),
+      null,
+    );
+    assert.equal(
+      packagePlanOf({ reschedule_active: 1, package_frequency: null, is_active: 1 }, TODAY),
+      null,
+    );
   });
 
   test("sem início, começa hoje; sem valor, vale zero", () => {
     assert.deepEqual(
-      packagePlanOf({ reschedule_active: 1, package_frequency: 2, package_start_date: null, package_price: null, is_active: 1 }, TODAY),
+      packagePlanOf(
+        {
+          reschedule_active: 1,
+          package_frequency: 2,
+          package_start_date: null,
+          package_price: null,
+          is_active: 1,
+        },
+        TODAY,
+      ),
       { visitsPerMonth: 2, start: TODAY, priceCents: 0 },
     );
   });
@@ -248,16 +331,39 @@ describe("o pacote do pet", () => {
 describe("conclusão de um automático", () => {
   test("só a passagem de pendente para concluído de um automático conta (BUG-3)", () => {
     assert.equal(isAutoVisitConclusion({ completed: 0 }, { completed: 1, is_auto: 1 }), true);
-    assert.equal(isAutoVisitConclusion({ completed: 1 }, { completed: 1, is_auto: 1 }), false, "salvar de novo");
-    assert.equal(isAutoVisitConclusion({ completed: 0 }, { completed: 1, is_auto: 0 }), false, "manual");
-    assert.equal(isAutoVisitConclusion({ completed: 0 }, { completed: 0, is_auto: 1 }), false, "sem concluir");
+    assert.equal(
+      isAutoVisitConclusion({ completed: 1 }, { completed: 1, is_auto: 1 }),
+      false,
+      "salvar de novo",
+    );
+    assert.equal(
+      isAutoVisitConclusion({ completed: 0 }, { completed: 1, is_auto: 0 }),
+      false,
+      "manual",
+    );
+    assert.equal(
+      isAutoVisitConclusion({ completed: 0 }, { completed: 0, is_auto: 1 }),
+      false,
+      "sem concluir",
+    );
   });
 
   test("com saldo no mês do último da agenda, soma o intervalo do pacote, inclusive na virada do ano", () => {
     const next = { concludedDate: "2026-11-10", pendingInLastScheduledMonth: 3 };
 
-    assert.equal(nextPackageVisitDate({ ...next, lastScheduled: "2026-12-29", visitsPerMonth: 4 }), "2027-01-05");
-    assert.equal(nextPackageVisitDate({ ...next, lastScheduled: "2027-02-20", visitsPerMonth: 2, pendingInLastScheduledMonth: 1 }), "2027-03-06");
+    assert.equal(
+      nextPackageVisitDate({ ...next, lastScheduled: "2026-12-29", visitsPerMonth: 4 }),
+      "2027-01-05",
+    );
+    assert.equal(
+      nextPackageVisitDate({
+        ...next,
+        lastScheduled: "2027-02-20",
+        visitsPerMonth: 2,
+        pendingInLastScheduledMonth: 1,
+      }),
+      "2027-03-06",
+    );
   });
 
   test("com o mês cheio, pula para o mês seguinte no dia da semana do concluído", () => {
@@ -273,8 +379,14 @@ describe("conclusão de um automático", () => {
   });
 
   test("o valor do atendimento segue a posição dele no mês", () => {
-    assert.deepEqual([1, 2, 3, 4].map((position) => visitCents(10003, 4, position)), [2501, 2501, 2501, 2500]);
-    assert.deepEqual([1, 2].map((position) => visitCents(20001, 2, position)), [10001, 10000]);
+    assert.deepEqual(
+      [1, 2, 3, 4].map((position) => visitCents(10003, 4, position)),
+      [2501, 2501, 2501, 2500],
+    );
+    assert.deepEqual(
+      [1, 2].map((position) => visitCents(20001, 2, position)),
+      [10001, 10000],
+    );
     assert.equal(visitCents(32000, 4, 5), 8000, "um 5º no mês fica sem sobra");
   });
 });
