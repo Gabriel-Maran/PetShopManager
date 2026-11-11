@@ -12,17 +12,17 @@ import {
   ThemeColors,
   useTheme,
   useThemedStyles,
-} from "../Themes/ThemeProvider";
-import InputWrapper from "./Cadastro/InputWrapper";
+} from "../theme/ThemeProvider";
+import InputWrapper from "./registry/InputWrapper";
 import { A11Y_LABELS } from "../../globals/accessibilityLabels";
-import { touchTargetSlop } from "./Acessibilidade/accessibilityProps";
-import { FONT_SIZE, RADIUS, SPACING } from "../Themes/tokens";
+import { touchTargetSlop } from "./accessibility/accessibilityProps";
+import { FONT_SIZE, RADIUS, SPACING } from "../theme/tokens";
 
 const SELECT_MIN_HEIGHT = 45;
 
 interface InputSelectProps<T> {
-  isEditavel: boolean;
-  itens: T[];
+  isEditable: boolean;
+  options: T[];
   itemSelected?: T | null;
   onChange: (item: T) => void;
   placeholder?: string;
@@ -35,8 +35,8 @@ interface InputSelectProps<T> {
 }
 
 export default function InputSelect<T>({
-  isEditavel = true,
-  itens,
+  isEditable = true,
+  options,
   itemSelected,
   onChange,
   placeholder = "Clique e selecione",
@@ -62,7 +62,7 @@ export default function InputSelect<T>({
       image={image}
       titleName={titleName}
       hasBorderBottom={hasBorderBottom}
-      whitGapComponents={false}
+      withGapComponents={false}
       inputSelectIsOpen={isOpen}
     >
       <TouchableOpacity
@@ -79,7 +79,7 @@ export default function InputSelect<T>({
         onPress={() => {
           setIsOpen(!isOpen);
         }}
-        disabled={!isEditavel}
+        disabled={!isEditable}
         activeOpacity={0.7}
         accessibilityRole="combobox"
         accessibilityLabel={A11Y_LABELS.field(titleName, selectedText)}
@@ -87,7 +87,7 @@ export default function InputSelect<T>({
         hitSlop={touchTargetSlop({ height: SELECT_MIN_HEIGHT })}
       >
         <Text style={s.selectText}>{selectedText}</Text>
-        {isEditavel && (
+        {isEditable && (
           <Image
             style={s.arrow}
             source={
@@ -102,7 +102,7 @@ export default function InputSelect<T>({
       {isOpen && (
         <View style={s.dropdown}>
           <FlatList
-            data={itens}
+            data={options}
             scrollEnabled={false}
             renderItem={({ item, index }) => (
               <TouchableOpacity

@@ -1,8 +1,8 @@
 import { StyleSheet, Text } from "react-native";
-import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
+import { ThemeColors, useThemedStyles } from "../theme/ThemeProvider";
 import { A11Y_LABELS } from "../../globals/accessibilityLabels";
-import IconButton from "./Acessibilidade/IconButton";
-import { FONT_SIZE, FONT_WEIGHT, LINE_HEIGHTS } from "../Themes/tokens";
+import IconButton from "./accessibility/IconButton";
+import { FONT_SIZE, FONT_WEIGHT, LINE_HEIGHTS } from "../theme/tokens";
 
 /** O diâmetro do círculo na tela; o IconButton completa a área de toque até 48 dp. */
 const SIZE = 30;

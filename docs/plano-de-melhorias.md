@@ -352,6 +352,8 @@ Adiantado para a Parte 3 em 2026-11-08, junto com o DADOS-2: as datas viraram te
 
 ### NOMES-1 · Identificadores em inglês
 
+Feito em 2026-11-11, num PR só (ver `decisoes.md`): identificadores, arquivos, pastas e testes em inglês, e a versão 7 do esquema com tabelas, colunas e códigos em inglês. O mesmo PR fez o tema do sistema na primeira abertura (P19). Falta o lint de hooks, que vem com o TEST-2.
+
 Adiantado em 2026-11-09, no PR #27: as ações de desativar e reativar de donos e pets e as props das listas, dos botões e do modal de Cadastros têm o nome do que fazem. Os nomes dos arquivos e a pasta `Botões` continuam para este item.
 
 - **Por quê:** o código mistura idiomas (`pegarRacasBanco`, `DataNumberPraString`, `isTaPago`, `Agendamentos` ao lado de `Appointments`). Dois hooks diferentes se chamam `useAgendamentos`, e `pegarRacasBanco` e `pegarDonosBanco` são hooks sem o prefixo `use`, o que esconde deles as regras dos hooks. O nome `PacoteRemarcacao.Mensal = 4` contradiz o relatório, que chama esse pacote de "Semanal (4x/mês)". A pasta `Botões` tem acento, o que atrapalha ferramentas.

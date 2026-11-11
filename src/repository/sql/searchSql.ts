@@ -1,7 +1,7 @@
 // Busca paginada por nome (BUG-5): a lista e a contagem saem da mesma função, com o mesmo FROM e o
 // mesmo filtro, para o total da paginação bater com o que a lista mostra. Sem depender do Expo, para
 // os testes rodarem o mesmo SQL no Node.
-import { normalizeForSearch } from "../../utils/formatadores/normalizaNome.ts";
+import { normalizeForSearch } from "../../utils/formatters/normalizeForSearch.ts";
 import type { NameSearch } from "../../model/Search";
 
 /** Um comando e os parâmetros dele, na ordem dos `?`. */
@@ -38,11 +38,11 @@ export function toSearchPattern(query: string): string {
  */
 export function pagedNameSearch(source: SearchSource, search: NameSearch): PagedSql {
   const { columns, from, alias } = source;
-  const where = `WHERE ${alias}.is_ativo = ? AND ${alias}.nome_normalizado LIKE ? ESCAPE '\\'`;
-  const filterParams = [search.ativo, toSearchPattern(search.query)];
+  const where = `WHERE ${alias}.is_active = ? AND ${alias}.normalized_name LIKE ? ESCAPE '\\'`;
+  const filterParams = [search.active, toSearchPattern(search.query)];
   const orderBy = normalizeForSearch(search.query)
-    ? `${alias}.nome_normalizado ASC, ${alias}.id ASC`
-    : `${alias}.criado_em DESC, ${alias}.id DESC`;
+    ? `${alias}.normalized_name ASC, ${alias}.id ASC`
+    : `${alias}.created_at DESC, ${alias}.id DESC`;
 
   return {
     list: {

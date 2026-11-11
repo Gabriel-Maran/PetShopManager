@@ -5,9 +5,9 @@ import type { MigrationDatabase } from "../config/migrator.ts";
 import type { Pet } from "../model/Pet.ts";
 import type { Appointment } from "../model/Appointment.ts";
 import type { PetPackage } from "../domain/packageSchedule.ts";
-import type { IsoDate } from "../utils/datas.ts";
-import type { Cents } from "../utils/dinheiro.ts";
-import { normalizeForSearch } from "../utils/formatadores/normalizaNome.ts";
+import type { IsoDate } from "../utils/dates.ts";
+import type { Cents } from "../utils/money.ts";
+import { normalizeForSearch } from "../utils/formatters/normalizeForSearch.ts";
 import {
   ACTIVATE_PET_SQL,
   FIND_PET_PACKAGE_SQL,
@@ -37,8 +37,8 @@ export interface ScheduleDatabase extends MigrationDatabase {
 /** O que a conclusão de um agendamento olha antes e depois de salvar, com o serviço pelo id. */
 export type AppointmentState = Pick<
   Appointment,
-  "pet_id" | "data" | "entregar_pet" | "concluido" | "observacao" | "is_auto_agen"
-> & { servico_id: number };
+  "pet_id" | "date" | "deliver_pet" | "completed" | "notes" | "is_auto"
+> & { service_id: number };
 
 /** Um atendimento da agenda do pacote, pronto para gravar. */
 export interface PackageVisitRow {
@@ -55,35 +55,35 @@ export interface PackageVisitRow {
 /** O pet como o formulário grava: as colunas do INSERT_PET_SQL e do UPDATE_PET_SQL. */
 export type PetWrite = Pick<
   Pet,
-  | "nome"
-  | "especie"
-  | "porte"
-  | "raca"
-  | "observacoes"
-  | "dono_id"
-  | "servico_padrao"
-  | "remarcacao_ativa"
-  | "pacote_remarcacao"
-  | "data_inicio_pacote"
-  | "horario_padrao"
-  | "valor_pacote"
+  | "name"
+  | "species_id"
+  | "size"
+  | "breed_id"
+  | "notes"
+  | "owner_id"
+  | "default_service"
+  | "reschedule_active"
+  | "package_frequency"
+  | "package_start_date"
+  | "default_time"
+  | "package_price"
 >;
 
 // Os parâmetros na ordem do INSERT_PET_SQL e do UPDATE_PET_SQL.
 const petParams = (pet: PetWrite): SqlValue[] => [
-  pet.nome,
-  normalizeForSearch(pet.nome),
-  pet.especie,
-  pet.porte,
-  pet.raca ?? null,
-  pet.observacoes ?? null,
-  pet.dono_id,
-  pet.servico_padrao ?? "Banho",
-  pet.remarcacao_ativa ?? 0,
-  pet.pacote_remarcacao ?? null,
-  pet.data_inicio_pacote ?? null,
-  pet.horario_padrao ?? null,
-  pet.valor_pacote ?? null,
+  pet.name,
+  normalizeForSearch(pet.name),
+  pet.species_id,
+  pet.size,
+  pet.breed_id ?? null,
+  pet.notes ?? null,
+  pet.owner_id,
+  pet.default_service ?? "Banho",
+  pet.reschedule_active ?? 0,
+  pet.package_frequency ?? null,
+  pet.package_start_date ?? null,
+  pet.default_time ?? null,
+  pet.package_price ?? null,
 ];
 
 export class PackageScheduleRepository {
@@ -142,8 +142,8 @@ export class PackageScheduleRepository {
   }
 
   async concludedDatesFrom(petId: number, from: IsoDate): Promise<Set<IsoDate>> {
-    const rows = await this.db.getAllAsync<{ data: IsoDate }>(LIST_CONCLUDED_DATES_FROM_SQL, petId, from);
-    return new Set(rows.map(({ data }) => data));
+    const rows = await this.db.getAllAsync<{ date: IsoDate }>(LIST_CONCLUDED_DATES_FROM_SQL, petId, from);
+    return new Set(rows.map(({ date }) => date));
   }
 
   /** Automáticos pendentes do pet no mês ("AAAA-MM"). */

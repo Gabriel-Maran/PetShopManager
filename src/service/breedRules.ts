@@ -3,7 +3,7 @@
 import { AppError } from "../errors/AppError.ts";
 import { MESSAGES } from "../globals/messages.ts";
 import type { BreedRecord } from "../model/Breed";
-import { normalizeForSearch } from "../utils/formatadores/normalizaNome.ts";
+import { normalizeForSearch } from "../utils/formatters/normalizeForSearch.ts";
 
 /** O nome como a comparação enxerga: sem acento, em minúsculas e com um espaço só entre as palavras. */
 export const breedNameKey = (name: string): string => normalizeForSearch(name).replace(/\s+/g, " ");
@@ -19,7 +19,7 @@ export function assertNewBreedName(existingNames: readonly string[], name: strin
 /** A raça escolhida para o pet precisa existir e ser da espécie escolhida. */
 export function assertBreedOfSpecies(breed: BreedRecord | null, speciesId: number): void {
   if (!breed) throw new AppError("NOT_FOUND", MESSAGES.breed.notFound);
-  if (breed.especie_id !== speciesId) {
+  if (breed.species_id !== speciesId) {
     throw new AppError("VALIDATION", MESSAGES.pet.breedOfOtherSpecies);
   }
 }

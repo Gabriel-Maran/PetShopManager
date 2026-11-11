@@ -4,49 +4,49 @@
 
 type ValueOf<T> = T[keyof T];
 
-export const TipoServico = {
-  Banho: "Banho",
-  BanhoETosa: "Banho e Tosa",
-  BanhoEHigienica: "Banho e Higiênica",
+export const ServiceName = {
+  Bath: "Banho",
+  BathAndGrooming: "Banho e Tosa",
+  BathAndHygienicTrim: "Banho e Higiênica",
 } as const;
-export type TipoServico = ValueOf<typeof TipoServico>;
+export type ServiceName = ValueOf<typeof ServiceName>;
 
-/** Os pacotes de remarcação, pelas semanas entre os agendamentos automáticos: o número que o banco guarda. */
-export const PacoteRemarcacao = {
-  Mensal: 4,
-  Quinzenal: 2,
+/** Os pacotes de remarcação, pelas visitas por mês, o número que o banco guarda: 4 é semanal, e 2, quinzenal. */
+export const PackageFrequency = {
+  Weekly: 4,
+  Biweekly: 2,
 } as const;
-export type PacoteRemarcacao = ValueOf<typeof PacoteRemarcacao>;
+export type PackageFrequency = ValueOf<typeof PackageFrequency>;
 
 /** Se o valor é um dos pacotes, como o pet salvo traz do banco. */
-export function isPacoteRemarcacao(value: unknown): value is PacoteRemarcacao {
-  return Object.values(PacoteRemarcacao).some((pacote) => pacote === value);
+export function isPackageFrequency(value: unknown): value is PackageFrequency {
+  return Object.values(PackageFrequency).some((frequency) => frequency === value);
 }
 
-export const EspeciesAtendidas = {
-  CAO: "CAO",
-  GATO: "GATO",
-  OUTRO: "OUTRO",
+export const SpeciesCode = {
+  Dog: "DOG",
+  Cat: "CAT",
+  Other: "OTHER",
 } as const;
-export type EspeciesAtendidas = ValueOf<typeof EspeciesAtendidas>;
+export type SpeciesCode = ValueOf<typeof SpeciesCode>;
 
-export const EspeciesAtendidasLabel: Record<EspeciesAtendidas, string> = {
-  [EspeciesAtendidas.CAO]: "Cão",
-  [EspeciesAtendidas.GATO]: "Gato",
-  [EspeciesAtendidas.OUTRO]: "Outro",
+export const SpeciesLabel: Record<SpeciesCode, string> = {
+  [SpeciesCode.Dog]: "Cão",
+  [SpeciesCode.Cat]: "Gato",
+  [SpeciesCode.Other]: "Outro",
 };
 
-export const PorteAnimal = {
-  PEQUENO: "PEQUENO",
-  MEDIO: "MEDIO",
-  GRANDE: "GRANDE",
-  GRANDAO: "GRANDAO",
+export const PetSize = {
+  Small: "SMALL",
+  Medium: "MEDIUM",
+  Large: "LARGE",
+  ExtraLarge: "EXTRA_LARGE",
 } as const;
-export type PorteAnimal = ValueOf<typeof PorteAnimal>;
+export type PetSize = ValueOf<typeof PetSize>;
 
-export const PorteAnimalLabel: Record<PorteAnimal, string> = {
-  PEQUENO: "Pequeno",
-  MEDIO: "Médio",
-  GRANDE: "Grande",
-  GRANDAO: "Grandão",
+export const PetSizeLabel: Record<PetSize, string> = {
+  [PetSize.Small]: "Pequeno",
+  [PetSize.Medium]: "Médio",
+  [PetSize.Large]: "Grande",
+  [PetSize.ExtraLarge]: "Grandão",
 };

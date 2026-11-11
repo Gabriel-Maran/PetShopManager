@@ -1,29 +1,29 @@
-import type { IsoDate } from "../utils/datas";
-import type { Cents } from "../utils/dinheiro";
+import type { IsoDate } from "../utils/dates";
+import type { Cents } from "../utils/money";
 
 export interface Appointment {
   id?: number;
   pet_id: number;
   /** O nome do serviço. Desde a versão 6 do esquema, o banco guarda o id, e o repository traduz. */
-  servico: string;
-  hora: string;
-  data: IsoDate;
-  entregar_pet: number; // 0 ou 1
-  concluido: number; // 0 ou 1
-  observacao?: string | null;
-  is_auto_agen: number; // 0 ou 1
-  valor: Cents;
+  service: string;
+  time: string;
+  date: IsoDate;
+  deliver_pet: number; // 0 ou 1
+  completed: number; // 0 ou 1
+  notes?: string | null;
+  is_auto: number; // 0 ou 1
+  price: Cents;
   /** O nome da forma de pagamento, ou vazio se não foi informada. O banco guarda o id, como o serviço. */
-  tipo_pgto: string;
-  ta_pago: number;
-  criado_em?: IsoDate;
+  payment_method: string;
+  is_paid: number;
+  created_at?: IsoDate;
 }
 
 export type AppointmentsWithOwnerAndPet = Appointment & {
   id: number;
-  nome_pet: string;
-  nome_dono: string;
-  especie: string;
+  pet_name: string;
+  owner_name: string;
+  species_name: string;
 };
 
 export type NewOrEditAppointmentParams = {
@@ -37,15 +37,15 @@ export class AppointmentBuilder {
   constructor() {
     this.props = {
       pet_id: 0,
-      servico: "",
-      hora: "00:00",
-      data: "",
-      entregar_pet: 0,
-      concluido: 0,
-      is_auto_agen: 0,
-      valor: 0,
-      tipo_pgto: "",
-      ta_pago: 0,
+      service: "",
+      time: "00:00",
+      date: "",
+      deliver_pet: 0,
+      completed: 0,
+      is_auto: 0,
+      price: 0,
+      payment_method: "",
+      is_paid: 0,
     };
   }
 
@@ -54,58 +54,58 @@ export class AppointmentBuilder {
     return this;
   }
 
-  public withServico(servico: string): this {
-    this.props.servico = servico;
+  public withService(service: string): this {
+    this.props.service = service;
     return this;
   }
 
-  public withHora(hora: string): this {
-    this.props.hora = hora;
+  public withTime(time: string): this {
+    this.props.time = time;
     return this;
   }
 
-  public withData(data: IsoDate): this {
-    this.props.data = data;
+  public withDate(date: IsoDate): this {
+    this.props.date = date;
     return this;
   }
 
-  public withEntregarPet(num: number): this {
-    this.props.entregar_pet = num !== 0 ? 1 : 0;
+  public withDeliverPet(num: number): this {
+    this.props.deliver_pet = num !== 0 ? 1 : 0;
     return this;
   }
 
-  public isConcluido(num: number): this {
-    this.props.concluido = num !== 0 ? 1 : 0;
+  public withCompleted(num: number): this {
+    this.props.completed = num !== 0 ? 1 : 0;
     return this;
   }
 
-  public withObservacao(obs: string | null): this {
-    this.props.observacao = obs;
+  public withNotes(notes: string | null): this {
+    this.props.notes = notes;
     return this;
   }
 
-  public withIsAutoAgen(num: number): this {
-    this.props.is_auto_agen = num !== 0 ? 1 : 0;
+  public withAuto(num: number): this {
+    this.props.is_auto = num !== 0 ? 1 : 0;
     return this;
   }
 
-  public withValor(valor: Cents): this {
-    this.props.valor = valor;
+  public withPrice(price: Cents): this {
+    this.props.price = price;
     return this;
   }
 
-  public withTipoPgto(tipo_pgto: string): this {
-    this.props.tipo_pgto = tipo_pgto;
+  public withPaymentMethod(payment_method: string): this {
+    this.props.payment_method = payment_method;
     return this; 
   }
 
-  public isTaPago(ta_pago: number): this {
-    this.props.ta_pago = ta_pago;
+  public withPaid(is_paid: number): this {
+    this.props.is_paid = is_paid;
     return this;
   }
 
-  public withCriadoEm(data: IsoDate): this {
-    this.props.criado_em = data;
+  public withCreatedAt(date: IsoDate): this {
+    this.props.created_at = date;
     return this;
   }
 

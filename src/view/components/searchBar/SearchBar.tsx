@@ -1,0 +1,149 @@
+import { useEffect, useState } from "react";
+import { Image, View, TextInput, StyleSheet } from "react-native";
+import {
+  ThemeColors,
+  useTheme,
+  useThemedStyles,
+} from "../../theme/ThemeProvider";
+import { StatusFilter } from "../../../config/consts";
+import FilterPanel from "./FilterPanel";
+import { MAX_SEARCH_LENGTH } from "../../../globals/limits";
+import { A11Y_LABELS } from "../../../globals/accessibilityLabels";
+import IconButton from "../accessibility/IconButton";
+import { FONT_SIZE, RADIUS, SPACING } from "../../theme/tokens";
+
+const SEARCH_ICON_SIZE = 30;
+const SEARCH_PADDING = SPACING[10];
+const FILTER_ICON_SIZE = 36;
+const FILTER_PADDING = SPACING[10];
+
+export default function SearchBar({
+  placeholderText,
+  setSearch,
+  hasFilter = false,
+  statusFilter = "active",
+  onStatusFilterChange,
+}: {
+  placeholderText: string;
+  setSearch: (txt: string) => void;
+  hasFilter?: boolean;
+  statusFilter?: StatusFilter;
+  onStatusFilterChange?: (n: number) => void;
+}) {
+  const s = useThemedStyles(styles);
+  const { colors } = useTheme();
+  const [text, setText] = useState("");
+  const [isSelectedFilter, setIsSelectedFilter] = useState(false);
+
+  useEffect(() => {
+    if (!hasFilter) {
+      setIsSelectedFilter(false);
+    }
+  }, [hasFilter]);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      setSearch(text);
+    }, 600);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [text]);
+
+  return (
+    <View style={s.container}>
+      {hasFilter && isSelectedFilter ? (
+        <FilterPanel
+          value={statusFilter}
+          onChange={onStatusFilterChange ?? (() => {})}
+        />
+      ) : (
+        <View style={s.searchText}>
+          <IconButton
+            label={A11Y_LABELS.search}
+            width={SEARCH_ICON_SIZE + 2 * SEARCH_PADDING}
+            height={SEARCH_ICON_SIZE}
+            onPress={() => setSearch(text)}
+            style={s.btnImg}
+          >
+            <Image
+              style={s.img}
+              source={require("../../../assets/outros/search.png")}
+            />
+          </IconButton>
+          <TextInput
+            onChangeText={setText}
+            value={text}
+            placeholder={placeholderText}
+            maxLength={MAX_SEARCH_LENGTH}
+            multiline={false}
+            style={s.input}
+            placeholderTextColor={colors.TEXT_PRIMARY}
+          />
+        </View>
+      )}
+      {hasFilter && (
+        <IconButton
+          label={A11Y_LABELS.filter.toggle}
+          width={FILTER_ICON_SIZE + 2 * FILTER_PADDING}
+          accessibilityState={{ expanded: isSelectedFilter }}
+          onPress={() => setIsSelectedFilter(!isSelectedFilter)}
+          style={s.btnFilter}
+        >
+          <Image
+            style={s.imgFilter}
+            source={require("../../../assets/outros/filter.png")}
+          />
+        </IconButton>
+      )}
+    </View>
+  );
+}
+
+const styles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      width: "100%",
+      marginTop: SPACING[10],
+      flexDirection: "row",
+      paddingHorizontal: SPACING[16],
+      gap: SPACING[5],
+    },
+    searchText: {
+      flex: 1,
+      flexDirection: "row",
+      alignSelf: "center",
+      alignItems: "center",
+      backgroundColor: colors.THIRD_BACKGROUND,
+      padding: SPACING[5],
+      borderRadius: RADIUS[10],
+      borderWidth: 1,
+      borderColor: colors.BORDER_STRONG,
+    },
+    input: {
+      minHeight: 30,
+      flex: 1,
+      fontSize: FONT_SIZE.SUBTITLE,
+      color: colors.TEXT_PRIMARY,
+    },
+    btnImg: {
+      paddingHorizontal: SEARCH_PADDING,
+    },
+    img: {
+      width: SEARCH_ICON_SIZE,
+      height: SEARCH_ICON_SIZE,
+      tintColor: colors.TEXT_MUTED,
+    },
+    btnFilter: {
+      backgroundColor: colors.FILTER_BACKGROUND,
+      borderRadius: RADIUS.PILL,
+      alignContent: "center",
+      justifyContent: "center",
+      alignSelf: "center",
+      padding: FILTER_PADDING,
+    },
+    imgFilter: {
+      tintColor: colors.FILTER_ICON,
+      width: FILTER_ICON_SIZE,
+      height: FILTER_ICON_SIZE,
+    },
+  });

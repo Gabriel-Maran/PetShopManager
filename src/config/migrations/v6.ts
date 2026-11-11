@@ -18,7 +18,7 @@
 // O dado antigo que violaria um CHECK é corrigido na cópia, pela regra que o app já usa: flag diferente
 // de zero é ligado (os builders), horário vazio é "00:00" (versão 5) e porte vazio é o "MEDIO" do
 // formulário. O serviço padrão do pet também é um valor do formulário, que só oferece os três de
-// TipoServico: o pet com outro serviço passa a apontar para o "Banho". Quando a correção joga fora um
+// ServiceName: o pet com outro serviço passa a apontar para o "Banho". Quando a correção joga fora um
 // valor que alguém digitou (porte que não é porte, serviço padrão fora dos três, horário fora do
 // formato, dinheiro negativo), o original vai para o fim da observação do pet ou do agendamento,
 // numa nota, e a observação que já existia fica intacta. O nome de serviço ou de pagamento que algum
@@ -32,7 +32,7 @@ import type { Migration } from "../migrator";
 
 // ── Conversão dos dados ───────────────────────────────────────────────────
 
-/** Diferente de zero vira 1, como o withEntregarPet, o isConcluido e os outros builders do app. */
+/** Diferente de zero vira 1, como o withDeliverPet, o withCompleted e os outros builders do app. */
 const flagFrom = (column: string) => `CASE WHEN ${column} = 0 THEN 0 ELSE 1 END`;
 
 /** "HH:MM", de 00:00 a 23:59. É o mesmo formato do campo de horário do app (validation/fields.ts). */
@@ -77,7 +77,7 @@ const isPorteLost = (column: string) =>
 
 const serviceIdOf = (name: string) => `(SELECT id FROM service_type WHERE servico = ${name})`;
 
-/** Os serviços que o formulário do pet oferece (TipoServico): sempre na lista, ativos. */
+/** Os serviços que o formulário do pet oferece (ServiceName): sempre na lista, ativos. */
 const DEFAULT_SERVICES = ["Banho", "Banho e Tosa", "Banho e Higiênica"] as const;
 const DEFAULT_SERVICES_SQL = `(${DEFAULT_SERVICES.map((name) => `'${name}'`).join(", ")})`;
 
@@ -169,7 +169,7 @@ export const SQL_UNIQUE_PAYMENT_METHODS_V6 = `
   CREATE UNIQUE INDEX idx_payment_methods_tipo_pgto ON payment_methods (tipo_pgto);
 `;
 
-// Os três serviços que o formulário do pet oferece (TipoServico) precisam estar na lista, ativos. Vem
+// Os três serviços que o formulário do pet oferece (ServiceName) precisam estar na lista, ativos. Vem
 // antes dos nomes desconhecidos: sem isso, um "Banho" que só existe no texto dos agendamentos entraria
 // oculto.
 export const SQL_ENSURE_DEFAULT_SERVICES_V6 = `

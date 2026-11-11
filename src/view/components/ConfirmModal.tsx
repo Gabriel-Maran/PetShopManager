@@ -1,13 +1,13 @@
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { ThemeColors, useThemedStyles } from "../Themes/ThemeProvider";
-import { HIDDEN_FROM_SCREEN_READER } from "./Acessibilidade/accessibilityProps";
+import { ThemeColors, useThemedStyles } from "../theme/ThemeProvider";
+import { HIDDEN_FROM_SCREEN_READER } from "./accessibility/accessibilityProps";
 import {
   FONT_SIZE,
   FONT_WEIGHT,
   LINE_HEIGHTS,
   RADIUS,
   SPACING,
-} from "../Themes/tokens";
+} from "../theme/tokens";
 
 type Variant = "destructive" | "default";
 

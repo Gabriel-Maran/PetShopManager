@@ -1,33 +1,33 @@
-import { PacoteRemarcacao, PorteAnimal, TipoServico } from "../config/petEnums";
-import type { IsoDate } from "../utils/datas";
-import type { Cents } from "../utils/dinheiro";
+import { PackageFrequency, PetSize, ServiceName } from "../config/petEnums";
+import type { IsoDate } from "../utils/dates";
+import type { Cents } from "../utils/money";
 
 export interface Pet {
   id?: number;
-  nome: string;
-  especie: number;
-  porte: PorteAnimal;
-  raca?: number;
-  raca_nome?: string;
-  observacoes?: string | null;
-  dono_id: number;
+  name: string;
+  species_id: number;
+  size: PetSize;
+  breed_id?: number;
+  breed_name?: string;
+  notes?: string | null;
+  owner_id: number;
   /** O nome do serviço. Desde a versão 6 do esquema, o banco guarda o id, e o repository traduz. */
-  servico_padrao: TipoServico;
-  valor_pacote?: Cents | null;
-  remarcacao_ativa: number; // 0 ou 1
-  pacote_remarcacao?: PacoteRemarcacao | null; // 2 ou 4 conforme o SQL
-  data_inicio_pacote?: IsoDate | null;
-  horario_padrao?: string | null;
-  current_ultima_visita_data?: IsoDate | null;
-  ultimo_visita_data_auto?: IsoDate | null;
-  is_ativo: number; // 0 ou 1
-  criado_em?: IsoDate;
+  default_service: ServiceName;
+  package_price?: Cents | null;
+  reschedule_active: number; // 0 ou 1
+  package_frequency?: PackageFrequency | null; // 2 ou 4 conforme o SQL
+  package_start_date?: IsoDate | null;
+  default_time?: string | null;
+  last_visit_date?: IsoDate | null;
+  last_auto_visit_date?: IsoDate | null;
+  is_active: number; // 0 ou 1
+  created_at?: IsoDate;
 }
 
-export type PetWithSpecieRaceAndOwner = Pet & {
-  nome_especie: string;
-  nome_raca: string;
-  nome_dono: string;
+export type PetWithSpeciesBreedAndOwner = Pet & {
+  species_name: string;
+  breed_name: string;
+  owner_name: string;
 };
 
 export class PetBuilder {
@@ -35,79 +35,79 @@ export class PetBuilder {
 
   constructor() {
     this.props = {
-      nome: "",
-      especie: 0,
-      porte: PorteAnimal.MEDIO,
-      dono_id: 0,
-      servico_padrao: TipoServico.BanhoETosa,
-      remarcacao_ativa: 0,
-      valor_pacote: null,
-      is_ativo: 1,
+      name: "",
+      species_id: 0,
+      size: PetSize.Medium,
+      owner_id: 0,
+      default_service: ServiceName.BathAndGrooming,
+      reschedule_active: 0,
+      package_price: null,
+      is_active: 1,
     };
   }
 
-  public withNome(nome: string): this {
-    this.props.nome = nome;
+  public withName(name: string): this {
+    this.props.name = name;
     return this;
   }
 
-  public forDono(donoId: number): this {
-    this.props.dono_id = donoId;
+  public forOwner(ownerId: number): this {
+    this.props.owner_id = ownerId;
     return this;
   }
 
-  public withEspecie(especie: number): this {
-    this.props.especie = especie;
+  public withSpecies(species_id: number): this {
+    this.props.species_id = species_id;
     return this;
   }
 
-  public withPorte(porte: PorteAnimal): this {
-    this.props.porte = porte;
+  public withSize(size: PetSize): this {
+    this.props.size = size;
     return this;
   }
 
-  public withRaca(raca: number): this {
-    this.props.raca = raca;
+  public withBreed(breed_id: number): this {
+    this.props.breed_id = breed_id;
     return this;
   }
 
-  public withServicoPadrao(servicePadrao: TipoServico): this {
-    this.props.servico_padrao = servicePadrao;
+  public withDefaultService(service: ServiceName): this {
+    this.props.default_service = service;
     return this;
   }
 
-  public isRemarcacaoAtiva(num: number): this {
-    this.props.remarcacao_ativa = num !== 0 ? 1 : 0;
+  public withRescheduleActive(num: number): this {
+    this.props.reschedule_active = num !== 0 ? 1 : 0;
     return this;
   }
 
-  public withPacote(tipo: PacoteRemarcacao | null | undefined): this {
-    this.props.pacote_remarcacao = tipo;
+  public withPackage(frequency: PackageFrequency | null | undefined): this {
+    this.props.package_frequency = frequency;
     return this;
   }
 
-  public withInicioPacote(dataInicio: IsoDate | null | undefined): this {
-    this.props.data_inicio_pacote = dataInicio;
+  public withPackageStart(start: IsoDate | null | undefined): this {
+    this.props.package_start_date = start;
     return this;
   }
 
-  public withValorPacote(valor: Cents | null | undefined): this {
-    this.props.valor_pacote = valor ?? null;
+  public withPackagePrice(price: Cents | null | undefined): this {
+    this.props.package_price = price ?? null;
     return this;
   }
 
-  public withHorarioPadrao(valor: string | null | undefined): this {
-    this.props.horario_padrao = valor;
+  public withDefaultTime(price: string | null | undefined): this {
+    this.props.default_time = price;
     return this;
   }
 
-  public is_ativo(num: number): this {
-    this.props.is_ativo = num !== 0 ? 1 : 0;
+  public withActive(num: number): this {
+    this.props.is_active = num !== 0 ? 1 : 0;
     return this;
   }
 
-  public withObservacoes(obs: string | null): this {
-    this.props.observacoes = obs;
+  public withNotes(notes: string | null): this {
+    this.props.notes = notes;
     return this;
   }
 

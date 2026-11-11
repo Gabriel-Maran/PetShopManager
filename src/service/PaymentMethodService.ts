@@ -1,9 +1,9 @@
-import type { PaymentsMethod } from "../model/PaymentMethod";
-import { paymentMethodRepository } from "../repository/PaymentsMethodsRepository";
+import type { PaymentMethod } from "../model/PaymentMethod";
+import { paymentMethodRepository } from "../repository/PaymentMethodRepository";
 
 class PaymentMethodService {
-  getAllPaymentMethods(): Promise<PaymentsMethod[]> {
-    return paymentMethodRepository.getAllPaymentMethod();
+  getAllPaymentMethods(): Promise<PaymentMethod[]> {
+    return paymentMethodRepository.getAllPaymentMethods();
   }
 }
 

@@ -2,21 +2,21 @@
 // comandos.
 import { toSearchPattern, type SqlQuery } from "./searchSql.ts";
 
-/** Parâmetros: especie_id, nome_raca, nome_raca_normalized. */
-export const INSERT_BREED_SQL = `INSERT INTO race (especie_id, nome_raca, nome_raca_normalized) VALUES (?, ?, ?)`;
+/** Parâmetros: species_id, name, normalized_name. */
+export const INSERT_BREED_SQL = `INSERT INTO breeds (species_id, name, normalized_name) VALUES (?, ?, ?)`;
 
 /** Parâmetros: id. Devolve a linha só se a espécie existe. */
 export const FIND_SPECIES_SQL = `SELECT id FROM species WHERE id = ?`;
 
 /** Parâmetros: id. A raça com a espécie dela. */
-export const FIND_BREED_SQL = `SELECT id, especie_id, nome_raca FROM race WHERE id = ?`;
+export const FIND_BREED_SQL = `SELECT id, species_id, name FROM breeds WHERE id = ?`;
 
 /**
- * Parâmetros: especie_id. Os nomes das raças da espécie, para achar a repetida pelo nome normalizado no
- * código: o `nome_raca_normalized` da carga inicial tira também a pontuação ("vira-lata srd"), e o do
+ * Parâmetros: species_id. Os nomes das raças da espécie, para achar a repetida pelo nome normalizado no
+ * código: o `normalized_name` da carga inicial tira também a pontuação ("vira-lata srd"), e o do
  * app não, então comparar a coluna deixaria passar "vira-lata (srd)".
  */
-export const LIST_BREED_NAMES_SQL = `SELECT nome_raca FROM race WHERE especie_id = ?`;
+export const LIST_BREED_NAMES_SQL = `SELECT name FROM breeds WHERE species_id = ?`;
 
 /**
  * O filtro da busca, o mesmo na página e na contagem. O texto vira o padrão do LIKE com `%`, `_` e `\`
@@ -24,7 +24,7 @@ export const LIST_BREED_NAMES_SQL = `SELECT nome_raca FROM race WHERE especie_id
  */
 function breedFilter(speciesId: number, query: string): SqlQuery {
   return {
-    sql: `WHERE especie_id = ? AND nome_raca_normalized LIKE ? ESCAPE '\\'`,
+    sql: `WHERE species_id = ? AND normalized_name LIKE ? ESCAPE '\\'`,
     params: [speciesId, toSearchPattern(query)],
   };
 }
@@ -38,8 +38,8 @@ export function listBreedsSql(
 ): SqlQuery {
   const filter = breedFilter(speciesId, query);
   return {
-    sql: `SELECT id, nome_raca AS nome FROM race ${filter.sql}
-       ORDER BY nome_raca ASC, id ASC
+    sql: `SELECT id, name FROM breeds ${filter.sql}
+       ORDER BY name ASC, id ASC
        LIMIT ? OFFSET ?`,
     params: [...filter.params, limit, page * limit],
   };
@@ -49,7 +49,7 @@ export function listBreedsSql(
 export function countBreedsSql(speciesId: number, query: string): SqlQuery {
   const filter = breedFilter(speciesId, query);
   return {
-    sql: `SELECT COUNT(*) AS total FROM race ${filter.sql}`,
+    sql: `SELECT COUNT(*) AS total FROM breeds ${filter.sql}`,
     params: filter.params,
   };
 }

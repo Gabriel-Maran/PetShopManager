@@ -1,10 +1,10 @@
 // Caracterização das funções de data, máscara, formatação e normalização usadas nas telas.
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { dateToIso, isIsoDate, isoToBr, todayIso } from "../src/utils/datas.ts";
-import { formatValue } from "../src/utils/formatadores/formaterHelper.ts";
-import { normalizeForSearch } from "../src/utils/formatadores/normalizaNome.ts";
-import { mascararHorario } from "../src/utils/mascarar.ts";
+import { dateToIso, isIsoDate, isoToBr, todayIso } from "../src/utils/dates.ts";
+import { formatValue } from "../src/utils/formatters/numberFormat.ts";
+import { normalizeForSearch } from "../src/utils/formatters/normalizeForSearch.ts";
+import { maskTime } from "../src/utils/timeMask.ts";
 import {
   centsToMoney,
   formatMoneyInput,
@@ -12,7 +12,7 @@ import {
   maskMoneyInput,
   moneyToCents,
   parseMoneyInput,
-} from "../src/utils/dinheiro.ts";
+} from "../src/utils/money.ts";
 import { MESSAGES } from "../src/globals/messages.ts";
 import { AppError } from "../src/errors/AppError.ts";
 
@@ -43,17 +43,17 @@ describe("datas", () => {
 
   test("só AAAA-MM-DD passa como data do banco", () => {
     assert.equal(isIsoDate("2026-11-08"), true);
-    for (const entrada of ["", "08/11/2026", "20261108", 20261108, "2026-11-8", " 2026-11-08", null, undefined]) {
-      assert.equal(isIsoDate(entrada), false, JSON.stringify(entrada));
+    for (const input of ["", "08/11/2026", "20261108", 20261108, "2026-11-8", " 2026-11-08", null, undefined]) {
+      assert.equal(isIsoDate(input), false, JSON.stringify(input));
     }
   });
 
   test("só passa um dia que existe no calendário, com o 29 de fevereiro dos anos bissextos", () => {
-    for (const entrada of ["2024-02-29", "2000-02-29", "2026-01-31", "2026-04-30", "2026-12-31"]) {
-      assert.equal(isIsoDate(entrada), true, entrada);
+    for (const input of ["2024-02-29", "2000-02-29", "2026-01-31", "2026-04-30", "2026-12-31"]) {
+      assert.equal(isIsoDate(input), true, input);
     }
-    for (const entrada of ["2025-02-29", "1900-02-29", "2026-02-30", "2026-04-31", "2026-13-01", "2026-00-10", "2026-01-00", "2026-01-32"]) {
-      assert.equal(isIsoDate(entrada), false, entrada);
+    for (const input of ["2025-02-29", "1900-02-29", "2026-02-30", "2026-04-31", "2026-13-01", "2026-00-10", "2026-01-00", "2026-01-32"]) {
+      assert.equal(isIsoDate(input), false, input);
     }
   });
 
@@ -68,8 +68,8 @@ describe("datas", () => {
   });
 
   test("entrada maliciosa ou fora do tipo não passa como data", () => {
-    for (const entrada of ["2026-11-08'; DROP TABLE pets; --", "2026-11-08\n", "２０２６-11-08", "9999-99-99", { toString: () => "2026-11-08" }, ["2026-11-08"]]) {
-      assert.equal(isIsoDate(entrada), false, String(entrada));
+    for (const input of ["2026-11-08'; DROP TABLE pets; --", "2026-11-08\n", "２０２６-11-08", "9999-99-99", { toString: () => "2026-11-08" }, ["2026-11-08"]]) {
+      assert.equal(isIsoDate(input), false, String(input));
     }
   });
 
@@ -97,7 +97,7 @@ describe("datas", () => {
 });
 
 describe("máscara de horário", () => {
-  for (const [entrada, saida] of [
+  for (const [input, output] of [
     ["", ""],
     ["9", "9"],
     ["09", "09"],
@@ -110,14 +110,14 @@ describe("máscara de horário", () => {
     // Com mais de quatro dígitos, o campo hoje fica vazio, em vez de ignorar o dígito a mais.
     ["09300", ""],
   ]) {
-    test(`${JSON.stringify(entrada)} vira ${JSON.stringify(saida)}`, () => {
-      assert.equal(mascararHorario(entrada), saida);
+    test(`${JSON.stringify(input)} vira ${JSON.stringify(output)}`, () => {
+      assert.equal(maskTime(input), output);
     });
   }
 });
 
 describe("dinheiro: máscara de digitação", () => {
-  for (const [entrada, saida] of [
+  for (const [input, output] of [
     ["120", "120"],
     ["120,5", "120,5"],
     ["120,567", "120,56"],
@@ -126,14 +126,14 @@ describe("dinheiro: máscara de digitação", () => {
     [",", ","],
     ["", ""],
   ]) {
-    test(`${JSON.stringify(entrada)} vira ${JSON.stringify(saida)}`, () => {
-      assert.equal(maskMoneyInput(entrada), saida);
+    test(`${JSON.stringify(input)} vira ${JSON.stringify(output)}`, () => {
+      assert.equal(maskMoneyInput(input), output);
     });
   }
 });
 
 describe("dinheiro: centavos", () => {
-  for (const [entrada, centavos] of [
+  for (const [input, cents] of [
     ["12,50", 1250],
     ["12,5", 1250],
     ["12", 1200],
@@ -141,14 +141,14 @@ describe("dinheiro: centavos", () => {
     [" 99,99 ", 9999],
     ["0", 0],
   ]) {
-    test(`${JSON.stringify(entrada)} vale ${centavos} centavos`, () => {
-      assert.equal(moneyToCents(entrada), centavos);
+    test(`${JSON.stringify(input)} vale ${cents} centavos`, () => {
+      assert.equal(moneyToCents(input), cents);
     });
   }
 
-  for (const entrada of ["", "   ", ",", ",50", "12,", "12,345", "1.234,56", "12.50", "-5", "abc", null, undefined]) {
-    test(`${JSON.stringify(entrada)} não é um valor`, () => {
-      assert.equal(moneyToCents(entrada), null);
+  for (const input of ["", "   ", ",", ",50", "12,", "12,345", "1.234,56", "12.50", "-5", "abc", null, undefined]) {
+    test(`${JSON.stringify(input)} não é um valor`, () => {
+      assert.equal(moneyToCents(input), null);
     });
   }
 
@@ -174,17 +174,17 @@ describe("dinheiro: campos dos formulários", () => {
   });
 
   test("campo vazio fica sem valor", () => {
-    for (const entrada of ["", "   ", null, undefined]) {
-      assert.equal(parseMoneyInput(entrada), null, JSON.stringify(entrada));
+    for (const input of ["", "   ", null, undefined]) {
+      assert.equal(parseMoneyInput(input), null, JSON.stringify(input));
     }
   });
 
   test("valor fora do formato vira a mensagem para o usuário", () => {
-    for (const entrada of [",", "12,", "12,345", "-5", "abc"]) {
+    for (const input of [",", "12,", "12,345", "-5", "abc"]) {
       assert.throws(
-        () => parseMoneyInput(entrada),
+        () => parseMoneyInput(input),
         (error) => error instanceof AppError && error.code === "VALIDATION" && error.message === MESSAGES.money.invalid,
-        JSON.stringify(entrada),
+        JSON.stringify(input),
       );
     }
   });
@@ -197,9 +197,9 @@ describe("dinheiro: campos dos formulários", () => {
   });
 
   test("os controllers só aceitam centavos inteiros e sem sinal", () => {
-    for (const valor of [0, 1, 1250, 10_000_000]) assert.equal(isValidCents(valor), true, String(valor));
-    for (const valor of [-1, 12.5, Number.NaN, Number.POSITIVE_INFINITY, "1250", null, undefined]) {
-      assert.equal(isValidCents(valor), false, String(valor));
+    for (const price of [0, 1, 1250, 10_000_000]) assert.equal(isValidCents(price), true, String(price));
+    for (const price of [-1, 12.5, Number.NaN, Number.POSITIVE_INFINITY, "1250", null, undefined]) {
+      assert.equal(isValidCents(price), false, String(price));
     }
   });
 });

@@ -1,25 +1,25 @@
 import { getDatabase } from "../config/database";
-import type { PacoteRemarcacao } from "../config/petEnums";
-import type { IsoDate } from "../utils/datas";
-import type { GroupCount } from "../utils/relatorios/graficos";
+import type { PackageFrequency } from "../config/petEnums";
+import type { IsoDate } from "../utils/dates";
+import type { GroupCount } from "../utils/reports/charts";
 import {
   ACTIVE_PACKAGES_SQL,
   APPOINTMENTS_BY_MONTH_SQL,
   APPOINTMENTS_BY_ORIGIN_SQL,
   COMPLETED_BY_HOUR_SQL,
   COMPLETED_BY_WEEKDAY_SQL,
-  PETS_AUSENTES_SQL,
+  ABSENT_PETS_SQL,
   PETS_BY_RESCHEDULE_SQL,
   PETS_IN_PACKAGE_SQL,
-} from "./sql/relatoriosSql";
+} from "./sql/reportsSql";
 
-/** As colunas de sim ou não (`concluido`, `remarcacao_ativa`) guardam 1 ou 0. */
+/** As colunas de sim ou não (`concluido`, `reschedule_active`) guardam 1 ou 0. */
 const asFlag = (value: boolean) => (value ? 1 : 0);
 
 /** Um pet ausente como o gráfico mostra: "Pet · Dono" e os dias sem visita. */
 export interface AbsentPetRow {
   label: string;
-  dias_ausente: number;
+  days_absent: number;
 }
 
 class ReportsRepository {
@@ -60,10 +60,10 @@ class ReportsRepository {
     return this.countBy(ACTIVE_PACKAGES_SQL);
   }
 
-  async listPetNamesInPackage(packageSize: PacoteRemarcacao): Promise<string[]> {
+  async listPetNamesInPackage(packageSize: PackageFrequency): Promise<string[]> {
     const db = await getDatabase();
-    const rows = await db.getAllAsync<{ nome: string }>(PETS_IN_PACKAGE_SQL, [packageSize]);
-    return rows.map((row) => row.nome);
+    const rows = await db.getAllAsync<{ name: string }>(PETS_IN_PACKAGE_SQL, [packageSize]);
+    return rows.map((row) => row.name);
   }
 
   async findAbsentPets(
@@ -72,7 +72,7 @@ class ReportsRepository {
     limit: number,
   ): Promise<AbsentPetRow[]> {
     const db = await getDatabase();
-    return db.getAllAsync<AbsentPetRow>(PETS_AUSENTES_SQL, [
+    return db.getAllAsync<AbsentPetRow>(ABSENT_PETS_SQL, [
       today,
       asFlag(rescheduleActive),
       limit,

@@ -479,3 +479,16 @@ Decisão:
 - **Limites de tamanho só no que mudou.** A nota engorda a observação para além de `MAX_NOTES_LENGTH` (250), e um nome oculto pode passar de `MAX_LIST_ITEM_LENGTH` (50). Quem edita sem trocar não pode ser recusado. Na edição, os controllers do pet e do agendamento passam o registro gravado ao schema (`petSchemaFor` e `appointmentSchemaFor`), e os limites de observação, serviço e forma de pagamento valem só para o que difere do gravado, com o teto de `MAX_STORED_TEXT_LENGTH` (1000) contra entrada gigante. Na criação, nada muda. O campo da tela abre a observação já gravada inteira (o `maxLength` é o maior entre o limite e o tamanho carregado), porque o `TextInput` do Android corta o valor que passa do `maxLength` ao carregar.
 Motivo: o histórico financeiro não pode mudar quando a lista muda; o dado que o usuário digitou não pode sumir em silêncio; e o formulário só deve oferecer o que o app trata hoje. A pergunta (a) do PR #56, sobre o pet com serviço oculto, deixou de existir com a decisão do pet fora dos três. Segue em aberto a (b): o próximo automático copia a observação do concluído, então a nota da migração se repete nos automáticos.
 Entrega: o #56 foi mesclado só com o primeiro commit, porque o segundo, com o pet fora dos três e os limites, chegou depois do merge. Esse segundo commit virou o PR #57, a partir do `main`.
+
+## 2026-11-11
+
+**NOMES-1 inteiro num PR, com as colunas do banco (versão 7) e o tema do sistema (P19).**
+Contexto: o plano dividia o NOMES-1 em um PR por camada. O Gabriel pediu tudo de uma vez, já que ninguém usa o app hoje, e aprovou renomear também as colunas do banco.
+Decisão:
+- Identificadores, arquivos e pastas em inglês em todas as camadas, telas e testes; comentários e mensagens seguem em português. A pasta `Botões` virou `registry/buttons`, e os hooks ganharam o `use` (`useOwners`, `useBreeds`, `useCalendar`, `useAppointmentForm`).
+- Versão 7 do esquema: tabelas, colunas e códigos em inglês (`breeds`, `services`, `settings`; `owner_id`, `is_active`...; `DOG`, `SMALL`...). O campo do modelo é igual à coluna. As versões 1 a 6 ficam como estão, congeladas.
+- O pacote de 4 por mês se chamava `Mensal`, mas é semanal: virou `PackageFrequency.Weekly`, e o de 2, `Biweekly`.
+- A `configs` virou a `settings` (chave e valor). Sem tema gravado, o app segue o do sistema (`userInterfaceStyle: automatic`); o escuro ligado na v6 vira a escolha `dark`.
+- Os testes das versões antigas montam os bancos com o SQL da época; o helper lê esses bancos com os nomes de hoje.
+Motivo: o código passa a ter um idioma só, e o critério do item ("nenhum identificador em português") vale também para o banco. Juntar a v7 dos nomes com a do tema evita duas reconstruções de tabela seguidas.
+

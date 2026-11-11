@@ -1,18 +1,18 @@
 import { getDatabase } from "../config/database";
-import type { EspeciesAtendidas } from "../config/petEnums";
+import type { SpeciesCode } from "../config/petEnums";
 import { FIND_SPECIES_SQL } from "./sql/breedsSql";
 
-/** Uma espécie: o id e o nome guardado no banco, um dos `EspeciesAtendidas`. */
+/** Uma espécie: o id e o nome guardado no banco, um dos `SpeciesCode`. */
 export type Species = {
   id: number;
-  nome: EspeciesAtendidas;
+  name: SpeciesCode;
 };
 
 class SpeciesRepository {
   async searchSpecies(): Promise<Species[]> {
     const db = await getDatabase();
     return db.getAllAsync<Species>(
-      `SELECT id, nome FROM species ORDER BY nome ASC`,
+      `SELECT id, name FROM species ORDER BY name ASC`,
     );
   }
 

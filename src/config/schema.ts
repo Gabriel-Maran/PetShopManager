@@ -8,6 +8,7 @@ import { V3 } from "./migrations/v3.ts";
 import { V4 } from "./migrations/v4.ts";
 import { V5 } from "./migrations/v5.ts";
 import { V6 } from "./migrations/v6.ts";
+import { V7 } from "./migrations/v7.ts";
 
 // ── Pragmas da conexão ────────────────────────────────────────────────────
 // Valem só para a conexão aberta e não ficam no arquivo do banco. Por isso são ligados a cada
@@ -27,4 +28,4 @@ export const SQL_CONNECTION_PRAGMAS = `
 // ── Migrações ─────────────────────────────────────────────────────────────
 // Cada item leva o banco uma versão adiante (migrator.ts), em sequência a partir de 1.
 
-export const MIGRATIONS: readonly Migration[] = [V1, V2, V3, V4, V5, V6];
+export const MIGRATIONS: readonly Migration[] = [V1, V2, V3, V4, V5, V6, V7];

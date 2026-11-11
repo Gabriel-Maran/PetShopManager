@@ -7,9 +7,9 @@ import { cents, flag, id, isoDate, optional, requiredText, text, time } from "./
 
 /** Os textos do agendamento que já estão gravados, para a edição não recusar o que não mudou. */
 export interface StoredAppointmentTexts {
-  servico?: string;
-  tipo_pgto?: string;
-  observacao?: string | null;
+  service?: string;
+  payment_method?: string;
+  notes?: string | null;
 }
 
 /**
@@ -19,34 +19,34 @@ export interface StoredAppointmentTexts {
 export const appointmentSchemaFor = (stored: StoredAppointmentTexts = {}) =>
   z.object({
     pet_id: id(MESSAGES.appointment.petRequired),
-    servico: requiredText(
+    service: requiredText(
       MAX_LIST_ITEM_LENGTH,
       {
         required: MESSAGES.appointment.serviceRequired,
         tooLong: MESSAGES.textTooLong("O serviço", MAX_LIST_ITEM_LENGTH),
       },
-      stored.servico,
+      stored.service,
     ),
-    data: isoDate(MESSAGES.date.invalid),
-    hora: time(MESSAGES.appointment.timeInvalid, MESSAGES.appointment.timeRequired),
-    valor: cents(MESSAGES.money.invalid),
+    date: isoDate(MESSAGES.date.invalid),
+    time: time(MESSAGES.appointment.timeInvalid, MESSAGES.appointment.timeRequired),
+    price: cents(MESSAGES.money.invalid),
     // Opcional na tela. O vazio é a forma não informada, que o banco guarda como id nulo (versão 6).
-    tipo_pgto: text(
+    payment_method: text(
       MAX_LIST_ITEM_LENGTH,
       MESSAGES.textTooLong("O tipo de pagamento", MAX_LIST_ITEM_LENGTH),
-      stored.tipo_pgto,
+      stored.payment_method,
     ),
-    observacao: optional(
+    notes: optional(
       text(
         MAX_NOTES_LENGTH,
         MESSAGES.textTooLong("A observação do agendamento", MAX_NOTES_LENGTH),
-        stored.observacao,
+        stored.notes,
       ),
     ),
-    entregar_pet: flag("Entregar pet"),
-    concluido: flag("Concluído"),
-    is_auto_agen: flag("Agendamento automático"),
-    ta_pago: flag("Pago"),
+    deliver_pet: flag("Entregar pet"),
+    completed: flag("Concluído"),
+    is_auto: flag("Agendamento automático"),
+    is_paid: flag("Pago"),
   });
 
 /** O schema da criação, sem nada gravado. */

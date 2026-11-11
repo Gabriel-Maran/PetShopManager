@@ -3,10 +3,10 @@
 // desde a versão 4, o PackageScheduleService chama estas funções e grava o resultado numa transação.
 // Quem chama passa o "hoje" pronto, no fuso do aparelho (scheduleClockOf). Os imports levam a extensão
 // .ts porque o Node dos testes exige.
-import type { PacoteRemarcacao } from "../config/petEnums.ts";
+import type { PackageFrequency } from "../config/petEnums.ts";
 import type { Appointment } from "../model/Appointment.ts";
 import type { Pet } from "../model/Pet.ts";
-import type { Cents } from "../utils/dinheiro.ts";
+import type { Cents } from "../utils/money.ts";
 import {
   addDays,
   monthOf,
@@ -14,13 +14,13 @@ import {
   todayIso,
   weekdayOf,
   type IsoDate,
-} from "../utils/datas.ts";
+} from "../utils/dates.ts";
 
 /** Até quantos dias depois de hoje a agenda do pacote é gerada: o PERIODO_REMARCACAO da versão 1. */
 export const SCHEDULE_HORIZON_DAYS = 224;
 
 /** Dias entre os atendimentos: o pacote de 2 por mês é a cada 14 dias, e o de 4, a cada 7. */
-const GAP_DAYS: Record<PacoteRemarcacao, number> = { 2: 14, 4: 7 };
+const GAP_DAYS: Record<PackageFrequency, number> = { 2: 14, 4: 7 };
 
 /** O momento em que a agenda é calculada, no fuso do aparelho. */
 export interface ScheduleClock {
@@ -32,21 +32,21 @@ export interface ScheduleClock {
 /** As colunas do pet que a remarcação lê. */
 export type PetPackage = Pick<
   Pet,
-  | "remarcacao_ativa"
-  | "pacote_remarcacao"
-  | "data_inicio_pacote"
-  | "valor_pacote"
-  | "horario_padrao"
-  | "is_ativo"
-  | "ultimo_visita_data_auto"
+  | "reschedule_active"
+  | "package_frequency"
+  | "package_start_date"
+  | "package_price"
+  | "default_time"
+  | "is_active"
+  | "last_auto_visit_date"
 > & {
   /** O serviço padrão pelo id, como o banco grava desde a versão 6 do esquema. */
-  servico_padrao_id: number;
+  default_service_id: number;
 };
 
 /** O pacote pronto para a conta. */
 export interface PackagePlan {
-  visitsPerMonth: PacoteRemarcacao;
+  visitsPerMonth: PackageFrequency;
   start: IsoDate;
   priceCents: Cents;
 }
@@ -74,11 +74,11 @@ export function scheduleClockOf(now: Date): ScheduleClock {
  * valor, os atendimentos valem zero, como os triggers faziam.
  */
 export function packagePlanOf(pet: PetPackage, today: IsoDate): PackagePlan | null {
-  if (pet.remarcacao_ativa !== 1 || pet.pacote_remarcacao == null) return null;
+  if (pet.reschedule_active !== 1 || pet.package_frequency == null) return null;
   return {
-    visitsPerMonth: pet.pacote_remarcacao,
-    start: pet.data_inicio_pacote ?? today,
-    priceCents: pet.valor_pacote ?? 0,
+    visitsPerMonth: pet.package_frequency,
+    start: pet.package_start_date ?? today,
+    priceCents: pet.package_price ?? 0,
   };
 }
 
@@ -153,13 +153,13 @@ export function scheduleFromToday(
 
 /** Os campos que entram na agenda. Mudar outro, como o nome ou a observação, não refaz nada (BUG-4). */
 const SCHEDULE_FIELDS = [
-  "remarcacao_ativa",
-  "pacote_remarcacao",
-  "data_inicio_pacote",
-  "is_ativo",
-  "horario_padrao",
-  "servico_padrao_id",
-  "valor_pacote",
+  "reschedule_active",
+  "package_frequency",
+  "package_start_date",
+  "is_active",
+  "default_time",
+  "default_service_id",
+  "package_price",
 ] as const satisfies readonly (keyof PetPackage)[];
 
 /**
@@ -168,7 +168,7 @@ const SCHEDULE_FIELDS = [
  * comparação é com o valor de antes.
  */
 export function shouldRebuildSchedule(before: PetPackage, after: PetPackage): boolean {
-  if (after.remarcacao_ativa !== 1 || after.pacote_remarcacao == null || after.is_ativo !== 1) {
+  if (after.reschedule_active !== 1 || after.package_frequency == null || after.is_active !== 1) {
     return false;
   }
   return SCHEDULE_FIELDS.some((field) => (before[field] ?? null) !== (after[field] ?? null));
@@ -179,10 +179,10 @@ export function shouldRebuildSchedule(before: PetPackage, after: PetPackage): bo
  * salvar de novo um concluído, para marcar como pago, não cria outro (BUG-3).
  */
 export function isAutoVisitConclusion(
-  before: Pick<Appointment, "concluido">,
-  after: Pick<Appointment, "concluido" | "is_auto_agen">,
+  before: Pick<Appointment, "completed">,
+  after: Pick<Appointment, "completed" | "is_auto">,
 ): boolean {
-  return before.concluido === 0 && after.concluido === 1 && after.is_auto_agen === 1;
+  return before.completed === 0 && after.completed === 1 && after.is_auto === 1;
 }
 
 /**
@@ -191,10 +191,10 @@ export function isAutoVisitConclusion(
  * atendimento concluído.
  */
 export function nextPackageVisitDate(next: {
-  /** O último automático pendente (ultimo_visita_data_auto) ou, sem ele, a data do concluído. */
+  /** O último automático pendente (last_auto_visit_date) ou, sem ele, a data do concluído. */
   lastScheduled: IsoDate;
   concludedDate: IsoDate;
-  visitsPerMonth: PacoteRemarcacao;
+  visitsPerMonth: PackageFrequency;
   /** Automáticos pendentes no mês do lastScheduled. */
   pendingInLastScheduledMonth: number;
 }): IsoDate {

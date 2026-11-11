@@ -1,7 +1,7 @@
 import { getDatabase } from "../config/database";
 import type { AppointmentData } from "../validation/appointmentSchema";
 import { appointmentsRepository } from "../repository/AppointmentsRepository";
-import type { IsoDate } from "../utils/datas";
+import type { IsoDate } from "../utils/dates";
 import { PackageScheduleService } from "./PackageScheduleService";
 import { assertAppointmentChoices, storedChoicesOf, type StoredChoices } from "./appointmentRules";
 import { paymentMethodService } from "./PaymentMethodService";

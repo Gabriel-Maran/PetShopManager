@@ -1,7 +1,7 @@
 import { Appointment } from "../model/Appointment";
 import { AppointmentsWithOwnerAndPet } from "../model/Appointment";
 import { appointmentsService } from "../service/AppointmentsService";
-import type { IsoDate } from "../utils/datas";
+import type { IsoDate } from "../utils/dates";
 import { AppError } from "../errors/AppError";
 import { MESSAGES } from "../globals/messages";
 import { appointmentSchema, appointmentSchemaFor } from "../validation/appointmentSchema";

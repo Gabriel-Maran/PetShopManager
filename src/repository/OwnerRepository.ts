@@ -8,7 +8,7 @@ import {
 import { fetchPage } from "./fetchPage";
 import { Owner } from "../model/Owner";
 import type { NameSearch, Page } from "../model/Search";
-import { normalizeForSearch } from "../utils/formatadores/normalizaNome";
+import { normalizeForSearch } from "../utils/formatters/normalizeForSearch";
 
 class OwnerRepository {
   async getOwnerById(id: number): Promise<Owner | null> {
@@ -21,31 +21,31 @@ class OwnerRepository {
   }
 
   async createOwner(owner: Owner): Promise<void> {
-    const nome_normalizado = normalizeForSearch(owner.nome);
+    const normalized_name = normalizeForSearch(owner.name);
     const db = await getDatabase();
     await db.runAsync(
       INSERT_OWNER_SQL,
       [
-        owner.nome,
-        nome_normalizado,
-        owner.telefone,
+        owner.name,
+        normalized_name,
+        owner.phone,
         owner.email ?? null,
-        owner.endereco ?? null,
+        owner.address ?? null,
       ],
     );
   }
 
   async updateOwner(id: number, owner: Owner): Promise<void> {
-    const nome_normalizado = normalizeForSearch(owner.nome);
+    const normalized_name = normalizeForSearch(owner.name);
     const db = await getDatabase();
     await db.runAsync(
-      `UPDATE owners SET nome = ?, nome_normalizado = ?, telefone = ?, email = ?, endereco = ? WHERE id = ?`,
+      `UPDATE owners SET name = ?, normalized_name = ?, phone = ?, email = ?, address = ? WHERE id = ?`,
       [
-        owner.nome,
-        nome_normalizado,
-        owner.telefone,
+        owner.name,
+        normalized_name,
+        owner.phone,
         owner.email ?? null,
-        owner.endereco ?? null,
+        owner.address ?? null,
         id,
       ],
     );

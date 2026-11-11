@@ -3,8 +3,8 @@
 // parseInput mostra a genérica. Sem depender do Expo, para os testes rodarem no Node, que exige a
 // extensão .ts nos imports.
 import * as z from "zod";
-import { isIsoDate } from "../utils/datas.ts";
-import { isValidCents } from "../utils/dinheiro.ts";
+import { isIsoDate } from "../utils/dates.ts";
+import { isValidCents } from "../utils/money.ts";
 import { MAX_STORED_TEXT_LENGTH } from "../globals/limits.ts";
 import { MESSAGES } from "../globals/messages.ts";
 
