@@ -1,15 +1,15 @@
 # Próximos passos
 
-Atualizado em 2026-11-12, com a correção da abertura do banco.
+Atualizado em 2026-11-12, com as respostas a todas as perguntas em aberto.
 
 > **Para o próximo chat:**
 > - Leia antes o [`checklist-perguntas.md`](checklist-perguntas.md).
 > - O Gabriel quer tudo de uma vez, num PR, e textos curtos.
-> - Em revisão: o PR da abertura do banco (branch `fix/abertura-do-banco`): o tema é lido só depois das migrações, e o log mostra a causa de um erro.
+> - No `main` desde o PR #61: o tema é lido só depois das migrações, e o log mostra a causa de um erro.
 > - O aparelho do Gabriel não abre: o banco dele ficou na v6 do PR #53, que mudou depois (#56 e #57), e a v7 falha com "no such column: is_ativo". Só aparelhos que rodaram o `main` entre os dois PRs, em 2026-11-10. Saída: limpar os dados do app no aparelho, se não houver dado real.
-> - Próximo: o bloco de entrega (Parte 5), no topo do [`plano-de-melhorias.md`](plano-de-melhorias.md). Sem vídeo, só prints (decisão de 2026-11-12). Depende do Gabriel: conta da Expo e as perguntas 3, 4 e 6 a 9.
-> - Do Gabriel: conferir no aparelho os roteiros dos PRs, o TalkBack e o tamanho do APK; REPO-4 com os parceiros; perguntas 12, 23 e 24.
-> - Pergunta em aberto: a nota da migração v6 se repete nos automáticos seguintes. Fica assim?
+> - Próximo: o bloco de entrega (Parte 5), no topo do [`plano-de-melhorias.md`](plano-de-melhorias.md). Sem vídeo, só prints (decisão de 2026-11-12). As perguntas estão respondidas (ver `decisoes.md`): sem licença, só Android, Expo Go atual, pet shop real sem o nome, e o Gabriel roda o build com a conta Expo dele.
+> - Do Gabriel: conferir no aparelho os roteiros dos PRs, o TalkBack e o tamanho do APK.
+> - O README já tem "Quem fez o quê", tirado dos commits; falta o resto do REPO-2 na Parte 5.
 > - Agentes em paralelo partem só do `main` atualizado (ver `decisoes.md`).
 
 ## Pendências entre áreas e varredura (2026-11-09, PRs #35 a #38)
@@ -78,7 +78,7 @@ Falta, nesta ordem:
 
 1. Do Gabriel:
    - avisar os parceiros que o `main` agora só recebe PR, com squash e o CI verde;
-   - decidir sobre os e-mails dos commits (ver a auditoria acima). O recomendado é cada um ativar no GitHub "Keep my email addresses private" e "Block command line pushes that expose my email" e usar o e-mail `noreply` no Git. Reescrever o histórico não compensa: exige force push no `main` e quebra os clones, e os e-mails antigos já podem estar em cópias.
+   - ~~decidir sobre os e-mails dos commits.~~ Decidido em 2026-11-12: ficam como estão.
 2. A partir de 2026-11-10, quando passam da espera de 7 dias, `npm i -E expo@58.0.23 expo-sharing@58.0.22 expo-sqlite@58.0.15`.
    - Em 2026-11-08, um `npm audit fix` no clone já subiu o `@expo/config` para 58.0.10 e o `@expo/fingerprint` para 0.21.8, os dois de 2026-10-31. O `package-lock.json` alterado ficou sem commit no clone. Como o PR #32 (zod) também muda esse arquivo, a mudança local é descartada antes do `git pull` (ver o topo), e o PR do patch confere se as duas versões entram.
    - O `@expo/config` novo deixa de usar o `deepmerge`, o que fecha um alerta.
@@ -87,7 +87,7 @@ Falta, nesta ordem:
 3. Do Gabriel:
    - testar no aparelho as permissões do PR #3, com o roteiro no PR;
    - conferir o tamanho do APK, porque o pacote JavaScript foi de 1,72 MB para 2,7 MB;
-   - responder `perguntas-em-aberto.md`.
+   - ~~responder `perguntas-em-aberto.md`.~~ Feito em 2026-11-12.
 4. DEMO-1 adiantado para a Parte 1, no `main` desde o PR #11:
    - botão em Configurações, que só aparece com o app vazio;
    - testes num SQLite em memória;
@@ -95,7 +95,7 @@ Falta, nesta ordem:
    - Pedido do Gabriel em 2026-11-08, no `main` desde o PR #15: em desenvolvimento, o mesmo cartão vira "Apagar tudo e carregar exemplo" quando o app tem dados.
 5. Parte 1 do plano:
    - README (REPO-2), em andamento: a primeira versão traz só o que está confirmado no código;
-   - equipe, "quem fez o quê" e licença entram depois das perguntas 1 a 5;
+   - equipe e "quem fez o quê" no README desde 2026-11-12; sem licença (pergunta 4);
    - os prints (MIDIA-1) estão no README desde 2026-11-08: seis telas tiradas pelo Gabriel com os dados de exemplo. Falta, opcional, um relatório com gráfico;
    - o script `typecheck` já entrou no PR #5.
 
@@ -106,7 +106,7 @@ Falta, nesta ordem:
 - A arquitetura de hoje está em [`arquitetura.md`](arquitetura.md), e as respostas do checklist, em [`auditoria.md`](auditoria.md).
 - O app mudou nos PRs #1 a #3 (segurança e build), #11 (dados de exemplo), #13 (testes), #14 (migrações), #15 (reset de dev), #16 (triggers), #17 e #18 (datas e dinheiro num lugar só), #19 e #20 (versão 3 do esquema, banco e app), #21 (backup de versão anterior), #22 (erros num lugar só), #23 (importação cancelada), #24 (ações de Cadastros), #25 (busca com o mesmo filtro), #26 (ordem da busca), #27 (nomes de desativar), #28 (resto do BKP-1), #29 (REPO-3), #30 (BUG-8), #31 (A11Y-1), #32 (VALID-1), #34 (pendências entre áreas), #35 (tema e `Toggle`), #36 (navegação) e #37 (limpeza); o #38 (validação e raças) está em revisão. O PR #5 adiantou o script `typecheck` da Parte 1 e o CI da Parte 2.
 - Da Parte 1, falta o que depende das perguntas em aberto. As Partes 2 e 3 estão completas e aceitas. A Parte 4 começou e ficou completa no código em 2026-11-09, com o PR #32 (VALID-1); falta o Gabriel conferir no aparelho. Da Parte 6, o A11Y-1 e parte do REPO-3 foram adiantados no mesmo dia. A Parte 5 ainda não começou.
-- Falta o Gabriel responder [`perguntas-em-aberto.md`](perguntas-em-aberto.md). Várias partes abaixo dependem dessas respostas.
+- As [`perguntas-em-aberto.md`](perguntas-em-aberto.md) estão todas respondidas desde 2026-11-12.
 
 ## Partes de execução
 
@@ -114,10 +114,10 @@ Cada parte é um PR para o `main`. Ao fim de cada uma, o Gabriel valida antes de
 
 ### Parte 0 · Do Gabriel, sem código
 
-- Responder as perguntas em aberto, principalmente equipe, sua parte, licença e as autorizações (perguntas 1 a 5, 10 e 11).
+- ~~Responder as perguntas em aberto.~~ Feito em 2026-11-12.
 - ~~Aplicar a descrição e os tópicos (REPO-1).~~ Feito em 2026-11-08.
 - ~~Ligar Dependabot, secret scanning e push protection (REPO-4).~~ Feito em 2026-11-08.
-- Conversar com os parceiros sobre os `docs/`, o ruleset no `main` e a licença.
+- ~~Conversar com os parceiros sobre os `docs/`, o ruleset no `main` e a licença.~~ Feito: concordam, e fica sem licença (2026-11-12).
 
 ### Parte 1 · Vitrine mínima (P0)
 
@@ -234,7 +234,7 @@ Pronto quando: o APK instala num Android limpo e mostra tudo com um toque, e o p
 - A11Y-1: rótulos, papéis, áreas de toque e contraste. No `main` desde o PR #31, em 2026-11-09, adiantado; falta o teste com o TalkBack. Os ajustes dos formulários e o contraste do `Toggle` desligado entraram no PR #34; a bolinha do `Toggle` no tema escuro, no PR #35.
 - TEMA-1: tokens de espaço, raio, tipografia e cores de gráfico.
 - REPO-3: limpeza de código, imagens e comentários. Em parte no `main` desde o PR #29, em 2026-11-09, adiantado; o resto entrou no PR #37, e as sobras nos arquivos das outras frentes, nos PRs #35, #36 e #38.
-- REPO-4: ruleset no `main`, se os parceiros concordarem.
+- ~~REPO-4: ruleset no `main`, se os parceiros concordarem.~~ Feito: os parceiros concordaram (2026-11-12).
 
 Pronto quando: `npm run check` passa no CI, e o teste com o TalkBack percorre o app sem botão mudo.
 

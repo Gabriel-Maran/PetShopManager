@@ -521,3 +521,30 @@ Decisão:
 - o `logError` registra o `cause` à parte;
 - sem migração de reparo: a v6 antiga só existiu em aparelhos de desenvolvimento entre os dois PRs, e o app não tem release. O aparelho afetado limpa os dados do app.
 Motivo: sem a ordem certa, quem tinha o tema escuro na v6 perdia a escolha na primeira abertura da v7, e o log escondia a causa de qualquer falha de migração. Fica a lição: uma migração que já rodou no aparelho de alguém, mesmo de desenvolvimento, não muda mais.
+
+**Respostas às perguntas em aberto** (perguntas 2 a 4, 6 a 9, 12, 23 e 24, mais a nota da v6 e os e-mails dos commits).
+Contexto: o bloco de entrega (Parte 5) dependia destas respostas para o README, a release e o portfólio.
+Decisão:
+- **Parceiros (3):** concordam com os `docs/` públicos e com o ruleset no `main`. O REPO-4 está completo.
+- **Licença (4):** nenhuma, por enquanto. O código fica com todos os direitos reservados aos três autores, e ninguém pode reutilizá-lo sem pedir.
+- **Quem fez o quê (2):** entra no README, curto e por área, tirado dos commits, sem explicar muito.
+- **Uso real (6):** o app foi feito para o uso interno de um pet shop, seguindo os requisitos dele, como a remarcação automática. O nome do pet shop não é divulgado.
+- **Plataforma (7 e 8):** só Android. O app abre no Expo Go atual, e o "como rodar" do README continua com ele.
+- **Regras (9):** as quatro são intencionais: a agenda até hoje + 224 dias, reativar o dono sem reativar os pets, desativar o pet apagando o pacote sem devolvê-lo ao reativar e o agendamento sem horário às 00:00, no relatório de horários.
+- **Nota da v6:** fica como está. O próximo automático copia a observação do concluído, e com ela a nota da migração.
+- **Lint (12):** respondida pelo PR #59.
+- **Prints e APK (23):** o Gabriel tira os prints e roda o build, com a conta Expo dele.
+- **Backup com senha (24):** não agora. Fica o aviso ao exportar, do SEG-1.
+- **E-mails dos commits:** ficam como estão, sem mudar configuração nem histórico.
+
+Motivo:
+- O README só conta o que aconteceu, e o Gabriel preferiu não expor o cliente.
+- As regras e a nota da v6 ficam sem mudança no banco. A nota só aparece no dado com valor inválido convertido pela v6, e repeti-la mantém o valor antigo à vista nos próximos atendimentos.
+- O backup com senha cresce o APK, exige build novo e perde o arquivo se a senha for esquecida, sem ganho para a `v1.0.0`.
+
+**Bloqueio de instalação no Claude Code, versionado.**
+Contexto: o Gabriel criou o `.claude/settings.json`, que nega ao Claude Code os comandos que instalam, atualizam ou removem pacotes, como garantia da regra de que só ele instala.
+Decisão:
+- o `.claude/settings.json` vai para o Git; o `settings.local.json` e os worktrees do Claude Code ficam no `.gitignore`;
+- a lista cobre também o comando sem argumentos (`npm install`, `npm ci`), os apelidos do npm (`add`, `it`, `cit`, `x`), o `npm audit fix`, o `npm exec` e os outros gerenciadores (`yarn`, `pnpm` e `bun`).
+Motivo: a regra vale para qualquer sessão do Claude Code no projeto, inclusive nos worktrees, e o arquivo não tem segredo. O `.npmrc` continua sendo a proteção de quem instala.
