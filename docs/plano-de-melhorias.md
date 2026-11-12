@@ -15,8 +15,10 @@ Criado em 2026-11-05, a partir da auditoria do código no commit `e1d5f2f` do `m
 Decidido em 2026-11-11: o resto do plano vai em poucos PRs grandes, um por bloco, sem dividir item por item.
 
 1. ~~**Bloco de qualidade e arquitetura**~~ Feito em 2026-11-12, num PR: TEST-2, ARQ-3 e o lint de camadas do ARQ-1. Saíram do plano, decididos com o Gabriel: o TEST-3 (o Jest e a biblioteca de testes de componentes custam mais do que trazem, e a lógica já está no `node:test`), as pastas por assunto do ARQ-1 (a regra de lint já garante as camadas) e o `zod/mini` (troca a API de todos os schemas por poucos KB).
-2. **Bloco de entrega** (Parte 5): BUILD-1 (APK na release `v1.0.0`) e REPO-2 completo (APK e "Quem fez o quê"), mais o card do portfólio, com os prints. O MIDIA-2 (vídeo) saiu em 2026-11-12, por decisão do Gabriel. As perguntas foram respondidas em 2026-11-12; falta só o build com a conta Expo do Gabriel.
-3. **Do Gabriel, sem código**: conferir no aparelho (roteiros dos PRs, TalkBack e tamanho do APK). O REPO-4 e as perguntas foram fechados em 2026-11-12.
+2. ~~**Bloco de entrega** (Parte 5)~~ Feito em 2026-11-12: o REPO-2 completo, com "Quem fez o quê", licença e como gerar o APK. Saíram do plano, por decisão do Gabriel: o MIDIA-2 (vídeo) e o BUILD-1 (o APK não é publicado; o app está pronto, e o comando fica no README). O card do portfólio é feito no repositório do portfólio.
+3. **Do Gabriel, sem código**: conferir no aparelho (roteiros dos PRs e TalkBack). O REPO-4 e as perguntas foram fechados em 2026-11-12.
+
+Com isso, o plano está concluído no código e na documentação desde 2026-11-12.
 
 ## Resumo
 
@@ -53,7 +55,7 @@ O estado e as pendências estão em `proximos-passos.md`, e as decisões, em `de
 | REPO-3 | Limpeza do repositório | P1 |
 | REPO-4 | Segurança e regras do GitHub | P1 |
 | DEMO-1 | Dados de demonstração | P1 |
-| BUILD-1 | APK de demonstração | P1 |
+| ~~BUILD-1~~ | ~~APK de demonstração~~ (fora do plano: o APK não é publicado) | — |
 | ~~MIDIA-2~~ | ~~Vídeo curto~~ (fora do plano: só prints) | — |
 | ARQ-1 | Reorganizar pastas e camadas | P2 |
 | ARQ-2 | Remarcação em TypeScript | P2 |
@@ -62,7 +64,7 @@ O estado e as pendências estão em `proximos-passos.md`, e as decisões, em `de
 | DADOS-4 | Integridade no esquema | P2 |
 | NOMES-1 | Identificadores em inglês | P2 |
 | PERF-1 | Imagens e buscas mais leves | P2 |
-| BUILD-2 | Atualizar SDK e configuração do EAS (SDK 58 no PR #1; falta o EAS e a API nova do `expo-file-system`) | P2 |
+| BUILD-2 | Atualizar SDK e configuração do EAS (SDK 58 no PR #1; o EAS e a API nova do `expo-file-system` no PR #51) | P2 |
 | TEST-3 | Testes de componentes | P2 |
 | SEG-1 | Dados pessoais no aparelho e no backup | P2 |
 
@@ -75,6 +77,8 @@ O estado e as pendências estão em `proximos-passos.md`, e as decisões, em `de
 - **Pronto quando:** a descrição e os tópicos aparecem no GitHub. É uma mudança de configuração, feita pelo Gabriel ou com o aval dele.
 
 ### REPO-2 · README
+
+Feito em 2026-11-12: o README tem todas as seções abaixo, menos o download do APK, que não é publicado (BUILD-1 fora do plano). No lugar, fica o comando para gerar.
 
 - **Por quê:** o repositório não tem README. Quem abre o código não sabe o que o app faz, como rodar nem quem fez.
 - **O que muda:** um `README.md` na raiz com:
@@ -260,11 +264,15 @@ Verificado: typecheck limpo, 213 testes passando (71 novos em `tests/acessibilid
 
 ### TEMA-1 · Tema completo
 
+Feito em 2026-11-10, no PR #52: tokens de espaço, raio e tipografia em `src/view/theme/tokens.ts`, e as cores fixas no tema desde o PR #35. Conferido em 2026-11-12: nenhuma cor, `fontSize` ou `borderRadius` literal fora do tema; sobram só os `margin: 0` e `padding: 0` que zeram o estilo do calendário.
+
 - **Por quê:** as cores estão centralizadas, mas há 43 cores escritas fora do tema (overlays, gráfico, relatórios, interruptor do tema) e 88 tamanhos de fonte soltos, além de espaços e raios. O `useColorScheme` é importado e não é usado.
 - **O que muda:** o tema ganha tokens de espaço, raio, tipografia, overlay e cores de gráfico, num arquivo separado do provider. Os componentes usam só esses valores. Na primeira abertura, o tema pode seguir o do sistema (ver `perguntas-em-aberto.md`).
 - **Pronto quando:** uma busca por cor ou `fontSize` literal fora do tema não acha nada.
 
 ### REPO-3 · Limpeza do repositório
+
+Feito: o resto entrou no PR #37, e as sobras das outras frentes, nos PRs #35, #36 e #38. Desde o PR #59, o lint barra import e variável sem uso.
 
 Em parte feito em 2026-11-09, no PR #29:
 - saíram o `ScreenService`, 11 imagens sem uso (1,6 MB; as do plano, mais `crud/personAdd.png` e `setas/setaDireita.png`), o script `web`, funções sem uso do `useFormState` e os comentários de conversa de `utils` e `hooks`;
@@ -299,7 +307,9 @@ A lista está em `proximos-passos.md`.
 - **O que muda:** os dados de `inserts.txt` viram uma função de seed, com datas relativas a hoje para o calendário e os relatórios terem movimento. Ela é chamada por um botão "Carregar dados de exemplo" em Configurações, só no build de demonstração (ver `perguntas-em-aberto.md`).
 - **Pronto quando:** num aparelho limpo, um toque preenche calendário, cadastros e os seis relatórios.
 
-### BUILD-1 · APK de demonstração
+### ~~BUILD-1 · APK de demonstração~~
+
+Fora do plano desde 2026-11-12: o Gabriel não vai publicar o APK. O app está pronto para gerar o build, e o comando está no README.
 
 - **Por quê:** recrutadores e tech leads podem testar sem montar o ambiente. O perfil `preview` do `eas.json` já gera APK.
 - **O que muda:** o Gabriel roda `eas build -p android --profile preview` (precisa da conta Expo). O APK vai para uma release `v1.0.0` no GitHub, com o SHA-256, as notas do que testar e o aviso de instalação fora da loja.
@@ -364,6 +374,8 @@ Adiantado para a Parte 3 em 2026-11-08, junto com o DADOS-2: as datas viraram te
 
 ### DADOS-4 · Integridade no esquema
 
+Feito em 2026-11-10, na versão 6 do esquema (PRs #53, #56 e #57; ver `decisoes.md`).
+
 - **Por quê:** flags, porte e horário não têm `CHECK`. Serviço e forma de pagamento são gravados como texto no agendamento, então renomear um quebra os registros antigos. `tipo_pgto` é `TEXT` com `DEFAULT 0`. O índice `idx_appointments_pet_id` repete o começo de outros dois.
 - **O que muda:** `CHECK` nos flags (0 ou 1), no porte e no formato da hora; serviço e pagamento por id, com chave estrangeira; índice redundante removido. Tudo por migração.
 - **Pronto quando:** o banco recusa valores fora do domínio, com teste.
@@ -387,6 +399,8 @@ Feito em 2026-11-10: os ícones e fundos foram reduzidos para 3 vezes o tamanho 
 - **Pronto quando:** a pasta de imagens cai de tamanho de forma visível, e um teste do hook de busca mostra que só o último resultado entra na tela.
 
 ### BUILD-2 · Atualizar SDK e configuração do EAS
+
+Feito em 2026-11-10, no PR #51: o backup usa a API nova do `expo-file-system`, e o `eas.json` fixa o `cli.version` e usa o `appVersionSource: remote`, com `autoIncrement` no `production`.
 
 - **Por quê:** o backup usa `expo-file-system/legacy`, a API antiga. O `eas.json` não fixa a versão do EAS CLI nem controla o `versionCode`.
 - **O que muda:** atualizar o Expo SDK seguindo o guia de cada versão, migrar para a API nova do `expo-file-system`, e adicionar `cli.version` e `appVersionSource` ao `eas.json`.

@@ -229,6 +229,6 @@ Desde 2026-11-09 (ERRO-1), num lugar só, em `src/errors/AppError.ts`:
 ## Build e release
 
 - `app.json`: nome "PetShop Manager", pacote `com.gabriel98989898.PetShopManager`, retrato, ícone e splash próprios.
-- `eas.json`: `preview` gera APK, `production` gera AAB. Sem versão mínima do EAS CLI e sem incremento automático de versão.
-- O app não tem suporte a web. O script `web` saiu do `package.json` no REPO-3, mas o bloco `web` do `app.json` continua.
-- Não há release publicada no GitHub.
+- `eas.json`: `preview` gera APK, `production` gera AAB. Fixa o EAS CLI (`>= 27.3.0`), a versão vem do servidor da EAS (`appVersionSource: remote`), e o `production` incrementa sozinho (BUILD-2, PR #51).
+- O app não tem suporte a web: não há script `web` no `package.json` nem bloco `web` no `app.json`.
+- Não há release publicada no GitHub, por decisão do Gabriel (BUILD-1 fora do plano). O comando do build está no README.

@@ -13,5 +13,5 @@ Ao fechar a tarefa. [Voltar ao índice](../checklist-perguntas.md)
 
 ## No PetShop Manager
 
-- Não há servidor: janela de manutenção, homologação e custo de nuvem são N/A. A entrega é o merge no `main` e, na Parte 5, o APK da release.
+- Não há servidor: janela de manutenção, homologação e custo de nuvem são N/A. A entrega é o merge no `main`; o APK não é publicado, e quem precisar gera o build pelo comando do README.
 - Decisão tomada na conversa vai para o `decisoes.md`, com data, contexto, decisão e motivo.

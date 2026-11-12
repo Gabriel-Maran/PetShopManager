@@ -1,15 +1,16 @@
 # Próximos passos
 
-Atualizado em 2026-11-12, com as respostas a todas as perguntas em aberto.
+Atualizado em 2026-11-12: o plano está concluído no código e na documentação.
 
 > **Para o próximo chat:**
 > - Leia antes o [`checklist-perguntas.md`](checklist-perguntas.md).
 > - O Gabriel quer tudo de uma vez, num PR, e textos curtos.
 > - No `main` desde o PR #61: o tema é lido só depois das migrações, e o log mostra a causa de um erro.
 > - O aparelho do Gabriel não abre: o banco dele ficou na v6 do PR #53, que mudou depois (#56 e #57), e a v7 falha com "no such column: is_ativo". Só aparelhos que rodaram o `main` entre os dois PRs, em 2026-11-10. Saída: limpar os dados do app no aparelho, se não houver dado real.
-> - Próximo: o bloco de entrega (Parte 5), no topo do [`plano-de-melhorias.md`](plano-de-melhorias.md). Sem vídeo, só prints (decisão de 2026-11-12). As perguntas estão respondidas (ver `decisoes.md`): sem licença, só Android, Expo Go atual, pet shop real sem o nome, e o Gabriel roda o build com a conta Expo dele.
-> - Do Gabriel: conferir no aparelho os roteiros dos PRs, o TalkBack e o tamanho do APK.
-> - O README já tem "Quem fez o quê", tirado dos commits; falta o resto do REPO-2 na Parte 5.
+> - **Projeto concluído.** O bloco de entrega (Parte 5) fechou com o README completo. Sem vídeo e sem APK publicado (decisões de 2026-11-12); o comando do build está no README.
+> - Só do Gabriel: conferir no aparelho os roteiros dos PRs e o TalkBack.
+> - Próximo, fora deste repositório: o card do PetShop no portfólio (ver "No portfólio", no fim).
+> - Daqui em diante, só correções ou pedidos novos, cada um com o seu PR.
 > - Agentes em paralelo partem só do `main` atualizado (ver `decisoes.md`).
 
 ## Pendências entre áreas e varredura (2026-11-09, PRs #35 a #38)
@@ -222,33 +223,35 @@ A ordem segue o que foi sugerido no começo da parte: o ERRO-1 primeiro, porque 
 
 ### Parte 5 · Demonstração (P1)
 
-- BUILD-1: APK numa release `v1.0.0`.
-- ~~MIDIA-2: vídeo curto.~~ Fora do plano: só prints.
-- REPO-2: README completo, com APK e "Quem fez o quê".
+Feita em 2026-11-12.
 
-Pronto quando: o APK instala num Android limpo e mostra tudo com um toque, e o portfólio pode trocar o card do PetShop por um com imagem e download.
+- ~~BUILD-1: APK numa release `v1.0.0`.~~ Fora do plano: o APK não é publicado, e o README traz o comando para gerar.
+- ~~MIDIA-2: vídeo curto.~~ Fora do plano: só prints.
+- REPO-2: README completo, com "Quem fez o quê", licença e o build. Feito.
+
+Pronto quando: o README mostra tudo, e o portfólio pode trocar o card do PetShop por um com imagem.
 
 ### Parte 6 · Qualidade contínua (P1)
 
 - TEST-2: lint, Prettier e o script `check` no CI, depois do aval das instalações.
 - A11Y-1: rótulos, papéis, áreas de toque e contraste. No `main` desde o PR #31, em 2026-11-09, adiantado; falta o teste com o TalkBack. Os ajustes dos formulários e o contraste do `Toggle` desligado entraram no PR #34; a bolinha do `Toggle` no tema escuro, no PR #35.
-- TEMA-1: tokens de espaço, raio, tipografia e cores de gráfico.
-- REPO-3: limpeza de código, imagens e comentários. Em parte no `main` desde o PR #29, em 2026-11-09, adiantado; o resto entrou no PR #37, e as sobras nos arquivos das outras frentes, nos PRs #35, #36 e #38.
+- TEMA-1: tokens de espaço, raio, tipografia e cores de gráfico. Feito no PR #52.
+- REPO-3: limpeza de código, imagens e comentários. Feito: em parte no PR #29, em 2026-11-09; o resto entrou no PR #37, e as sobras nos arquivos das outras frentes, nos PRs #35, #36 e #38.
 - ~~REPO-4: ruleset no `main`, se os parceiros concordarem.~~ Feito: os parceiros concordaram (2026-11-12).
 
 Pronto quando: `npm run check` passa no CI, e o teste com o TalkBack percorre o app sem botão mudo.
 
 ### Parte 7 em diante · Arquitetura (P2)
 
-Feitos em 2026-11-10: ARQ-1 (#42), ARQ-2 (#47), PERF-1 (#44 e #48) e SEG-1 (#45), e os relatórios e as listas pelo service (#46). Falta conferir no aparelho.
+Todos feitos: ARQ-1 (#42), ARQ-2 (#47), PERF-1 (#44 e #48), SEG-1 (#45), os relatórios e as listas pelo service (#46), BUILD-2 (#51), TEMA-1 (#52), DADOS-4 (#53, #56 e #57), NOMES-1 (#58) e ARQ-3 (#59). O TEST-3 saiu do plano. Falta conferir no aparelho.
 
 Um PR por item, nesta ordem: ARQ-1 (pastas e camadas), NOMES-1 (nomes), ARQ-2 (remarcação em TypeScript), DADOS-3 e DADOS-4 (esquema), ARQ-3 (navegação), PERF-1, BUILD-2, TEST-3 e SEG-1. As perguntas 13 a 21 estão respondidas desde 2026-11-09: `src/`, nomes em inglês, remarcação em TypeScript, backup automático desligado e tema do sistema na primeira abertura. A Parte 7 é feita só pelo Gabriel e pelo Claude, sem esperar os parceiros (ver `decisoes.md`).
 
-## No portfólio, depois
+## No portfólio
 
-Quando as Partes 1 e 5 estiverem no `main`, o portfólio pode:
+As Partes 1 e 5 estão no `main`. No repositório do portfólio, o card do PetShop pode:
 
-- trocar a descrição do PetShop pelo texto do README;
-- usar um print no card;
-- citar "Minha parte", com a resposta da pergunta 2;
-- linkar o APK.
+- trocar a descrição pelo texto do README, citando o pet shop sem o nome;
+- usar um print de `docs/imagens/` no card;
+- citar "Minha parte", com a resposta da pergunta 2 e a seção "Equipe" do README;
+- linkar o repositório. Não há APK publicado.
