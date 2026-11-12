@@ -48,5 +48,10 @@ export function toUserMessage(error: unknown, fallback: string = MESSAGES.unexpe
  */
 export function logError(error: unknown, context?: string): void {
   if (isAppError(error) && error.cause === undefined) return;
-  console.error(`[${context ?? "erro"}]`, error);
+  const label = `[${context ?? "erro"}]`;
+  // O console do React Native mostra só a mensagem do erro, sem o `cause`. Sem ele à parte, uma
+  // migração que falha no aparelho aparece só como "a atualização falhou".
+  const cause = error instanceof Error ? error.cause : undefined;
+  if (cause === undefined) console.error(label, error);
+  else console.error(label, error, "Causa:", cause);
 }

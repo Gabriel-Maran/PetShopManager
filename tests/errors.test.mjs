@@ -98,12 +98,11 @@ describe("logError", () => {
     assert.deepEqual(calls, [["[tema]", error]]);
   });
 
-  test("um AppError com motivo vai para o log, para o motivo não se perder", (t) => {
-    const error = new AppError("DATABASE", MESSAGES.database.migrationFailed(4), {
-      cause: new Error("no such table"),
-    });
-    const calls = captureConsoleError(t, () => logError(error));
-    assert.deepEqual(calls, [["[erro]", error]]);
+  test("um AppError com motivo vai para o log com o motivo à parte, que o console do app não mostra", (t) => {
+    const cause = new Error("no such column: is_ativo");
+    const error = new AppError("DATABASE", MESSAGES.database.migrationFailed(7), { cause });
+    const calls = captureConsoleError(t, () => logError(error, "abertura do banco"));
+    assert.deepEqual(calls, [["[abertura do banco]", error, "Causa:", cause]]);
   });
 });
 

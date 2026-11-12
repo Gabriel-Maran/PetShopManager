@@ -6,8 +6,7 @@ import { MIGRATIONS, SQL_CONNECTION_PRAGMAS } from "./schema";
 /** O arquivo do banco, na pasta SQLite do app. */
 export const DATABASE_NAME = "petshop.db";
 
-// Guarda a promessa, e não a conexão: na abertura do app, o tema e o initDatabase pedem o banco ao
-// mesmo tempo, e os dois precisam receber a mesma conexão.
+// Guarda a promessa, e não a conexão: quem pedir o banco enquanto ele abre recebe a mesma conexão.
 let connection: Promise<SQLite.SQLiteDatabase> | null = null;
 
 /** A conexão do app, aberta uma vez, com o WAL e os pragmas que os triggers esperam. */

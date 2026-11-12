@@ -509,3 +509,15 @@ Decisão:
 - O commit das imagens, dos tipos e do porte do pet, que ficou fora do merge do #58, entrou aqui.
 Motivo: entregar o bloco inteiro de uma vez, com o `check` cobrindo lint e formato daqui em diante.
 
+**Sem vídeo na entrega (MIDIA-2 fora do plano).**
+Contexto: a Parte 5 previa um vídeo curto da remarcação para o README e o portfólio.
+Decisão: o Gabriel não vai gravar vídeo. O README e o card do portfólio usam os prints do MIDIA-1.
+Motivo: os prints já mostram as telas, e o vídeo dependia de uma gravação que não vai acontecer.
+
+**Tema lido depois das migrações, e a causa do erro no log.**
+Contexto: o aparelho do Gabriel parou na abertura com "a atualização do banco para a versão 7 falhou". O log não mostrava o motivo, porque o console do React Native não exibe o `cause`. Reproduzido em memória: o banco dele estava na v6 do PR #53, que foi editada nos #56 e #57 depois de rodar no aparelho, e a v7 não acha o `is_ativo` das listas. Na mesma abertura, o tema lia a `settings` antes de a v7 criá-la.
+Decisão:
+- o `DatabaseGate` (App.tsx) roda as migrações antes do `ThemeProvider`; a carga e o erro usam o tema do sistema;
+- o `logError` registra o `cause` à parte;
+- sem migração de reparo: a v6 antiga só existiu em aparelhos de desenvolvimento entre os dois PRs, e o app não tem release. O aparelho afetado limpa os dados do app.
+Motivo: sem a ordem certa, quem tinha o tema escuro na v6 perdia a escolha na primeira abertura da v7, e o log escondia a causa de qualquer falha de migração. Fica a lição: uma migração que já rodou no aparelho de alguém, mesmo de desenvolvimento, não muda mais.

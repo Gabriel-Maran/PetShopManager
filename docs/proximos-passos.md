@@ -1,12 +1,13 @@
 # Próximos passos
 
-Atualizado em 2026-11-12, com o bloco de qualidade e arquitetura.
+Atualizado em 2026-11-12, com a correção da abertura do banco.
 
 > **Para o próximo chat:**
 > - Leia antes o [`checklist-perguntas.md`](checklist-perguntas.md).
 > - O Gabriel quer tudo de uma vez, num PR, e textos curtos.
-> - Em revisão: o PR do bloco de qualidade (branch `feat/bloco-qualidade`): navegação com React Navigation, ESLint e Prettier no `check`, e o commit que ficou fora do #58.
-> - Próximo: o bloco de entrega (Parte 5), no topo do [`plano-de-melhorias.md`](plano-de-melhorias.md). Depende do Gabriel: conta da Expo, gravação e as perguntas 3, 4 e 6 a 9.
+> - Em revisão: o PR da abertura do banco (branch `fix/abertura-do-banco`): o tema é lido só depois das migrações, e o log mostra a causa de um erro.
+> - O aparelho do Gabriel não abre: o banco dele ficou na v6 do PR #53, que mudou depois (#56 e #57), e a v7 falha com "no such column: is_ativo". Só aparelhos que rodaram o `main` entre os dois PRs, em 2026-11-10. Saída: limpar os dados do app no aparelho, se não houver dado real.
+> - Próximo: o bloco de entrega (Parte 5), no topo do [`plano-de-melhorias.md`](plano-de-melhorias.md). Sem vídeo, só prints (decisão de 2026-11-12). Depende do Gabriel: conta da Expo e as perguntas 3, 4 e 6 a 9.
 > - Do Gabriel: conferir no aparelho os roteiros dos PRs, o TalkBack e o tamanho do APK; REPO-4 com os parceiros; perguntas 12, 23 e 24.
 > - Pergunta em aberto: a nota da migração v6 se repete nos automáticos seguintes. Fica assim?
 > - Agentes em paralelo partem só do `main` atualizado (ver `decisoes.md`).
@@ -222,8 +223,8 @@ A ordem segue o que foi sugerido no começo da parte: o ERRO-1 primeiro, porque 
 ### Parte 5 · Demonstração (P1)
 
 - BUILD-1: APK numa release `v1.0.0`.
-- MIDIA-2: vídeo curto.
-- REPO-2: README completo, com APK, vídeo e "Quem fez o quê".
+- ~~MIDIA-2: vídeo curto.~~ Fora do plano: só prints.
+- REPO-2: README completo, com APK e "Quem fez o quê".
 
 Pronto quando: o APK instala num Android limpo e mostra tudo com um toque, e o portfólio pode trocar o card do PetShop por um com imagem e download.
 
@@ -248,6 +249,6 @@ Um PR por item, nesta ordem: ARQ-1 (pastas e camadas), NOMES-1 (nomes), ARQ-2 (r
 Quando as Partes 1 e 5 estiverem no `main`, o portfólio pode:
 
 - trocar a descrição do PetShop pelo texto do README;
-- usar um print ou o vídeo no card;
+- usar um print no card;
 - citar "Minha parte", com a resposta da pergunta 2;
 - linkar o APK.

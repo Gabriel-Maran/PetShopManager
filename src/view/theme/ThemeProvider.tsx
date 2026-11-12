@@ -18,6 +18,18 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
+const colorsOf = (isDark: boolean): ThemeColors =>
+  isDark ? THEME_COLORS.dark : THEME_COLORS.light;
+
+/**
+ * As cores do tema do sistema, para as telas de antes do banco abrir: o tema salvo fica no banco, e
+ * só pode ser lido depois das migrações.
+ */
+export function useSystemColors(): ThemeColors {
+  return colorsOf(useColorScheme() === ThemePreference.Dark);
+}
+
+/** Lê o tema salvo, então precisa ficar dentro do DatabaseGate (App.tsx), depois das migrações. */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Sem escolha gravada, vale o tema do sistema (P19), e ele acompanha a troca feita no aparelho.
   const systemScheme = useColorScheme();
@@ -37,7 +49,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(
     () => ({
       isDark,
-      colors: isDark ? THEME_COLORS.dark : THEME_COLORS.light,
+      colors: colorsOf(isDark),
       setTheme: setPreference,
     }),
     [isDark],
