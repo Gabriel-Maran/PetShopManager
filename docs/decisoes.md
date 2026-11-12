@@ -541,3 +541,10 @@ Motivo:
 - O README só conta o que aconteceu, e o Gabriel preferiu não expor o cliente.
 - As regras e a nota da v6 ficam sem mudança no banco. A nota só aparece no dado com valor inválido convertido pela v6, e repeti-la mantém o valor antigo à vista nos próximos atendimentos.
 - O backup com senha cresce o APK, exige build novo e perde o arquivo se a senha for esquecida, sem ganho para a `v1.0.0`.
+
+**Bloqueio de instalação no Claude Code, versionado.**
+Contexto: o Gabriel criou o `.claude/settings.json`, que nega ao Claude Code os comandos que instalam, atualizam ou removem pacotes, como garantia da regra de que só ele instala.
+Decisão:
+- o `.claude/settings.json` vai para o Git; o `settings.local.json` e os worktrees do Claude Code ficam no `.gitignore`;
+- a lista cobre também o comando sem argumentos (`npm install`, `npm ci`), os apelidos do npm (`add`, `it`, `cit`, `x`), o `npm audit fix`, o `npm exec` e os outros gerenciadores (`yarn`, `pnpm` e `bun`).
+Motivo: a regra vale para qualquer sessão do Claude Code no projeto, inclusive nos worktrees, e o arquivo não tem segredo. O `.npmrc` continua sendo a proteção de quem instala.

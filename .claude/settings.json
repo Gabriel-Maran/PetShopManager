@@ -1,9 +1,20 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "deny": [
+      "Bash(npm install)",
       "Bash(npm install *)",
+      "Bash(npm i)",
       "Bash(npm i *)",
+      "Bash(npm add *)",
+      "Bash(npm isntall *)",
+      "Bash(npm install-test *)",
+      "Bash(npm it *)",
+      "Bash(npm install-ci-test *)",
+      "Bash(npm cit *)",
+      "Bash(npm ci)",
       "Bash(npm ci *)",
+      "Bash(npm update)",
       "Bash(npm update *)",
       "Bash(npm up *)",
       "Bash(npm upgrade *)",
@@ -11,7 +22,20 @@
       "Bash(npm remove *)",
       "Bash(npm rm *)",
       "Bash(npm un *)",
-      "Bash(npx *)"
+      "Bash(npm audit fix)",
+      "Bash(npm audit fix *)",
+      "Bash(npm dedupe)",
+      "Bash(npm dedupe *)",
+      "Bash(npm prune)",
+      "Bash(npm prune *)",
+      "Bash(npm link *)",
+      "Bash(npm exec *)",
+      "Bash(npm x *)",
+      "Bash(npx *)",
+      "Bash(yarn *)",
+      "Bash(pnpm *)",
+      "Bash(bun *)",
+      "Bash(bunx *)"
     ]
   }
 }
