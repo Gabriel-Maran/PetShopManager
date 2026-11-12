@@ -548,3 +548,11 @@ Decisão:
 - o `.claude/settings.json` vai para o Git; o `settings.local.json` e os worktrees do Claude Code ficam no `.gitignore`;
 - a lista cobre também o comando sem argumentos (`npm install`, `npm ci`), os apelidos do npm (`add`, `it`, `cit`, `x`), o `npm audit fix`, o `npm exec` e os outros gerenciadores (`yarn`, `pnpm` e `bun`).
 Motivo: a regra vale para qualquer sessão do Claude Code no projeto, inclusive nos worktrees, e o arquivo não tem segredo. O `.npmrc` continua sendo a proteção de quem instala.
+
+**Sem APK publicado (BUILD-1 fora do plano) e plano concluído.**
+Contexto: a Parte 5 previa o APK numa release `v1.0.0`, linkado no README e no portfólio.
+Decisão:
+- o Gabriel não vai publicar o APK. O app está pronto para o build, e o README traz o comando (`eas build -p android --profile preview`);
+- o README fica completo sem o download: pet shop real sem o nome, só Android, Expo Go atual, "Quem fez o quê", stack atualizada e a licença (nenhuma);
+- os itens que já estavam feitos no código, mas sem nota no plano (TEMA-1, REPO-3, DADOS-4 e BUILD-2), foram marcados como feitos, com os PRs.
+Motivo: o APK não é necessário para mostrar o projeto, e quem quiser instalar gera o build. Com isso, o plano está concluído; sobra só a conferência no aparelho, que é do Gabriel, e o card do portfólio, que fica no outro repositório.

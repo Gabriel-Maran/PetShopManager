@@ -2,7 +2,9 @@
 
 App Android para um pet shop organizar donos, pets e a agenda de banho e tosa, com pacotes que se remarcam sozinhos. Funciona offline: os dados ficam num banco SQLite no próprio aparelho, sem servidor nem login.
 
-Projeto acadêmico da disciplina de Desenvolvimento Mobile, na Unipar.
+Feito para o uso interno de um pet shop, seguindo os requisitos dele, como a remarcação automática dos pacotes. Também foi o projeto da disciplina de Desenvolvimento Mobile, na Unipar.
+
+Só para Android.
 
 ## Telas
 
@@ -32,14 +34,16 @@ Prints com os dados de exemplo do próprio app.
 
 ## Stack
 
-- Expo SDK 58 (`expo` 58.0.21), React Native 0.88.1 e React 19.3.0.
+- Expo SDK 58 (`expo` 58.0.23), React Native 0.88.1 e React 19.3.0.
 - TypeScript 6.0.3 em modo `strict`.
+- React Navigation 7 (`native-stack`) para a navegação.
 - `expo-sqlite` para o banco local e `react-native-calendars` para o calendário.
 - Zod 4 para validar a entrada, com um schema por entidade.
 - `expo-file-system`, `expo-sharing` e `expo-document-picker` para o backup.
 - Build Android pelo EAS: o perfil `preview` gera APK, e o `production` gera AAB.
 - Testes com `node:test` e `node:sqlite`, sem dependências.
-- GitHub Actions: typecheck, testes e pacote Android a cada pull request.
+- ESLint 9 (`eslint-config-expo`, com a ordem das camadas) e Prettier 3.
+- GitHub Actions: typecheck, lint, formatação, testes e pacote Android a cada pull request.
 
 ## Como funciona por dentro
 
@@ -54,14 +58,14 @@ Prints com os dados de exemplo do próprio app.
   - a agenda é gerada até 224 dias à frente;
   - o valor de cada atendimento é o do pacote dividido pela quantidade.
 
-Os detalhes estão em [`docs/arquitetura.md`](docs/arquitetura.md), e o que ainda vai melhorar, em [`docs/plano-de-melhorias.md`](docs/plano-de-melhorias.md).
+Os detalhes estão em [`docs/arquitetura.md`](docs/arquitetura.md). A revisão feita depois da disciplina, item por item, está em [`docs/plano-de-melhorias.md`](docs/plano-de-melhorias.md), e o porquê de cada escolha, em [`docs/decisoes.md`](docs/decisoes.md).
 
 ## Como rodar
 
 Requisitos:
 
 - Node 24 e npm;
-- um Android com o Expo Go compatível com o SDK 58, ou um emulador Android.
+- um Android com o Expo Go atual, ou um emulador Android.
 
 Para instalar as dependências e subir o servidor do Expo:
 
@@ -80,11 +84,21 @@ Os testes rodam o esquema do banco e os dados de exemplo num SQLite em memória,
 npm test
 ```
 
-As mesmas checagens do CI (typecheck, testes e pacote Android) rodam com:
+As mesmas checagens do CI (typecheck, lint, formatação, testes e pacote Android) rodam com:
 
 ```bash
 npm run check
 ```
+
+## Gerar o APK
+
+O APK não é publicado. Para gerar um, com uma conta na Expo:
+
+```bash
+eas build -p android --profile preview
+```
+
+O perfil `preview` gera o APK para instalar direto, e o `production` gera o AAB da Play Store.
 
 ## Equipe
 
@@ -97,3 +111,7 @@ Feito em equipe, com as responsabilidades divididas:
 ## Contribuindo
 
 O `main` só recebe mudanças por pull request, com o CI verde, e o merge é por squash. As mensagens de commit seguem o [Conventional Commits](https://www.conventionalcommits.org/pt-br/), como `fix(app.json): ...`.
+
+## Licença
+
+Sem licença: todos os direitos reservados aos autores. O código pode ser lido, mas não reutilizado sem autorização.
