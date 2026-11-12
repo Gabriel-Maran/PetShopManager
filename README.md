@@ -90,16 +90,6 @@ As mesmas checagens do CI (typecheck, lint, formatação, testes e pacote Androi
 npm run check
 ```
 
-## Gerar o APK
-
-O APK não é publicado. Para gerar um, com uma conta na Expo:
-
-```bash
-eas build -p android --profile preview
-```
-
-O perfil `preview` gera o APK para instalar direto, e o `production` gera o AAB da Play Store.
-
 ## Equipe
 
 Feito em equipe, com as responsabilidades divididas:
@@ -112,6 +102,3 @@ Feito em equipe, com as responsabilidades divididas:
 
 O `main` só recebe mudanças por pull request, com o CI verde, e o merge é por squash. As mensagens de commit seguem o [Conventional Commits](https://www.conventionalcommits.org/pt-br/), como `fix(app.json): ...`.
 
-## Licença
-
-Sem licença: todos os direitos reservados aos autores. O código pode ser lido, mas não reutilizado sem autorização.
