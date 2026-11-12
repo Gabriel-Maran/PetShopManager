@@ -90,9 +90,9 @@ npm run check
 
 Feito em equipe, com as responsabilidades divididas:
 
-- [Gabriel Maran](https://github.com/Gabriel-Maran)
-- [João Pedro Uhry Gonçalves](https://github.com/joaopug)
-- [Gustavo Grosbelli](https://github.com/Grosbelli12)
+- [Gabriel Maran](https://github.com/Gabriel-Maran): a base do app (Expo, SQLite e as camadas), o calendário, Cadastros com busca e paginação, a remarcação automática, os relatórios, o tema claro e escuro, o backup e, depois da disciplina, a revisão do código (testes, migrações, validação e navegação).
+- [João Pedro Uhry Gonçalves](https://github.com/joaopug): os donos, a tela de agendamento (criação, edição, valores e pagamento), os dias marcados no calendário e os componentes dos formulários (campos, `Toggle`, seletor de data e máscaras).
+- [Gustavo Grosbelli](https://github.com/Grosbelli12): o cadastro de pets (espécie, raça, porte e observações), o seletor de dono e as imagens e os ícones das telas.
 
 ## Contribuindo
 

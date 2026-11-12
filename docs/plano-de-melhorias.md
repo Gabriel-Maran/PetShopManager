@@ -15,8 +15,8 @@ Criado em 2026-11-05, a partir da auditoria do código no commit `e1d5f2f` do `m
 Decidido em 2026-11-11: o resto do plano vai em poucos PRs grandes, um por bloco, sem dividir item por item.
 
 1. ~~**Bloco de qualidade e arquitetura**~~ Feito em 2026-11-12, num PR: TEST-2, ARQ-3 e o lint de camadas do ARQ-1. Saíram do plano, decididos com o Gabriel: o TEST-3 (o Jest e a biblioteca de testes de componentes custam mais do que trazem, e a lógica já está no `node:test`), as pastas por assunto do ARQ-1 (a regra de lint já garante as camadas) e o `zod/mini` (troca a API de todos os schemas por poucos KB).
-2. **Bloco de entrega** (Parte 5): BUILD-1 (APK na release `v1.0.0`) e REPO-2 completo (APK e "Quem fez o quê"), mais o card do portfólio, com os prints. O MIDIA-2 (vídeo) saiu em 2026-11-12, por decisão do Gabriel. Depende dele: conta da Expo e as perguntas 3, 4 e 6 a 9.
-3. **Do Gabriel, sem código**: conferir no aparelho (roteiros dos PRs, TalkBack e tamanho do APK), REPO-4 com os parceiros e as perguntas 12, 23 e 24.
+2. **Bloco de entrega** (Parte 5): BUILD-1 (APK na release `v1.0.0`) e REPO-2 completo (APK e "Quem fez o quê"), mais o card do portfólio, com os prints. O MIDIA-2 (vídeo) saiu em 2026-11-12, por decisão do Gabriel. As perguntas foram respondidas em 2026-11-12; falta só o build com a conta Expo do Gabriel.
+3. **Do Gabriel, sem código**: conferir no aparelho (roteiros dos PRs, TalkBack e tamanho do APK). O REPO-4 e as perguntas foram fechados em 2026-11-12.
 
 ## Resumo
 
@@ -78,15 +78,16 @@ O estado e as pendências estão em `proximos-passos.md`, e as decisões, em `de
 
 - **Por quê:** o repositório não tem README. Quem abre o código não sabe o que o app faz, como rodar nem quem fez.
 - **O que muda:** um `README.md` na raiz com:
-  - o que é, em duas frases, e o aviso de projeto acadêmico;
+  - o que é, em duas frases: projeto acadêmico feito para o uso interno de um pet shop, com os requisitos dele, sem citar o nome (pergunta 6);
   - prints (MIDIA-1);
   - funcionalidades reais: cadastros com desativação em cascata, agenda com calendário, pacotes de 2 ou 4 atendimentos por mês com remarcação automática, seis relatórios, tema claro e escuro e backup por arquivo;
   - como funciona por dentro: camadas, banco local e o resumo dos triggers, com link para `docs/arquitetura.md`;
   - stack com as versões;
   - como rodar: requisitos, `npm ci` e `npm start`, testado num clone limpo;
   - download do APK, quando existir (BUILD-1);
-  - equipe e a parte de cada um, depois da confirmação (ver `perguntas-em-aberto.md`);
-  - licença, se os três autores decidirem por uma.
+  - equipe e a parte de cada um, curta e por área (pergunta 2, já no README desde 2026-11-12);
+  - sem licença (pergunta 4): todos os direitos reservados aos autores;
+  - só Android, com o Expo Go atual no "como rodar" (perguntas 7 e 8).
 - **Pronto quando:** o README tem todas as seções, e os comandos de "como rodar" funcionam num clone novo.
 
 ### MIDIA-1 · Prints do app
@@ -289,6 +290,7 @@ A lista está em `proximos-passos.md`.
 
 - **Por quê:** Dependabot, varredura de segredos e proteção de push estão desligados, e o `main` não tem regra: qualquer colaborador pode enviar direto. O repositório não tem licença, então ninguém pode reutilizar o código legalmente.
 - **O que muda:** ligar Dependabot alerts, security updates, secret scanning e push protection. Criar um ruleset no `main` com PR obrigatório e CI verde (TEST-2), se os parceiros concordarem. Escolher a licença com os três autores.
+- **Feito:** os parceiros concordaram com o ruleset e os `docs/` públicos, e o repositório fica sem licença (perguntas 3 e 4, 2026-11-12).
 - **Pronto quando:** as opções aparecem ligadas nas configurações, e o `main` só recebe mudanças por PR.
 
 ### DEMO-1 · Dados de demonstração
@@ -401,7 +403,7 @@ Fora do plano desde 2026-11-12 (ver "O que falta").
 
 ### SEG-1 · Dados pessoais no aparelho e no backup
 
-Feito em 2026-11-10, no PR #45, como decidido na pergunta 20: `android.allowBackup: false` e um aviso ao exportar, dizendo que o arquivo não tem senha e traz os dados pessoais dos clientes. O backup com senha ficou como pergunta 24 em `perguntas-em-aberto.md`. Falta conferir no aparelho, num build novo.
+Feito em 2026-11-10, no PR #45, como decidido na pergunta 20: `android.allowBackup: false` e um aviso ao exportar, dizendo que o arquivo não tem senha e traz os dados pessoais dos clientes. O backup com senha não entra agora (pergunta 24, 2026-11-12). Falta conferir no aparelho, num build novo.
 
 - **Por quê:** o banco guarda nome, telefone, e-mail e endereço dos clientes. Ele fica protegido na área privada do app, mas o backup exportado é um arquivo aberto, compartilhado por qualquer app, e o backup automático do Android pode copiar o banco para a nuvem.
 - **O que muda:** aviso no exportar de que o arquivo tem dados pessoais; decidir se o `allowBackup` do Android fica ligado; avaliar backup com senha (exige biblioteca).
