@@ -15,7 +15,7 @@ Criado em 2026-11-05, a partir da auditoria do código no commit `e1d5f2f` do `m
 Decidido em 2026-11-11: o resto do plano vai em poucos PRs grandes, um por bloco, sem dividir item por item.
 
 1. ~~**Bloco de qualidade e arquitetura**~~ Feito em 2026-11-12, num PR: TEST-2, ARQ-3 e o lint de camadas do ARQ-1. Saíram do plano, decididos com o Gabriel: o TEST-3 (o Jest e a biblioteca de testes de componentes custam mais do que trazem, e a lógica já está no `node:test`), as pastas por assunto do ARQ-1 (a regra de lint já garante as camadas) e o `zod/mini` (troca a API de todos os schemas por poucos KB).
-2. **Bloco de entrega** (Parte 5): BUILD-1 (APK na release `v1.0.0`), MIDIA-2 (vídeo) e REPO-2 completo (APK, vídeo e "Quem fez o quê"), mais o card do portfólio. Depende do Gabriel: conta da Expo, gravação e as perguntas 3, 4 e 6 a 9.
+2. **Bloco de entrega** (Parte 5): BUILD-1 (APK na release `v1.0.0`) e REPO-2 completo (APK e "Quem fez o quê"), mais o card do portfólio, com os prints. O MIDIA-2 (vídeo) saiu em 2026-11-12, por decisão do Gabriel. Depende dele: conta da Expo e as perguntas 3, 4 e 6 a 9.
 3. **Do Gabriel, sem código**: conferir no aparelho (roteiros dos PRs, TalkBack e tamanho do APK), REPO-4 com os parceiros e as perguntas 12, 23 e 24.
 
 ## Resumo
@@ -54,7 +54,7 @@ O estado e as pendências estão em `proximos-passos.md`, e as decisões, em `de
 | REPO-4 | Segurança e regras do GitHub | P1 |
 | DEMO-1 | Dados de demonstração | P1 |
 | BUILD-1 | APK de demonstração | P1 |
-| MIDIA-2 | Vídeo curto | P1 |
+| ~~MIDIA-2~~ | ~~Vídeo curto~~ (fora do plano: só prints) | — |
 | ARQ-1 | Reorganizar pastas e camadas | P2 |
 | ARQ-2 | Remarcação em TypeScript | P2 |
 | ARQ-3 | Navegação com histórico | P2 |
@@ -79,7 +79,7 @@ O estado e as pendências estão em `proximos-passos.md`, e as decisões, em `de
 - **Por quê:** o repositório não tem README. Quem abre o código não sabe o que o app faz, como rodar nem quem fez.
 - **O que muda:** um `README.md` na raiz com:
   - o que é, em duas frases, e o aviso de projeto acadêmico;
-  - prints (MIDIA-1) e, depois, o vídeo (MIDIA-2);
+  - prints (MIDIA-1);
   - funcionalidades reais: cadastros com desativação em cascata, agenda com calendário, pacotes de 2 ou 4 atendimentos por mês com remarcação automática, seis relatórios, tema claro e escuro e backup por arquivo;
   - como funciona por dentro: camadas, banco local e o resumo dos triggers, com link para `docs/arquitetura.md`;
   - stack com as versões;
@@ -303,7 +303,9 @@ A lista está em `proximos-passos.md`.
 - **O que muda:** o Gabriel roda `eas build -p android --profile preview` (precisa da conta Expo). O APK vai para uma release `v1.0.0` no GitHub, com o SHA-256, as notas do que testar e o aviso de instalação fora da loja.
 - **Pronto quando:** o APK instala e abre num Android sem o app, e o link está no README e no portfólio.
 
-### MIDIA-2 · Vídeo curto
+### ~~MIDIA-2 · Vídeo curto~~
+
+Fora do plano desde 2026-11-12: o Gabriel não vai gravar vídeo, e os prints do MIDIA-1 bastam no README e no card do portfólio.
 
 - **Por quê:** a remarcação automática é o ponto alto, e ela aparece melhor em movimento do que em print.
 - **O que muda:** um vídeo de 30 a 45 segundos com os dados de exemplo: cadastrar um pet com pacote de 4 por mês, ver o calendário marcado, concluir um agendamento, ver o próximo surgir e abrir um relatório.

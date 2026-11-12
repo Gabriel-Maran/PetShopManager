@@ -18,8 +18,8 @@ import { HOME_SCREEN, isTabScreen, Screen } from "./src/config/navigation";
 import {
   ThemeColors,
   ThemeProvider,
+  useSystemColors,
   useTheme,
-  useThemedStyles,
 } from "./src/view/theme/ThemeProvider";
 
 import { ErrorProvider } from "./src/view/components/error/ErrorProvider";
@@ -82,9 +82,13 @@ function AppContent() {
   );
 }
 
-function AppInner() {
-  const s = useThemedStyles(styles);
-  const { isDark, colors } = useTheme();
+/**
+ * Leva o banco à última versão antes de tudo, porque o tema salvo e as telas leem tabelas que a migração
+ * pode estar criando. Enquanto isso, a carga e o erro seguem o tema do sistema.
+ */
+function DatabaseGate({ children }: { children: ReactNode }) {
+  const colors = useSystemColors();
+  const s = useMemo(() => styles(colors), [colors]);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -113,6 +117,12 @@ function AppInner() {
     );
   }
 
+  return children;
+}
+
+function AppShell() {
+  const { isDark, colors } = useTheme();
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.BACKGROUND }}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
@@ -125,11 +135,13 @@ function AppInner() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <ErrorProvider>
-        <AppInner />
-      </ErrorProvider>
-    </ThemeProvider>
+    <DatabaseGate>
+      <ThemeProvider>
+        <ErrorProvider>
+          <AppShell />
+        </ErrorProvider>
+      </ThemeProvider>
+    </DatabaseGate>
   );
 }
 
@@ -142,6 +154,6 @@ const styles = (colors: ThemeColors) =>
       justifyContent: "center",
     },
     errorTxt: {
-      color: "red",
+      color: colors.RED_COLOR,
     },
   });

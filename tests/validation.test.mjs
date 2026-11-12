@@ -175,7 +175,7 @@ describe("parseInput", () => {
       assert.ok(error.cause instanceof z.ZodError, String(input));
 
       const calls = captureConsoleError(t, () => logError(error, "salvar dono"));
-      assert.deepEqual(calls.at(-1), ["[salvar dono]", error]);
+      assert.deepEqual(calls.at(-1), ["[salvar dono]", error, "Causa:", error.cause]);
     }
   });
 
