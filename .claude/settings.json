@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(npm install *)",
+      "Bash(npm i *)",
+      "Bash(npm ci *)",
+      "Bash(npm update *)",
+      "Bash(npm up *)",
+      "Bash(npm upgrade *)",
+      "Bash(npm uninstall *)",
+      "Bash(npm remove *)",
+      "Bash(npm rm *)",
+      "Bash(npm un *)",
+      "Bash(npx *)"
+    ]
+  }
+}

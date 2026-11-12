@@ -54,3 +54,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Claude Code: as configurações do projeto vão para o Git; as locais e os worktrees, não.
+.claude/settings.local.json
+.claude/worktrees/
